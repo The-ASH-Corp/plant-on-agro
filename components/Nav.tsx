@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Section } from "@/types";
+import Image from "next/image";
+import Logo from "../public/Screenshot_From_2026-09-17_15-39-39-removebg-preview.png"
 
 interface NavProps {
   active: Section;
@@ -41,15 +43,13 @@ export function Nav({ active, setActive, openPlant }: NavProps) {
           onClick={() => setActive("home")}
           className="flex items-center gap-2.5 group"
         >
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#52b788] to-[#2d6a4f] flex items-center justify-center text-sm">
-            🌿
-          </div>
-          <span
-            style={{ fontFamily: "var(--font-display)" }}
-            className="text-white text-xl tracking-tight"
-          >
-            PlantOn <span className="text-[#52b788]">Agrow</span>
-          </span>
+          <Image
+            src={Logo}
+            alt="Logo"
+            width={200}
+            height={200}
+            className="w-30 h-14"
+          />
         </button>
 
         {/* Desktop links */}
