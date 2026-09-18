@@ -1,3 +1,6 @@
+import Image from "next/image";
+import Logo from "../public/Screenshot_From_2026-09-17_15-39-39-removebg-preview.png";
+
 interface FooterProps {
   openPlant: () => void;
 }
@@ -22,7 +25,8 @@ export function Footer({ openPlant }: FooterProps) {
           <em className="not-italic text-[#95d5b2]">Grow Tomorrow.</em>
         </h2>
         <p className="text-white/60 max-w-lg mx-auto mb-10">
-          Thousands of individuals, families, and companies have already started their green journey. Yours begins with one tree.
+          Thousands of individuals, families, and companies have already started
+          their green journey. Yours begins with one tree.
         </p>
         <button
           onClick={openPlant}
@@ -41,15 +45,13 @@ export function Footer({ openPlant }: FooterProps) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#52b788] to-[#2d6a4f] flex items-center justify-center text-xs">
-                🌿
-              </div>
-              <span
-                style={{ fontFamily: "var(--font-display)" }}
-                className="text-white text-lg"
-              >
-                PlantOn <span className="text-[#52b788]">Agrow</span>
-              </span>
+              <Image
+                src={Logo}
+                alt="Logo"
+                width={180}
+                height={180}
+                className="w-auto h-12 object-contain"
+              />
             </div>
             <p className="text-white/40 text-sm leading-relaxed">
               You Plant. We Grow. Building a greener India, one tree at a time.
@@ -58,7 +60,13 @@ export function Footer({ openPlant }: FooterProps) {
           {[
             {
               title: "Platform",
-              links: ["Plant a Tree", "Our Trees", "How It Works", "Pricing", "Track My Tree"],
+              links: [
+                "Plant a Tree",
+                "Our Trees",
+                "How It Works",
+                "Pricing",
+                "Track My Tree",
+              ],
             },
             {
               title: "Company",
@@ -66,11 +74,19 @@ export function Footer({ openPlant }: FooterProps) {
             },
             {
               title: "Connect",
-              links: ["Contact Us", "Corporate / CSR", "Partner with Us", "Press", "FAQs"],
+              links: [
+                "Contact Us",
+                "Corporate / CSR",
+                "Partner with Us",
+                "Press",
+                "FAQs",
+              ],
             },
           ].map((col) => (
             <div key={col.title}>
-              <h4 className="text-white/80 font-semibold text-sm mb-4">{col.title}</h4>
+              <h4 className="text-white/80 font-semibold text-sm mb-4">
+                {col.title}
+              </h4>
               <ul className="space-y-2.5">
                 {col.links.map((l) => (
                   <li key={l}>
@@ -90,8 +106,12 @@ export function Footer({ openPlant }: FooterProps) {
           className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4"
           style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
         >
-          <p className="text-white/30 text-xs">© 2026 PlantOn Agrow. All rights reserved.</p>
-          <p className="text-white/30 text-xs">Made with 🌱 for a greener planet</p>
+          <p className="text-white/30 text-xs">
+            © 2026 PlantOn Agrow. All rights reserved.
+          </p>
+          <p className="text-white/30 text-xs">
+            Made with 🌱 for a greener planet
+          </p>
         </div>
       </div>
     </footer>

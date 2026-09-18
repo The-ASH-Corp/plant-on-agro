@@ -41,14 +41,14 @@ export function Nav({ active, setActive, openPlant }: NavProps) {
         {/* Logo */}
         <button
           onClick={() => setActive("home")}
-          className="flex items-center gap-2.5 group"
+          className="flex items-center gap-2.5 group *:hover:cursor-pointer duration-200"
         >
           <Image
             src={Logo}
             alt="Logo"
             width={200}
             height={200}
-            className="w-30 h-14"
+            className="w-auto h-10 sm:h-12 md:h-14 object-contain"
           />
         </button>
 
