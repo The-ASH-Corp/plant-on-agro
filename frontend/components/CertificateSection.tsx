@@ -16,7 +16,8 @@ export function CertificateSection() {
               <em className="not-italic text-[#2d6a4f]">Actually Grows</em>
             </h2>
             <p className="text-[#4a6557] text-lg leading-relaxed mb-8">
-              Every tree you plant comes with a premium digital certificate — personalised, shareable, and backed by real plantation data.
+              Every tree you plant comes with a premium digital certificate —
+              personalised, shareable, and backed by real plantation data.
             </p>
             <div className="space-y-3">
               {[
@@ -47,11 +48,17 @@ export function CertificateSection() {
               {/* Decorative corner */}
               <div
                 className="absolute top-0 right-0 w-40 h-40 opacity-10"
-                style={{ background: "radial-gradient(circle at 100% 0%, #52b788, transparent)" }}
+                style={{
+                  background:
+                    "radial-gradient(circle at 100% 0%, #52b788, transparent)",
+                }}
               />
               <div
                 className="absolute bottom-0 left-0 w-32 h-32 opacity-10"
-                style={{ background: "radial-gradient(circle at 0% 100%, #95d5b2, transparent)" }}
+                style={{
+                  background:
+                    "radial-gradient(circle at 0% 100%, #95d5b2, transparent)",
+                }}
               />
 
               <div className="relative z-10 text-center">
@@ -63,7 +70,7 @@ export function CertificateSection() {
                     style={{ fontFamily: "var(--font-display)" }}
                     className="text-white/80 text-sm"
                   >
-                    PlantOn Agrow
+                    PlantOn agro
                   </span>
                 </div>
                 <div className="text-[#95d5b2] text-xs tracking-widest uppercase mb-3">
@@ -76,7 +83,8 @@ export function CertificateSection() {
                   Priya Sharma
                 </h3>
                 <p className="text-white/60 text-xs mb-6 leading-relaxed">
-                  has planted an Indian Mango tree through PlantOn Agrow,<br />
+                  has planted an Indian Mango tree through PlantOn agro,
+                  <br />
                   contributing to a greener, healthier planet.
                 </p>
                 <div className="grid grid-cols-2 gap-3 mb-6">
@@ -94,7 +102,9 @@ export function CertificateSection() {
                       <div className="text-[10px] text-[#52b788] uppercase tracking-wider mb-0.5">
                         {d.label}
                       </div>
-                      <div className="text-white text-xs font-semibold">{d.value}</div>
+                      <div className="text-white text-xs font-semibold">
+                        {d.value}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -110,7 +120,9 @@ export function CertificateSection() {
                   </button>
                   <button
                     className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white"
-                    style={{ background: "linear-gradient(135deg,#52b788,#2d6a4f)" }}
+                    style={{
+                      background: "linear-gradient(135deg,#52b788,#2d6a4f)",
+                    }}
                   >
                     Share
                   </button>

@@ -107,7 +107,7 @@ export function Footer({ openPlant }: FooterProps) {
           style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
         >
           <p className="text-white/30 text-xs">
-            © 2026 PlantOn Agrow. All rights reserved.
+            © 2026 PlantOn agro. All rights reserved.
           </p>
           <p className="text-white/30 text-xs">
             Made with 🌱 for a greener planet

@@ -37,7 +37,7 @@ export function HowItWorks() {
             style={{ fontFamily: "var(--font-display)" }}
             className="text-[#173324] text-4xl md:text-5xl"
           >
-            How PlantOn Agrow Works
+            How PlantOn agro Works
           </h2>
         </div>
 
@@ -45,11 +45,16 @@ export function HowItWorks() {
           {/* Connector line */}
           <div
             className="hidden md:block absolute top-16 left-[12.5%] right-[12.5%] h-px"
-            style={{ background: "linear-gradient(90deg, #52b788, #95d5b2, #52b788)" }}
+            style={{
+              background: "linear-gradient(90deg, #52b788, #95d5b2, #52b788)",
+            }}
           />
 
           {steps.map((step, i) => (
-            <div key={i} className="relative flex flex-col items-center text-center group">
+            <div
+              key={i}
+              className="relative flex flex-col items-center text-center group"
+            >
               <div
                 className="w-14 h-14 rounded-full flex items-center justify-center text-2xl mb-6 relative z-10 transition-transform duration-300 group-hover:scale-110"
                 style={{
@@ -63,8 +68,12 @@ export function HowItWorks() {
               <span className="text-xs font-bold tracking-widest text-[#52b788] mb-2">
                 STEP {step.num}
               </span>
-              <h3 className="text-[#173324] font-semibold text-lg mb-3">{step.title}</h3>
-              <p className="text-[#4a6557] text-sm leading-relaxed">{step.desc}</p>
+              <h3 className="text-[#173324] font-semibold text-lg mb-3">
+                {step.title}
+              </h3>
+              <p className="text-[#4a6557] text-sm leading-relaxed">
+                {step.desc}
+              </p>
             </div>
           ))}
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { Counter } from "@/components/ui/Counter";
-import { useScroll, useTransform,motion } from "framer-motion";
+import { useScroll, useTransform, motion } from "framer-motion";
 
 interface HeroProps {
   openPlant: () => void;
@@ -11,9 +11,9 @@ interface HeroProps {
 export function Hero({ openPlant, goImpact }: HeroProps) {
   const { scrollY } = useScroll();
 
-const bgY = useTransform(scrollY, [0, 1000], [0, 300]);
-const textY = useTransform(scrollY, [0, 1000], [0, 100]);
-const scale = useTransform(scrollY, [0, 500], [1, 1.25]);
+  const bgY = useTransform(scrollY, [0, 1000], [0, 300]);
+  const textY = useTransform(scrollY, [0, 1000], [0, 100]);
+  const scale = useTransform(scrollY, [0, 500], [1, 1.25]);
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-between pt-28 pb-10 sm:pb-12 md:pt-36 md:pb-16 overflow-hidden">
       {/* BG image */}
@@ -25,12 +25,12 @@ const scale = useTransform(scrollY, [0, 500], [1, 1.25]);
           style={{ y: bgY }}
         />
         <motion.div
-
           className="absolute inset-0"
           style={{
             background:
               "linear-gradient(170deg, rgba(23,51,36,0.78) 0%, rgba(23,51,36,0.55) 50%, rgba(23,51,36,0.82) 100%)",
-          y: textY, }}
+            y: textY,
+          }}
         />
       </motion.div>
 
@@ -58,7 +58,7 @@ const scale = useTransform(scrollY, [0, 500], [1, 1.25]);
         </h1>
 
         <p className="text-white/75 text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-8 sm:mb-10 font-light leading-relaxed">
-          Choose a tree, plant it through PlantOn Agrow, and watch your impact
+          Choose a tree, plant it through PlantOn agro, and watch your impact
           grow — with real photos, location tracking, and a certificate in your
           name.
         </p>
@@ -113,7 +113,7 @@ const scale = useTransform(scrollY, [0, 500], [1, 1.25]);
       {/* Scroll cue */}
       <div className="relative z-10 mt-6 sm:mt-8 mb-2 sm:mb-4 flex flex-col items-center gap-2 text-white/40 text-xs shrink-0">
         <span>Scroll</span>
-       
+
         <div className="animate-bounce">
           <svg
             xmlns="http://www.w3.org/2000/svg"
