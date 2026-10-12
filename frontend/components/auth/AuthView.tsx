@@ -65,8 +65,8 @@ export function AuthView({
   };
 
   const containerClasses = isModal
-    ? "fixed inset-0 z-50 flex flex-col md:flex-row bg-[#fff]"
-    : "relative w-full min-h-screen flex flex-col md:flex-row bg-[#fff]";
+    ? "fixed inset-0 z-50 flex flex-col md:flex-row bg-[#fff] overflow-hidden"
+    : "relative w-full min-h-screen md:h-screen flex flex-col md:flex-row bg-[#fff] overflow-x-hidden md:overflow-hidden";
 
   return (
     <div className={containerClasses}>

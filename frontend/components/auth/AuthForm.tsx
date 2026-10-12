@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export type AuthMode = "login" | "register";
 
@@ -17,46 +17,87 @@ interface AuthFormProps {
 
 export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
   const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [usePhone, setUsePhone] = useState(false);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  // Dynamic password strength calculation
-  const getPasswordStrength = () => {
-    if (!password) return 0;
-    let score = 0;
-    if (password.length >= 6) score += 1;
-    if (password.length >= 8) score += 1;
-    if (/[A-Z]/.test(password) || /[0-9]/.test(password)) score += 1;
-    if (/[^A-Za-z0-9]/.test(password) && password.length >= 8) score += 1;
-    return Math.min(score, 4);
+  // Clear password & error states whenever switching between login and register
+  useEffect(() => {
+    setPassword("");
+    setSubmitted(false);
+    setShowPassword(false);
+  }, [mode]);
+
+  const handleTabSwitch = (newMode: AuthMode) => {
+    if (newMode !== mode) {
+      setPassword("");
+      setSubmitted(false);
+      setShowPassword(false);
+      onToggleMode(newMode);
+    }
   };
 
-  const strength = getPasswordStrength();
+  // 5 Password Criteria Checks
+  const criteriaList = [
+    {
+      id: "capital",
+      label: "A capital letter (A-Z)",
+      shortLabel: "Capital letter",
+      met: /[A-Z]/.test(password),
+    },
+    {
+      id: "small",
+      label: "A small letter (a-z)",
+      shortLabel: "Small letter",
+      met: /[a-z]/.test(password),
+    },
+    {
+      id: "special",
+      label: "A special symbol (!@#$...)",
+      shortLabel: "Special symbol",
+      met: /[^A-Za-z0-9]/.test(password),
+    },
+    {
+      id: "number",
+      label: "A number (0-9)",
+      shortLabel: "Number",
+      met: /[0-9]/.test(password),
+    },
+    {
+      id: "length",
+      label: "Length of 8 letters",
+      shortLabel: "8+ letters",
+      met: password.length >= 8,
+    },
+  ];
+
+  const metCount = criteriaList.filter((c) => c.met).length;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
+    if (mode === "register" && metCount < 5) {
+      return;
+    }
     if (onSubmit) {
       onSubmit({
         mode,
         name: mode === "register" ? name : undefined,
-        email: usePhone ? phoneNumber : email,
+        email,
         password,
       });
     }
   };
 
   return (
-    <div className="w-full md:w-7/12 lg:w-1/2 min-h-screen flex flex-col justify-center px-6 sm:px-10 py-10 overflow-y-auto bg-white relative">
-      {/* Subtle ambient mint glows matching reference design */}
-      <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-[#d1fae5]/35 blur-3xl pointer-events-none -mr-20 -mt-20" />
-      <div className="absolute top-1/2 left-0 w-64 h-64 rounded-full bg-[#ecfdf5]/40 blur-3xl pointer-events-none -ml-20" />
+    <div className="w-full md:w-7/12 lg:w-1/2 h-full md:h-screen flex flex-col px-6 sm:px-10 py-6 sm:py-8 md:py-10 overflow-y-auto overflow-x-hidden bg-white relative">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-[#d1fae5]/35 blur-3xl -mr-20 -mt-20" />
+        <div className="absolute top-1/2 left-0 w-64 h-64 rounded-full bg-[#ecfdf5]/40 blur-3xl -ml-20" />
+      </div>
 
-      <div className="max-w-[430px] w-full mx-auto relative z-10 flex flex-col gap-5">
+      <div className="max-w-[430px] w-full mx-auto relative z-10 flex flex-col gap-4 sm:gap-5 my-auto">
       
 
         {/* Heading & Subtitle */}
@@ -78,7 +119,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
         <div className="p-1 rounded-2xl bg-[#eef3f0] flex items-center border border-[#e1e9e4]">
           <button
             type="button"
-            onClick={() => onToggleMode("register")}
+            onClick={() => handleTabSwitch("register")}
             className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${
               mode === "register"
                 ? "bg-white text-[#173324] shadow-sm"
@@ -104,7 +145,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
           </button>
           <button
             type="button"
-            onClick={() => onToggleMode("login")}
+            onClick={() => handleTabSwitch("login")}
             className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${
               mode === "login"
                 ? "bg-white text-[#173324] shadow-sm"
@@ -209,63 +250,34 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
             </div>
           )}
 
-          {/* Email / Phone Field */}
+          {/* Email Address Field */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-[11px] font-bold text-[#3d4f45] uppercase tracking-wider block">
-                {usePhone ? "PHONE NUMBER" : "EMAIL ADDRESS"}
-              </label>
-              <button
-                type="button"
-                onClick={() => setUsePhone(!usePhone)}
-                className="text-xs font-semibold text-[#1b7a43] hover:underline cursor-pointer"
-              >
-                {usePhone ? "Use Email instead" : "Use Phone OTP instead"}
-              </button>
-            </div>
+            <label className="text-[11px] font-bold text-[#3d4f45] uppercase tracking-wider mb-1.5 block">
+              EMAIL ADDRESS
+            </label>
 
             <div className="relative flex items-center">
               <span className="absolute left-4 text-[#7b8c82]">
-                {usePhone ? (
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
-                )}
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
               </span>
               <input
-                type={usePhone ? "tel" : "email"}
+                type="email"
                 required
-                value={usePhone ? phoneNumber : email}
-                onChange={(e) =>
-                  usePhone
-                    ? setPhoneNumber(e.target.value)
-                    : setEmail(e.target.value)
-                }
-                placeholder={usePhone ? "+91 98765 43210" : "your@email.com"}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
                 className="w-full pl-11 pr-4 py-3.5 rounded-xl text-sm outline-none transition-all"
                 style={{
                   border: "1.5px solid #e2eae5",
@@ -285,8 +297,20 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
                 PASSWORD
               </label>
               {mode === "register" ? (
-                <span className="text-xs font-semibold text-[#10b981] flex items-center gap-1">
-                  ✓ Strong password
+                <span
+                  className={`text-xs font-semibold flex items-center gap-1 transition-colors duration-200 ${
+                    metCount === 5
+                      ? "text-[#10b981]"
+                      : metCount > 0
+                      ? "text-[#1b7a43]"
+                      : "text-[#7a8a80]"
+                  }`}
+                >
+                  {metCount === 5
+                    ? "✓ All 5 criteria met"
+                    : password.length > 0
+                    ? `${metCount}/5 criteria met`
+                    : "5 criteria required"}
                 </span>
               ) : (
                 <button
@@ -319,8 +343,10 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••••"
-                className="w-full pl-11 pr-11 py-3.5 rounded-xl text-sm outline-none transition-all tracking-wider font-mono"
+                placeholder={mode === "register" ? "Create a password" : "Enter your password"}
+                className={`w-full pl-11 pr-11 py-3.5 rounded-xl text-sm outline-none transition-all ${
+                  password ? "tracking-wider font-mono" : ""
+                }`}
                 style={{
                   border: "1.5px solid #e2eae5",
                   color: "#173324",
@@ -333,6 +359,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 text-[#7b8c82] hover:text-[#173324] cursor-pointer"
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
                   <svg
@@ -372,29 +399,69 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
               </button>
             </div>
 
-            {/* Password Strength Meter (4 green segments matching image) */}
-            <div className="grid grid-cols-4 gap-1.5 mt-2">
-              <div
-                className={`h-1 rounded-full transition-all duration-300 ${
-                  strength >= 1 || !password ? "bg-[#10b981]" : "bg-[#d1fae5]"
-                }`}
-              />
-              <div
-                className={`h-1 rounded-full transition-all duration-300 ${
-                  strength >= 2 || !password ? "bg-[#10b981]" : "bg-[#d1fae5]"
-                }`}
-              />
-              <div
-                className={`h-1 rounded-full transition-all duration-300 ${
-                  strength >= 3 || !password ? "bg-[#10b981]" : "bg-[#d1fae5]"
-                }`}
-              />
-              <div
-                className={`h-1 rounded-full transition-all duration-300 ${
-                  strength >= 4 || !password ? "bg-[#10b981]" : "bg-[#d1fae5]"
-                }`}
-              />
-            </div>
+            {/* 5-Criteria Green Indicator Bars & Validation (Only in Register Mode) */}
+            {mode === "register" && (
+              <>
+                <div className="grid grid-cols-5 gap-1.5 mt-2">
+                  {criteriaList.map((c, idx) => (
+                    <div
+                      key={c.id}
+                      title={`Criteria ${idx + 1}: ${c.label} (${c.met && password.length > 0 ? "Achieved" : "Not met"})`}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        password.length > 0 && c.met
+                          ? "bg-[#10b981] shadow-[0_0_6px_rgba(16,185,129,0.5)]"
+                          : "bg-[#e2eae5]"
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                {/* Real-time 5 Criteria Feedback while typing */}
+                {password.length > 0 && (
+                  <div className="mt-2.5 p-2.5 rounded-xl bg-[#f7faf8] border border-[#e2eae5] text-[11px] transition-all duration-200">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="font-semibold text-[#3d4f45]">
+                        5 Password Criteria:
+                      </span>
+                      <span
+                        className={`font-semibold ${
+                          metCount === 5 ? "text-[#10b981]" : "text-[#7a8a80]"
+                        }`}
+                      >
+                        {metCount}/5 achieved
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1">
+                      {criteriaList.map((c, idx) => (
+                        <div
+                          key={c.id}
+                          className={`flex items-center gap-1.5 transition-colors duration-200 ${
+                            c.met ? "text-[#10b981] font-medium" : "text-[#7a8a80]"
+                          }`}
+                        >
+                          <span
+                            className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 transition-all duration-200 ${
+                              c.met
+                                ? "bg-[#10b981] text-white"
+                                : "bg-[#e2eae5] text-[#7a8a80]"
+                            }`}
+                          >
+                            {c.met ? "✓" : (idx + 1).toString()}
+                          </span>
+                          <span>{c.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {submitted && metCount < 5 && (
+                  <p className="text-xs text-red-600 mt-1.5 font-medium">
+                    Please fulfill all 5 password criteria before proceeding.
+                  </p>
+                )}
+              </>
+            )}
           </div>
           {/* Main Action Button */}
           <button

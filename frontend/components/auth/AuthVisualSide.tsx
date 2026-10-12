@@ -11,7 +11,7 @@ interface AuthVisualSideProps {
 
 export function AuthVisualSide({ onBack }: AuthVisualSideProps) {
   return (
-    <div className="relative w-full md:w-5/12 lg:w-1/2 h-56 sm:h-64 md:h-full md:min-h-screen overflow-hidden flex flex-col justify-between p-6 md:p-12 shrink-0">
+    <div className="relative w-full md:w-5/12 lg:w-1/2 h-56 sm:h-64 md:h-full md:h-screen overflow-hidden flex flex-col justify-between p-6 md:p-10 lg:p-12 shrink-0">
       {/* Background Image */}
       <img
         src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&h=1600&fit=crop&auto=format"
