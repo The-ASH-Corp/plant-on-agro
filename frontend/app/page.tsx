@@ -5,17 +5,14 @@ import { Section } from "@/types";
 import { Nav } from "@/components/Nav";
 import { Hero } from "@/components/Hero";
 import { HowItWorks } from "@/components/HowItWorks";
-import { ExploreTrees } from "@/components/ExploreTrees";
 import { ImpactSection } from "@/components/ImpactSection";
 import { CertificateSection } from "@/components/CertificateSection";
 import { Footer } from "@/components/Footer";
 import { PlantFlow } from "@/components/PlantFlow";
-import { AuthModal } from "@/components/auth";
 
 export default function App() {
   const [activeSection, setActiveSection] = useState<Section>("home");
   const [plantOpen, setPlantOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<"login" | "register" | null>(null);
 
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -44,7 +41,6 @@ export default function App() {
         active={activeSection}
         setActive={handleNav}
         openPlant={() => setPlantOpen(true)}
-        openAuth={(m) => setAuthMode(m)}
       />
 
       <main>
@@ -63,12 +59,6 @@ export default function App() {
       <Footer openPlant={() => setPlantOpen(true)} />
 
       {plantOpen && <PlantFlow onClose={() => setPlantOpen(false)} />}
-      {authMode && (
-        <AuthModal
-          initialMode={authMode}
-          onClose={() => setAuthMode(null)}
-        />
-      )}
     </div>
   );
 }

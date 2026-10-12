@@ -11,14 +11,15 @@ interface NavProps {
   active?: Section;
   setActive?: (s: Section) => void;
   openPlant?: () => void;
-  openAuth?: (m: "login" | "register") => void;
 }
 
-export function Nav({ active = "home", setActive, openPlant, openAuth }: NavProps) {
+export function Nav({ active = "home", setActive, openPlant }: NavProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
   const isHome = pathname === "/";
+  const isAuth =
+    pathname?.startsWith("/login") || pathname?.startsWith("/register");
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 40);
@@ -108,37 +109,16 @@ export function Nav({ active = "home", setActive, openPlant, openAuth }: NavProp
 
         {/* CTAs */}
         <div className="hidden md:flex items-center gap-3">
-          {openAuth ? (
-            <button
-              onClick={() => openAuth("login")}
-              className="text-sm font-medium transition-colors px-4 py-2 cursor-pointer"
-              style={{
-                color:
-                  pathname === "/login" || pathname === "/register"
-                    ? "#52b788"
-                    : "rgba(255,255,255,0.8)",
-                fontWeight:
-                  pathname === "/login" || pathname === "/register" ? 600 : 500,
-              }}
-            >
-              Login
-            </button>
-          ) : (
-            <Link
-              href="/login"
-              className="text-sm font-medium transition-colors px-4 py-2"
-              style={{
-                color:
-                  pathname === "/login" || pathname === "/register"
-                    ? "#52b788"
-                    : "rgba(255,255,255,0.8)",
-                fontWeight:
-                  pathname === "/login" || pathname === "/register" ? 600 : 500,
-              }}
-            >
-              Login
-            </Link>
-          )}
+          <Link
+            href="/login"
+            className="text-sm font-medium transition-colors px-4 py-2"
+            style={{
+              color: isAuth ? "#52b788" : "rgba(255,255,255,0.8)",
+              fontWeight: isAuth ? 600 : 500,
+            }}
+          >
+            Login
+          </Link>
           {openPlant ? (
             <button
               onClick={openPlant}
@@ -194,25 +174,13 @@ export function Nav({ active = "home", setActive, openPlant, openAuth }: NavProp
                 )}
               </div>
             ))}
-            {openAuth ? (
-              <button
-                onClick={() => {
-                  openAuth("login");
-                  setMenuOpen(false);
-                }}
-                className="text-left text-white/80 hover:text-white font-medium py-1 w-full cursor-pointer"
-              >
-                Login / Sign Up
-              </button>
-            ) : (
-              <Link
-                href="/login"
-                onClick={() => setMenuOpen(false)}
-                className="text-left text-white/80 hover:text-white font-medium py-1"
-              >
-                Login / Sign Up
-              </Link>
-            )}
+            <Link
+              href="/login"
+              onClick={() => setMenuOpen(false)}
+              className="text-left text-white/80 hover:text-white font-medium py-1"
+            >
+              Login / Sign Up
+            </Link>
             {openPlant ? (
               <button
                 onClick={() => {

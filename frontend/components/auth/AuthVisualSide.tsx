@@ -49,7 +49,12 @@ export function AuthVisualSide({ onBack }: AuthVisualSideProps) {
 
       {/* Bottom Branding Copy (Desktop) */}
       <div className="relative z-10 mt-auto hidden md:block">
-        <button className="flex items-center gap-2.5 group *:hover:cursor-pointer duration-200 my-5">
+        {onBack ? (
+          <button
+            type="button"
+            onClick={onBack}
+            className="flex items-center gap-2.5 group hover:cursor-pointer duration-200 my-5"
+          >
             <Image
               src={Logo}
               alt="Logo"
@@ -59,6 +64,21 @@ export function AuthVisualSide({ onBack }: AuthVisualSideProps) {
               className="w-auto h-10 sm:h-12 md:h-14 object-contain"
             />
           </button>
+        ) : (
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 group hover:cursor-pointer duration-200 my-5"
+          >
+            <Image
+              src={Logo}
+              alt="Logo"
+              width={200}
+              height={200}
+              priority
+              className="w-auto h-10 sm:h-12 md:h-14 object-contain"
+            />
+          </Link>
+        )}
         <h2
           style={{ fontFamily: "var(--font-display)" }}
           className="text-white text-5xl lg:text-6xl mb-4 leading-tight"
