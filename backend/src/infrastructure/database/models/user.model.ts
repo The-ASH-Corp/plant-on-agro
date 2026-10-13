@@ -3,7 +3,8 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IUserDocument extends Document {
   name: string;
   email: string;
-  role: 'admin' | 'farmer' | 'buyer';
+  password?: string;
+  role: 'admin' | 'buyer';
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -24,9 +25,14 @@ const UserSchema = new Schema<IUserDocument>(
       trim: true,
       index: true,
     },
+    password: {
+      type: String,
+      required: false,
+      select: false, 
+    },
     role: {
       type: String,
-      enum: ['admin', 'farmer', 'buyer'],
+      enum: ['admin', 'buyer'],
       default: 'buyer',
     },
     isActive: {

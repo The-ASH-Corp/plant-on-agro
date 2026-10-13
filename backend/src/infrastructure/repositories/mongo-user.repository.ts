@@ -17,6 +17,14 @@ export class MongoUserRepository implements IUserRepository {
     return UserMapper.toDomain(doc);
   }
 
+  public async findByEmailWithPassword(email: string): Promise<Nullable<User>> {
+    const doc = await UserModel.findOne({ email: email.toLowerCase() })
+      .select('+password')
+      .exec();
+    if (!doc) return null;
+    return UserMapper.toDomain(doc);
+  }
+
   public async save(user: User): Promise<User> {
     const persistenceData = UserMapper.toPersistence(user);
     const doc = await UserModel.create(persistenceData);

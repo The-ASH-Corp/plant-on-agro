@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { Section } from "@/types";
 import Image from "next/image";
 import Logo from "../public/Screenshot_From_2026-09-17_15-39-39-removebg-preview.png";
+import { useAuthStore } from "@/store/auth.store";
+import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
 
 interface NavProps {
   active?: Section;
@@ -16,10 +18,15 @@ interface NavProps {
 export function Nav({ active = "home", setActive, openPlant }: NavProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const user = useHydratedStore(useAuthStore, (s) => s.user);
+  const isAuthenticated = useHydratedStore(useAuthStore, (s) => s.isAuthenticated);
+  const logout = useAuthStore((s) => s.logout);
   const pathname = usePathname();
   const isHome = pathname === "/";
   const isAuth =
-    pathname?.startsWith("/login") || pathname?.startsWith("/register");
+    pathname?.startsWith("/login") ||
+    pathname?.startsWith("/register") ||
+    pathname?.startsWith("/forgot-password");
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 40);
@@ -109,16 +116,36 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
 
         {/* CTAs */}
         <div className="hidden md:flex items-center gap-3">
-          <Link
-            href="/login"
-            className="text-sm font-medium transition-colors px-4 py-2"
-            style={{
-              color: isAuth ? "#52b788" : "rgba(255,255,255,0.8)",
-              fontWeight: isAuth ? 600 : 500,
-            }}
-          >
-            Login
-          </Link>
+          {isAuthenticated && user ? (
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-white text-xs font-medium border border-white/15">
+                <span className="w-2 h-2 rounded-full bg-[#52b788] animate-pulse"></span>
+                <span className="truncate max-w-[130px] font-semibold">{user.name}</span>
+                {user.role === "admin" && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider bg-amber-500/25 text-amber-300 border border-amber-400/30">
+                    Admin
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => logout()}
+                className="text-xs text-white/70 hover:text-white transition-colors px-2 py-1 cursor-pointer font-medium"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="text-sm font-medium transition-colors px-4 py-2"
+              style={{
+                color: isAuth ? "#52b788" : "rgba(255,255,255,0.8)",
+                fontWeight: isAuth ? 600 : 500,
+              }}
+            >
+              Login
+            </Link>
+          )}
           {openPlant ? (
             <button
               onClick={openPlant}
@@ -174,13 +201,36 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
                 )}
               </div>
             ))}
-            <Link
-              href="/login"
-              onClick={() => setMenuOpen(false)}
-              className="text-left text-white/80 hover:text-white font-medium py-1"
-            >
-              Login / Sign Up
-            </Link>
+            {isAuthenticated && user ? (
+              <div className="py-2.5 px-1 flex items-center justify-between border-t border-white/10">
+                <div className="flex items-center gap-2 text-white text-sm">
+                  <span className="w-2 h-2 rounded-full bg-[#52b788]"></span>
+                  <span className="font-semibold">{user.name}</span>
+                  {user.role === "admin" && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider bg-amber-500/25 text-amber-300 border border-amber-400/30">
+                      Admin
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => {
+                    logout();
+                    setMenuOpen(false);
+                  }}
+                  className="text-xs text-red-300 hover:text-red-200 font-medium cursor-pointer"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMenuOpen(false)}
+                className="text-left text-white/80 hover:text-white font-medium py-1"
+              >
+                Login / Sign Up
+              </Link>
+            )}
             {openPlant ? (
               <button
                 onClick={() => {
