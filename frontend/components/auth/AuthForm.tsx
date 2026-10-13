@@ -22,11 +22,20 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
+  const [role, setRole] = useState<"buyer" | "farmer">("buyer");
+  const [agreedToTerms, setAgreedToTerms] = useState(true);
   const [submitted, setSubmitted] = useState(false);
+  const [isSuccessState, setIsSuccessState] = useState(false);
+  const [registeredData, setRegisteredData] = useState<{
+    name: string;
+    email: string;
+    role: string;
+  } | null>(null);
 
   // Zustand State Management Store
   const {
     register: registerUser,
+    login: loginUser,
     isLoading,
     error: apiError,
     fieldErrors,
@@ -40,6 +49,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
     setPassword("");
     setSubmitted(false);
     setShowPassword(false);
+    setIsSuccessState(false);
     clearError();
     clearSuccess();
   }, [mode, clearError, clearSuccess]);
@@ -49,6 +59,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
       setPassword("");
       setSubmitted(false);
       setShowPassword(false);
+      setIsSuccessState(false);
       clearError();
       clearSuccess();
       onToggleMode(newMode);
@@ -94,28 +105,44 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
-    if (mode === "register" && metCount < 5) {
-      return;
-    }
 
     if (mode === "register") {
+      if (metCount < 5) return;
+      if (!agreedToTerms) return;
+
       const result = await registerUser({
         name: name.trim(),
         email: email.trim(),
         password,
-        role: "buyer",
+        role,
+      });
+
+      if (result.success && result.data) {
+        setIsSuccessState(true);
+        setRegisteredData({
+          name: result.data.name,
+          email: result.data.email,
+          role: result.data.role,
+        });
+
+        setTimeout(() => {
+          if (onSubmit) {
+            onSubmit({
+              mode,
+              name,
+              email,
+              password,
+            });
+          }
+        }, 2500);
+      }
+    } else {
+      const result = await loginUser({
+        email: email.trim(),
+        password,
       });
 
       if (result.success && onSubmit) {
-        onSubmit({
-          mode,
-          name,
-          email,
-          password,
-        });
-      }
-    } else {
-      if (onSubmit) {
         onSubmit({
           mode,
           email,
@@ -124,6 +151,74 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
       }
     }
   };
+
+  if (isSuccessState && registeredData) {
+    return (
+      <div className="w-full md:w-7/12 lg:w-1/2 h-full md:h-screen flex flex-col px-6 sm:px-10 py-6 sm:py-8 md:py-10 overflow-y-auto overflow-x-hidden bg-white relative justify-center">
+        <div className="max-w-[430px] w-full mx-auto relative z-10 flex flex-col items-center text-center gap-5 my-auto animate-fadeIn">
+          {/* Animated Success Badge */}
+          <div className="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-4xl shadow-md border-2 border-emerald-300">
+            🌱
+          </div>
+
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-[#1b7a43] bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+              Registration Complete
+            </span>
+            <h2
+              style={{ fontFamily: "var(--font-display)" }}
+              className="text-[#173324] text-3xl font-semibold tracking-tight mt-3 mb-1.5"
+            >
+              Welcome, {registeredData.name}!
+            </h2>
+            <p className="text-[#55695d] text-sm">
+              Your account has been securely encrypted with Argon2id and saved.
+            </p>
+          </div>
+
+          <div className="w-full p-4 rounded-2xl bg-[#f4f7f5] border border-[#e2eae5] text-left text-xs space-y-2.5">
+            <div className="flex justify-between items-center">
+              <span className="text-[#7a8a80]">Full Name:</span>
+              <span className="font-semibold text-[#173324]">{registeredData.name}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-[#7a8a80]">Email:</span>
+              <span className="font-semibold text-[#173324]">{registeredData.email}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-[#7a8a80]">Account Role:</span>
+              <span className="font-semibold text-[#1b7a43] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                {registeredData.role === "farmer" ? "🌾 Farmer Partner" : "🌳 Tree Planter"}
+              </span>
+            </div>
+          </div>
+
+          <div className="w-full">
+            <button
+              id="auth-success-continue-btn"
+              type="button"
+              onClick={() => {
+                if (onSubmit) {
+                  onSubmit({ mode: "register", name, email, password });
+                }
+              }}
+              className="w-full py-3.5 px-6 rounded-xl font-semibold text-sm text-white transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-md hover:shadow-xl hover:scale-[1.01]"
+              style={{
+                background: "linear-gradient(135deg, #1d553a 0%, #173324 100%)",
+                boxShadow: "0 8px 24px rgba(23,51,36,0.25)",
+              }}
+            >
+              <span>Continue to Platform</span>
+              <span className="text-lg leading-none">→</span>
+            </button>
+            <p className="text-[11px] text-[#7a8a80] mt-2">
+              Redirecting automatically in a moment...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full md:w-7/12 lg:w-1/2 h-full md:h-screen flex flex-col px-6 sm:px-10 py-6 sm:py-8 md:py-10 overflow-y-auto overflow-x-hidden bg-white relative">
@@ -186,6 +281,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
         {/* Segmented Tab Switcher */}
         <div className="p-1 rounded-2xl bg-[#eef3f0] flex items-center border border-[#e1e9e4]">
           <button
+            id="auth-tab-register"
             type="button"
             onClick={() => handleTabSwitch("register")}
             className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${
@@ -212,6 +308,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
             <span>Create Account</span>
           </button>
           <button
+            id="auth-tab-login"
             type="button"
             onClick={() => handleTabSwitch("login")}
             className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${
@@ -227,6 +324,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
         {/* Social Buttons: Google & Apple */}
         <div className="grid grid-cols-2 gap-3">
           <button
+            id="auth-social-google"
             type="button"
             onClick={() => alert("Google OAuth login initialized...")}
             className="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-[#e1e9e4] bg-white hover:bg-[#f9faf9] transition-all text-xs sm:text-sm font-semibold text-[#2d3a33] shadow-xs cursor-pointer"
@@ -253,6 +351,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
           </button>
 
           <button
+            id="auth-social-apple"
             type="button"
             onClick={() => alert("Apple ID authentication initialized...")}
             className="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-[#e1e9e4] bg-white hover:bg-[#f9faf9] transition-all text-xs sm:text-sm font-semibold text-[#2d3a33] shadow-xs cursor-pointer"
@@ -276,7 +375,55 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form id="auth-form" onSubmit={handleSubmit} className="space-y-4">
+          {/* Account Role Selection (Tree Planter vs Farmer) */}
+          {mode === "register" && (
+            <div>
+              <label className="text-[11px] font-bold text-[#3d4f45] uppercase tracking-wider mb-2 block">
+                I AM JOINING AS A
+              </label>
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  id="auth-role-buyer"
+                  type="button"
+                  onClick={() => setRole("buyer")}
+                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 ${
+                    role === "buyer"
+                      ? "border-[#1b7a43] bg-emerald-50/60 shadow-xs ring-1 ring-[#1b7a43]"
+                      : "border-[#e1e9e4] bg-[#fcfaf7] hover:bg-white"
+                  }`}
+                >
+                  <span className="text-sm font-semibold text-[#173324] flex items-center justify-between">
+                    <span>🌳 Tree Planter</span>
+                    {role === "buyer" && <span className="text-xs text-[#1b7a43] font-bold">✓</span>}
+                  </span>
+                  <span className="text-[11px] text-[#55695d] leading-tight">
+                    Plant trees & earn verified offsets
+                  </span>
+                </button>
+
+                <button
+                  id="auth-role-farmer"
+                  type="button"
+                  onClick={() => setRole("farmer")}
+                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 ${
+                    role === "farmer"
+                      ? "border-[#1b7a43] bg-emerald-50/60 shadow-xs ring-1 ring-[#1b7a43]"
+                      : "border-[#e1e9e4] bg-[#fcfaf7] hover:bg-white"
+                  }`}
+                >
+                  <span className="text-sm font-semibold text-[#173324] flex items-center justify-between">
+                    <span>🌾 Farmer Partner</span>
+                    {role === "farmer" && <span className="text-xs text-[#1b7a43] font-bold">✓</span>}
+                  </span>
+                  <span className="text-[11px] text-[#55695d] leading-tight">
+                    Host agroforestry & grow trees
+                  </span>
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Full Name (for register mode) */}
           {mode === "register" && (
             <div>
@@ -300,6 +447,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
                   </svg>
                 </span>
                 <input
+                  id="auth-name-input"
                   type="text"
                   required
                   value={name}
@@ -307,12 +455,12 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
                   placeholder="Priya Sharma"
                   className="w-full pl-11 pr-4 py-3.5 rounded-xl text-sm outline-none transition-all"
                   style={{
-                    border: "1.5px solid #e2eae5",
+                    border: fieldErrors.name ? "1.5px solid #ef4444" : "1.5px solid #e2eae5",
                     color: "#173324",
                     background: "#fcfaf7",
                   }}
                   onFocus={(e) => (e.target.style.border = "1.5px solid #2d6a4f")}
-                  onBlur={(e) => (e.target.style.border = "1.5px solid #e2eae5")}
+                  onBlur={(e) => (e.target.style.border = fieldErrors.name ? "1.5px solid #ef4444" : "1.5px solid #e2eae5")}
                 />
               </div>
               {fieldErrors.name && (
@@ -344,6 +492,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
                 </svg>
               </span>
               <input
+                id="auth-email-input"
                 type="email"
                 required
                 value={email}
@@ -419,6 +568,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
                 </svg>
               </span>
               <input
+                id="auth-password-input"
                 type={showPassword ? "text" : "password"}
                 required
                 value={password}
@@ -428,12 +578,12 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
                   password ? "tracking-wider font-mono" : ""
                 }`}
                 style={{
-                  border: "1.5px solid #e2eae5",
+                  border: fieldErrors.password ? "1.5px solid #ef4444" : "1.5px solid #e2eae5",
                   color: "#173324",
                   background: "#fcfaf7",
                 }}
                 onFocus={(e) => (e.target.style.border = "1.5px solid #2d6a4f")}
-                onBlur={(e) => (e.target.style.border = "1.5px solid #e2eae5")}
+                onBlur={(e) => (e.target.style.border = fieldErrors.password ? "1.5px solid #ef4444" : "1.5px solid #e2eae5")}
               />
               <button
                 type="button"
@@ -478,6 +628,9 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
                 )}
               </button>
             </div>
+            {fieldErrors.password && (
+              <p className="text-xs text-red-600 mt-1 font-medium">{fieldErrors.password}</p>
+            )}
 
             {/* 5-Criteria Green Indicator Bars & Validation (Only in Register Mode) */}
             {mode === "register" && (
@@ -543,8 +696,38 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
               </>
             )}
           </div>
+
+          {/* Terms & Conditions Agreement (Register Mode) */}
+          {mode === "register" && (
+            <div className="pt-1">
+              <div className="flex items-start gap-2.5">
+                <input
+                  id="auth-terms-checkbox"
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 rounded text-[#1b7a43] focus:ring-[#1b7a43] border-[#ccd8d0] cursor-pointer"
+                />
+                <label
+                  htmlFor="auth-terms-checkbox"
+                  className="text-xs text-[#55695d] cursor-pointer leading-snug"
+                >
+                  I agree to PlantOnAgro's{" "}
+                  <span className="text-[#1b7a43] font-semibold underline">Terms of Service</span> and{" "}
+                  <span className="text-[#1b7a43] font-semibold underline">Privacy Policy</span>.
+                </label>
+              </div>
+              {submitted && !agreedToTerms && (
+                <p className="text-xs text-red-600 mt-1 font-medium">
+                  Please accept the terms to create your account.
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Main Action Button */}
           <button
+            id="auth-submit-btn"
             type="submit"
             disabled={isLoading}
             className={`w-full py-3.5 px-6 rounded-xl font-semibold text-sm sm:text-base text-white transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-md hover:shadow-xl hover:scale-[1.01] ${
