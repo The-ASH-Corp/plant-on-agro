@@ -3,6 +3,8 @@ export { AuthModal } from "./AuthModal";
 export { AuthVisualSide } from "./AuthVisualSide";
 export { AuthForm } from "./AuthForm";
 export type { AuthMode } from "./AuthForm";
+export { ForgotPasswordForm } from "./ForgotPasswordForm";
 export { LoginPage } from "./LoginPage";
 export { RegisterPage } from "./RegisterPage";
+export { ForgotPasswordPage } from "./ForgotPasswordPage";
 export { AuthPage } from "./AuthPage";

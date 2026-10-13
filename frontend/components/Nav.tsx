@@ -19,7 +19,9 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const isAuth =
-    pathname?.startsWith("/login") || pathname?.startsWith("/register");
+    pathname?.startsWith("/login") ||
+    pathname?.startsWith("/register") ||
+    pathname?.startsWith("/forgot-password");
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 40);

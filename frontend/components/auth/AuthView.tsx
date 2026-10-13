@@ -4,13 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AuthVisualSide } from "./AuthVisualSide";
 import { AuthForm, AuthMode } from "./AuthForm";
+import { ForgotPasswordForm } from "./ForgotPasswordForm";
+
+export type AuthViewMode = AuthMode | "forgot-password";
 
 export interface AuthViewProps {
-  initialMode?: "login" | "register" | "signin" | "signup";
+  initialMode?: "login" | "register" | "signin" | "signup" | "forgot-password";
   onClose?: () => void;
   isModal?: boolean;
   onSuccess?: (data: {
-    mode: AuthMode;
+    mode: AuthViewMode;
     name?: string;
     email: string;
   }) => void;
@@ -23,13 +26,14 @@ export function AuthView({
   onSuccess,
 }: AuthViewProps) {
   const router = useRouter();
-  // Normalize initialMode ("signin" -> "login", "signup" -> "register")
-  const normalizedInitial: AuthMode =
-    initialMode === "register" || initialMode === "signup"
-      ? "register"
-      : "login";
+  // Normalize initialMode
+  const getNormalizedMode = (): AuthViewMode => {
+    if (initialMode === "register" || initialMode === "signup") return "register";
+    if (initialMode === "forgot-password") return "forgot-password";
+    return "login";
+  };
 
-  const [mode, setMode] = useState<AuthMode>(normalizedInitial);
+  const [mode, setMode] = useState<AuthViewMode>(getNormalizedMode());
 
   const handleBack = () => {
     if (onClose) {
@@ -39,11 +43,13 @@ export function AuthView({
     }
   };
 
-  const handleToggleMode = (newMode: AuthMode) => {
+  const handleToggleMode = (newMode: AuthViewMode) => {
     setMode(newMode);
     // If not in a modal, optionally update browser URL smoothly
     if (!isModal && typeof window !== "undefined") {
-      const targetUrl = newMode === "register" ? "/register" : "/login";
+      let targetUrl = "/login";
+      if (newMode === "register") targetUrl = "/register";
+      else if (newMode === "forgot-password") targetUrl = "/forgot-password";
       window.history.replaceState(null, "", targetUrl);
     }
   };
@@ -74,11 +80,22 @@ export function AuthView({
       <AuthVisualSide onBack={handleBack} />
 
       {/* Right Column - Form Area */}
-      <AuthForm
-        mode={mode}
-        onToggleMode={handleToggleMode}
-        onSubmit={handleSubmit}
-      />
+      {mode === "forgot-password" ? (
+        <ForgotPasswordForm
+          onToggleMode={handleToggleMode}
+          onSubmitSuccess={(email) => {
+            if (onSuccess) {
+              onSuccess({ mode: "forgot-password", email });
+            }
+          }}
+        />
+      ) : (
+        <AuthForm
+          mode={mode}
+          onToggleMode={handleToggleMode}
+          onSubmit={handleSubmit}
+        />
+      )}
     </div>
   );
 }

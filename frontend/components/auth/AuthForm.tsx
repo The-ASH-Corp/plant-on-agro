@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
-export type AuthMode = "login" | "register";
+export type AuthMode = "login" | "register" | "forgot-password";
 
 interface AuthFormProps {
   mode: AuthMode;
@@ -313,12 +314,18 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
                     : "5 criteria required"}
                 </span>
               ) : (
-                <button
-                  type="button"
+                <Link
+                  href="/forgot-password"
+                  onClick={(e) => {
+                    if (onToggleMode) {
+                      e.preventDefault();
+                      onToggleMode("forgot-password");
+                    }
+                  }}
                   className="text-xs font-semibold text-[#1b7a43] hover:underline cursor-pointer"
                 >
                   Forgot password?
-                </button>
+                </Link>
               )}
             </div>
 
