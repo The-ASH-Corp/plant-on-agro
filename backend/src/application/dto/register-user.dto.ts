@@ -1,4 +1,4 @@
-export type AllowedRegistrationRole = 'farmer' | 'buyer';
+export type AllowedRegistrationRole = 'buyer';
 
 export interface RegisterUserInputDto {
   name: string;

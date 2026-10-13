@@ -1,7 +1,7 @@
 import { Email } from '../value-objects/email.vo';
 import { HashedPassword } from '../value-objects/password.vo';
 
-export type UserRole = 'admin' | 'farmer' | 'buyer';
+export type UserRole = 'admin' | 'buyer';
 
 export interface UserProps {
   id?: string;

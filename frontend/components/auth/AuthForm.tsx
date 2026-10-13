@@ -22,7 +22,6 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
-  const [role, setRole] = useState<"buyer" | "farmer">("buyer");
   const [agreedToTerms, setAgreedToTerms] = useState(true);
   const [submitted, setSubmitted] = useState(false);
   const [isSuccessState, setIsSuccessState] = useState(false);
@@ -114,7 +113,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
         name: name.trim(),
         email: email.trim(),
         password,
-        role,
+        role: "buyer",
       });
 
       if (result.success && result.data) {
@@ -188,7 +187,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
             <div className="flex justify-between items-center">
               <span className="text-[#7a8a80]">Account Role:</span>
               <span className="font-semibold text-[#1b7a43] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                {registeredData.role === "farmer" ? "🌾 Farmer Partner" : "🌳 Tree Planter"}
+                {registeredData.role === "admin" ? "🛡️ Admin" : "🌳 Buyer (Tree Planter)"}
               </span>
             </div>
           </div>
@@ -376,54 +375,6 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
 
         {/* Form Body */}
         <form id="auth-form" onSubmit={handleSubmit} className="space-y-4">
-          {/* Account Role Selection (Tree Planter vs Farmer) */}
-          {mode === "register" && (
-            <div>
-              <label className="text-[11px] font-bold text-[#3d4f45] uppercase tracking-wider mb-2 block">
-                I AM JOINING AS A
-              </label>
-              <div className="grid grid-cols-2 gap-2.5">
-                <button
-                  id="auth-role-buyer"
-                  type="button"
-                  onClick={() => setRole("buyer")}
-                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 ${
-                    role === "buyer"
-                      ? "border-[#1b7a43] bg-emerald-50/60 shadow-xs ring-1 ring-[#1b7a43]"
-                      : "border-[#e1e9e4] bg-[#fcfaf7] hover:bg-white"
-                  }`}
-                >
-                  <span className="text-sm font-semibold text-[#173324] flex items-center justify-between">
-                    <span>🌳 Tree Planter</span>
-                    {role === "buyer" && <span className="text-xs text-[#1b7a43] font-bold">✓</span>}
-                  </span>
-                  <span className="text-[11px] text-[#55695d] leading-tight">
-                    Plant trees & earn verified offsets
-                  </span>
-                </button>
-
-                <button
-                  id="auth-role-farmer"
-                  type="button"
-                  onClick={() => setRole("farmer")}
-                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 ${
-                    role === "farmer"
-                      ? "border-[#1b7a43] bg-emerald-50/60 shadow-xs ring-1 ring-[#1b7a43]"
-                      : "border-[#e1e9e4] bg-[#fcfaf7] hover:bg-white"
-                  }`}
-                >
-                  <span className="text-sm font-semibold text-[#173324] flex items-center justify-between">
-                    <span>🌾 Farmer Partner</span>
-                    {role === "farmer" && <span className="text-xs text-[#1b7a43] font-bold">✓</span>}
-                  </span>
-                  <span className="text-[11px] text-[#55695d] leading-tight">
-                    Host agroforestry & grow trees
-                  </span>
-                </button>
-              </div>
-            </div>
-          )}
-
           {/* Full Name (for register mode) */}
           {mode === "register" && (
             <div>

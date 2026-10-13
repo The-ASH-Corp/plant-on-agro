@@ -1,4 +1,4 @@
-export type UserRole = 'farmer' | 'buyer' | 'admin';
+export type UserRole = 'admin' | 'buyer';
 
 export interface User {
   id: string;
@@ -13,7 +13,7 @@ export interface RegisterPayload {
   name: string;
   email: string;
   password: string;
-  role?: 'farmer' | 'buyer';
+  role?: 'buyer';
 }
 
 export interface LoginPayload {

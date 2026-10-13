@@ -30,8 +30,8 @@ export const registerSchema = z
       ),
 
     role: z
-      .enum(['farmer', 'buyer'], {
-        error: "Role must be either 'farmer' or 'buyer'",
+      .enum(['buyer'], {
+        error: "Role must be 'buyer'",
       })
       .optional()
       .default('buyer'),

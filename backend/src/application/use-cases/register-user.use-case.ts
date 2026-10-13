@@ -18,10 +18,11 @@ export class RegisterUserUseCase {
     const passwordVO = Password.create(input.password);
 
   
-    const allowedRoles: UserRole[] = ['buyer', 'farmer'];
-    const selectedRole: UserRole = input.role ?? 'buyer';
 
-    if (!allowedRoles.includes(selectedRole)) {
+    const allowedRoles: UserRole[] = ['buyer'];
+    const selectedRole: UserRole = 'buyer';
+
+    if (input.role && !allowedRoles.includes(input.role)) {
       throw new BadRequestError('Invalid role specified for self-registration');
     }
 
