@@ -10,15 +10,22 @@ export const createApp = (): Application => {
   const app = express();
 
   // Security & standard middlewares
-  app.use(helmet());
+  app.disable('x-powered-by');
+  app.use(
+    helmet({
+      contentSecurityPolicy: true,
+      crossOriginEmbedderPolicy: true,
+    })
+  );
   app.use(
     cors({
       origin: env.CORS_ORIGIN === '*' ? '*' : env.CORS_ORIGIN.split(','),
       credentials: true,
     })
   );
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+  app.use(express.json({ limit: '100kb' }));
+  app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 
   // Root redirect/health
   app.get('/', (_req, res) => {

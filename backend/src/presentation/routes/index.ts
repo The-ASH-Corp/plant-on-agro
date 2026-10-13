@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { authRoutes } from './auth.routes';
 import { userRoutes } from './user.routes';
 import { ApiResponse } from '../../shared/utils/api-response';
 
@@ -18,6 +19,7 @@ apiRouter.get('/health', (_req, res) => {
 });
 
 // Resource routes
+apiRouter.use('/auth', authRoutes);
 apiRouter.use('/users', userRoutes);
 
 export const routes = apiRouter;
