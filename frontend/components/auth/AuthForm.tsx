@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
 
 export type AuthMode = "login" | "register" | "forgot-password";
@@ -18,6 +19,7 @@ interface AuthFormProps {
 }
 
 export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -141,12 +143,23 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
         password,
       });
 
-      if (result.success && onSubmit) {
-        onSubmit({
-          mode,
-          email,
-          password,
-        });
+      if (result.success && result.data) {
+        if (result.data.role === "admin") {
+          router.replace("/admin");
+          return;
+        }
+
+        // Buyer logs in: keep on the landing page in logged-in mode
+        if (onSubmit) {
+          onSubmit({
+            mode,
+            name: result.data.name,
+            email,
+            password,
+          });
+        } else {
+          router.push("/");
+        }
       }
     }
   };

@@ -86,6 +86,11 @@ export class User {
     this._updatedAt = new Date();
   }
 
+  public changeRole(newRole: UserRole): void {
+    this._role = newRole;
+    this._updatedAt = new Date();
+  }
+
   public deactivate(): void {
     this._isActive = false;
     this._updatedAt = new Date();

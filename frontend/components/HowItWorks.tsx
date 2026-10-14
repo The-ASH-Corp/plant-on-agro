@@ -2,24 +2,18 @@ export function HowItWorks() {
   const steps = [
     {
       num: "01",
-      icon: "🌳",
-      title: "Choose Your Tree",
-      desc: "Browse dozens of native, fruit, timber, and medicinal species. Find the tree that speaks to you.",
-    },
-    {
-      num: "02",
       icon: "📋",
       title: "Choose Your Plan",
       desc: "Individual, student, family, occasion, or corporate — every milestone deserves roots.",
     },
     {
-      num: "03",
+      num: "02",
       icon: "🤲",
       title: "We Plant It",
       desc: "Our expert plantation team handles the fieldwork at verified sites across India.",
     },
     {
-      num: "04",
+      num: "03",
       icon: "📸",
       title: "Watch It Grow",
       desc: "Track your tree with geo-tagged photos, growth milestones, and a digital certificate.",
@@ -41,10 +35,10 @@ export function HowItWorks() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative max-w-5xl mx-auto">
           {/* Connector line */}
           <div
-            className="hidden md:block absolute top-16 left-[12.5%] right-[12.5%] h-px"
+            className="hidden md:block absolute top-16 left-[16.6%] right-[16.6%] h-px"
             style={{
               background: "linear-gradient(90deg, #52b788, #95d5b2, #52b788)",
             }}

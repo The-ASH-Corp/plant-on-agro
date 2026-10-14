@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AuthVisualSide } from "./AuthVisualSide";
 import { AuthForm, AuthMode } from "./AuthForm";
 import { ForgotPasswordForm } from "./ForgotPasswordForm";
+import { useAuthStore } from "@/store/auth.store";
 
 export type AuthViewMode = AuthMode | "forgot-password";
 
@@ -26,6 +27,39 @@ export function AuthView({
   onSuccess,
 }: AuthViewProps) {
   const router = useRouter();
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    if (!hasHydrated && useAuthStore.persist?.hasHydrated?.()) {
+      useAuthStore.getState().setHasHydrated(true);
+    }
+  }, [hasHydrated]);
+
+  // Route already-logged-in users according to role
+  useEffect(() => {
+    if (!mounted) return;
+    const storeHydrated = hasHydrated || (useAuthStore.persist?.hasHydrated?.() ?? false);
+    if (!storeHydrated) return;
+
+    if (isAuthenticated && user) {
+      if (user.role === "admin") {
+        router.replace("/admin");
+      } else {
+        // Buyer is already logged in, stay on the landing page
+        if (isModal) {
+          onClose?.();
+        } else {
+          router.replace("/");
+        }
+      }
+    }
+  }, [mounted, hasHydrated, isAuthenticated, user, router, isModal, onClose]);
+
   // Normalize initialMode
   const getNormalizedMode = (): AuthViewMode => {
     if (initialMode === "register" || initialMode === "signup") return "register";
@@ -63,9 +97,14 @@ export function AuthView({
     if (onSuccess) {
       onSuccess(data);
     }
-    if (onClose) {
-      onClose();
+    const currentUser = useAuthStore.getState().user;
+    if (currentUser?.role === "admin") {
+      router.replace("/admin");
     } else {
+      // Buyer stays on landing page with login mode
+      if (onClose) {
+        onClose();
+      }
       router.push("/");
     }
   };
