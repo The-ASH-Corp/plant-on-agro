@@ -31,12 +31,34 @@ export function AuthView({
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
 
-  // If already logged in as admin, directly redirect into the admin dashboard
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
-    if (hasHydrated && isAuthenticated && user?.role === "admin") {
-      router.replace("/admin");
+    setMounted(true);
+    if (!hasHydrated && useAuthStore.persist?.hasHydrated?.()) {
+      useAuthStore.getState().setHasHydrated(true);
     }
-  }, [hasHydrated, isAuthenticated, user, router]);
+  }, [hasHydrated]);
+
+  // Route already-logged-in users according to role
+  useEffect(() => {
+    if (!mounted) return;
+    const storeHydrated = hasHydrated || (useAuthStore.persist?.hasHydrated?.() ?? false);
+    if (!storeHydrated) return;
+
+    if (isAuthenticated && user) {
+      if (user.role === "admin") {
+        router.replace("/admin");
+      } else {
+        // Buyer is already logged in, stay on the landing page
+        if (isModal) {
+          onClose?.();
+        } else {
+          router.replace("/");
+        }
+      }
+    }
+  }, [mounted, hasHydrated, isAuthenticated, user, router, isModal, onClose]);
 
   // Normalize initialMode
   const getNormalizedMode = (): AuthViewMode => {
@@ -75,15 +97,15 @@ export function AuthView({
     if (onSuccess) {
       onSuccess(data);
     }
-    if (onClose) {
-      onClose();
+    const currentUser = useAuthStore.getState().user;
+    if (currentUser?.role === "admin") {
+      router.replace("/admin");
     } else {
-      const currentUser = useAuthStore.getState().user;
-      if (currentUser?.role === "admin") {
-        router.push("/admin");
-      } else {
-        router.push("/");
+      // Buyer stays on landing page with login mode
+      if (onClose) {
+        onClose();
       }
+      router.push("/");
     }
   };
 

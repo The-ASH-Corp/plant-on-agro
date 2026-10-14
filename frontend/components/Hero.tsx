@@ -2,6 +2,8 @@
 
 import { Counter } from "@/components/ui/Counter";
 import { useScroll, useTransform, motion } from "framer-motion";
+import { useAuthStore } from "@/store/auth.store";
+import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
 
 interface HeroProps {
   openPlant: () => void;
@@ -9,6 +11,8 @@ interface HeroProps {
 }
 
 export function Hero({ openPlant, goImpact }: HeroProps) {
+  const user = useHydratedStore(useAuthStore, (s) => s.user);
+  const isAuthenticated = useHydratedStore(useAuthStore, (s) => s.isAuthenticated);
   const { scrollY } = useScroll();
 
   const bgY = useTransform(scrollY, [0, 1000], [0, 300]);
@@ -36,17 +40,35 @@ export function Hero({ openPlant, goImpact }: HeroProps) {
 
       {/* Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-6 text-center my-auto">
-        <div
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold mb-6 sm:mb-8 tracking-widest uppercase"
-          style={{
-            background: "rgba(82,183,136,0.18)",
-            color: "#95d5b2",
-            border: "1px solid rgba(82,183,136,0.3)",
-            backdropFilter: "blur(8px)",
-          }}
-        >
-          🌱 You Plant. We Grow.
-        </div>
+        {isAuthenticated && user ? (
+          <div
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold mb-6 sm:mb-8"
+            style={{
+              background: "rgba(82,183,136,0.22)",
+              color: "#95d5b2",
+              border: "1px solid rgba(82,183,136,0.45)",
+              backdropFilter: "blur(10px)",
+            }}
+          >
+            <span className="w-2 h-2 rounded-full bg-[#52b788] animate-pulse"></span>
+            <span>Welcome, {user.name}!</span>
+            <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/25 text-emerald-200 border border-emerald-400/40">
+              {user.role === "admin" ? "Admin Mode" : "Buyer Mode • Logged In"}
+            </span>
+          </div>
+        ) : (
+          <div
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold mb-6 sm:mb-8 tracking-widest uppercase"
+            style={{
+              background: "rgba(82,183,136,0.18)",
+              color: "#95d5b2",
+              border: "1px solid rgba(82,183,136,0.3)",
+              backdropFilter: "blur(8px)",
+            }}
+          >
+            🌱 You Plant. We Grow.
+          </div>
+        )}
 
         <h1
           style={{ fontFamily: "var(--font-display)", lineHeight: 1.1 }}

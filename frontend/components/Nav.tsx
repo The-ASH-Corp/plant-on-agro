@@ -130,9 +130,13 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
               <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-white text-xs font-medium border border-white/15">
                 <span className="w-2 h-2 rounded-full bg-[#52b788] animate-pulse"></span>
                 <span className="truncate max-w-[130px] font-semibold">{user.name}</span>
-                {user.role === "admin" && (
+                {user.role === "admin" ? (
                   <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider bg-amber-500/25 text-amber-300 border border-amber-400/30">
                     Admin
+                  </span>
+                ) : (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider bg-emerald-500/25 text-emerald-300 border border-emerald-400/30">
+                    Planter
                   </span>
                 )}
               </div>

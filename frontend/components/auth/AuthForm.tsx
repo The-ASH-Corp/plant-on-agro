@@ -143,18 +143,22 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
         password,
       });
 
-      if (result.success) {
-        if (result.data?.role === "admin") {
-          router.push("/admin");
+      if (result.success && result.data) {
+        if (result.data.role === "admin") {
+          router.replace("/admin");
           return;
         }
 
+        // Buyer logs in: keep on the landing page in logged-in mode
         if (onSubmit) {
           onSubmit({
             mode,
+            name: result.data.name,
             email,
             password,
           });
+        } else {
+          router.push("/");
         }
       }
     }
