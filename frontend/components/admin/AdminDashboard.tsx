@@ -481,7 +481,6 @@ export function AdminDashboard() {
           activeTab={activeTab}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          onOpenAddTree={() => setShowAddTreeModal(true)}
         />
 
         {/* Global Toast Alert */}

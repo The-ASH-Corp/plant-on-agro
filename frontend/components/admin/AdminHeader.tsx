@@ -1,8 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import Logo from "../../public/Screenshot_From_2026-09-17_15-39-39-removebg-preview.png";
 import { AdminTabType } from "./types";
 
 interface AdminHeaderProps {
@@ -10,16 +7,15 @@ interface AdminHeaderProps {
   activeTab: AdminTabType;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  onOpenAddTree: () => void;
 }
 
-const TAB_META: Record<AdminTabType, { label: string; icon: string }> = {
-  overview: { label: "Overview", icon: "📊" },
-  trees: { label: "Tree Varieties", icon: "🌳" },
-  plans: { label: "Adoption Plans", icon: "🌱" },
-  instances: { label: "Tree Instances", icon: "🏷️" },
-  locations: { label: "Reserves & GPS", icon: "📍" },
-  orders: { label: "Adoption Orders", icon: "📦" },
+const TAB_META: Record<AdminTabType, { label: string }> = {
+  overview: { label: "Overview" },
+  trees: { label: "Tree Varieties" },
+  plans: { label: "Adoption Plans" },
+  instances: { label: "Tree Instances" },
+  locations: { label: "Reserves & GPS" },
+  orders: { label: "Adoption Orders" },
 };
 
 export function AdminHeader({
@@ -27,7 +23,6 @@ export function AdminHeader({
   activeTab,
   searchQuery,
   setSearchQuery,
-  onOpenAddTree,
 }: AdminHeaderProps) {
   const currentTab = TAB_META[activeTab];
 
@@ -42,25 +37,8 @@ export function AdminHeader({
           ☰
         </button>
 
-        {/* Landing page logo icon in dashboard navbar */}
-        <Link
-          href="/"
-          className="flex items-center gap-2 group px-2.5 py-1 rounded-xl bg-[#173324] hover:bg-[#1b432e] border border-[#2d6a4f]/40 shadow-xs transition-all"
-          title="Return to PlantOn Agro Landing Page"
-        >
-          <Image
-            src={Logo}
-            alt="PlantOn Agro Logo"
-            width={140}
-            height={45}
-            priority
-            className="w-auto h-7 sm:h-8 object-contain"
-          />
-        </Link>
-        <span className="text-[#cbd5ce] hidden sm:inline">/</span>
-        <span className="font-bold text-[#173324] capitalize flex items-center gap-1.5 text-xs sm:text-sm">
-          <span>{currentTab.icon}</span>
-          <span>{currentTab.label}</span>
+        <span className="font-bold text-[#173324] capitalize text-sm sm:text-base">
+          {currentTab.label}
         </span>
       </div>
 
@@ -83,25 +61,6 @@ export function AdminHeader({
               ✕
             </button>
           )}
-        </div>
-
-        {/* Quick Action Buttons */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onOpenAddTree}
-            className="flex items-center gap-1.5 bg-[#173324] hover:bg-[#1f4230] text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-xs transition-all cursor-pointer"
-          >
-            <span>+</span>
-            <span className="hidden sm:inline">New Species</span>
-          </button>
-
-          <Link
-            href="/"
-            className="hidden sm:flex items-center gap-1 text-xs font-medium text-[#1b7a43] bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-xl transition-colors"
-          >
-            <span>🏪</span>
-            <span>Live Storefront</span>
-          </Link>
         </div>
       </div>
     </header>
