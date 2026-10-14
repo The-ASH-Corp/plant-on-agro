@@ -118,6 +118,15 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
         <div className="hidden md:flex items-center gap-3">
           {isAuthenticated && user ? (
             <div className="flex items-center gap-2.5">
+              {user.role === "admin" && (
+                <Link
+                  href="/admin"
+                  className="text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 hover:bg-emerald-500/30 transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>📊</span>
+                  <span>Dashboard</span>
+                </Link>
+              )}
               <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-white text-xs font-medium border border-white/15">
                 <span className="w-2 h-2 rounded-full bg-[#52b788] animate-pulse"></span>
                 <span className="truncate max-w-[130px] font-semibold">{user.name}</span>
@@ -202,25 +211,37 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
               </div>
             ))}
             {isAuthenticated && user ? (
-              <div className="py-2.5 px-1 flex items-center justify-between border-t border-white/10">
-                <div className="flex items-center gap-2 text-white text-sm">
-                  <span className="w-2 h-2 rounded-full bg-[#52b788]"></span>
-                  <span className="font-semibold">{user.name}</span>
-                  {user.role === "admin" && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider bg-amber-500/25 text-amber-300 border border-amber-400/30">
-                      Admin
-                    </span>
-                  )}
+              <div className="py-2.5 px-1 flex flex-col gap-2 border-t border-white/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-white text-sm">
+                    <span className="w-2 h-2 rounded-full bg-[#52b788]"></span>
+                    <span className="font-semibold">{user.name}</span>
+                    {user.role === "admin" && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider bg-amber-500/25 text-amber-300 border border-amber-400/30">
+                        Admin
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setMenuOpen(false);
+                    }}
+                    className="text-xs text-red-300 hover:text-red-200 font-medium cursor-pointer"
+                  >
+                    Sign Out
+                  </button>
                 </div>
-                <button
-                  onClick={() => {
-                    logout();
-                    setMenuOpen(false);
-                  }}
-                  className="text-xs text-red-300 hover:text-red-200 font-medium cursor-pointer"
-                >
-                  Sign Out
-                </button>
+                {user.role === "admin" && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-xs font-semibold px-3 py-2 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-2"
+                  >
+                    <span>📊</span>
+                    <span>Admin Dashboard</span>
+                  </Link>
+                )}
               </div>
             ) : (
               <Link

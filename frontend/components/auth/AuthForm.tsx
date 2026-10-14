@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
 
 export type AuthMode = "login" | "register" | "forgot-password";
@@ -18,6 +19,7 @@ interface AuthFormProps {
 }
 
 export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -141,12 +143,19 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
         password,
       });
 
-      if (result.success && onSubmit) {
-        onSubmit({
-          mode,
-          email,
-          password,
-        });
+      if (result.success) {
+        if (result.data?.role === "admin") {
+          router.push("/admin");
+          return;
+        }
+
+        if (onSubmit) {
+          onSubmit({
+            mode,
+            email,
+            password,
+          });
+        }
       }
     }
   };

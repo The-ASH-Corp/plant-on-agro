@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AuthVisualSide } from "./AuthVisualSide";
 import { AuthForm, AuthMode } from "./AuthForm";
 import { ForgotPasswordForm } from "./ForgotPasswordForm";
+import { useAuthStore } from "@/store/auth.store";
 
 export type AuthViewMode = AuthMode | "forgot-password";
 
@@ -26,6 +27,17 @@ export function AuthView({
   onSuccess,
 }: AuthViewProps) {
   const router = useRouter();
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+
+  // If already logged in as admin, directly redirect into the admin dashboard
+  useEffect(() => {
+    if (hasHydrated && isAuthenticated && user?.role === "admin") {
+      router.replace("/admin");
+    }
+  }, [hasHydrated, isAuthenticated, user, router]);
+
   // Normalize initialMode
   const getNormalizedMode = (): AuthViewMode => {
     if (initialMode === "register" || initialMode === "signup") return "register";
@@ -66,7 +78,12 @@ export function AuthView({
     if (onClose) {
       onClose();
     } else {
-      router.push("/");
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser?.role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/");
+      }
     }
   };
 

@@ -36,7 +36,7 @@ export class MongoUserRepository implements IUserRepository {
       throw new Error('Cannot update user without an ID');
     }
     const persistenceData = UserMapper.toPersistence(user);
-    const doc = await UserModel.findByIdAndUpdate(user.id, persistenceData, { new: true }).exec();
+    const doc = await UserModel.findByIdAndUpdate(user.id, persistenceData, { returnDocument: 'after' }).exec();
     if (!doc) {
       throw new Error(`User with ID ${user.id} not found`);
     }
