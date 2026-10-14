@@ -20,6 +20,7 @@ interface AdminSidebarProps {
   setActiveTab: (tab: AdminTabType) => void;
   treesCount: number;
   plansCount: number;
+  instancesCount?: number;
   locationsCount: number;
   ordersCount: number;
   userName?: string;
@@ -27,6 +28,7 @@ interface AdminSidebarProps {
   onOpenAddTree: () => void;
   onOpenAddPlan: () => void;
   onOpenAddLocation: () => void;
+  onOpenAddInstance?: () => void;
 }
 
 export function AdminSidebar({
@@ -36,6 +38,7 @@ export function AdminSidebar({
   setActiveTab,
   treesCount,
   plansCount,
+  instancesCount = 0,
   locationsCount,
   ordersCount,
   userName = "Admin User",
@@ -43,11 +46,13 @@ export function AdminSidebar({
   onOpenAddTree,
   onOpenAddPlan,
   onOpenAddLocation,
+  onOpenAddInstance,
 }: AdminSidebarProps) {
   const navItems: NavItemDef[] = [
     { id: "overview", label: "Overview", icon: "📊", badge: "Live" },
     { id: "trees", label: "Tree Varieties", icon: "🌳", count: treesCount },
     { id: "plans", label: "Adoption Plans", icon: "🌱", count: plansCount },
+    { id: "instances", label: "Tree Instances", icon: "🏷️", count: instancesCount },
     { id: "locations", label: "Reserves & GPS", icon: "📍", count: locationsCount },
     { id: "orders", label: "Adoption Orders", icon: "📦", count: ordersCount },
   ];
@@ -155,6 +160,14 @@ export function AdminSidebar({
                 >
                   <span className="text-emerald-400">+</span> Geotag Reserve
                 </button>
+                {onOpenAddInstance && (
+                  <button
+                    onClick={onOpenAddInstance}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
+                  >
+                    <span className="text-emerald-400">+</span> Tag & Plant Sapling
+                  </button>
+                )}
               </div>
             </div>
           </div>

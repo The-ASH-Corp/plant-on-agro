@@ -1,6 +1,7 @@
 import { MongoUserRepository } from '../repositories/mongo-user.repository';
 import { MongoTreeVarietyRepository } from '../repositories/mongo-tree-variety.repository';
 import { MongoAdoptionPlanRepository } from '../repositories/mongo-adoption-plan.repository';
+import { MongoTreeInstanceRepository } from '../repositories/mongo-tree-instance.repository';
 import { Argon2PasswordHasher } from '../services/argon2-password-hasher.service';
 
 import { CreateUserUseCase } from '../../application/use-cases/create-user.use-case';
@@ -20,10 +21,18 @@ import { GetAdoptionPlanByIdUseCase } from '../../application/use-cases/adoption
 import { UpdateAdoptionPlanUseCase } from '../../application/use-cases/adoption-plans/update-adoption-plan.use-case';
 import { DeleteAdoptionPlanUseCase } from '../../application/use-cases/adoption-plans/delete-adoption-plan.use-case';
 
+import { CreateTreeInstanceUseCase } from '../../application/use-cases/tree-instances/create-tree-instance.use-case';
+import { GetTreeInstancesUseCase } from '../../application/use-cases/tree-instances/get-tree-instances.use-case';
+import { GetTreeInstanceByIdUseCase } from '../../application/use-cases/tree-instances/get-tree-instance-by-id.use-case';
+import { GetTreeInstanceByTagUseCase } from '../../application/use-cases/tree-instances/get-tree-instance-by-tag.use-case';
+import { UpdateTreeInstanceUseCase } from '../../application/use-cases/tree-instances/update-tree-instance.use-case';
+import { DeleteTreeInstanceUseCase } from '../../application/use-cases/tree-instances/delete-tree-instance.use-case';
+
 import { UserController } from '../../presentation/controllers/user.controller';
 import { AuthController } from '../../presentation/controllers/auth.controller';
 import { TreeVarietyController } from '../../presentation/controllers/tree-variety.controller';
 import { AdoptionPlanController } from '../../presentation/controllers/adoption-plan.controller';
+import { TreeInstanceController } from '../../presentation/controllers/tree-instance.controller';
 
 export class Container {
   // Services & Adapters
@@ -33,6 +42,7 @@ export class Container {
   public static readonly userRepository = new MongoUserRepository();
   public static readonly treeVarietyRepository = new MongoTreeVarietyRepository();
   public static readonly adoptionPlanRepository = new MongoAdoptionPlanRepository();
+  public static readonly treeInstanceRepository = new MongoTreeInstanceRepository();
 
   // User Use Cases
   private static readonly registerUserUseCase = new RegisterUserUseCase(
@@ -81,6 +91,26 @@ export class Container {
     Container.adoptionPlanRepository
   );
 
+  // Tree Instance Use Cases
+  private static readonly createTreeInstanceUseCase = new CreateTreeInstanceUseCase(
+    Container.treeInstanceRepository
+  );
+  private static readonly getTreeInstancesUseCase = new GetTreeInstancesUseCase(
+    Container.treeInstanceRepository
+  );
+  private static readonly getTreeInstanceByIdUseCase = new GetTreeInstanceByIdUseCase(
+    Container.treeInstanceRepository
+  );
+  private static readonly getTreeInstanceByTagUseCase = new GetTreeInstanceByTagUseCase(
+    Container.treeInstanceRepository
+  );
+  private static readonly updateTreeInstanceUseCase = new UpdateTreeInstanceUseCase(
+    Container.treeInstanceRepository
+  );
+  private static readonly deleteTreeInstanceUseCase = new DeleteTreeInstanceUseCase(
+    Container.treeInstanceRepository
+  );
+
   // Controllers
   public static readonly authController = new AuthController(
     Container.registerUserUseCase,
@@ -106,5 +136,14 @@ export class Container {
     Container.getAdoptionPlanByIdUseCase,
     Container.updateAdoptionPlanUseCase,
     Container.deleteAdoptionPlanUseCase
+  );
+
+  public static readonly treeInstanceController = new TreeInstanceController(
+    Container.createTreeInstanceUseCase,
+    Container.getTreeInstancesUseCase,
+    Container.getTreeInstanceByIdUseCase,
+    Container.getTreeInstanceByTagUseCase,
+    Container.updateTreeInstanceUseCase,
+    Container.deleteTreeInstanceUseCase
   );
 }

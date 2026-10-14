@@ -29,24 +29,28 @@ import { AdminToast } from "./AdminToast";
 import { OverviewTab } from "./tabs/OverviewTab";
 import { TreesTab } from "./tabs/TreesTab";
 import { PlansTab } from "./tabs/PlansTab";
+import { TreeInstancesTab } from "./tabs/TreeInstancesTab";
 import { LocationsTab } from "./tabs/LocationsTab";
 import { OrdersTab } from "./tabs/OrdersTab";
 
 // Modal Components
 import { AddTreeModal } from "./modals/AddTreeModal";
 import { AddPlanModal } from "./modals/AddPlanModal";
+import { AddTreeInstanceModal } from "./modals/AddTreeInstanceModal";
 import { AddLocationModal } from "./modals/AddLocationModal";
 import { OrderDetailsModal } from "./modals/OrderDetailsModal";
 
 import { treeVarietyService } from "@/services/tree-varieties/tree-variety.service";
 import { adoptionPlanService } from "@/services/adoption-plans/adoption-plan.service";
-import { OccasionDedicationType } from "./types";
+import { treeInstanceService } from "@/services/tree-instances/tree-instance.service";
+import { OccasionDedicationType, TreeInstanceItem, TreeHealthStatus } from "./types";
 
 // Re-export types for backward compatibility
 export type {
   AdminTabType,
   TreeVarietyItem,
   AdoptionPlanItem,
+  TreeInstanceItem,
   PlantationLocationItem,
   AdoptionOrder,
 };
@@ -60,21 +64,24 @@ export function AdminDashboard() {
   // Dynamic Lists State
   const [trees, setTrees] = useState<TreeVarietyItem[]>([]);
   const [plans, setPlans] = useState<AdoptionPlanItem[]>([]);
+  const [instances, setInstances] = useState<TreeInstanceItem[]>([]);
   const [locations, setLocations] = useState<PlantationLocationItem[]>(INITIAL_LOCATIONS);
   const [orders] = useState<AdoptionOrder[]>(INITIAL_ORDERS);
 
-  // Load real tree varieties and adoption plans from backend API on mount
+  // Load real tree varieties, adoption plans, and tree instances from backend API on mount
   useEffect(() => {
     let isMounted = true;
     async function loadCatalog() {
       try {
-        const [treesRes, plansRes] = await Promise.all([
+        const [treesRes, plansRes, instancesRes] = await Promise.all([
           treeVarietyService.getAll(),
           adoptionPlanService.getAll(),
+          treeInstanceService.getAll(),
         ]);
         if (isMounted) {
           setTrees(treesRes.data?.items ? treesRes.data.items.map(treeVarietyService.mapToUiItem) : []);
           setPlans(plansRes.data?.items ? plansRes.data.items.map(adoptionPlanService.mapToUiItem) : []);
+          setInstances(instancesRes.data?.items ? instancesRes.data.items.map(treeInstanceService.mapToUiItem) : []);
         }
       } catch (err) {
         console.warn("Could not load catalog from backend:", err);
@@ -89,6 +96,7 @@ export function AdminDashboard() {
   // Modals State
   const [showAddTreeModal, setShowAddTreeModal] = useState(false);
   const [showAddPlanModal, setShowAddPlanModal] = useState(false);
+  const [showAddInstanceModal, setShowAddInstanceModal] = useState(false);
   const [showAddLocationModal, setShowAddLocationModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<AdoptionOrder | null>(null);
 
@@ -321,6 +329,91 @@ export function AdminDashboard() {
     }
   };
 
+  const handleCreateInstance = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const treeTag = (fd.get("treeTag") as string).trim().toUpperCase();
+    const orderRef = (fd.get("orderRef") as string)?.trim() || "";
+    const assignedReserve = (fd.get("assignedReserve") as string).trim();
+    const latitude = Number(fd.get("latitude")) || 18.5204;
+    const longitude = Number(fd.get("longitude")) || 73.8567;
+    const datePlanted = (fd.get("datePlanted") as string) || new Date().toISOString();
+    const healthStatus = (fd.get("healthStatus") as TreeHealthStatus) || "Sapling Growing";
+    const treeVarietyName = (fd.get("treeVarietyName") as string)?.trim() || "";
+    const adopterName = (fd.get("adopterName") as string)?.trim() || "";
+    const adopterEmail = (fd.get("adopterEmail") as string)?.trim() || "";
+    const notes = (fd.get("notes") as string)?.trim() || "";
+
+    try {
+      const res = await treeInstanceService.create({
+        treeTag,
+        orderRef,
+        assignedReserve,
+        gpsCoordinates: { latitude, longitude },
+        datePlanted,
+        healthStatus,
+        treeVarietyName,
+        adopterName,
+        adopterEmail,
+        notes,
+      });
+
+      if (res.data) {
+        const uiItem = treeInstanceService.mapToUiItem(res.data);
+        setInstances((prev) => [uiItem, ...prev.filter((i) => i.id !== uiItem.id)]);
+      } else {
+        const fallback: TreeInstanceItem = {
+          id: "inst-" + Date.now(),
+          treeTag,
+          orderRef,
+          assignedReserve,
+          gpsCoordinates: { latitude, longitude },
+          formattedGps: `${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E`,
+          datePlanted,
+          healthStatus,
+          treeVarietyName,
+          adopterName,
+          adopterEmail,
+          notes,
+          isActive: true,
+        };
+        setInstances((prev) => [fallback, ...prev]);
+      }
+
+      setShowAddInstanceModal(false);
+      showToast(`Tagged and planted sapling "${treeTag}"!`);
+      setActiveTab("instances");
+    } catch (err: any) {
+      console.warn("Tree instance creation notice:", err);
+      showToast(err.message || "Failed to create tree instance");
+    }
+  };
+
+  const handleUpdateInstanceHealth = async (id: string, healthStatus: TreeHealthStatus) => {
+    try {
+      await treeInstanceService.update(id, { healthStatus });
+      setInstances((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, healthStatus } : item))
+      );
+      showToast(`Updated tree health to ${healthStatus}!`);
+    } catch (err: any) {
+      console.warn("Failed to update health status:", err);
+      showToast(err.message || "Could not update health status");
+    }
+  };
+
+  const handleDeleteInstance = async (id: string) => {
+    if (confirm("Remove this tagged tree instance?")) {
+      try {
+        await treeInstanceService.delete(id);
+      } catch (err) {
+        console.warn("Tree instance deletion notice:", err);
+      }
+      setInstances((prev) => prev.filter((i) => i.id !== id));
+      showToast("Tree instance record removed.");
+    }
+  };
+
   // Wait until client has mounted and store has rehydrated
   const isReady = mounted && (hasHydrated || (useAuthStore.persist?.hasHydrated?.() ?? false));
 
@@ -369,6 +462,7 @@ export function AdminDashboard() {
         setActiveTab={setActiveTab}
         treesCount={trees.length}
         plansCount={plans.length}
+        instancesCount={instances.length}
         locationsCount={locations.length}
         ordersCount={orders.length}
         userName={user?.name}
@@ -376,6 +470,7 @@ export function AdminDashboard() {
         onOpenAddTree={() => setShowAddTreeModal(true)}
         onOpenAddPlan={() => setShowAddPlanModal(true)}
         onOpenAddLocation={() => setShowAddLocationModal(true)}
+        onOpenAddInstance={() => setShowAddInstanceModal(true)}
       />
 
       {/* 2. Main Application Content Area */}
@@ -421,6 +516,16 @@ export function AdminDashboard() {
             />
           )}
 
+          {activeTab === "instances" && (
+            <TreeInstancesTab
+              instances={instances}
+              searchQuery={searchQuery}
+              onOpenAddInstance={() => setShowAddInstanceModal(true)}
+              onUpdateHealth={handleUpdateInstanceHealth}
+              onDeleteInstance={handleDeleteInstance}
+            />
+          )}
+
           {activeTab === "locations" && (
             <LocationsTab
               locations={locations}
@@ -451,6 +556,12 @@ export function AdminDashboard() {
         isOpen={showAddPlanModal}
         onClose={() => setShowAddPlanModal(false)}
         onSubmit={handleCreatePlan}
+      />
+
+      <AddTreeInstanceModal
+        isOpen={showAddInstanceModal}
+        onClose={() => setShowAddInstanceModal(false)}
+        onSubmit={handleCreateInstance}
       />
 
       <AddLocationModal

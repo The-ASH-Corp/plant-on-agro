@@ -17,6 +17,7 @@ const TAB_META: Record<AdminTabType, { label: string; icon: string }> = {
   overview: { label: "Overview", icon: "📊" },
   trees: { label: "Tree Varieties", icon: "🌳" },
   plans: { label: "Adoption Plans", icon: "🌱" },
+  instances: { label: "Tree Instances", icon: "🏷️" },
   locations: { label: "Reserves & GPS", icon: "📍" },
   orders: { label: "Adoption Orders", icon: "📦" },
 };

@@ -19,5 +19,10 @@ export const API_ENDPOINTS = {
     BASE: '/adoption-plans',
     BY_ID: (id: string) => `/adoption-plans/${id}`,
   },
+  TREE_INSTANCES: {
+    BASE: '/tree-instances',
+    BY_ID: (id: string) => `/tree-instances/${id}`,
+    BY_TAG: (tag: string) => `/tree-instances/tag/${tag}`,
+  },
   HEALTH: '/health',
 } as const;
