@@ -101,8 +101,42 @@ export function TreesTab({
         ))}
       </div>
 
-      {/* Grid View */}
-      {viewMode === "grid" ? (
+      {/* Content: Empty State or Grid / Table Views */}
+      {filteredTrees.length === 0 ? (
+        <div className="p-12 text-center bg-white rounded-3xl border border-[#e2eae5] shadow-xs space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-3xl bg-emerald-50 text-3xl flex items-center justify-center border border-emerald-100">
+            🌱
+          </div>
+          <div>
+            <h3 style={{ fontFamily: "var(--font-display)" }} className="text-xl font-bold text-[#173324]">
+              {trees.length === 0
+                ? "No tree varieties catalogued yet"
+                : "No matching tree species found"}
+            </h3>
+            <p className="text-xs text-[#73877b] max-w-md mx-auto mt-1 leading-relaxed">
+              {trees.length === 0
+                ? "All trees must be created from the admin side. Click the button below to register your first species with pricing, CO2 absorption rate, care requirements, and growth timeline."
+                : `No tree species found in category "${selectedCategory}" matching "${searchQuery}".`}
+            </p>
+          </div>
+          {trees.length === 0 ? (
+            <button
+              onClick={onOpenAddTree}
+              className="px-5 py-2.5 rounded-xl bg-[#173324] hover:bg-[#1f4230] text-white text-xs font-semibold inline-flex items-center gap-2 shadow-xs transition-all cursor-pointer"
+            >
+              <span>+</span>
+              <span>Create First Tree Variety</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setSelectedCategory("All")}
+              className="px-4 py-2 rounded-xl border border-emerald-200 text-xs font-semibold text-[#1b7a43] bg-emerald-50 hover:bg-emerald-100 transition-colors cursor-pointer"
+            >
+              Reset Category Filter
+            </button>
+          )}
+        </div>
+      ) : viewMode === "grid" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredTrees.map((tree) => (
             <div
@@ -143,6 +177,13 @@ export function TreesTab({
                       <span className="font-semibold text-[#1b7a43]">{tree.co2PerYearKg} kg/year</span>
                     </div>
                   </div>
+
+                  {tree.careRequirements && (
+                    <div className="pt-2 text-[10px] text-[#55695d] bg-[#f8faf8] p-2.5 rounded-xl border border-[#e5ebe7]">
+                      <span className="font-bold text-[#173324] uppercase tracking-wider text-[9px] block mb-0.5">Care Requirements</span>
+                      <span className="line-clamp-2">{tree.careRequirements}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 

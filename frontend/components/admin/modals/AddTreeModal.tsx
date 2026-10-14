@@ -122,6 +122,18 @@ export function AddTreeModal({ isOpen, onClose, onSubmit }: AddTreeModalProps) {
           </div>
 
           <div>
+            <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">Care Requirements</label>
+            <input
+              name="careRequirements"
+              type="text"
+              required
+              defaultValue="Weekly watering in early stages, adequate sunlight, organic soil"
+              placeholder="e.g. Weekly irrigation, full sunlight, organic fertilizer"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7]"
+            />
+          </div>
+
+          <div>
             <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">Description</label>
             <textarea
               name="desc"

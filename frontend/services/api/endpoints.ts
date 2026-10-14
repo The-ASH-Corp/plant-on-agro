@@ -11,5 +11,9 @@ export const API_ENDPOINTS = {
     BASE: '/users',
     BY_ID: (id: string) => `/users/${id}`,
   },
+  TREE_VARIETIES: {
+    BASE: '/tree-varieties',
+    BY_ID: (id: string) => `/tree-varieties/${id}`,
+  },
   HEALTH: '/health',
 } as const;

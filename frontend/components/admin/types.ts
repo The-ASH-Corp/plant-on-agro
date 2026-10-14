@@ -4,13 +4,21 @@ export interface TreeVarietyItem {
   id: string;
   name: string;
   sci: string;
+  commonName?: string;
+  scientificName?: string;
   category: "Fruit Trees" | "Timber Trees" | "Medicinal" | "Native Trees" | "Shade Trees" | "Occasion";
   price: number;
   location: string;
   growth: string;
+  growthTimeline?: string;
   img: string;
+  coverImages?: string[];
   desc: string;
+  description?: string;
   co2PerYearKg: number;
+  co2AbsorptionRateKgYear?: number;
+  careRequirements?: string;
+  isActive?: boolean;
 }
 
 export interface AdoptionPlanItem {

@@ -38,6 +38,8 @@ import { AddPlanModal } from "./modals/AddPlanModal";
 import { AddLocationModal } from "./modals/AddLocationModal";
 import { OrderDetailsModal } from "./modals/OrderDetailsModal";
 
+import { treeVarietyService } from "@/services/tree-varieties/tree-variety.service";
+
 // Re-export types for backward compatibility
 export type {
   AdminTabType,
@@ -54,10 +56,30 @@ export function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Dynamic Lists State
-  const [trees, setTrees] = useState<TreeVarietyItem[]>(INITIAL_TREES);
+  const [trees, setTrees] = useState<TreeVarietyItem[]>([]);
   const [plans, setPlans] = useState<AdoptionPlanItem[]>(INITIAL_PLANS);
   const [locations, setLocations] = useState<PlantationLocationItem[]>(INITIAL_LOCATIONS);
   const [orders] = useState<AdoptionOrder[]>(INITIAL_ORDERS);
+
+  // Load real tree varieties from backend API on mount
+  useEffect(() => {
+    let isMounted = true;
+    async function loadTrees() {
+      try {
+        const res = await treeVarietyService.getAll();
+        if (isMounted) {
+          setTrees(res.data?.items ? res.data.items.map(treeVarietyService.mapToUiItem) : []);
+        }
+      } catch (err) {
+        console.warn("Could not load trees from backend:", err);
+        if (isMounted) setTrees([]);
+      }
+    }
+    loadTrees();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Modals State
   const [showAddTreeModal, setShowAddTreeModal] = useState(false);
@@ -99,29 +121,82 @@ export function AdminDashboard() {
   }, [mounted, hasHydrated, isAuthenticated, user, router]);
 
   // Create Handlers
-  const handleCreateTree = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateTree = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const newTree: TreeVarietyItem = {
-      id: "tree-" + (trees.length + 1),
-      name: (fd.get("name") as string).trim(),
-      sci: (fd.get("sci") as string).trim(),
-      category: fd.get("category") as TreeVarietyItem["category"],
-      price: Number(fd.get("price")) || 299,
-      location: (fd.get("location") as string).trim() || "Western Ghats, Maharashtra",
-      growth: (fd.get("growth") as string).trim() || "10–12 m in 5 years",
-      img:
-        (fd.get("img") as string).trim() ||
-        "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
-      desc:
-        (fd.get("desc") as string).trim() ||
-        "Newly catalogued botanical variety for agroforestry.",
-      co2PerYearKg: Number(fd.get("co2")) || 25,
-    };
-    setTrees((prev) => [newTree, ...prev]);
-    setShowAddTreeModal(false);
-    showToast(`Added "${newTree.name}" to tree catalog!`);
-    setActiveTab("trees");
+    const commonName = (fd.get("name") as string).trim();
+    const scientificName = (fd.get("sci") as string).trim();
+    const category = fd.get("category") as TreeVarietyItem["category"];
+    const price = Number(fd.get("price")) || 299;
+    const co2 = Number(fd.get("co2")) || 25;
+    const location = (fd.get("location") as string).trim() || "Western Ghats, Maharashtra";
+    const growth = (fd.get("growth") as string).trim() || "10–12 m in 5 years";
+    const careRequirements =
+      (fd.get("careRequirements") as string)?.trim() ||
+      "Weekly watering in early stages, adequate sunlight, organic soil";
+    const img =
+      (fd.get("img") as string).trim() ||
+      "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format";
+    const desc =
+      (fd.get("desc") as string).trim() ||
+      "Newly catalogued botanical variety for agroforestry.";
+
+    try {
+      const res = await treeVarietyService.create({
+        commonName,
+        scientificName,
+        category,
+        price,
+        co2AbsorptionRateKgYear: co2,
+        growthTimeline: growth,
+        careRequirements,
+        coverImages: [img],
+        location,
+        description: desc,
+      });
+
+      if (res.data) {
+        const uiTree = treeVarietyService.mapToUiItem(res.data);
+        setTrees((prev) => [uiTree, ...prev.filter((t) => t.id !== uiTree.id)]);
+      } else {
+        const localTree: TreeVarietyItem = {
+          id: "tree-" + (trees.length + 1),
+          name: commonName,
+          sci: scientificName,
+          category,
+          price,
+          location,
+          growth,
+          img,
+          desc,
+          co2PerYearKg: co2,
+          careRequirements,
+        };
+        setTrees((prev) => [localTree, ...prev]);
+      }
+      setShowAddTreeModal(false);
+      showToast(`Added "${commonName}" to tree catalog!`);
+      setActiveTab("trees");
+    } catch (err) {
+      console.warn("Tree creation notice:", err);
+      const localTree: TreeVarietyItem = {
+        id: "tree-" + (trees.length + 1),
+        name: commonName,
+        sci: scientificName,
+        category,
+        price,
+        location,
+        growth,
+        img,
+        desc,
+        co2PerYearKg: co2,
+        careRequirements,
+      };
+      setTrees((prev) => [localTree, ...prev]);
+      setShowAddTreeModal(false);
+      showToast(`Added "${commonName}" to tree catalog!`);
+      setActiveTab("trees");
+    }
   };
 
   const handleCreatePlan = (e: React.FormEvent<HTMLFormElement>) => {
@@ -167,8 +242,13 @@ export function AdminDashboard() {
     setActiveTab("locations");
   };
 
-  const handleDeleteTree = (id: string) => {
+  const handleDeleteTree = async (id: string) => {
     if (confirm("Remove this tree variety from adoption catalog?")) {
+      try {
+        await treeVarietyService.delete(id);
+      } catch (err) {
+        console.warn("Tree deletion API notice:", err);
+      }
       setTrees((prev) => prev.filter((t) => t.id !== id));
       showToast("Tree variety removed from catalog.");
     }

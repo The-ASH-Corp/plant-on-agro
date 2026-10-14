@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authRoutes } from './auth.routes';
 import { userRoutes } from './user.routes';
+import { treeVarietyRoutes } from './tree-variety.routes';
 import { ApiResponse } from '../../shared/utils/api-response';
 
 const apiRouter = Router();
@@ -21,5 +22,6 @@ apiRouter.get('/health', (_req, res) => {
 // Resource routes
 apiRouter.use('/auth', authRoutes);
 apiRouter.use('/users', userRoutes);
+apiRouter.use('/tree-varieties', treeVarietyRoutes);
 
 export const routes = apiRouter;
