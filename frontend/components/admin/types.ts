@@ -21,14 +21,27 @@ export interface TreeVarietyItem {
   isActive?: boolean;
 }
 
+export type OccasionDedicationType =
+  | 'birthday'
+  | 'memorial'
+  | 'anniversary'
+  | 'corporate'
+  | 'general';
+
 export interface AdoptionPlanItem {
   id: string;
   label: string;
+  planLabel?: string;
   icon: string;
   desc: string;
+  description?: string;
   price: number;
+  priceModifier?: number;
+  features?: string[];
+  occasionDedications?: OccasionDedicationType[];
   badge: string;
   activeCount: number;
+  isActive?: boolean;
 }
 
 export interface PlantationLocationItem {

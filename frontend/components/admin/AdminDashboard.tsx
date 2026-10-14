@@ -39,6 +39,8 @@ import { AddLocationModal } from "./modals/AddLocationModal";
 import { OrderDetailsModal } from "./modals/OrderDetailsModal";
 
 import { treeVarietyService } from "@/services/tree-varieties/tree-variety.service";
+import { adoptionPlanService } from "@/services/adoption-plans/adoption-plan.service";
+import { OccasionDedicationType } from "./types";
 
 // Re-export types for backward compatibility
 export type {
@@ -57,25 +59,28 @@ export function AdminDashboard() {
 
   // Dynamic Lists State
   const [trees, setTrees] = useState<TreeVarietyItem[]>([]);
-  const [plans, setPlans] = useState<AdoptionPlanItem[]>(INITIAL_PLANS);
+  const [plans, setPlans] = useState<AdoptionPlanItem[]>([]);
   const [locations, setLocations] = useState<PlantationLocationItem[]>(INITIAL_LOCATIONS);
   const [orders] = useState<AdoptionOrder[]>(INITIAL_ORDERS);
 
-  // Load real tree varieties from backend API on mount
+  // Load real tree varieties and adoption plans from backend API on mount
   useEffect(() => {
     let isMounted = true;
-    async function loadTrees() {
+    async function loadCatalog() {
       try {
-        const res = await treeVarietyService.getAll();
+        const [treesRes, plansRes] = await Promise.all([
+          treeVarietyService.getAll(),
+          adoptionPlanService.getAll(),
+        ]);
         if (isMounted) {
-          setTrees(res.data?.items ? res.data.items.map(treeVarietyService.mapToUiItem) : []);
+          setTrees(treesRes.data?.items ? treesRes.data.items.map(treeVarietyService.mapToUiItem) : []);
+          setPlans(plansRes.data?.items ? plansRes.data.items.map(adoptionPlanService.mapToUiItem) : []);
         }
       } catch (err) {
-        console.warn("Could not load trees from backend:", err);
-        if (isMounted) setTrees([]);
+        console.warn("Could not load catalog from backend:", err);
       }
     }
-    loadTrees();
+    loadCatalog();
     return () => {
       isMounted = false;
     };
@@ -199,22 +204,72 @@ export function AdminDashboard() {
     }
   };
 
-  const handleCreatePlan = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreatePlan = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const newPlan: AdoptionPlanItem = {
-      id: "plan-" + (plans.length + 1),
-      label: (fd.get("label") as string).trim(),
-      icon: (fd.get("icon") as string).trim() || "🌱",
-      desc: (fd.get("desc") as string).trim(),
-      price: Number(fd.get("price")) || 0,
-      badge: (fd.get("badge") as string).trim() || "New Tier",
-      activeCount: 0,
-    };
-    setPlans((prev) => [...prev, newPlan]);
-    setShowAddPlanModal(false);
-    showToast(`Added plan "${newPlan.label}"!`);
-    setActiveTab("plans");
+    const planLabel = (fd.get("label") as string).trim();
+    const icon = (fd.get("icon") as string).trim() || "🌱";
+    const priceModifier = Number(fd.get("price")) || 0;
+    const badge = (fd.get("badge") as string).trim() || "Standard";
+    const description = (fd.get("desc") as string).trim();
+
+    // Parse features
+    const rawFeatures = (fd.get("features") as string) || "";
+    const features = rawFeatures
+      .split(/[\n,]+/)
+      .map((f) => f.trim())
+      .filter((f) => f.length > 0);
+
+    // Parse occasion dedications
+    let occasionDedications: OccasionDedicationType[] = ["general"];
+    try {
+      const rawOccasions = fd.get("occasionDedications") as string;
+      if (rawOccasions) {
+        occasionDedications = JSON.parse(rawOccasions);
+      }
+    } catch {
+      occasionDedications = ["general"];
+    }
+
+    try {
+      const res = await adoptionPlanService.create({
+        planLabel,
+        icon,
+        priceModifier,
+        badge,
+        description,
+        features,
+        occasionDedications,
+      });
+
+      if (res.data) {
+        const uiPlan = adoptionPlanService.mapToUiItem(res.data);
+        setPlans((prev) => [uiPlan, ...prev.filter((p) => p.id !== uiPlan.id)]);
+      } else {
+        const fallbackPlan: AdoptionPlanItem = {
+          id: "plan-" + Date.now(),
+          label: planLabel,
+          planLabel,
+          icon,
+          desc: description,
+          description,
+          price: priceModifier,
+          priceModifier,
+          features,
+          occasionDedications,
+          badge,
+          activeCount: 0,
+        };
+        setPlans((prev) => [fallbackPlan, ...prev]);
+      }
+
+      setShowAddPlanModal(false);
+      showToast(`Added adoption plan "${planLabel}"!`);
+      setActiveTab("plans");
+    } catch (err: any) {
+      console.warn("Plan creation notice:", err);
+      showToast(err.message || "Failed to create adoption plan");
+    }
   };
 
   const handleCreateLocation = (e: React.FormEvent<HTMLFormElement>) => {
@@ -251,6 +306,18 @@ export function AdminDashboard() {
       }
       setTrees((prev) => prev.filter((t) => t.id !== id));
       showToast("Tree variety removed from catalog.");
+    }
+  };
+
+  const handleDeletePlan = async (id: string) => {
+    if (confirm("Remove this adoption plan?")) {
+      try {
+        await adoptionPlanService.delete(id);
+      } catch (err) {
+        console.warn("Adoption plan deletion API notice:", err);
+      }
+      setPlans((prev) => prev.filter((p) => p.id !== id));
+      showToast("Adoption plan removed.");
     }
   };
 
@@ -350,6 +417,7 @@ export function AdminDashboard() {
               plans={plans}
               searchQuery={searchQuery}
               onOpenAddPlan={() => setShowAddPlanModal(true)}
+              onDeletePlan={handleDeletePlan}
             />
           )}
 

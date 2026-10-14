@@ -1,5 +1,6 @@
 import { MongoUserRepository } from '../repositories/mongo-user.repository';
 import { MongoTreeVarietyRepository } from '../repositories/mongo-tree-variety.repository';
+import { MongoAdoptionPlanRepository } from '../repositories/mongo-adoption-plan.repository';
 import { Argon2PasswordHasher } from '../services/argon2-password-hasher.service';
 
 import { CreateUserUseCase } from '../../application/use-cases/create-user.use-case';
@@ -13,9 +14,16 @@ import { GetTreeVarietyByIdUseCase } from '../../application/use-cases/tree-vari
 import { UpdateTreeVarietyUseCase } from '../../application/use-cases/tree-varieties/update-tree-variety.use-case';
 import { DeleteTreeVarietyUseCase } from '../../application/use-cases/tree-varieties/delete-tree-variety.use-case';
 
+import { CreateAdoptionPlanUseCase } from '../../application/use-cases/adoption-plans/create-adoption-plan.use-case';
+import { GetAdoptionPlansUseCase } from '../../application/use-cases/adoption-plans/get-adoption-plans.use-case';
+import { GetAdoptionPlanByIdUseCase } from '../../application/use-cases/adoption-plans/get-adoption-plan-by-id.use-case';
+import { UpdateAdoptionPlanUseCase } from '../../application/use-cases/adoption-plans/update-adoption-plan.use-case';
+import { DeleteAdoptionPlanUseCase } from '../../application/use-cases/adoption-plans/delete-adoption-plan.use-case';
+
 import { UserController } from '../../presentation/controllers/user.controller';
 import { AuthController } from '../../presentation/controllers/auth.controller';
 import { TreeVarietyController } from '../../presentation/controllers/tree-variety.controller';
+import { AdoptionPlanController } from '../../presentation/controllers/adoption-plan.controller';
 
 export class Container {
   // Services & Adapters
@@ -24,6 +32,7 @@ export class Container {
   // Repositories
   public static readonly userRepository = new MongoUserRepository();
   public static readonly treeVarietyRepository = new MongoTreeVarietyRepository();
+  public static readonly adoptionPlanRepository = new MongoAdoptionPlanRepository();
 
   // User Use Cases
   private static readonly registerUserUseCase = new RegisterUserUseCase(
@@ -55,6 +64,23 @@ export class Container {
     Container.treeVarietyRepository
   );
 
+  // Adoption Plan Use Cases
+  private static readonly createAdoptionPlanUseCase = new CreateAdoptionPlanUseCase(
+    Container.adoptionPlanRepository
+  );
+  private static readonly getAdoptionPlansUseCase = new GetAdoptionPlansUseCase(
+    Container.adoptionPlanRepository
+  );
+  private static readonly getAdoptionPlanByIdUseCase = new GetAdoptionPlanByIdUseCase(
+    Container.adoptionPlanRepository
+  );
+  private static readonly updateAdoptionPlanUseCase = new UpdateAdoptionPlanUseCase(
+    Container.adoptionPlanRepository
+  );
+  private static readonly deleteAdoptionPlanUseCase = new DeleteAdoptionPlanUseCase(
+    Container.adoptionPlanRepository
+  );
+
   // Controllers
   public static readonly authController = new AuthController(
     Container.registerUserUseCase,
@@ -72,5 +98,13 @@ export class Container {
     Container.getTreeVarietyByIdUseCase,
     Container.updateTreeVarietyUseCase,
     Container.deleteTreeVarietyUseCase
+  );
+
+  public static readonly adoptionPlanController = new AdoptionPlanController(
+    Container.createAdoptionPlanUseCase,
+    Container.getAdoptionPlansUseCase,
+    Container.getAdoptionPlanByIdUseCase,
+    Container.updateAdoptionPlanUseCase,
+    Container.deleteAdoptionPlanUseCase
   );
 }
