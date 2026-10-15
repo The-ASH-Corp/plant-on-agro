@@ -1,15 +1,53 @@
 "use client";
 
 import { Counter } from "@/components/ui/Counter";
+import { ImpactSectionContent } from "@/services/landing-page/landing-page.service";
 
-export function ImpactSection() {
-  const stats = [
-    { icon: "🌳", value: 25000, suffix: "+", label: "Trees Planted", color: "#52b788" },
-    { icon: "🌍", value: 312, suffix: " MT", label: "CO₂ Impact Offset", color: "#95d5b2" },
-    { icon: "🌱", value: 48, suffix: " acres", label: "Green Area Created", color: "#52b788" },
-    { icon: "👥", value: 12500, suffix: "+", label: "People Participated", color: "#95d5b2" },
-    { icon: "🏢", value: 87, suffix: "+", label: "Companies Onboard", color: "#52b788" },
-  ];
+interface ImpactSectionProps {
+  content?: ImpactSectionContent;
+}
+
+export function ImpactSection({ content }: ImpactSectionProps) {
+  const tagline = content?.tagline || "Collective Action";
+  const title = content?.title || "Your Impact Is Growing.";
+  const description =
+    content?.description ||
+    "Every tree planted creates a ripple — cleaner air, cooler ground, and a living legacy.";
+
+  const stats =
+    content?.stats && content.stats.length > 0
+      ? content.stats
+      : [
+          { icon: "🌳", value: 25000, suffix: "+", label: "Trees Planted", color: "#52b788" },
+          { icon: "🌍", value: 312, suffix: " MT", label: "CO₂ Impact Offset", color: "#95d5b2" },
+          { icon: "🌱", value: 48, suffix: " acres", label: "Green Area Created", color: "#52b788" },
+          { icon: "👥", value: 12500, suffix: "+", label: "People Participated", color: "#95d5b2" },
+          { icon: "🏢", value: 87, suffix: "+", label: "Companies Onboard", color: "#52b788" },
+        ];
+
+  const projects =
+    content?.projects && content.projects.length > 0
+      ? content.projects
+      : [
+          {
+            img: "https://images.unsplash.com/photo-1622383563227-04401ab4e5ea?w=600&h=400&fit=crop&auto=format",
+            title: "Western Ghats Restoration",
+            trees: "8,200 trees",
+            region: "Maharashtra",
+          },
+          {
+            img: "https://images.unsplash.com/photo-1590682680695-43b964a3ae17?w=600&h=400&fit=crop&auto=format",
+            title: "Urban School Forest",
+            trees: "3,400 trees",
+            region: "Pune",
+          },
+          {
+            img: "https://images.unsplash.com/photo-1457530378978-8bac673b8062?w=600&h=400&fit=crop&auto=format",
+            title: "Deccan Dry Forest Patch",
+            trees: "5,600 trees",
+            region: "Aurangabad",
+          },
+        ];
 
   return (
     <section
@@ -36,16 +74,16 @@ export function ImpactSection() {
       <div className="relative z-10 max-w-7xl mx-auto px-6">
         <div className="text-center mb-20">
           <p className="text-[#52b788] text-sm font-semibold tracking-widest uppercase mb-3">
-            Collective Action
+            {tagline}
           </p>
           <h2
             style={{ fontFamily: "var(--font-display)" }}
             className="text-white text-4xl md:text-6xl mb-4"
           >
-            Your Impact Is Growing.
+            {title}
           </h2>
           <p className="text-white/60 max-w-lg mx-auto text-lg">
-            Every tree planted creates a ripple — cleaner air, cooler ground, and a living legacy.
+            {description}
           </p>
         </div>
 
@@ -73,26 +111,7 @@ export function ImpactSection() {
 
         {/* Project highlights */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            {
-              img: "https://images.unsplash.com/photo-1622383563227-04401ab4e5ea?w=600&h=400&fit=crop&auto=format",
-              title: "Western Ghats Restoration",
-              trees: "8,200 trees",
-              region: "Maharashtra",
-            },
-            {
-              img: "https://images.unsplash.com/photo-1590682680695-43b964a3ae17?w=600&h=400&fit=crop&auto=format",
-              title: "Urban School Forest",
-              trees: "3,400 trees",
-              region: "Pune",
-            },
-            {
-              img: "https://images.unsplash.com/photo-1457530378978-8bac673b8062?w=600&h=400&fit=crop&auto=format",
-              title: "Deccan Dry Forest Patch",
-              trees: "5,600 trees",
-              region: "Aurangabad",
-            },
-          ].map((p) => (
+          {projects.map((p) => (
             <div
               key={p.title}
               className="rounded-2xl overflow-hidden group"

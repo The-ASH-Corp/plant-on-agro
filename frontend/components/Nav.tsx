@@ -8,6 +8,7 @@ import Image from "next/image";
 import Logo from "../public/Screenshot_From_2026-09-17_15-39-39-removebg-preview.png";
 import { useAuthStore } from "@/store/auth.store";
 import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
+import { UserAvatarMenu } from "@/components/UserAvatarMenu";
 
 interface NavProps {
   active?: Section;
@@ -117,36 +118,11 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
         {/* CTAs */}
         <div className="hidden md:flex items-center gap-3">
           {isAuthenticated && user ? (
-            <div className="flex items-center gap-2.5">
-              {user.role === "admin" && (
-                <Link
-                  href="/admin"
-                  className="text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 hover:bg-emerald-500/30 transition-all flex items-center gap-1.5 cursor-pointer"
-                >
-                  <span>📊</span>
-                  <span>Dashboard</span>
-                </Link>
-              )}
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-white text-xs font-medium border border-white/15">
-                <span className="w-2 h-2 rounded-full bg-[#52b788] animate-pulse"></span>
-                <span className="truncate max-w-[130px] font-semibold">{user.name}</span>
-                {user.role === "admin" ? (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider bg-amber-500/25 text-amber-300 border border-amber-400/30">
-                    Admin
-                  </span>
-                ) : (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider bg-emerald-500/25 text-emerald-300 border border-emerald-400/30">
-                    Planter
-                  </span>
-                )}
-              </div>
-              <button
-                onClick={() => logout()}
-                className="text-xs text-white/70 hover:text-white transition-colors px-2 py-1 cursor-pointer font-medium"
-              >
-                Sign Out
-              </button>
-            </div>
+            <UserAvatarMenu
+              user={user}
+              onLogout={logout}
+              openPlant={openPlant}
+            />
           ) : (
             <Link
               href="/login"
@@ -215,37 +191,51 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
               </div>
             ))}
             {isAuthenticated && user ? (
-              <div className="py-2.5 px-1 flex flex-col gap-2 border-t border-white/10">
+              <div className="py-3 px-2 flex flex-col gap-3 border-t border-white/10 bg-white/5 rounded-2xl">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-white text-sm">
-                    <span className="w-2 h-2 rounded-full bg-[#52b788]"></span>
-                    <span className="font-semibold">{user.name}</span>
-                    {user.role === "admin" && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider bg-amber-500/25 text-amber-300 border border-amber-400/30">
-                        Admin
-                      </span>
-                    )}
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#1b7a43] to-[#52b788] text-white font-bold text-xs flex items-center justify-center shadow-xs">
+                      {user.name?.charAt(0).toUpperCase() || "U"}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-semibold text-white text-xs truncate max-w-[130px]">{user.name}</span>
+                        {user.role === "admin" ? (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider bg-amber-500/25 text-amber-300 border border-amber-400/30">
+                            Admin
+                          </span>
+                        ) : (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider bg-emerald-500/25 text-emerald-300 border border-emerald-400/30">
+                            Buyer
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-white/60 truncate max-w-[150px]">{user.email}</p>
+                    </div>
                   </div>
                   <button
                     onClick={() => {
                       logout();
                       setMenuOpen(false);
                     }}
-                    className="text-xs text-red-300 hover:text-red-200 font-medium cursor-pointer"
+                    className="text-xs text-red-300 hover:text-red-200 font-semibold px-2 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors cursor-pointer"
                   >
                     Sign Out
                   </button>
                 </div>
-                {user.role === "admin" && (
-                  <Link
-                    href="/admin"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-xs font-semibold px-3 py-2 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-2"
-                  >
-                    <span>📊</span>
-                    <span>Admin Dashboard</span>
-                  </Link>
-                )}
+
+                {/* Role-based Dashboard button */}
+                <Link
+                  href={user.role === "admin" ? "/admin" : "/buyer/dashboard"}
+                  onClick={() => setMenuOpen(false)}
+                  className="text-xs font-semibold px-3 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600/40 to-emerald-500/30 text-emerald-200 border border-emerald-400/30 flex items-center justify-between hover:bg-emerald-600/50 transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <span>{user.role === "admin" ? "🛡️" : "🌿"}</span>
+                    <span>{user.role === "admin" ? "Admin Dashboard" : "Buyer Dashboard"}</span>
+                  </span>
+                  <span className="text-[10px] text-emerald-300">Open →</span>
+                </Link>
               </div>
             ) : (
               <Link

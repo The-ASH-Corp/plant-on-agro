@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Section } from "@/types";
 import { Nav } from "@/components/Nav";
 import { Hero } from "@/components/Hero";
@@ -9,10 +9,34 @@ import { ImpactSection } from "@/components/ImpactSection";
 import { CertificateSection } from "@/components/CertificateSection";
 import { Footer } from "@/components/Footer";
 import { PlantFlow } from "@/components/PlantFlow";
+import {
+  landingPageService,
+  LandingPageContent,
+  DEFAULT_LANDING_PAGE_CONTENT,
+} from "@/services/landing-page/landing-page.service";
 
 export default function App() {
   const [activeSection, setActiveSection] = useState<Section>("home");
   const [plantOpen, setPlantOpen] = useState(false);
+  const [cmsContent, setCmsContent] = useState<LandingPageContent>(DEFAULT_LANDING_PAGE_CONTENT);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadLandingPageContent() {
+      try {
+        const res = await landingPageService.get();
+        if (isMounted && res.data) {
+          setCmsContent(res.data);
+        }
+      } catch (err) {
+        console.warn("Using fallback landing page data:", err);
+      }
+    }
+    loadLandingPageContent();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -44,19 +68,35 @@ export default function App() {
       />
 
       <main>
-        <div id="home">
-          <Hero
-            openPlant={() => setPlantOpen(true)}
-            goImpact={() => scrollTo("impact")}
-          />
-        </div>
-        <HowItWorks />
+        {cmsContent.hero?.isEnabled !== false && (
+          <div id="home">
+            <Hero
+              openPlant={() => setPlantOpen(true)}
+              goImpact={() => scrollTo("impact")}
+              content={cmsContent.hero}
+            />
+          </div>
+        )}
+
+        {cmsContent.howItWorks?.isEnabled !== false && (
+          <HowItWorks content={cmsContent.howItWorks} />
+        )}
+
         {/* <ExploreTrees openPlant={() => setPlantOpen(true)} /> */}
-        <ImpactSection />
-        <CertificateSection />
+
+        {cmsContent.impact?.isEnabled !== false && (
+          <ImpactSection content={cmsContent.impact} />
+        )}
+
+        {cmsContent.certificate?.isEnabled !== false && (
+          <CertificateSection content={cmsContent.certificate} />
+        )}
       </main>
 
-      <Footer openPlant={() => setPlantOpen(true)} />
+      <Footer
+        openPlant={() => setPlantOpen(true)}
+        content={cmsContent.footer}
+      />
 
       {plantOpen && <PlantFlow onClose={() => setPlantOpen(false)} />}
     </div>

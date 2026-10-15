@@ -1,31 +1,57 @@
-export function CertificateSection() {
+import { CertificateSectionContent } from "@/services/landing-page/landing-page.service";
+
+interface CertificateSectionProps {
+  content?: CertificateSectionContent;
+}
+
+export function CertificateSection({ content }: CertificateSectionProps) {
+  const tagline = content?.tagline || "Your Legacy";
+  const titlePart1 = content?.titlePart1 || "A Certificate That";
+  const titleHighlight = content?.titleHighlight || "Actually Grows";
+  const description =
+    content?.description ||
+    "Every tree you plant comes with a premium digital certificate — personalised, shareable, and backed by real plantation data.";
+
+  const features =
+    content?.features && content.features.length > 0
+      ? content.features
+      : [
+          "Your name on every certificate",
+          "GPS coordinates of your tree",
+          "Linked to live growth tracking",
+          "Shareable on LinkedIn & social",
+        ];
+
+  const recipient = content?.sampleRecipientName || "Priya Sharma";
+  const treeName = content?.sampleTreeName || "Indian Mango";
+  const treeId = content?.sampleTreeId || "POA-MG-2847";
+  const location = content?.sampleLocation || "Nashik, MH";
+  const date = content?.sampleDate || "14 Sep 2026";
+  const quote =
+    content?.sampleQuote ||
+    "has planted an Indian Mango tree through PlantOn agro, contributing to a greener, healthier planet.";
+
   return (
     <section className="py-28" style={{ background: "#fff" }}>
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <div>
             <p className="text-[#2d6a4f] text-sm font-semibold tracking-widest uppercase mb-3">
-              Your Legacy
+              {tagline}
             </p>
             <h2
               style={{ fontFamily: "var(--font-display)" }}
               className="text-[#173324] text-4xl md:text-5xl mb-6"
             >
-              A Certificate That
+              {titlePart1}
               <br />
-              <em className="not-italic text-[#2d6a4f]">Actually Grows</em>
+              <em className="not-italic text-[#2d6a4f]">{titleHighlight}</em>
             </h2>
             <p className="text-[#4a6557] text-lg leading-relaxed mb-8">
-              Every tree you plant comes with a premium digital certificate —
-              personalised, shareable, and backed by real plantation data.
+              {description}
             </p>
             <div className="space-y-3">
-              {[
-                "Your name on every certificate",
-                "GPS coordinates of your tree",
-                "Linked to live growth tracking",
-                "Shareable on LinkedIn & social",
-              ].map((f) => (
+              {features.map((f) => (
                 <div key={f} className="flex items-center gap-3 text-[#4a6557]">
                   <div className="w-5 h-5 rounded-full bg-[#d8f3e8] flex items-center justify-center text-[#2d6a4f] text-xs shrink-0">
                     ✓
@@ -80,19 +106,17 @@ export function CertificateSection() {
                   style={{ fontFamily: "var(--font-display)" }}
                   className="text-white text-2xl mb-2"
                 >
-                  Priya Sharma
+                  {recipient}
                 </h3>
                 <p className="text-white/60 text-xs mb-6 leading-relaxed">
-                  has planted an Indian Mango tree through PlantOn agro,
-                  <br />
-                  contributing to a greener, healthier planet.
+                  {quote}
                 </p>
                 <div className="grid grid-cols-2 gap-3 mb-6">
                   {[
-                    { label: "Tree", value: "Indian Mango" },
-                    { label: "Tree ID", value: "POA-MG-2847" },
-                    { label: "Location", value: "Nashik, MH" },
-                    { label: "Date", value: "14 Sep 2026" },
+                    { label: "Tree", value: treeName },
+                    { label: "Tree ID", value: treeId },
+                    { label: "Location", value: location },
+                    { label: "Date", value: date },
                   ].map((d) => (
                     <div
                       key={d.label}

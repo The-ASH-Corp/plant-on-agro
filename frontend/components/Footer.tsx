@@ -1,44 +1,59 @@
 import Image from "next/image";
 import Logo from "../public/Screenshot_From_2026-09-17_15-39-39-removebg-preview.png";
+import { FooterSectionContent } from "@/services/landing-page/landing-page.service";
 
 interface FooterProps {
   openPlant: () => void;
+  content?: FooterSectionContent;
 }
 
-export function Footer({ openPlant }: FooterProps) {
+export function Footer({ openPlant, content }: FooterProps) {
+  const ctaTagline = content?.ctaTagline || "Join the Movement";
+  const ctaTitlePart1 = content?.ctaTitlePart1 || "Plant Today.";
+  const ctaTitleHighlight = content?.ctaTitleHighlight || "Grow Tomorrow.";
+  const ctaDescription =
+    content?.ctaDescription ||
+    "Thousands of individuals, families, and companies have already started their green journey. Yours begins with one tree.";
+  const ctaButtonText = content?.ctaButtonText || "Plant a Tree Today";
+  const footerTagline =
+    content?.footerTagline || "You Plant. We Grow. Building a greener India, one tree at a time.";
+  const copyrightText = content?.copyrightText || "© 2026 PlantOn agro. All rights reserved.";
+  const ctaBandEnabled = content?.ctaBandEnabled !== false;
+
   return (
     <footer style={{ background: "#0f2318" }}>
       {/* CTA band */}
-      <div
-        className="py-20 px-6 text-center"
-        style={{ background: "linear-gradient(135deg,#173324,#1e4433)" }}
-      >
-        <p className="text-[#52b788] text-sm font-semibold tracking-widest uppercase mb-3">
-          Join the Movement
-        </p>
-        <h2
-          style={{ fontFamily: "var(--font-display)" }}
-          className="text-white text-4xl md:text-5xl mb-6"
+      {ctaBandEnabled && (
+        <div
+          className="py-20 px-6 text-center"
+          style={{ background: "linear-gradient(135deg,#173324,#1e4433)" }}
         >
-          Plant Today.
-          <br />
-          <em className="not-italic text-[#95d5b2]">Grow Tomorrow.</em>
-        </h2>
-        <p className="text-white/60 max-w-lg mx-auto mb-10">
-          Thousands of individuals, families, and companies have already started
-          their green journey. Yours begins with one tree.
-        </p>
-        <button
-          onClick={openPlant}
-          className="px-10 py-4 rounded-full font-semibold text-base text-white transition-all duration-200 hover:scale-105"
-          style={{
-            background: "linear-gradient(135deg,#52b788,#2d6a4f)",
-            boxShadow: "0 8px 32px rgba(82,183,136,0.3)",
-          }}
-        >
-          Plant a Tree Today
-        </button>
-      </div>
+          <p className="text-[#52b788] text-sm font-semibold tracking-widest uppercase mb-3">
+            {ctaTagline}
+          </p>
+          <h2
+            style={{ fontFamily: "var(--font-display)" }}
+            className="text-white text-4xl md:text-5xl mb-6"
+          >
+            {ctaTitlePart1}
+            <br />
+            <em className="not-italic text-[#95d5b2]">{ctaTitleHighlight}</em>
+          </h2>
+          <p className="text-white/60 max-w-lg mx-auto mb-10">
+            {ctaDescription}
+          </p>
+          <button
+            onClick={openPlant}
+            className="px-10 py-4 rounded-full font-semibold text-base text-white transition-all duration-200 hover:scale-105"
+            style={{
+              background: "linear-gradient(135deg,#52b788,#2d6a4f)",
+              boxShadow: "0 8px 32px rgba(82,183,136,0.3)",
+            }}
+          >
+            {ctaButtonText}
+          </button>
+        </div>
+      )}
 
       {/* Footer links */}
       <div className="max-w-7xl mx-auto px-6 py-16">
@@ -54,7 +69,7 @@ export function Footer({ openPlant }: FooterProps) {
               />
             </div>
             <p className="text-white/40 text-sm leading-relaxed">
-              You Plant. We Grow. Building a greener India, one tree at a time.
+              {footerTagline}
             </p>
           </div>
           {[
@@ -107,7 +122,7 @@ export function Footer({ openPlant }: FooterProps) {
           style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
         >
           <p className="text-white/30 text-xs">
-            © 2026 PlantOn agro. All rights reserved.
+            {copyrightText}
           </p>
           <p className="text-white/30 text-xs">
             Made with 🌱 for a greener planet

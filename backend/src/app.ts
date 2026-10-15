@@ -5,6 +5,7 @@ import { env } from './config/env';
 import { routes } from './presentation/routes';
 import { notFoundHandler } from './presentation/middlewares/not-found.middleware';
 import { errorHandler } from './presentation/middlewares/error.middleware';
+import morgan from 'morgan';
 
 export const createApp = (): Application => {
   const app = express();
@@ -27,6 +28,7 @@ export const createApp = (): Application => {
   app.use(express.json({ limit: '100kb' }));
   app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 
+  app.use(morgan("dev"))
   // Root redirect/health
   app.get('/', (_req, res) => {
     res.json({

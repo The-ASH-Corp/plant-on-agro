@@ -1,37 +1,48 @@
-export function HowItWorks() {
-  const steps = [
-    {
-      num: "01",
-      icon: "📋",
-      title: "Choose Your Plan",
-      desc: "Individual, student, family, occasion, or corporate — every milestone deserves roots.",
-    },
-    {
-      num: "02",
-      icon: "🤲",
-      title: "We Plant It",
-      desc: "Our expert plantation team handles the fieldwork at verified sites across India.",
-    },
-    {
-      num: "03",
-      icon: "📸",
-      title: "Watch It Grow",
-      desc: "Track your tree with geo-tagged photos, growth milestones, and a digital certificate.",
-    },
-  ];
+import { HowItWorksSectionContent } from "@/services/landing-page/landing-page.service";
+
+interface HowItWorksProps {
+  content?: HowItWorksSectionContent;
+}
+
+export function HowItWorks({ content }: HowItWorksProps) {
+  const tagline = content?.tagline || "Simple Process";
+  const title = content?.title || "How PlantOn agro Works";
+  const steps =
+    content?.steps && content.steps.length > 0
+      ? content.steps
+      : [
+          {
+            num: "01",
+            icon: "📋",
+            title: "Choose Your Plan",
+            desc: "Individual, student, family, occasion, or corporate — every milestone deserves roots.",
+          },
+          {
+            num: "02",
+            icon: "🤲",
+            title: "We Plant It",
+            desc: "Our expert plantation team handles the fieldwork at verified sites across India.",
+          },
+          {
+            num: "03",
+            icon: "📸",
+            title: "Watch It Grow",
+            desc: "Track your tree with geo-tagged photos, growth milestones, and a digital certificate.",
+          },
+        ];
 
   return (
     <section id="how-it-works" className="py-28" style={{ background: "#fff" }}>
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-20">
           <p className="text-[#2d6a4f] text-sm font-semibold tracking-widest uppercase mb-3">
-            Simple Process
+            {tagline}
           </p>
           <h2
             style={{ fontFamily: "var(--font-display)" }}
             className="text-[#173324] text-4xl md:text-5xl"
           >
-            How PlantOn agro Works
+            {title}
           </h2>
         </div>
 
