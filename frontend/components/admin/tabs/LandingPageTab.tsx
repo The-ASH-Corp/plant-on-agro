@@ -19,6 +19,7 @@ import {
   FloatingSaveBar,
   LivePreviewModal,
 } from "./landing-page";
+import { DeleteConfirmationModal } from "../modals/DeleteConfirmationModal";
 
 interface LandingPageTabProps {
   showToast: (msg: string) => void;
@@ -31,6 +32,7 @@ export function LandingPageTab({ showToast }: LandingPageTabProps) {
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
   const [resetting, setResetting] = useState<boolean>(false);
+  const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
   const [showPreviewModal, setShowPreviewModal] = useState<boolean>(false);
 
   // Fetch landing page content on mount
@@ -76,15 +78,12 @@ export function LandingPageTab({ showToast }: LandingPageTabProps) {
     }
   };
 
-  // Reset to default landing page data
-  const handleReset = async () => {
-    if (
-      !window.confirm(
-        "Are you sure you want to restore original default content for the landing page? Any unsaved edits will be lost."
-      )
-    ) {
-      return;
-    }
+  // Trigger custom confirmation popup modal to restore defaults
+  const handleReset = () => {
+    setShowResetConfirm(true);
+  };
+
+  const executeReset = async () => {
     try {
       setResetting(true);
       const res = await landingPageService.reset();
@@ -98,6 +97,7 @@ export function LandingPageTab({ showToast }: LandingPageTabProps) {
       showToast("Failed to reset content.");
     } finally {
       setResetting(false);
+      setShowResetConfirm(false);
     }
   };
 
@@ -218,6 +218,20 @@ export function LandingPageTab({ showToast }: LandingPageTabProps) {
         hasUnsavedChanges={hasUnsavedChanges}
         onClose={() => setShowPreviewModal(false)}
         onSave={handleSave}
+      />
+
+      {/* Custom Reset / Discard Confirmation Popup Modal */}
+      <DeleteConfirmationModal
+        isOpen={showResetConfirm}
+        title="Restore Default Content"
+        itemType="Configuration"
+        itemName="Landing Page CMS Template"
+        description="Are you sure you want to restore original default content for the landing page? All unsaved section modifications and custom copy overrides will be permanently removed."
+        isDeleting={resetting}
+        onClose={() => {
+          if (!resetting) setShowResetConfirm(false);
+        }}
+        onConfirm={executeReset}
       />
     </div>
   );

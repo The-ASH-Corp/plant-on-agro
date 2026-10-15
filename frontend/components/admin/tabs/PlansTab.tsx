@@ -2,12 +2,13 @@
 
 import { useState, useMemo } from "react";
 import { AdoptionPlanItem, OccasionDedicationType } from "../types";
+import { TrashIcon } from "@/components/ui/TrashIcon";
 
 interface PlansTabProps {
   plans: AdoptionPlanItem[];
   searchQuery: string;
   onOpenAddPlan: () => void;
-  onDeletePlan?: (id: string) => void;
+  onDeletePlan?: (id: string, name?: string) => void;
 }
 
 const OCCASION_FILTERS: { value: string; label: string; icon: string }[] = [
@@ -137,12 +138,13 @@ export function PlansTab({
                       </span>
                       {onDeletePlan && (
                         <button
-                          onClick={() => onDeletePlan(plan.id)}
+                          type="button"
+                          onClick={() => onDeletePlan(plan.id, plan.label || plan.planLabel)}
                           title="Delete adoption plan"
-                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 hover:text-rose-700 cursor-pointer text-xs"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 hover:text-rose-700 cursor-pointer text-xs inline-flex items-center justify-center"
                           aria-label={`Delete ${plan.label || plan.planLabel}`}
                         >
-                          ✕
+                          <TrashIcon className="w-3.5 h-3.5" />
                         </button>
                       )}
                     </div>

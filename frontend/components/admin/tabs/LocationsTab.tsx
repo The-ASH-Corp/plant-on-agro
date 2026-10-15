@@ -2,17 +2,20 @@
 
 import { useMemo } from "react";
 import { PlantationLocationItem } from "../types";
+import { TrashIcon } from "@/components/ui/TrashIcon";
 
 interface LocationsTabProps {
   locations: PlantationLocationItem[];
   searchQuery: string;
   onOpenAddLocation: () => void;
+  onDeleteLocation?: (id: string, name?: string) => void;
 }
 
 export function LocationsTab({
   locations,
   searchQuery,
   onOpenAddLocation,
+  onDeleteLocation,
 }: LocationsTabProps) {
   const filteredLocations = useMemo(() => {
     return locations.filter(
@@ -95,6 +98,21 @@ export function LocationsTab({
                     </div>
                   </div>
                 </div>
+
+                {onDeleteLocation && (
+                  <div className="px-5 py-3 border-t border-[#f0f4f1] bg-[#fafcfa] flex items-center justify-between text-xs">
+                    <span className="text-[11px] text-[#7a8c81]">Capacity: {loc.capacity.toLocaleString()}</span>
+                    <button
+                      type="button"
+                      onClick={() => onDeleteLocation(loc.id, loc.name)}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-2.5 py-1.5 rounded-xl transition-colors cursor-pointer"
+                      title={`Delete reserve ${loc.name}`}
+                    >
+                      <TrashIcon className="w-3.5 h-3.5" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           );

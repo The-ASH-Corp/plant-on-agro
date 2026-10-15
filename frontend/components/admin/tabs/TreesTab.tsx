@@ -2,12 +2,13 @@
 
 import { useState, useMemo } from "react";
 import { TreeVarietyItem } from "../types";
+import { TrashIcon } from "@/components/ui/TrashIcon";
 
 interface TreesTabProps {
   trees: TreeVarietyItem[];
   searchQuery: string;
   onOpenAddTree: () => void;
-  onDeleteTree: (id: string) => void;
+  onDeleteTree: (id: string, name?: string) => void;
 }
 
 const CATEGORIES = [
@@ -191,10 +192,13 @@ export function TreesTab({
               <div className="p-4 bg-[#f9faf8] border-t border-[#f0f4f1] flex items-center justify-between">
                 <span className="text-[11px] text-[#73877b] font-medium">{tree.growth}</span>
                 <button
-                  onClick={() => onDeleteTree(tree.id)}
-                  className="text-xs font-semibold text-red-600 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
+                  type="button"
+                  onClick={() => onDeleteTree(tree.id, tree.name)}
+                  title={`Delete ${tree.name}`}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 px-2.5 py-1.5 rounded-xl hover:bg-rose-50 transition-colors cursor-pointer"
                 >
-                  Remove
+                  <TrashIcon className="w-3.5 h-3.5" />
+                  <span>Delete</span>
                 </button>
               </div>
             </div>
@@ -231,10 +235,13 @@ export function TreesTab({
                     <td className="py-3 px-4 font-semibold text-[#1b7a43]">{tree.co2PerYearKg} kg</td>
                     <td className="py-3 px-4 text-right">
                       <button
-                        onClick={() => onDeleteTree(tree.id)}
-                        className="text-red-500 hover:text-red-700 font-semibold cursor-pointer"
+                        type="button"
+                        onClick={() => onDeleteTree(tree.id, tree.name)}
+                        title={`Delete ${tree.name}`}
+                        className="inline-flex items-center gap-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-2.5 py-1.5 rounded-xl font-semibold transition-colors cursor-pointer"
                       >
-                        Delete
+                        <TrashIcon className="w-3.5 h-3.5" />
+                        <span>Delete</span>
                       </button>
                     </td>
                   </tr>

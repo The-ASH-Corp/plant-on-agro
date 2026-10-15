@@ -40,6 +40,7 @@ import { AddPlanModal } from "./modals/AddPlanModal";
 import { AddTreeInstanceModal } from "./modals/AddTreeInstanceModal";
 import { AddLocationModal } from "./modals/AddLocationModal";
 import { OrderDetailsModal } from "./modals/OrderDetailsModal";
+import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
 
 import { treeVarietyService } from "@/services/tree-varieties/tree-variety.service";
 import { adoptionPlanService } from "@/services/adoption-plans/adoption-plan.service";
@@ -100,6 +101,14 @@ export function AdminDashboard() {
   const [showAddInstanceModal, setShowAddInstanceModal] = useState(false);
   const [showAddLocationModal, setShowAddLocationModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<AdoptionOrder | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    type: "tree" | "plan" | "instance" | "location";
+    id: string;
+    name: string;
+    description?: string;
+  } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Toast Notification State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -306,28 +315,28 @@ export function AdminDashboard() {
     setActiveTab("locations");
   };
 
-  const handleDeleteTree = async (id: string) => {
-    if (confirm("Remove this tree variety from adoption catalog?")) {
-      try {
-        await treeVarietyService.delete(id);
-      } catch (err) {
-        console.warn("Tree deletion API notice:", err);
-      }
-      setTrees((prev) => prev.filter((t) => t.id !== id));
-      showToast("Tree variety removed from catalog.");
-    }
+  const handleDeleteTree = (id: string, name?: string) => {
+    const item = trees.find((t) => t.id === id);
+    setDeleteModal({
+      isOpen: true,
+      type: "tree",
+      id,
+      name: name || item?.name || "Tree Variety",
+      description:
+        "Are you sure you want to remove this tree variety from the public catalog? Buyers will no longer be able to select it.",
+    });
   };
 
-  const handleDeletePlan = async (id: string) => {
-    if (confirm("Remove this adoption plan?")) {
-      try {
-        await adoptionPlanService.delete(id);
-      } catch (err) {
-        console.warn("Adoption plan deletion API notice:", err);
-      }
-      setPlans((prev) => prev.filter((p) => p.id !== id));
-      showToast("Adoption plan removed.");
-    }
+  const handleDeletePlan = (id: string, name?: string) => {
+    const item = plans.find((p) => p.id === id);
+    setDeleteModal({
+      isOpen: true,
+      type: "plan",
+      id,
+      name: name || item?.label || item?.planLabel || "Adoption Plan",
+      description:
+        "Are you sure you want to delete this adoption package? It will no longer be offered during tree adoption.",
+    });
   };
 
   const handleCreateInstance = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -403,15 +412,68 @@ export function AdminDashboard() {
     }
   };
 
-  const handleDeleteInstance = async (id: string) => {
-    if (confirm("Remove this tagged tree instance?")) {
-      try {
-        await treeInstanceService.delete(id);
-      } catch (err) {
-        console.warn("Tree instance deletion notice:", err);
+  const handleDeleteInstance = (id: string, tag?: string) => {
+    const item = instances.find((i) => i.id === id);
+    setDeleteModal({
+      isOpen: true,
+      type: "instance",
+      id,
+      name: tag || item?.treeTag || "Tree Sapling Instance",
+      description:
+        "Are you sure you want to remove this tagged tree instance and its GPS telemetry record?",
+    });
+  };
+
+  const handleDeleteLocation = (id: string, name?: string) => {
+    const item = locations.find((l) => l.id === id);
+    setDeleteModal({
+      isOpen: true,
+      type: "location",
+      id,
+      name: name || item?.name || "Reserve Location",
+      description:
+        "Are you sure you want to remove this agroforestry bio-sanctuary and its boundary data?",
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteModal) return;
+    setIsDeleting(true);
+    const { type, id, name } = deleteModal;
+    try {
+      if (type === "tree") {
+        try {
+          await treeVarietyService.delete(id);
+        } catch (err) {
+          console.warn("Tree deletion API notice:", err);
+        }
+        setTrees((prev) => prev.filter((t) => t.id !== id));
+        showToast(`Tree variety "${name}" removed from catalog.`);
+      } else if (type === "plan") {
+        try {
+          await adoptionPlanService.delete(id);
+        } catch (err) {
+          console.warn("Adoption plan deletion API notice:", err);
+        }
+        setPlans((prev) => prev.filter((p) => p.id !== id));
+        showToast(`Adoption plan "${name}" removed.`);
+      } else if (type === "instance") {
+        try {
+          await treeInstanceService.delete(id);
+        } catch (err) {
+          console.warn("Tree instance deletion notice:", err);
+        }
+        setInstances((prev) => prev.filter((i) => i.id !== id));
+        showToast(`Tree instance "${name}" record removed.`);
+      } else if (type === "location") {
+        setLocations((prev) => prev.filter((l) => l.id !== id));
+        showToast(`Reserve location "${name}" removed.`);
       }
-      setInstances((prev) => prev.filter((i) => i.id !== id));
-      showToast("Tree instance record removed.");
+      setDeleteModal(null);
+    } catch (err: any) {
+      showToast(err.message || "Failed to delete item");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -531,6 +593,7 @@ export function AdminDashboard() {
               locations={locations}
               searchQuery={searchQuery}
               onOpenAddLocation={() => setShowAddLocationModal(true)}
+              onDeleteLocation={handleDeleteLocation}
             />
           )}
 
@@ -581,6 +644,27 @@ export function AdminDashboard() {
           showToast(`Digital Certificate ${certId} downloaded!`);
           setSelectedOrder(null);
         }}
+      />
+
+      {/* 4. Custom Delete Confirmation Popup Modal */}
+      <DeleteConfirmationModal
+        isOpen={Boolean(deleteModal?.isOpen)}
+        itemType={
+          deleteModal?.type === "tree"
+            ? "Tree Variety"
+            : deleteModal?.type === "plan"
+            ? "Adoption Plan"
+            : deleteModal?.type === "instance"
+            ? "Tree Sapling Instance"
+            : "Reserve Location"
+        }
+        itemName={deleteModal?.name}
+        description={deleteModal?.description}
+        isDeleting={isDeleting}
+        onClose={() => {
+          if (!isDeleting) setDeleteModal(null);
+        }}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

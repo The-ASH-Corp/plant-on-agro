@@ -32,7 +32,7 @@ export function PlantFlow({ onClose }: PlantFlowProps) {
     step === 6 ||
     step === 7;
 
-  const stepLabels = ["Tree", "Plan", "Qty", "Location", "Details", "Payment", "Done"];
+  const stepLabels = ["Tree", "Dedication", "Qty", "Location", "Details", "Payment", "Done"];
 
   return (
     <div
@@ -134,10 +134,11 @@ export function PlantFlow({ onClose }: PlantFlowProps) {
             </div>
           )}
 
-          {/* Step 2: Plan */}
+          {/* Step 2: Dedication */}
           {step === 2 && (
             <div>
-              <p className="text-[#4a6557] mb-5">Choose your planting plan.</p>
+              <p className="text-[#4a6557] font-medium mb-1">Choose your dedication or occasion package.</p>
+              <p className="text-xs text-[#73877b] mb-4">All adoptions are a single-time lifetime payment with zero renewal fees.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {PLANS.map((p) => (
                   <button
@@ -295,14 +296,19 @@ export function PlantFlow({ onClose }: PlantFlowProps) {
                 className="p-5 rounded-2xl mb-6"
                 style={{ background: "#f0faf4", border: "1px solid #d4ede1" }}
               >
-                <h3 className="font-semibold text-[#173324] mb-3">Order Summary</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-[#173324]">Order Summary</h3>
+                  <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-2.5 py-0.5 rounded-full">
+                    Lifetime Single-Time Payment
+                  </span>
+                </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between text-[#4a6557]">
-                    <span>Tree</span>
+                    <span>Tree Species</span>
                     <span className="text-[#173324] font-medium">{selectedTree?.name}</span>
                   </div>
                   <div className="flex justify-between text-[#4a6557]">
-                    <span>Plan</span>
+                    <span>Dedication Tier</span>
                     <span className="text-[#173324] font-medium">{selectedPlanData?.label}</span>
                   </div>
                   <div className="flex justify-between text-[#4a6557]">
@@ -310,19 +316,29 @@ export function PlantFlow({ onClose }: PlantFlowProps) {
                     <span className="text-[#173324] font-medium">{qty} trees</span>
                   </div>
                   <div className="flex justify-between text-[#4a6557]">
-                    <span>Location</span>
+                    <span>Reserve Location</span>
                     <span className="text-[#173324] font-medium text-right max-w-[60%]">
                       {location}
                     </span>
+                  </div>
+                  <div className="flex justify-between text-[#4a6557]">
+                    <span>Billing Cycle</span>
+                    <span className="text-emerald-700 font-bold">None (100% Lifetime Single-Time)</span>
                   </div>
                   <div
                     className="border-t pt-2 mt-2 flex justify-between font-bold"
                     style={{ borderColor: "#d4ede1" }}
                   >
-                    <span className="text-[#173324]">Total</span>
+                    <span className="text-[#173324]">Total Payable</span>
                     <span className="text-[#2d6a4f] text-lg">
                       ₹{total.toLocaleString("en-IN")}
                     </span>
+                  </div>
+                </div>
+                <div className="mt-4 p-3 rounded-xl bg-white/90 border border-emerald-200 text-xs text-[#2d6a4f] flex items-start gap-2.5">
+                  <span className="text-base shrink-0">🛡️</span>
+                  <div className="leading-relaxed">
+                    <span className="font-bold text-[#173324]">One-Time Single Payment Guarantee:</span> No recurring subscriptions, annual renewal charges, or hidden maintenance fees. Covers sapling plantation, lifelong forestry care, drone telemetry, and permanent digital deed.
                   </div>
                 </div>
               </div>
@@ -377,6 +393,10 @@ export function PlantFlow({ onClose }: PlantFlowProps) {
                 <div className="flex justify-between text-sm">
                   <span className="text-[#4a6557]">Order ID</span>
                   <span className="font-mono font-semibold text-[#2d6a4f]">{orderId}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-[#4a6557]">Billing Plan</span>
+                  <span className="font-semibold text-emerald-700">Lifetime Single-Time (No Expiration)</span>
                 </div>
               </div>
               <div className="flex gap-3">

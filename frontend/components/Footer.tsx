@@ -77,7 +77,6 @@ export function Footer({ openPlant, content }: FooterProps) {
               title: "Platform",
               links: [
                 "Plant a Tree",
-                "Our Trees",
                 "How It Works",
                 "Pricing",
                 "Track My Tree",
