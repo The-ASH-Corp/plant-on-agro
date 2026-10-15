@@ -24,5 +24,9 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `/tree-instances/${id}`,
     BY_TAG: (tag: string) => `/tree-instances/tag/${tag}`,
   },
+  LANDING_PAGE: {
+    BASE: '/landing-page',
+    RESET: '/landing-page/reset',
+  },
   HEALTH: '/health',
 } as const;

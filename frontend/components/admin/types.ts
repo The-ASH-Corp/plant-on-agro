@@ -1,4 +1,4 @@
-export type AdminTabType = "overview" | "trees" | "plans" | "locations" | "orders" | "instances";
+export type AdminTabType = "overview" | "trees" | "plans" | "locations" | "orders" | "instances" | "landing-page";
 
 export type TreeHealthStatus =
   | 'Healthy'

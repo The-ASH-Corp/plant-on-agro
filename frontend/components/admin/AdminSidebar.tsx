@@ -55,6 +55,7 @@ export function AdminSidebar({
     { id: "instances", label: "Tree Instances", icon: "🏷️", count: instancesCount },
     { id: "locations", label: "Reserves & GPS", icon: "📍", count: locationsCount },
     { id: "orders", label: "Adoption Orders", icon: "📦", count: ordersCount },
+    { id: "landing-page", label: "Landing Page CMS", icon: "🎨", badge: "Editor" },
   ];
 
   return (

@@ -28,6 +28,12 @@ import { GetTreeInstanceByTagUseCase } from '../../application/use-cases/tree-in
 import { UpdateTreeInstanceUseCase } from '../../application/use-cases/tree-instances/update-tree-instance.use-case';
 import { DeleteTreeInstanceUseCase } from '../../application/use-cases/tree-instances/delete-tree-instance.use-case';
 
+import { MongoLandingPageRepository } from '../repositories/mongo-landing-page.repository';
+import { GetLandingPageUseCase } from '../../application/use-cases/landing-page/get-landing-page.use-case';
+import { UpdateLandingPageUseCase } from '../../application/use-cases/landing-page/update-landing-page.use-case';
+import { ResetLandingPageUseCase } from '../../application/use-cases/landing-page/reset-landing-page.use-case';
+import { LandingPageController } from '../../presentation/controllers/landing-page.controller';
+
 import { UserController } from '../../presentation/controllers/user.controller';
 import { AuthController } from '../../presentation/controllers/auth.controller';
 import { TreeVarietyController } from '../../presentation/controllers/tree-variety.controller';
@@ -43,6 +49,18 @@ export class Container {
   public static readonly treeVarietyRepository = new MongoTreeVarietyRepository();
   public static readonly adoptionPlanRepository = new MongoAdoptionPlanRepository();
   public static readonly treeInstanceRepository = new MongoTreeInstanceRepository();
+  public static readonly landingPageRepository = new MongoLandingPageRepository();
+
+  // Landing Page Use Cases
+  private static readonly getLandingPageUseCase = new GetLandingPageUseCase(
+    Container.landingPageRepository
+  );
+  private static readonly updateLandingPageUseCase = new UpdateLandingPageUseCase(
+    Container.landingPageRepository
+  );
+  private static readonly resetLandingPageUseCase = new ResetLandingPageUseCase(
+    Container.landingPageRepository
+  );
 
   // User Use Cases
   private static readonly registerUserUseCase = new RegisterUserUseCase(
@@ -145,5 +163,11 @@ export class Container {
     Container.getTreeInstanceByTagUseCase,
     Container.updateTreeInstanceUseCase,
     Container.deleteTreeInstanceUseCase
+  );
+
+  public static readonly landingPageController = new LandingPageController(
+    Container.getLandingPageUseCase,
+    Container.updateLandingPageUseCase,
+    Container.resetLandingPageUseCase
   );
 }

@@ -32,6 +32,7 @@ import { PlansTab } from "./tabs/PlansTab";
 import { TreeInstancesTab } from "./tabs/TreeInstancesTab";
 import { LocationsTab } from "./tabs/LocationsTab";
 import { OrdersTab } from "./tabs/OrdersTab";
+import { LandingPageTab } from "./tabs/LandingPageTab";
 
 // Modal Components
 import { AddTreeModal } from "./modals/AddTreeModal";
@@ -540,6 +541,10 @@ export function AdminDashboard() {
               onSelectOrder={setSelectedOrder}
               onExportCSV={() => showToast("Exporting order ledger CSV...")}
             />
+          )}
+
+          {activeTab === "landing-page" && (
+            <LandingPageTab showToast={showToast} />
           )}
         </main>
       </div>

@@ -5,15 +5,37 @@ import { useScroll, useTransform, motion } from "framer-motion";
 import { useAuthStore } from "@/store/auth.store";
 import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
 
+import { HeroSectionContent } from "@/services/landing-page/landing-page.service";
+
 interface HeroProps {
   openPlant: () => void;
   goImpact: () => void;
+  content?: HeroSectionContent;
 }
 
-export function Hero({ openPlant, goImpact }: HeroProps) {
+export function Hero({ openPlant, goImpact, content }: HeroProps) {
   const user = useHydratedStore(useAuthStore, (s) => s.user);
   const isAuthenticated = useHydratedStore(useAuthStore, (s) => s.isAuthenticated);
   const { scrollY } = useScroll();
+
+  const badgeText = content?.badge || "🌱 You Plant. We Grow.";
+  const headline1 = content?.headlinePart1 || "Plant a Tree.";
+  const headlineHighlight = content?.headlineHighlight || "Create a Future.";
+  const description =
+    content?.description ||
+    "Choose a tree, plant it through PlantOn agro, and watch your impact grow — with real photos, location tracking, and a certificate in your name.";
+  const primaryCta = content?.primaryCtaText || "Plant a Tree";
+  const secondaryCta = content?.secondaryCtaText || "Explore Our Impact";
+  const bgImg =
+    content?.bgImageUrl ||
+    "https://images.unsplash.com/photo-1568241640298-1adf2974314c?w=1920&h=1080&fit=crop&auto=format";
+  const stats = content?.stats && content.stats.length > 0
+    ? content.stats
+    : [
+        { target: 25000, suffix: "+", label: "Trees Planted" },
+        { target: 12500, suffix: "+", label: "People Participated" },
+        { target: 150, suffix: "+", label: "Plantation Projects" },
+      ];
 
   const bgY = useTransform(scrollY, [0, 1000], [0, 300]);
   const textY = useTransform(scrollY, [0, 1000], [0, 100]);
@@ -23,7 +45,7 @@ export function Hero({ openPlant, goImpact }: HeroProps) {
       {/* BG image */}
       <motion.div className="absolute inset-0">
         <motion.img
-          src="https://images.unsplash.com/photo-1568241640298-1adf2974314c?w=1920&h=1080&fit=crop&auto=format"
+          src={bgImg}
           alt="Aerial forest canopy"
           className="w-full h-full object-cover"
           style={{ y: bgY }}
@@ -66,7 +88,7 @@ export function Hero({ openPlant, goImpact }: HeroProps) {
               backdropFilter: "blur(8px)",
             }}
           >
-            🌱 You Plant. We Grow.
+            {badgeText}
           </div>
         )}
 
@@ -74,15 +96,13 @@ export function Hero({ openPlant, goImpact }: HeroProps) {
           style={{ fontFamily: "var(--font-display)", lineHeight: 1.1 }}
           className="text-white text-4xl sm:text-5xl md:text-7xl mb-6"
         >
-          Plant a Tree.
+          {headline1}
           <br />
-          <em className="text-[#95d5b2] not-italic">Create a Future.</em>
+          <em className="text-[#95d5b2] not-italic">{headlineHighlight}</em>
         </h1>
 
         <p className="text-white/75 text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-8 sm:mb-10 font-light leading-relaxed">
-          Choose a tree, plant it through PlantOn agro, and watch your impact
-          grow — with real photos, location tracking, and a certificate in your
-          name.
+          {description}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 sm:mb-16">
@@ -94,7 +114,7 @@ export function Hero({ openPlant, goImpact }: HeroProps) {
               boxShadow: "0 8px 32px rgba(82,183,136,0.35)",
             }}
           >
-            Plant a Tree
+            {primaryCta}
           </button>
           <button
             onClick={goImpact}
@@ -106,17 +126,13 @@ export function Hero({ openPlant, goImpact }: HeroProps) {
               backdropFilter: "blur(8px)",
             }}
           >
-            Explore Our Impact
+            {secondaryCta}
           </button>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3 sm:gap-6 max-w-2xl mx-auto mb-14 sm:mb-16 md:mb-20">
-          {[
-            { target: 25000, suffix: "+", label: "Trees Planted" },
-            { target: 12500, suffix: "+", label: "People Participated" },
-            { target: 150, suffix: "+", label: "Plantation Projects" },
-          ].map((s) => (
+          {stats.map((s) => (
             <div key={s.label} className="text-center">
               <div
                 style={{ fontFamily: "var(--font-display)", color: "#95d5b2" }}
