@@ -108,9 +108,9 @@ export const DEFAULT_LANDING_PAGE_DATA: Omit<LandingPageProps, 'id' | 'createdAt
     bgImageUrl:
       'https://images.unsplash.com/photo-1568241640298-1adf2974314c?w=1920&h=1080&fit=crop&auto=format',
     stats: [
-      { target: 25000, suffix: '+', label: 'Trees Planted' },
-      { target: 12500, suffix: '+', label: 'People Participated' },
-      { target: 150, suffix: '+', label: 'Plantation Projects' },
+      { target: 0, suffix: "+", label: "Trees Planted & Geotagged" },
+      { target: 0, suffix: "", label: "Native Tree Varieties" },
+      { target: 0, suffix: "+", label: "Protected Bio-Reserves" },
     ],
   },
   howItWorks: {
@@ -145,32 +145,13 @@ export const DEFAULT_LANDING_PAGE_DATA: Omit<LandingPageProps, 'id' | 'createdAt
     description:
       'Every tree planted creates a ripple — cleaner air, cooler ground, and a living legacy.',
     stats: [
-      { icon: '🌳', value: 25000, suffix: '+', label: 'Trees Planted', color: '#52b788' },
-      { icon: '🌍', value: 312, suffix: ' MT', label: 'CO₂ Impact Offset', color: '#95d5b2' },
-      { icon: '🌱', value: 48, suffix: ' acres', label: 'Green Area Created', color: '#52b788' },
-      { icon: '👥', value: 12500, suffix: '+', label: 'People Participated', color: '#95d5b2' },
-      { icon: '🏢', value: 87, suffix: '+', label: 'Companies Onboard', color: '#52b788' },
+      { icon: '🌳', value: 0, suffix: '+', label: 'Trees Planted & Geotagged', color: '#52b788' },
+      { icon: '🌍', value: 0, suffix: ' MT', label: 'CO₂ Impact Offset / yr', color: '#95d5b2' },
+      { icon: '🌱', value: 0, suffix: ' acres', label: 'Canopy Conserved', color: '#52b788' },
+      { icon: '👥', value: 0, suffix: '+', label: 'Verified Adopters', color: '#95d5b2' },
+      { icon: '🌿', value: 0, suffix: ' Species', label: 'Botanical Varieties', color: '#52b788' },
     ],
-    projects: [
-      {
-        img: 'https://images.unsplash.com/photo-1622383563227-04401ab4e5ea?w=600&h=400&fit=crop&auto=format',
-        title: 'Western Ghats Restoration',
-        trees: '8,200 trees',
-        region: 'Maharashtra',
-      },
-      {
-        img: 'https://images.unsplash.com/photo-1590682680695-43b964a3ae17?w=600&h=400&fit=crop&auto=format',
-        title: 'Urban School Forest',
-        trees: '3,400 trees',
-        region: 'Pune',
-      },
-      {
-        img: 'https://images.unsplash.com/photo-1457530378978-8bac673b8062?w=600&h=400&fit=crop&auto=format',
-        title: 'Deccan Dry Forest Patch',
-        trees: '5,600 trees',
-        region: 'Aurangabad',
-      },
-    ],
+    projects: [],
   },
   certificate: {
     isEnabled: true,
@@ -185,13 +166,13 @@ export const DEFAULT_LANDING_PAGE_DATA: Omit<LandingPageProps, 'id' | 'createdAt
       'Linked to live growth tracking',
       'Shareable on LinkedIn & social',
     ],
-    sampleRecipientName: 'Priya Sharma',
-    sampleTreeName: 'Indian Mango',
-    sampleTreeId: 'POA-MG-2847',
-    sampleLocation: 'Nashik, MH',
-    sampleDate: '14 Sep 2026',
+    sampleRecipientName: 'Your Name Here',
+    sampleTreeName: 'Botanical Species',
+    sampleTreeId: 'POA-TR-0000',
+    sampleLocation: 'Verified Bio-Reserve',
+    sampleDate: 'Plantation Date',
     sampleQuote:
-      'has planted an Indian Mango tree through PlantOn agro, contributing to a greener, healthier planet.',
+      'has planted a tree through PlantOn agro, contributing to a greener, healthier planet.',
   },
   footer: {
     ctaBandEnabled: true,

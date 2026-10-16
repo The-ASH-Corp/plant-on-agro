@@ -30,14 +30,27 @@ export function BuyerCertificatesTab({
         </span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
-        {trees.map((tree) => {
-          const recipient = userName || tree.adopterName || "Tree Planter";
-          return (
-            <div
-              key={tree.id}
-              className="bg-gradient-to-br from-[#0c2417] via-[#133825] to-[#081810] rounded-2xl p-5 sm:p-6 text-white shadow-xl border-2 border-emerald-500/30 relative overflow-hidden flex flex-col justify-between group hover:border-emerald-400/50 transition-all duration-300"
-            >
+      {trees.length === 0 ? (
+        <div className="bg-white rounded-2xl p-8 text-center border border-[#e2eae5] space-y-3 max-w-md mx-auto shadow-xs">
+          <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl mx-auto shadow-inner">
+            📜
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-[#173324]">No Deeds Issued Yet</h3>
+            <p className="text-xs text-[#52796f] mt-0.5 leading-relaxed">
+              When you adopt a tree, your official cryptographic certificate of adoption and permanent GPS registry deed will be generated here.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
+          {trees.map((tree) => {
+            const recipient = userName || tree.adopterName || "Tree Planter";
+            return (
+              <div
+                key={tree.id}
+                className="bg-gradient-to-br from-[#0c2417] via-[#133825] to-[#081810] rounded-2xl p-5 sm:p-6 text-white shadow-xl border-2 border-emerald-500/30 relative overflow-hidden flex flex-col justify-between group hover:border-emerald-400/50 transition-all duration-300"
+              >
               {/* Ornate corner lines */}
               <div className="absolute top-2.5 left-2.5 w-5 h-5 border-t-2 border-l-2 border-emerald-400/40" />
               <div className="absolute top-2.5 right-2.5 w-5 h-5 border-t-2 border-r-2 border-emerald-400/40" />
@@ -130,7 +143,8 @@ export function BuyerCertificatesTab({
             </div>
           );
         })}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

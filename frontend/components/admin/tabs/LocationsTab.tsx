@@ -44,10 +44,26 @@ export function LocationsTab({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredLocations.map((loc) => {
-          const pct = Math.round((loc.treesPlanted / loc.capacity) * 100);
-          return (
+      {filteredLocations.length === 0 ? (
+        <div className="bg-white rounded-3xl border border-[#e2eae5] p-12 text-center space-y-3">
+          <span className="text-4xl">🗺️</span>
+          <h3 className="text-lg font-bold text-[#173324]">No Protected Bio-Reserves Geotagged Yet</h3>
+          <p className="text-xs text-[#73877b] max-w-md mx-auto">
+            You have not registered any plantation reserves or forest sanctuaries yet. Click the button below to geotag your first verified reserve.
+          </p>
+          <button
+            onClick={onOpenAddLocation}
+            className="px-5 py-2.5 rounded-xl bg-[#173324] hover:bg-[#1f4230] text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
+          >
+            <span>+</span>
+            <span>Geotag Your First Reserve</span>
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredLocations.map((loc) => {
+            const pct = Math.round((loc.treesPlanted / loc.capacity) * 100);
+            return (
             <div
               key={loc.id}
               className="bg-white rounded-3xl border border-[#e2eae5] overflow-hidden shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between"
@@ -118,6 +134,7 @@ export function LocationsTab({
           );
         })}
       </div>
+      )}
     </div>
   );
 }

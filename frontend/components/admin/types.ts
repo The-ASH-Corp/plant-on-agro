@@ -21,13 +21,13 @@ export interface GpsCoordinates {
 
 export interface TreeInstanceItem {
   id: string;
-  treeTag: string; // Unique tree tag / serial
-  orderRef: string; // Reference to order (e.g. "ORD-88219")
-  assignedReserve: string; // Assigned reserve
-  gpsCoordinates: GpsCoordinates; // Exact GPS lat/long where sapling was physically put into the ground
-  formattedGps: string; // e.g. "18.5204° N, 73.8567° E"
-  datePlanted: string; // Date planted
-  healthStatus: TreeHealthStatus; // Current health status
+  treeTag: string;
+  orderRef: string;
+  assignedReserve: string;
+  gpsCoordinates: GpsCoordinates;
+  formattedGps: string;
+  datePlanted: string;
+  healthStatus: TreeHealthStatus;
   treeVarietyName: string;
   adopterName: string;
   adopterEmail: string;

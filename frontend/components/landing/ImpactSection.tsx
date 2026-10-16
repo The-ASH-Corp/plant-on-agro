@@ -3,51 +3,58 @@
 import { Counter } from "@/components/ui/Counter";
 import { ImpactSectionContent } from "@/services/landing-page/landing-page.service";
 
-export interface ImpactSectionProps {
-  content?: ImpactSectionContent;
+export interface ImpactLiveStats {
+  totalTrees: number;
+  totalCo2Mt: number;
+  canopyAcres: number;
+  peopleCount: number;
+  varietiesCount: number;
 }
 
-export function ImpactSection({ content }: ImpactSectionProps) {
+export interface ImpactProjectItem {
+  title: string;
+  trees: string;
+  region: string;
+  img: string;
+}
+
+export interface ImpactSectionProps {
+  content?: ImpactSectionContent;
+  liveStats?: ImpactLiveStats;
+  liveProjects?: ImpactProjectItem[];
+}
+
+export function ImpactSection({ content, liveStats, liveProjects }: ImpactSectionProps) {
   const tagline = content?.tagline || "Collective Action";
   const title = content?.title || "Your Impact Is Growing.";
   const description =
     content?.description ||
     "Every tree planted creates a ripple — cleaner air, cooler ground, and a living legacy.";
 
-  const stats =
-    content?.stats && content.stats.length > 0
-      ? content.stats
-      : [
-          { icon: "🌳", value: 25000, suffix: "+", label: "Trees Planted", color: "#52b788" },
-          { icon: "🌍", value: 312, suffix: " MT", label: "CO₂ Impact Offset", color: "#95d5b2" },
-          { icon: "🌱", value: 48, suffix: " acres", label: "Green Area Created", color: "#52b788" },
-          { icon: "👥", value: 12500, suffix: "+", label: "People Participated", color: "#95d5b2" },
-          { icon: "🏢", value: 87, suffix: "+", label: "Companies Onboard", color: "#52b788" },
-        ];
+  const stats = liveStats
+    ? [
+        { icon: "🌳", value: liveStats.totalTrees, suffix: liveStats.totalTrees > 0 ? "+" : "", label: "Trees Planted & Geotagged", color: "#52b788" },
+        { icon: "🌍", value: liveStats.totalCo2Mt, suffix: " MT", label: "CO₂ Impact Offset / yr", color: "#95d5b2" },
+        { icon: "🌱", value: liveStats.canopyAcres, suffix: " acres", label: "Canopy Area Conserved", color: "#52b788" },
+        { icon: "👥", value: liveStats.peopleCount, suffix: liveStats.peopleCount > 0 ? "+" : "", label: "Verified Adopters", color: "#95d5b2" },
+        { icon: "🌿", value: liveStats.varietiesCount, suffix: " Species", label: "Botanical Varieties", color: "#52b788" },
+      ]
+    : content?.stats && content.stats.length > 0
+    ? content.stats
+    : [
+        { icon: "🌳", value: 0, suffix: "", label: "Trees Planted & Geotagged", color: "#52b788" },
+        { icon: "🌍", value: 0, suffix: " MT", label: "CO₂ Impact Offset / yr", color: "#95d5b2" },
+        { icon: "🌱", value: 0, suffix: " acres", label: "Canopy Area Conserved", color: "#52b788" },
+        { icon: "👥", value: 0, suffix: "", label: "Verified Adopters", color: "#95d5b2" },
+        { icon: "🌿", value: 0, suffix: " Species", label: "Botanical Varieties", color: "#52b788" },
+      ];
 
   const projects =
-    content?.projects && content.projects.length > 0
+    liveProjects && liveProjects.length > 0
+      ? liveProjects
+      : content?.projects && content.projects.length > 0
       ? content.projects
-      : [
-          {
-            img: "https://images.unsplash.com/photo-1622383563227-04401ab4e5ea?w=600&h=400&fit=crop&auto=format",
-            title: "Western Ghats Restoration",
-            trees: "8,200 trees",
-            region: "Maharashtra",
-          },
-          {
-            img: "https://images.unsplash.com/photo-1590682680695-43b964a3ae17?w=600&h=400&fit=crop&auto=format",
-            title: "Urban School Forest",
-            trees: "3,400 trees",
-            region: "Pune",
-          },
-          {
-            img: "https://images.unsplash.com/photo-1457530378978-8bac673b8062?w=600&h=400&fit=crop&auto=format",
-            title: "Deccan Dry Forest Patch",
-            trees: "5,600 trees",
-            region: "Aurangabad",
-          },
-        ];
+      : [];
 
   return (
     <section
@@ -110,40 +117,50 @@ export function ImpactSection({ content }: ImpactSectionProps) {
         </div>
 
         {/* Project highlights */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {projects.map((p) => (
-            <div
-              key={p.title}
-              className="rounded-2xl overflow-hidden group"
-              style={{
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(82,183,136,0.1)",
-              }}
-            >
-              <div className="relative h-44 overflow-hidden">
-                <img
-                  src={p.img}
-                  alt={p.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, transparent 50%, rgba(23,51,36,0.85))",
-                  }}
-                />
-              </div>
-              <div className="p-5">
-                <h3 className="text-white font-semibold mb-1">{p.title}</h3>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-[#52b788] font-medium">{p.trees}</span>
-                  <span className="text-white/50">📍 {p.region}</span>
+        {projects.length === 0 ? (
+          <div className="p-8 sm:p-10 rounded-2xl bg-white/[0.04] border border-[#52b788]/20 text-center max-w-xl mx-auto backdrop-blur-xs">
+            <span className="text-3xl">🌱</span>
+            <h3 className="text-white font-semibold text-base mt-2">Active Plantation Reserves</h3>
+            <p className="text-white/60 text-xs mt-1">
+              Afforestation projects and reserve sectors will appear here as trees and botanical varieties are registered and planted.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {projects.map((p) => (
+              <div
+                key={p.title}
+                className="rounded-2xl overflow-hidden group"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(82,183,136,0.1)",
+                }}
+              >
+                <div className="relative h-44 overflow-hidden">
+                  <img
+                    src={p.img}
+                    alt={p.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(180deg, transparent 50%, rgba(23,51,36,0.85))",
+                    }}
+                  />
+                </div>
+                <div className="p-5">
+                  <h3 className="text-white font-semibold mb-1">{p.title}</h3>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-[#52b788] font-medium">{p.trees}</span>
+                    <span className="text-white/50">📍 {p.region}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

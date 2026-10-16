@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
 
-// Types & Mock Data
+// Types
 import {
   AdminTabType,
   TreeVarietyItem,
@@ -14,12 +14,6 @@ import {
   AdoptionOrder,
   AdoptionOrderStatus,
 } from "./types";
-import {
-  INITIAL_TREES,
-  INITIAL_PLANS,
-  INITIAL_LOCATIONS,
-  INITIAL_ORDERS,
-} from "./mockData";
 
 // Layout Components
 import { AdminSidebar } from "./AdminSidebar";
@@ -59,6 +53,172 @@ export type {
   AdoptionOrderStatus,
 };
 
+function deriveOrdersFromInstances(
+  instances: any[],
+  storedOrders: AdoptionOrder[] = []
+): AdoptionOrder[] {
+  const storedByOrderNum = new Map<string, AdoptionOrder>();
+  for (const o of storedOrders) {
+    storedByOrderNum.set(o.orderNumber, o);
+  }
+
+  // Group instances by orderRef
+  const groups = new Map<string, any[]>();
+  for (const inst of instances) {
+    const key = inst.orderRef || inst.treeTag;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(inst);
+  }
+
+  const derived: AdoptionOrder[] = [];
+  for (const [orderNumber, insts] of groups.entries()) {
+    const first = insts[0];
+    const existing = storedByOrderNum.get(orderNumber);
+    const qty = insts.length;
+
+    let status: AdoptionOrderStatus = existing?.status || "Planted";
+    if (first.notes && first.notes.includes("New Request")) status = "New Request";
+    else if (first.notes && first.notes.includes("Verified")) status = "Verified & Tagged";
+
+    let planType = existing?.planType || "Individual";
+    const planMatch = first.notes ? first.notes.match(/under "(.*?)"/) : null;
+    if (planMatch && planMatch[1]) planType = planMatch[1];
+
+    derived.push({
+      id: existing?.id || `ord-${orderNumber}`,
+      orderNumber,
+      adopterName: first.adopterName || "Verified Adopter",
+      adopterEmail: first.adopterEmail || "adopter@example.com",
+      treeSpecies: first.treeVarietyName || "Indigenous Tree",
+      scientificName: existing?.scientificName || "Botanical Specimen",
+      category: existing?.category || "Native Trees",
+      reserveName: first.assignedReserve,
+      gpsCoords: first.formattedGps || `${first.gpsCoordinates?.latitude}° N, ${first.gpsCoordinates?.longitude}° E`,
+      planType,
+      quantity: qty,
+      totalAmount: existing?.totalAmount || qty * 399,
+      datePlanted: typeof first.datePlanted === "string" ? first.datePlanted : new Date(first.datePlanted).toISOString().split("T")[0],
+      status,
+      certificateId: existing?.certificateId || `CERT-${orderNumber}`,
+      ndviScore: existing?.ndviScore || 0.91,
+      isRead: existing?.isRead !== undefined ? existing.isRead : true,
+      createdAt: first.createdAt || new Date().toISOString(),
+    });
+  }
+
+  // Include any extra stored orders that might not yet have instances in DB
+  for (const o of storedOrders) {
+    if (!groups.has(o.orderNumber)) {
+      derived.push(o);
+    }
+  }
+
+  return derived;
+}
+
+function deriveLocationsFromData(
+  instances: any[],
+  varieties: any[],
+  customLocations: PlantationLocationItem[] = []
+): PlantationLocationItem[] {
+  const reserveConfigs: Record<
+    string,
+    { region: string; gps: string; areaHectares: number; capacity: number; image: string }
+  > = {
+    "Western Ghats, Maharashtra": {
+      region: "Sahyadri Mountain Range, MH",
+      gps: "18.9894° N, 73.4428° E",
+      areaHectares: 48.5,
+      capacity: 15000,
+      image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
+    },
+    "Western Ghats Ecological Corridor, MH": {
+      region: "Sahyadri Mountain Range, MH",
+      gps: "18.9894° N, 73.4428° E",
+      areaHectares: 52.0,
+      capacity: 18000,
+      image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
+    },
+    "Nashik Valley, Maharashtra": {
+      region: "Godavari River Basin, MH",
+      gps: "19.9975° N, 73.7898° E",
+      areaHectares: 26.2,
+      capacity: 8500,
+      image: "https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=600&h=400&fit=crop&auto=format",
+    },
+    "Satara Plateau, Maharashtra": {
+      region: "Kaas UNESCO Biosphere, MH",
+      gps: "17.6805° N, 73.9904° E",
+      areaHectares: 34.0,
+      capacity: 11000,
+      image: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=600&h=400&fit=crop&auto=format",
+    },
+    "Nagpur Forest Zone": {
+      region: "Vidarbha Dry Deciduous Belt, MH",
+      gps: "21.1458° N, 79.0882° E",
+      areaHectares: 62.0,
+      capacity: 22000,
+      image: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&h=400&fit=crop&auto=format",
+    },
+    "Aurangabad Green Belt": {
+      region: "Marathwada Semi-Arid Zone, MH",
+      gps: "19.8762° N, 75.3433° E",
+      areaHectares: 18.5,
+      capacity: 6000,
+      image: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=600&h=400&fit=crop&auto=format",
+    },
+    "Pune Hills, Maharashtra": {
+      region: "Deccan Plateau Foothills, MH",
+      gps: "18.5204° N, 73.8567° E",
+      areaHectares: 15.0,
+      capacity: 5000,
+      image: "https://images.unsplash.com/photo-1511497584788-87676104235f?w=600&h=400&fit=crop&auto=format",
+    },
+  };
+
+  const activeReserves = new Set<string>();
+  instances.forEach((i: any) => i.assignedReserve && activeReserves.add(i.assignedReserve));
+  varieties.forEach((v: any) => v.location && activeReserves.add(v.location));
+  customLocations.forEach((c) => c.name && activeReserves.add(c.name));
+
+  const treeCountMap: Record<string, number> = {};
+  instances.forEach((i: any) => {
+    const resName = i.assignedReserve;
+    treeCountMap[resName] = (treeCountMap[resName] || 0) + 1;
+  });
+
+  const locationsList: PlantationLocationItem[] = [];
+  let idx = 1;
+  for (const reserveName of activeReserves) {
+    const custom = customLocations.find((c) => c.name === reserveName);
+    const config = custom || reserveConfigs[reserveName] || {
+      region: "Registered Reserve Sector",
+      gps: "19.0000° N, 74.0000° E",
+      areaHectares: 25.0,
+      capacity: 10000,
+      image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
+    };
+
+    const count = treeCountMap[reserveName] || 0;
+    locationsList.push({
+      id: custom?.id || `loc-db-${idx++}`,
+      name: reserveName,
+      region: config.region,
+      gps: config.gps,
+      areaHectares: config.areaHectares,
+      capacity: config.capacity,
+      treesPlanted: count,
+      survivalRate: custom?.survivalRate || "100%",
+      ndviScore: custom?.ndviScore || 0.88,
+      soilHealth: custom?.soilHealth || "Optimal Loam",
+      image: config.image,
+      status: count >= config.capacity ? "Full" : count > 500 ? "Expanding" : "Active",
+    });
+  }
+
+  return locationsList;
+}
+
 export function AdminDashboard() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<AdminTabType>("overview");
@@ -69,7 +229,7 @@ export function AdminDashboard() {
   const [trees, setTrees] = useState<TreeVarietyItem[]>([]);
   const [plans, setPlans] = useState<AdoptionPlanItem[]>([]);
   const [instances, setInstances] = useState<TreeInstanceItem[]>([]);
-  const [locations, setLocations] = useState<PlantationLocationItem[]>(INITIAL_LOCATIONS);
+  const [locations, setLocations] = useState<PlantationLocationItem[]>([]);
   const [orders, setOrders] = useState<AdoptionOrder[]>(() => {
     if (typeof window !== "undefined") {
       try {
@@ -77,15 +237,14 @@ export function AdminDashboard() {
         if (stored) {
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            const parsedNumbers = new Set(parsed.map((p: any) => p.orderNumber));
-            return [...parsed, ...INITIAL_ORDERS.filter((o) => !parsedNumbers.has(o.orderNumber))];
+            return parsed;
           }
         }
       } catch (e) {
         console.warn("Could not load stored orders:", e);
       }
     }
-    return INITIAL_ORDERS;
+    return [];
   });
 
   // Listen for real-time new orders placed from client storefront
@@ -131,19 +290,36 @@ export function AdminDashboard() {
           treeInstanceService.getAll(),
         ]);
         if (isMounted) {
-          setTrees(treesRes.data?.items ? treesRes.data.items.map(treeVarietyService.mapToUiItem) : []);
-          setPlans(plansRes.data?.items ? plansRes.data.items.map(adoptionPlanService.mapToUiItem) : []);
-          
+          const apiTrees = treesRes.data?.items ? treesRes.data.items.map(treeVarietyService.mapToUiItem) : [];
+          const apiPlans = plansRes.data?.items ? plansRes.data.items.map(adoptionPlanService.mapToUiItem) : [];
           const apiInstances = instancesRes.data?.items ? instancesRes.data.items.map(treeInstanceService.mapToUiItem) : [];
-          let storedInstances: TreeInstanceItem[] = [];
+
+          setTrees(apiTrees);
+          setPlans(apiPlans);
+          setInstances(apiInstances);
+
+          // Dynamically derive bio-reserves from database records + custom locations
+          let customLocations: PlantationLocationItem[] = [];
           if (typeof window !== "undefined") {
             try {
-              const raw = localStorage.getItem("poa_instances");
-              if (raw) storedInstances = JSON.parse(raw);
+              const raw = localStorage.getItem("poa_custom_locations");
+              if (raw) customLocations = JSON.parse(raw);
             } catch {}
           }
-          const apiIds = new Set(apiInstances.map((i) => i.id));
-          setInstances([...storedInstances.filter((s) => !apiIds.has(s.id)), ...apiInstances]);
+
+          const derivedLocations = deriveLocationsFromData(
+            instancesRes.data?.items || [],
+            treesRes.data?.items || [],
+            customLocations
+          );
+          setLocations(derivedLocations);
+
+          // Dynamically derive adoption orders strictly from database instances
+          const derivedOrders = deriveOrdersFromInstances(
+            instancesRes.data?.items || [],
+            []
+          );
+          setOrders(derivedOrders);
         }
       } catch (err) {
         console.warn("Could not load catalog from backend:", err);
@@ -182,7 +358,7 @@ export function AdminDashboard() {
     (o) => o.isRead === false || o.status === "New Request"
   ).length;
 
-  const handleUpdateOrderStatus = (orderNumber: string, newStatus: AdoptionOrderStatus) => {
+  const handleUpdateOrderStatus = async (orderNumber: string, newStatus: AdoptionOrderStatus) => {
     setOrders((prev) => {
       const updated = prev.map((o) => {
         if (o.orderNumber === orderNumber || o.id === orderNumber) {
@@ -200,6 +376,21 @@ export function AdminDashboard() {
 
     if (selectedOrder && (selectedOrder.orderNumber === orderNumber || selectedOrder.id === orderNumber)) {
       setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus, isRead: true } : null));
+    }
+
+    // Persist status change to matching tree instances in database
+    const matchingInsts = instances.filter(
+      (i) => i.orderRef === orderNumber || i.treeTag === orderNumber
+    );
+    for (const inst of matchingInsts) {
+      try {
+        const cleanNotes = inst.notes ? inst.notes.replace(/Status: [^.]+\.\s*/, "") : "";
+        await treeInstanceService.update(inst.id, {
+          notes: `Status: ${newStatus}. ${cleanNotes}`,
+        });
+      } catch (err) {
+        console.warn("Failed to persist order status to instance in DB:", err);
+      }
     }
 
     showToast(`✓ Order ${orderNumber} status changed to "${newStatus}"`);
@@ -408,7 +599,7 @@ export function AdminDashboard() {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const newLoc: PlantationLocationItem = {
-      id: "loc-" + (locations.length + 1),
+      id: "loc-" + Date.now(),
       name: (fd.get("name") as string).trim(),
       region: (fd.get("region") as string).trim(),
       gps: (fd.get("gps") as string).trim() || "18.5204° N, 73.8567° E",
@@ -423,7 +614,17 @@ export function AdminDashboard() {
         "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
       status: "Active",
     };
-    setLocations((prev) => [...prev, newLoc]);
+    setLocations((prev) => {
+      const next = [...prev, newLoc];
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("poa_custom_locations");
+          const custom = raw ? JSON.parse(raw) : [];
+          localStorage.setItem("poa_custom_locations", JSON.stringify([...custom, newLoc]));
+        } catch {}
+      }
+      return next;
+    });
     setShowAddLocationModal(false);
     showToast(`Added reserve location "${newLoc.name}"!`);
     setActiveTab("locations");
@@ -581,6 +782,15 @@ export function AdminDashboard() {
         showToast(`Tree instance "${name}" record removed.`);
       } else if (type === "location") {
         setLocations((prev) => prev.filter((l) => l.id !== id));
+        if (typeof window !== "undefined") {
+          try {
+            const raw = localStorage.getItem("poa_custom_locations");
+            if (raw) {
+              const custom = JSON.parse(raw).filter((l: any) => l.id !== id && l.name !== name);
+              localStorage.setItem("poa_custom_locations", JSON.stringify(custom));
+            }
+          } catch {}
+        }
         showToast(`Reserve location "${name}" removed.`);
       }
       setDeleteModal(null);
@@ -675,6 +885,8 @@ export function AdminDashboard() {
             <OverviewTab
               locations={locations}
               orders={orders}
+              instances={instances}
+              treeVarieties={trees}
               setActiveTab={setActiveTab}
               onSelectOrder={handleSelectOrder}
               unreadOrdersCount={unreadOrdersCount}

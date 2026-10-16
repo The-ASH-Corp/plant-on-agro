@@ -7,13 +7,20 @@ import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
 
 import { HeroSectionContent } from "@/services/landing-page/landing-page.service";
 
+export interface HeroLiveStats {
+  totalTrees: number;
+  totalVarieties: number;
+  totalReserves: number;
+}
+
 export interface HeroProps {
   openPlant: () => void;
   goImpact: () => void;
   content?: HeroSectionContent;
+  liveStats?: HeroLiveStats;
 }
 
-export function Hero({ openPlant, goImpact, content }: HeroProps) {
+export function Hero({ openPlant, goImpact, content, liveStats }: HeroProps) {
   const user = useHydratedStore(useAuthStore, (s) => s.user);
   const isAuthenticated = useHydratedStore(useAuthStore, (s) => s.isAuthenticated);
   const { scrollY } = useScroll();
@@ -29,12 +36,18 @@ export function Hero({ openPlant, goImpact, content }: HeroProps) {
   const bgImg =
     content?.bgImageUrl ||
     "https://images.unsplash.com/photo-1568241640298-1adf2974314c?w=1920&h=1080&fit=crop&auto=format";
-  const stats = content?.stats && content.stats.length > 0
+  const stats = liveStats
+    ? [
+        { target: liveStats.totalTrees, suffix: liveStats.totalTrees > 0 ? "+" : "", label: "Trees Planted & Geotagged" },
+        { target: liveStats.totalVarieties, suffix: "", label: "Native Tree Varieties" },
+        { target: liveStats.totalReserves, suffix: liveStats.totalReserves > 0 ? "+" : "", label: "Protected Bio-Reserves" },
+      ]
+    : content?.stats && content.stats.length > 0
     ? content.stats
     : [
-        { target: 25000, suffix: "+", label: "Trees Planted" },
-        { target: 12500, suffix: "+", label: "People Participated" },
-        { target: 150, suffix: "+", label: "Plantation Projects" },
+        { target: 0, suffix: "", label: "Trees Planted & Geotagged" },
+        { target: 0, suffix: "", label: "Native Tree Varieties" },
+        { target: 0, suffix: "", label: "Protected Bio-Reserves" },
       ];
 
   const bgY = useTransform(scrollY, [0, 1000], [0, 300]);

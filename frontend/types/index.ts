@@ -12,7 +12,7 @@ export type TreeCategory =
 export type PlantStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 export interface Tree {
-  id: number;
+  id: string | number;
   name: string;
   sci: string;
   category: TreeCategory;
@@ -21,6 +21,7 @@ export interface Tree {
   growth: string;
   img: string;
   desc: string;
+  co2AbsorptionRateKgYear?: number;
 }
 
 export interface Plan {
