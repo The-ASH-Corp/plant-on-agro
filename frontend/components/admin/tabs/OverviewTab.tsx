@@ -7,6 +7,8 @@ interface OverviewTabProps {
   orders: AdoptionOrder[];
   setActiveTab: (tab: AdminTabType) => void;
   onSelectOrder: (order: AdoptionOrder) => void;
+  unreadOrdersCount?: number;
+  onMarkAllAsRead?: () => void;
 }
 
 export function OverviewTab({
@@ -14,9 +16,52 @@ export function OverviewTab({
   orders,
   setActiveTab,
   onSelectOrder,
+  unreadOrdersCount = 0,
+  onMarkAllAsRead,
 }: OverviewTabProps) {
   return (
     <div className="space-y-6 animate-fadeIn">
+      {/* Prominent Alert Banner for When Admin Logs In & Has New Orders */}
+      {unreadOrdersCount > 0 && (
+        <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-500/15 via-emerald-500/10 to-emerald-500/5 border border-amber-400/40 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fadeIn">
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl shrink-0 shadow-xs animate-bounce">
+              🔔
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-bold text-[#173324] text-sm sm:text-base">
+                  {unreadOrdersCount} New Tree Adoption Request{unreadOrdersCount > 1 ? "s" : ""} Received!
+                </h3>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-500 text-white shadow-xs">
+                  Action Required
+                </span>
+              </div>
+              <p className="text-xs text-[#4a6557] mt-0.5 leading-relaxed">
+                New buyer requests were submitted while you were away. You can review buyer details, verify sapling allocation, and update order statuses.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+            <button
+              onClick={() => setActiveTab("orders")}
+              className="px-4 py-2 rounded-xl bg-[#173324] text-white text-xs font-semibold hover:bg-[#1f4230] transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
+            >
+              <span>Review Orders</span>
+              <span>→</span>
+            </button>
+            {onMarkAllAsRead && (
+              <button
+                onClick={onMarkAllAsRead}
+                className="px-3 py-2 rounded-xl border border-amber-300 text-xs font-semibold text-amber-900 bg-amber-50 hover:bg-amber-100 transition-colors cursor-pointer"
+              >
+                Mark Reviewed
+              </button>
+            )}
+          </div>
+        </div>
+      )}
       {/* Executive Welcome Hero Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#173324] via-[#1c402d] to-[#0f241a] text-white p-6 sm:p-8 shadow-lg border border-emerald-900/30">
         <div className="relative z-10 max-w-2xl">
@@ -204,6 +249,11 @@ export function OverviewTab({
                       <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
                         {order.orderNumber}
                       </span>
+                      {(order.isRead === false || order.status === "New Request") && (
+                        <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-500 text-white animate-pulse">
+                          NEW
+                        </span>
+                      )}
                     </div>
                     <span className="text-[11px] text-[#73877b]">
                       Adopted by {order.adopterName} • {order.reserveName}
@@ -213,7 +263,19 @@ export function OverviewTab({
 
                 <div className="text-right">
                   <span className="text-xs font-bold text-[#173324] block">₹{order.totalAmount}</span>
-                  <span className="text-[10px] font-semibold text-emerald-600">{order.status}</span>
+                  <span
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mt-0.5 ${
+                      order.status === "New Request"
+                        ? "bg-amber-100 text-amber-800 border border-amber-300"
+                        : order.status === "Verified & Tagged"
+                        ? "bg-sky-50 text-sky-700 border border-sky-200"
+                        : order.status === "Planted"
+                        ? "bg-lime-50 text-lime-700 border border-lime-200"
+                        : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    }`}
+                  >
+                    {order.status}
+                  </span>
                 </div>
               </div>
             ))}

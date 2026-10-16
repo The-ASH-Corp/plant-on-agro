@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Logo from "../../public/Screenshot_From_2026-09-17_15-39-39-removebg-preview.png";
 import { User } from "@/types/auth";
-import { UserAvatarMenu } from "@/components/UserAvatarMenu";
+import { UserAvatarMenu } from "@/components/layout";
 
 interface BuyerHeaderProps {
   user?: User | null;

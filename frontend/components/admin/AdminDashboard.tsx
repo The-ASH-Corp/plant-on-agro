@@ -12,6 +12,7 @@ import {
   AdoptionPlanItem,
   PlantationLocationItem,
   AdoptionOrder,
+  AdoptionOrderStatus,
 } from "./types";
 import {
   INITIAL_TREES,
@@ -55,6 +56,7 @@ export type {
   TreeInstanceItem,
   PlantationLocationItem,
   AdoptionOrder,
+  AdoptionOrderStatus,
 };
 
 export function AdminDashboard() {
@@ -173,6 +175,60 @@ export function AdminDashboard() {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  // Unread / New Orders Tracking
+  const unreadOrdersCount = orders.filter(
+    (o) => o.isRead === false || o.status === "New Request"
+  ).length;
+
+  const handleUpdateOrderStatus = (orderNumber: string, newStatus: AdoptionOrderStatus) => {
+    setOrders((prev) => {
+      const updated = prev.map((o) => {
+        if (o.orderNumber === orderNumber || o.id === orderNumber) {
+          return { ...o, status: newStatus, isRead: true };
+        }
+        return o;
+      });
+      try {
+        localStorage.setItem("poa_orders", JSON.stringify(updated));
+      } catch (e) {
+        console.warn("Could not save updated orders:", e);
+      }
+      return updated;
+    });
+
+    if (selectedOrder && (selectedOrder.orderNumber === orderNumber || selectedOrder.id === orderNumber)) {
+      setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus, isRead: true } : null));
+    }
+
+    showToast(`✓ Order ${orderNumber} status changed to "${newStatus}"`);
+  };
+
+  const handleMarkAllOrdersAsRead = () => {
+    setOrders((prev) => {
+      const updated = prev.map((o) => ({ ...o, isRead: true }));
+      try {
+        localStorage.setItem("poa_orders", JSON.stringify(updated));
+      } catch (e) {
+        console.warn("Could not save read orders:", e);
+      }
+      return updated;
+    });
+    showToast("✓ All adoption requests marked as reviewed.");
+  };
+
+  const handleSelectOrder = (order: AdoptionOrder) => {
+    setSelectedOrder(order);
+    if (order.isRead === false) {
+      setOrders((prev) => {
+        const updated = prev.map((o) => (o.id === order.id ? { ...o, isRead: true } : o));
+        try {
+          localStorage.setItem("poa_orders", JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+    }
   };
 
   // Auth Store & Access Guard
@@ -586,6 +642,7 @@ export function AdminDashboard() {
         instancesCount={instances.length}
         locationsCount={locations.length}
         ordersCount={orders.length}
+        unreadOrdersCount={unreadOrdersCount}
         userName={user?.name}
         onLogout={logout}
         onOpenAddTree={() => setShowAddTreeModal(true)}
@@ -602,6 +659,11 @@ export function AdminDashboard() {
           activeTab={activeTab}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          orders={orders}
+          unreadCount={unreadOrdersCount}
+          onSelectOrder={handleSelectOrder}
+          onMarkAllAsRead={handleMarkAllOrdersAsRead}
+          onViewAllOrders={() => setActiveTab("orders")}
         />
 
         {/* Global Toast Alert */}
@@ -614,7 +676,9 @@ export function AdminDashboard() {
               locations={locations}
               orders={orders}
               setActiveTab={setActiveTab}
-              onSelectOrder={setSelectedOrder}
+              onSelectOrder={handleSelectOrder}
+              unreadOrdersCount={unreadOrdersCount}
+              onMarkAllAsRead={handleMarkAllOrdersAsRead}
             />
           )}
 
@@ -659,8 +723,11 @@ export function AdminDashboard() {
             <OrdersTab
               orders={orders}
               searchQuery={searchQuery}
-              onSelectOrder={setSelectedOrder}
+              onSelectOrder={handleSelectOrder}
               onExportCSV={() => showToast("Exporting order ledger CSV...")}
+              onUpdateStatus={handleUpdateOrderStatus}
+              onMarkAllAsRead={handleMarkAllOrdersAsRead}
+              unreadCount={unreadOrdersCount}
             />
           )}
 
@@ -702,6 +769,7 @@ export function AdminDashboard() {
           showToast(`Digital Certificate ${certId} downloaded!`);
           setSelectedOrder(null);
         }}
+        onUpdateStatus={handleUpdateOrderStatus}
       />
 
       {/* 4. Custom Delete Confirmation Popup Modal */}

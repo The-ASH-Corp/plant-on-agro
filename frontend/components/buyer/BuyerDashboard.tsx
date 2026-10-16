@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
 import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
-import { PlantFlow } from "@/components/PlantFlow";
+import { PlantFlow } from "@/components/plant-flow";
 import {
   treeInstanceService,
   BackendTreeInstance,

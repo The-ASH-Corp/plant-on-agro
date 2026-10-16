@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { Section } from "@/types";
-import { Nav } from "@/components/Nav";
-import { Hero } from "@/components/Hero";
-import { HowItWorks } from "@/components/HowItWorks";
-import { ImpactSection } from "@/components/ImpactSection";
-import { CertificateSection } from "@/components/CertificateSection";
-import { Footer } from "@/components/Footer";
-import { PlantFlow } from "@/components/PlantFlow";
+import { Nav, Footer } from "@/components/layout";
+import {
+  Hero,
+  HowItWorks,
+  ImpactSection,
+  CertificateSection,
+} from "@/components/landing";
+import { PlantFlow } from "@/components/plant-flow";
 import {
   landingPageService,
   LandingPageContent,

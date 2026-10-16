@@ -260,9 +260,11 @@ export const INITIAL_ORDERS: AdoptionOrder[] = [
     quantity: 2,
     totalAmount: 798,
     datePlanted: "2026-10-12",
-    status: "Certificate Issued",
+    status: "New Request",
     certificateId: "CERT-NSK-09821",
     ndviScore: 0.88,
+    isRead: false,
+    createdAt: "2026-10-12T14:30:00Z",
   },
   {
     id: "ord-2",
