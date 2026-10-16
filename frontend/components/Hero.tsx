@@ -107,8 +107,9 @@ export function Hero({ openPlant, goImpact, content }: HeroProps) {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 sm:mb-16">
           <button
+            id="hero-plant-btn"
             onClick={openPlant}
-            className="px-8 py-4 rounded-full font-semibold text-base text-white transition-all duration-200 hover:scale-105 hover:shadow-2xl"
+            className="px-8 py-4 rounded-full font-semibold text-base text-white transition-all duration-200 hover:scale-105 hover:shadow-2xl cursor-pointer"
             style={{
               background: "linear-gradient(135deg,#52b788,#1e4433)",
               boxShadow: "0 8px 32px rgba(82,183,136,0.35)",

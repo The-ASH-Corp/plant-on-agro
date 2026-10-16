@@ -136,8 +136,9 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
           )}
           {openPlant ? (
             <button
+              id="nav-plant-btn"
               onClick={openPlant}
-              className="text-sm font-semibold px-5 py-2.5 rounded-full transition-all duration-200 hover:scale-105"
+              className="text-sm font-semibold px-5 py-2.5 rounded-full transition-all duration-200 hover:scale-105 cursor-pointer"
               style={{ background: "linear-gradient(135deg,#52b788,#2d6a4f)", color: "#fff" }}
             >
               Plant a Tree

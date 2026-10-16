@@ -68,7 +68,55 @@ export function AdminDashboard() {
   const [plans, setPlans] = useState<AdoptionPlanItem[]>([]);
   const [instances, setInstances] = useState<TreeInstanceItem[]>([]);
   const [locations, setLocations] = useState<PlantationLocationItem[]>(INITIAL_LOCATIONS);
-  const [orders] = useState<AdoptionOrder[]>(INITIAL_ORDERS);
+  const [orders, setOrders] = useState<AdoptionOrder[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("poa_orders");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const parsedNumbers = new Set(parsed.map((p: any) => p.orderNumber));
+            return [...parsed, ...INITIAL_ORDERS.filter((o) => !parsedNumbers.has(o.orderNumber))];
+          }
+        }
+      } catch (e) {
+        console.warn("Could not load stored orders:", e);
+      }
+    }
+    return INITIAL_ORDERS;
+  });
+
+  // Listen for real-time new orders placed from client storefront
+  useEffect(() => {
+    const handleNewOrder = (e: any) => {
+      if (e.detail?.order) {
+        const newOrd = e.detail.order as AdoptionOrder;
+        setOrders((prev) => [newOrd, ...prev.filter((o) => o.orderNumber !== newOrd.orderNumber)]);
+        showToast(
+          `🎉 New Order Received! ${newOrd.orderNumber} from ${newOrd.adopterName} (₹${newOrd.totalAmount.toLocaleString()})`
+        );
+        if (Array.isArray(e.detail?.instances)) {
+          const newInsts = e.detail.instances as TreeInstanceItem[];
+          const newInstIds = new Set(newInsts.map((i) => i.id));
+          setInstances((prev) => [...newInsts, ...prev.filter((i) => !newInstIds.has(i.id))]);
+        } else if (e.detail?.instance) {
+          const newInst = e.detail.instance as TreeInstanceItem;
+          setInstances((prev) => [newInst, ...prev.filter((i) => i.id !== newInst.id)]);
+        }
+      } else if (e.detail?.orderNumber) {
+        const newOrd = e.detail as AdoptionOrder;
+        setOrders((prev) => [newOrd, ...prev.filter((o) => o.orderNumber !== newOrd.orderNumber)]);
+        showToast(
+          `🎉 New Order Received! ${newOrd.orderNumber} from ${newOrd.adopterName} (₹${newOrd.totalAmount.toLocaleString()})`
+        );
+      }
+    };
+
+    window.addEventListener("poa-new-order", handleNewOrder);
+    return () => {
+      window.removeEventListener("poa-new-order", handleNewOrder);
+    };
+  }, []);
 
   // Load real tree varieties, adoption plans, and tree instances from backend API on mount
   useEffect(() => {
@@ -83,7 +131,17 @@ export function AdminDashboard() {
         if (isMounted) {
           setTrees(treesRes.data?.items ? treesRes.data.items.map(treeVarietyService.mapToUiItem) : []);
           setPlans(plansRes.data?.items ? plansRes.data.items.map(adoptionPlanService.mapToUiItem) : []);
-          setInstances(instancesRes.data?.items ? instancesRes.data.items.map(treeInstanceService.mapToUiItem) : []);
+          
+          const apiInstances = instancesRes.data?.items ? instancesRes.data.items.map(treeInstanceService.mapToUiItem) : [];
+          let storedInstances: TreeInstanceItem[] = [];
+          if (typeof window !== "undefined") {
+            try {
+              const raw = localStorage.getItem("poa_instances");
+              if (raw) storedInstances = JSON.parse(raw);
+            } catch {}
+          }
+          const apiIds = new Set(apiInstances.map((i) => i.id));
+          setInstances([...storedInstances.filter((s) => !apiIds.has(s.id)), ...apiInstances]);
         }
       } catch (err) {
         console.warn("Could not load catalog from backend:", err);

@@ -85,38 +85,76 @@ export function BuyerDashboard() {
           limit: 10,
         });
 
+        const storedBuyerTrees: BackendTreeInstance[] = (() => {
+          if (typeof window !== "undefined") {
+            try {
+              const raw = localStorage.getItem("poa_buyer_trees");
+              return raw ? JSON.parse(raw) : [];
+            } catch {
+              return [];
+            }
+          }
+          return [];
+        })();
+
         if (isMounted) {
           if (res.data?.items && res.data.items.length > 0) {
-            setTrees(res.data.items);
+            const apiIds = new Set(res.data.items.map((i) => i.id));
+            setTrees([...storedBuyerTrees.filter((s) => !apiIds.has(s.id)), ...res.data.items]);
           } else {
-            setTrees(defaultBuyerTrees);
+            setTrees([...storedBuyerTrees, ...defaultBuyerTrees]);
           }
         }
       } catch (err) {
         console.warn("Could not load trees from API, using default ledger:", err);
-        if (isMounted) setTrees(defaultBuyerTrees);
+        const storedBuyerTrees: BackendTreeInstance[] = (() => {
+          if (typeof window !== "undefined") {
+            try {
+              const raw = localStorage.getItem("poa_buyer_trees");
+              return raw ? JSON.parse(raw) : [];
+            } catch {
+              return [];
+            }
+          }
+          return [];
+        })();
+        if (isMounted) setTrees([...storedBuyerTrees, ...defaultBuyerTrees]);
       } finally {
         if (isMounted) setLoading(false);
       }
     }
 
-    if (user) {
-      fetchUserTrees();
-    } else {
-      setLoading(false);
-    }
+    fetchUserTrees();
+
+    // Real-time listener for test orders
+    const handleNewOrder = (e: any) => {
+      if (Array.isArray(e.detail?.instances)) {
+        const insts = e.detail.instances as BackendTreeInstance[];
+        const instIds = new Set(insts.map((i) => i.id));
+        setTrees((prev) => [...insts, ...prev.filter((t) => !instIds.has(t.id))]);
+      } else if (e.detail?.instance) {
+        const inst = e.detail.instance as BackendTreeInstance;
+        setTrees((prev) => [inst, ...prev.filter((t) => t.id !== inst.id)]);
+      }
+    };
+    window.addEventListener("poa-new-order", handleNewOrder);
 
     return () => {
       isMounted = false;
+      window.removeEventListener("poa-new-order", handleNewOrder);
     };
   }, [user]);
 
-  // Protected route check
+  // Protected route check (allows viewing newly adopted trees in test mode)
   useEffect(() => {
-    if (!isAuthenticated && !user) {
+    const hasTestTrees =
+      typeof window !== "undefined" &&
+      Boolean(localStorage.getItem("poa_buyer_trees"));
+
+    if (!isAuthenticated && !user && !hasTestTrees) {
       const timeout = setTimeout(() => {
         router.push("/login");
-      }, 300);
+      }, 500);
       return () => clearTimeout(timeout);
     }
   }, [isAuthenticated, user, router]);
