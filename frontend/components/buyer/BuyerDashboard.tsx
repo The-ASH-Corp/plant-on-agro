@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
 import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
-import { PlantFlow } from "@/components/PlantFlow";
+import { PlantFlow } from "@/components/plant-flow";
 import {
   treeInstanceService,
   BackendTreeInstance,
@@ -32,91 +32,97 @@ export function BuyerDashboard() {
   const [trees, setTrees] = useState<BackendTreeInstance[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fallback demo trees so buyer dashboard is instantly alive, rich, and inspiring
-  const defaultBuyerTrees: BackendTreeInstance[] = [
-    {
-      id: "demo-tree-1",
-      treeTag: "POA-MG-2847",
-      orderRef: "ORD-2026-781",
-      assignedReserve: "Western Ghats Ecological Corridor, MH",
-      gpsCoordinates: { latitude: 18.922, longitude: 73.816 },
-      formattedGps: "18.9220° N, 73.8160° E",
-      datePlanted: "14 Sep 2026",
-      healthStatus: "Thriving",
-      treeVarietyName: "Indian Mango (Mangifera Indica)",
-      adopterName: user?.name || "Tree Planter",
-      adopterEmail: user?.email || "planter@plantonagro.com",
-      notes: "Sapling thriving under monsoon care. Regular geotagged drone inspections scheduled.",
-      imageUrl: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
-      lastInspectedAt: "2026-10-01",
-      isActive: true,
-      createdAt: "2026-09-14",
-      updatedAt: "2026-10-01",
-    },
-    {
-      id: "demo-tree-2",
-      treeTag: "POA-TK-1192",
-      orderRef: "ORD-2026-904",
-      assignedReserve: "Deccan Dry Forest Patch, Pune",
-      gpsCoordinates: { latitude: 18.5204, longitude: 73.8567 },
-      formattedGps: "18.5204° N, 73.8567° E",
-      datePlanted: "28 Sep 2026",
-      healthStatus: "Healthy",
-      treeVarietyName: "Teak Wood (Tectona Grandis)",
-      adopterName: user?.name || "Tree Planter",
-      adopterEmail: user?.email || "planter@plantonagro.com",
-      notes: "Secondary leaf canopy developing smoothly. Strong root anchoring established.",
-      imageUrl: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=600&h=400&fit=crop&auto=format",
-      lastInspectedAt: "2026-10-10",
-      isActive: true,
-      createdAt: "2026-09-28",
-      updatedAt: "2026-10-10",
-    },
-  ];
-
-  // Fetch real trees from API
+  // Fetch real trees from MongoDB database via treeInstanceService
   useEffect(() => {
     let isMounted = true;
     async function fetchUserTrees() {
       try {
         setLoading(true);
+        // Query by user's email or name if authenticated, otherwise fetch latest general instances
+        const searchQuery = user?.email || user?.name || "";
         const res = await treeInstanceService.getAll({
-          search: user?.name || user?.email || "",
-          limit: 10,
+          search: searchQuery,
+          limit: 50,
         });
 
+        // Also check if any trees were adopted during this session in local storage
+        const storedBuyerTrees: BackendTreeInstance[] = (() => {
+          if (typeof window !== "undefined") {
+            try {
+              const raw = localStorage.getItem("poa_buyer_trees");
+              return raw ? JSON.parse(raw) : [];
+            } catch {
+              return [];
+            }
+          }
+          return [];
+        })();
+
         if (isMounted) {
-          if (res.data?.items && res.data.items.length > 0) {
-            setTrees(res.data.items);
+          const apiItems = res.data?.items || [];
+          if (apiItems.length > 0) {
+            const apiIds = new Set(apiItems.map((i) => i.id));
+            setTrees([...storedBuyerTrees.filter((s) => !apiIds.has(s.id)), ...apiItems]);
+          } else if (storedBuyerTrees.length > 0) {
+            setTrees(storedBuyerTrees);
           } else {
-            setTrees(defaultBuyerTrees);
+            // If user has no specific trees, fetch general trees so dashboard displays real database trees
+            const generalRes = await treeInstanceService.getAll({ limit: 10 });
+            if (isMounted) {
+              setTrees(generalRes.data?.items || []);
+            }
           }
         }
       } catch (err) {
-        console.warn("Could not load trees from API, using default ledger:", err);
-        if (isMounted) setTrees(defaultBuyerTrees);
+        console.warn("Could not load trees from database:", err);
+        const storedBuyerTrees: BackendTreeInstance[] = (() => {
+          if (typeof window !== "undefined") {
+            try {
+              const raw = localStorage.getItem("poa_buyer_trees");
+              return raw ? JSON.parse(raw) : [];
+            } catch {
+              return [];
+            }
+          }
+          return [];
+        })();
+        if (isMounted) setTrees(storedBuyerTrees);
       } finally {
         if (isMounted) setLoading(false);
       }
     }
 
-    if (user) {
-      fetchUserTrees();
-    } else {
-      setLoading(false);
-    }
+    fetchUserTrees();
+
+    // Real-time listener for test orders
+    const handleNewOrder = (e: any) => {
+      if (Array.isArray(e.detail?.instances)) {
+        const insts = e.detail.instances as BackendTreeInstance[];
+        const instIds = new Set(insts.map((i) => i.id));
+        setTrees((prev) => [...insts, ...prev.filter((t) => !instIds.has(t.id))]);
+      } else if (e.detail?.instance) {
+        const inst = e.detail.instance as BackendTreeInstance;
+        setTrees((prev) => [inst, ...prev.filter((t) => t.id !== inst.id)]);
+      }
+    };
+    window.addEventListener("poa-new-order", handleNewOrder);
 
     return () => {
       isMounted = false;
+      window.removeEventListener("poa-new-order", handleNewOrder);
     };
   }, [user]);
 
-  // Protected route check
+  // Protected route check (allows viewing newly adopted trees in test mode)
   useEffect(() => {
-    if (!isAuthenticated && !user) {
+    const hasTestTrees =
+      typeof window !== "undefined" &&
+      Boolean(localStorage.getItem("poa_buyer_trees"));
+
+    if (!isAuthenticated && !user && !hasTestTrees) {
       const timeout = setTimeout(() => {
         router.push("/login");
-      }, 300);
+      }, 500);
       return () => clearTimeout(timeout);
     }
   }, [isAuthenticated, user, router]);

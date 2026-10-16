@@ -5,12 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Section } from "@/types";
 import Image from "next/image";
-import Logo from "../public/Screenshot_From_2026-09-17_15-39-39-removebg-preview.png";
+import Logo from "../../public/Screenshot_From_2026-09-17_15-39-39-removebg-preview.png";
 import { useAuthStore } from "@/store/auth.store";
 import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
-import { UserAvatarMenu } from "@/components/UserAvatarMenu";
+import { UserAvatarMenu } from "./UserAvatarMenu";
 
-interface NavProps {
+export interface NavProps {
   active?: Section;
   setActive?: (s: Section) => void;
   openPlant?: () => void;
@@ -38,7 +38,6 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
   const links: { label: string; id: Section; href: string }[] = [
     { label: "Home", id: "home", href: "/" },
     { label: "How It Works", id: "how-it-works", href: "/#how-it-works" },
-    { label: "Our Trees", id: "trees", href: "/#trees" },
     { label: "Impact", id: "impact", href: "/#impact" },
   ];
 
@@ -98,7 +97,7 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
               {isHome && setActive ? (
                 <button
                   onClick={() => handleLinkClick(l)}
-                  className="text-sm font-medium transition-colors duration-200"
+                  className="text-sm font-medium transition-colors duration-200 cursor-pointer"
                   style={{ color: active === l.id ? "#52b788" : "rgba(255,255,255,0.8)" }}
                 >
                   {l.label}
@@ -137,8 +136,9 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
           )}
           {openPlant ? (
             <button
+              id="nav-plant-btn"
               onClick={openPlant}
-              className="text-sm font-semibold px-5 py-2.5 rounded-full transition-all duration-200 hover:scale-105"
+              className="text-sm font-semibold px-5 py-2.5 rounded-full transition-all duration-200 hover:scale-105 cursor-pointer"
               style={{ background: "linear-gradient(135deg,#52b788,#2d6a4f)", color: "#fff" }}
             >
               Plant a Tree
@@ -156,8 +156,9 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
 
         {/* Mobile menu toggle */}
         <button
-          className="md:hidden text-white text-2xl"
+          className="md:hidden text-white text-2xl cursor-pointer"
           onClick={() => setMenuOpen((v) => !v)}
+          aria-label="Toggle navigation menu"
         >
           {menuOpen ? "✕" : "☰"}
         </button>
@@ -175,7 +176,7 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
                       setActive(l.id);
                       setMenuOpen(false);
                     }}
-                    className="text-left text-white/80 hover:text-white font-medium py-1 w-full"
+                    className="text-left text-white/80 hover:text-white font-medium py-1 w-full cursor-pointer"
                   >
                     {l.label}
                   </button>
@@ -252,7 +253,7 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
                   openPlant();
                   setMenuOpen(false);
                 }}
-                className="mt-2 text-sm font-semibold px-5 py-3 rounded-full text-white text-center"
+                className="mt-2 text-sm font-semibold px-5 py-3 rounded-full text-white text-center cursor-pointer"
                 style={{ background: "linear-gradient(135deg,#52b788,#2d6a4f)" }}
               >
                 Plant a Tree

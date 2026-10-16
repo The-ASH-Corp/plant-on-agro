@@ -1,6 +1,6 @@
 import { Tree } from "@/types";
 
-interface TreeCardProps {
+export interface TreeCardProps {
   tree: Tree;
   onPlant: () => void;
 }
@@ -39,7 +39,7 @@ export function TreeCard({ tree, onPlant }: TreeCardProps) {
         </div>
         <button
           onClick={onPlant}
-          className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:shadow-lg"
+          className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:shadow-lg cursor-pointer"
           style={{ background: "linear-gradient(135deg,#2d6a4f,#173324)", color: "#fff" }}
         >
           Plant This Tree

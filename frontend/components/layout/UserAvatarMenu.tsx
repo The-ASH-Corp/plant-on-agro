@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/auth";
 
-interface UserAvatarMenuProps {
+export interface UserAvatarMenuProps {
   user: User;
   onLogout: () => void;
   openPlant?: () => void;

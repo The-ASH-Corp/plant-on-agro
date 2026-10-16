@@ -1,8 +1,8 @@
 import Image from "next/image";
-import Logo from "../public/Screenshot_From_2026-09-17_15-39-39-removebg-preview.png";
+import Logo from "../../public/Screenshot_From_2026-09-17_15-39-39-removebg-preview.png";
 import { FooterSectionContent } from "@/services/landing-page/landing-page.service";
 
-interface FooterProps {
+export interface FooterProps {
   openPlant: () => void;
   content?: FooterSectionContent;
 }
@@ -44,7 +44,7 @@ export function Footer({ openPlant, content }: FooterProps) {
           </p>
           <button
             onClick={openPlant}
-            className="px-10 py-4 rounded-full font-semibold text-base text-white transition-all duration-200 hover:scale-105"
+            className="px-10 py-4 rounded-full font-semibold text-base text-white transition-all duration-200 hover:scale-105 cursor-pointer"
             style={{
               background: "linear-gradient(135deg,#52b788,#2d6a4f)",
               boxShadow: "0 8px 32px rgba(82,183,136,0.3)",
@@ -77,7 +77,6 @@ export function Footer({ openPlant, content }: FooterProps) {
               title: "Platform",
               links: [
                 "Plant a Tree",
-                "Our Trees",
                 "How It Works",
                 "Pricing",
                 "Track My Tree",

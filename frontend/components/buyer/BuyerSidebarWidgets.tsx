@@ -40,40 +40,55 @@ export function BuyerSidebarWidgets({
 
           {/* Reserve Satellite Quick View Card */}
           <div className="p-3 rounded-xl bg-black/40 border border-white/10 space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-white/60 font-medium">Assigned Bio-Reserve:</span>
-              <span className="font-bold text-white text-right truncate max-w-[170px]">
-                {activeTree ? activeTree.assignedReserve : "Western Ghats Corridor"}
-              </span>
-            </div>
+            {activeTree ? (
+              <>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-white/60 font-medium">Assigned Bio-Reserve:</span>
+                  <span className="font-bold text-white text-right truncate max-w-[170px]">
+                    {activeTree.assignedReserve}
+                  </span>
+                </div>
 
-            <div className="grid grid-cols-2 gap-2 pt-1 text-[11px] font-mono">
-              <div className="bg-white/5 p-2 rounded-lg border border-white/5">
-                <span className="text-white/40 block text-[9px] uppercase font-sans">Coordinates</span>
-                <span className="text-emerald-300 font-bold">
-                  {activeTree?.formattedGps || "18.922° N, 73.816° E"}
-                </span>
-              </div>
-              <div className="bg-white/5 p-2 rounded-lg border border-white/5">
-                <span className="text-white/40 block text-[9px] uppercase font-sans">Elevation</span>
-                <span className="text-white font-bold">540m ASL</span>
-              </div>
-            </div>
+                <div className="grid grid-cols-2 gap-2 pt-1 text-[11px] font-mono">
+                  <div className="bg-white/5 p-2 rounded-lg border border-white/5">
+                    <span className="text-white/40 block text-[9px] uppercase font-sans">Coordinates</span>
+                    <span className="text-emerald-300 font-bold truncate block">
+                      {activeTree.formattedGps}
+                    </span>
+                  </div>
+                  <div className="bg-white/5 p-2 rounded-lg border border-white/5">
+                    <span className="text-white/40 block text-[9px] uppercase font-sans">Condition</span>
+                    <span className="text-white font-bold">{activeTree.healthStatus}</span>
+                  </div>
+                </div>
 
-            <div className="grid grid-cols-3 gap-1.5 pt-1 text-center text-[10px]">
-              <div className="p-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/20">
-                <span className="text-white/50 block text-[8px]">Soil Moisture</span>
-                <strong className="text-emerald-300 font-bold">68% (Optimal)</strong>
+                <div className="grid grid-cols-3 gap-1.5 pt-1 text-center text-[10px]">
+                  <div className="p-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/20">
+                    <span className="text-white/50 block text-[8px]">Tag</span>
+                    <strong className="text-emerald-300 font-bold">{activeTree.treeTag}</strong>
+                  </div>
+                  <div className="p-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/20">
+                    <span className="text-white/50 block text-[8px]">Planted</span>
+                    <strong className="text-amber-300 font-bold truncate block">{activeTree.datePlanted}</strong>
+                  </div>
+                  <div className="p-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/20">
+                    <span className="text-white/50 block text-[8px]">Audited</span>
+                    <strong className="text-blue-300 font-bold truncate block">{activeTree.lastInspectedAt || "Recent"}</strong>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="py-4 text-center">
+                <span className="text-xl">🛰️</span>
+                <p className="text-[11px] text-white/70 mt-1">No active trees adopted yet.</p>
+                <button
+                  onClick={onOpenPlantFlow}
+                  className="mt-2 text-[10px] font-bold text-emerald-300 underline cursor-pointer"
+                >
+                  Adopt a tree to activate GPS telemetry →
+                </button>
               </div>
-              <div className="p-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/20">
-                <span className="text-white/50 block text-[8px]">Sunlight</span>
-                <strong className="text-amber-300 font-bold">7.4 hrs/day</strong>
-              </div>
-              <div className="p-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/20">
-                <span className="text-white/50 block text-[8px]">Micro-Climate</span>
-                <strong className="text-blue-300 font-bold">28°C • Good</strong>
-              </div>
-            </div>
+            )}
           </div>
 
           <p className="text-[10px] text-white/60 leading-snug">
@@ -192,32 +207,29 @@ export function BuyerSidebarWidgets({
         </div>
 
         <div className="space-y-2 text-xs">
-          <div className="flex items-start gap-2 border-l-2 border-emerald-500 pl-2.5 py-0.5">
-            <div>
-              <p className="text-[11px] font-semibold text-[#173324]">
-                Drone Survey Photogrammetry Synced
-              </p>
-              <span className="text-[9px] text-[#52796f] block">Tag: POA-MG-2847 • 2 days ago</span>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-2 border-l-2 border-blue-500 pl-2.5 py-0.5">
-            <div>
-              <p className="text-[11px] font-semibold text-[#173324]">
-                Official Digital Deed Certified & Sealed
-              </p>
-              <span className="text-[9px] text-[#52796f] block">Recipient: {user?.name || "Tree Adopter"} • 5 days ago</span>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-2 border-l-2 border-amber-500 pl-2.5 py-0.5">
-            <div>
-              <p className="text-[11px] font-semibold text-[#173324]">
-                Sapling Root Anchoring Verified by Field Arborist
-              </p>
-              <span className="text-[9px] text-[#52796f] block">Western Ghats Reserve • 1 week ago</span>
-            </div>
-          </div>
+          {trees.length === 0 ? (
+            <p className="text-[11px] text-[#52796f] italic py-2">
+              No ledger transactions recorded yet. Plant your first tree to begin.
+            </p>
+          ) : (
+            trees.slice(0, 3).map((tree, idx) => (
+              <div
+                key={tree.id || idx}
+                className={`flex items-start gap-2 border-l-2 ${
+                  idx === 0 ? "border-emerald-500" : idx === 1 ? "border-blue-500" : "border-amber-500"
+                } pl-2.5 py-0.5`}
+              >
+                <div>
+                  <p className="text-[11px] font-semibold text-[#173324]">
+                    {tree.treeVarietyName} Sapling Active ({tree.healthStatus})
+                  </p>
+                  <span className="text-[9px] text-[#52796f] block">
+                    Tag: {tree.treeTag} • Planted {tree.datePlanted} • {tree.assignedReserve}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

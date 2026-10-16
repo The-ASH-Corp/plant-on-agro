@@ -1,6 +1,6 @@
 import { HowItWorksSectionContent } from "@/services/landing-page/landing-page.service";
 
-interface HowItWorksProps {
+export interface HowItWorksProps {
   content?: HowItWorksSectionContent;
 }
 

@@ -23,6 +23,7 @@ interface AdminSidebarProps {
   instancesCount?: number;
   locationsCount: number;
   ordersCount: number;
+  unreadOrdersCount?: number;
   userName?: string;
   onLogout: () => void;
   onOpenAddTree: () => void;
@@ -41,6 +42,7 @@ export function AdminSidebar({
   instancesCount = 0,
   locationsCount,
   ordersCount,
+  unreadOrdersCount = 0,
   userName = "Admin User",
   onLogout,
   onOpenAddTree,
@@ -54,7 +56,13 @@ export function AdminSidebar({
     { id: "plans", label: "Adoption Plans", icon: "🌱", count: plansCount },
     { id: "instances", label: "Tree Instances", icon: "🏷️", count: instancesCount },
     { id: "locations", label: "Reserves & GPS", icon: "📍", count: locationsCount },
-    { id: "orders", label: "Adoption Orders", icon: "📦", count: ordersCount },
+    {
+      id: "orders",
+      label: "Adoption Orders",
+      icon: "📦",
+      count: ordersCount,
+      badge: unreadOrdersCount > 0 ? `${unreadOrdersCount} New` : undefined,
+    },
     { id: "landing-page", label: "Landing Page CMS", icon: "🎨", badge: "Editor" },
   ];
 

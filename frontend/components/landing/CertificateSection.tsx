@@ -1,10 +1,19 @@
 import { CertificateSectionContent } from "@/services/landing-page/landing-page.service";
 
-interface CertificateSectionProps {
-  content?: CertificateSectionContent;
+export interface SampleTreeCertificate {
+  recipientName: string;
+  treeName: string;
+  treeId: string;
+  location: string;
+  date: string;
 }
 
-export function CertificateSection({ content }: CertificateSectionProps) {
+export interface CertificateSectionProps {
+  content?: CertificateSectionContent;
+  sampleTree?: SampleTreeCertificate;
+}
+
+export function CertificateSection({ content, sampleTree }: CertificateSectionProps) {
   const tagline = content?.tagline || "Your Legacy";
   const titlePart1 = content?.titlePart1 || "A Certificate That";
   const titleHighlight = content?.titleHighlight || "Actually Grows";
@@ -22,14 +31,14 @@ export function CertificateSection({ content }: CertificateSectionProps) {
           "Shareable on LinkedIn & social",
         ];
 
-  const recipient = content?.sampleRecipientName || "Priya Sharma";
-  const treeName = content?.sampleTreeName || "Indian Mango";
-  const treeId = content?.sampleTreeId || "POA-MG-2847";
-  const location = content?.sampleLocation || "Nashik, MH";
-  const date = content?.sampleDate || "14 Sep 2026";
+  const recipient = sampleTree?.recipientName || content?.sampleRecipientName || "Verified Tree Adopter";
+  const treeName = sampleTree?.treeName || content?.sampleTreeName || "Botanical Species";
+  const treeId = sampleTree?.treeId || content?.sampleTreeId || "POA-TR-0000";
+  const location = sampleTree?.location || content?.sampleLocation || "Verified Bio-Reserve";
+  const date = sampleTree?.date || content?.sampleDate || "Plantation Date";
   const quote =
     content?.sampleQuote ||
-    "has planted an Indian Mango tree through PlantOn agro, contributing to a greener, healthier planet.";
+    `has planted a ${treeName} tree through PlantOn agro, contributing to a greener, healthier planet.`;
 
   return (
     <section className="py-28" style={{ background: "#fff" }}>
@@ -134,7 +143,7 @@ export function CertificateSection({ content }: CertificateSectionProps) {
                 </div>
                 <div className="flex gap-3">
                   <button
-                    className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white"
+                    className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white cursor-pointer"
                     style={{
                       background: "rgba(82,183,136,0.25)",
                       border: "1px solid rgba(82,183,136,0.4)",
@@ -143,7 +152,7 @@ export function CertificateSection({ content }: CertificateSectionProps) {
                     Download
                   </button>
                   <button
-                    className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white"
+                    className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white cursor-pointer"
                     style={{
                       background: "linear-gradient(135deg,#52b788,#2d6a4f)",
                     }}

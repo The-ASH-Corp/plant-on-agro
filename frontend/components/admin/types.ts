@@ -1,11 +1,18 @@
-export type AdminTabType = "overview" | "trees" | "plans" | "locations" | "orders" | "instances" | "landing-page";
+export type AdminTabType =
+  | "overview"
+  | "trees"
+  | "plans"
+  | "locations"
+  | "orders"
+  | "instances"
+  | "landing-page";
 
 export type TreeHealthStatus =
-  | 'Healthy'
-  | 'Thriving'
-  | 'Needs Attention'
-  | 'Critical'
-  | 'Sapling Growing';
+  | "Healthy"
+  | "Thriving"
+  | "Needs Attention"
+  | "Critical"
+  | "Sapling Growing";
 
 export interface GpsCoordinates {
   latitude: number;
@@ -14,13 +21,13 @@ export interface GpsCoordinates {
 
 export interface TreeInstanceItem {
   id: string;
-  treeTag: string; // Unique tree tag / serial
-  orderRef: string; // Reference to order (e.g. "ORD-88219")
-  assignedReserve: string; // Assigned reserve
-  gpsCoordinates: GpsCoordinates; // Exact GPS lat/long where sapling was physically put into the ground
-  formattedGps: string; // e.g. "18.5204° N, 73.8567° E"
-  datePlanted: string; // Date planted
-  healthStatus: TreeHealthStatus; // Current health status
+  treeTag: string;
+  orderRef: string;
+  assignedReserve: string;
+  gpsCoordinates: GpsCoordinates;
+  formattedGps: string;
+  datePlanted: string;
+  healthStatus: TreeHealthStatus;
   treeVarietyName: string;
   adopterName: string;
   adopterEmail: string;
@@ -29,6 +36,14 @@ export interface TreeInstanceItem {
   lastInspectedAt?: string | null;
   isActive: boolean;
 }
+
+export type AdoptionOrderStatus =
+  | "New Request"
+  | "Verified & Tagged"
+  | "Planted"
+  | "Pending Drone Scan"
+  | "Certificate Issued"
+  | "Completed";
 
 export interface AdoptionOrder {
   id: string;
@@ -44,9 +59,11 @@ export interface AdoptionOrder {
   quantity: number;
   totalAmount: number;
   datePlanted: string;
-  status: "Verified & Tagged" | "Planted" | "Pending Drone Scan" | "Certificate Issued";
+  status: AdoptionOrderStatus;
   certificateId: string;
   ndviScore: number;
+  isRead?: boolean;
+  createdAt?: string;
 }
 
 export interface TreeVarietyItem {
@@ -55,7 +72,13 @@ export interface TreeVarietyItem {
   sci: string;
   commonName?: string;
   scientificName?: string;
-  category: "Fruit Trees" | "Timber Trees" | "Medicinal" | "Native Trees" | "Shade Trees" | "Occasion";
+  category:
+    | "Fruit Trees"
+    | "Timber Trees"
+    | "Medicinal"
+    | "Native Trees"
+    | "Shade Trees"
+    | "Occasion";
   price: number;
   location: string;
   growth: string;
@@ -71,11 +94,11 @@ export interface TreeVarietyItem {
 }
 
 export type OccasionDedicationType =
-  | 'birthday'
-  | 'memorial'
-  | 'anniversary'
-  | 'corporate'
-  | 'general';
+  | "birthday"
+  | "memorial"
+  | "anniversary"
+  | "corporate"
+  | "general";
 
 export interface AdoptionPlanItem {
   id: string;
@@ -106,23 +129,4 @@ export interface PlantationLocationItem {
   soilHealth: string;
   image: string;
   status: "Active" | "Expanding" | "Full";
-}
-
-export interface AdoptionOrder {
-  id: string;
-  orderNumber: string;
-  adopterName: string;
-  adopterEmail: string;
-  treeSpecies: string;
-  scientificName: string;
-  category: string;
-  reserveName: string;
-  gpsCoords: string;
-  planType: string;
-  quantity: number;
-  totalAmount: number;
-  datePlanted: string;
-  status: "Verified & Tagged" | "Planted" | "Pending Drone Scan" | "Certificate Issued";
-  certificateId: string;
-  ndviScore: number;
 }

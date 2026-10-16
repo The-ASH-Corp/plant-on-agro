@@ -2,17 +2,20 @@
 
 import { useMemo } from "react";
 import { PlantationLocationItem } from "../types";
+import { TrashIcon } from "@/components/ui/TrashIcon";
 
 interface LocationsTabProps {
   locations: PlantationLocationItem[];
   searchQuery: string;
   onOpenAddLocation: () => void;
+  onDeleteLocation?: (id: string, name?: string) => void;
 }
 
 export function LocationsTab({
   locations,
   searchQuery,
   onOpenAddLocation,
+  onDeleteLocation,
 }: LocationsTabProps) {
   const filteredLocations = useMemo(() => {
     return locations.filter(
@@ -41,10 +44,26 @@ export function LocationsTab({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredLocations.map((loc) => {
-          const pct = Math.round((loc.treesPlanted / loc.capacity) * 100);
-          return (
+      {filteredLocations.length === 0 ? (
+        <div className="bg-white rounded-3xl border border-[#e2eae5] p-12 text-center space-y-3">
+          <span className="text-4xl">🗺️</span>
+          <h3 className="text-lg font-bold text-[#173324]">No Protected Bio-Reserves Geotagged Yet</h3>
+          <p className="text-xs text-[#73877b] max-w-md mx-auto">
+            You have not registered any plantation reserves or forest sanctuaries yet. Click the button below to geotag your first verified reserve.
+          </p>
+          <button
+            onClick={onOpenAddLocation}
+            className="px-5 py-2.5 rounded-xl bg-[#173324] hover:bg-[#1f4230] text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
+          >
+            <span>+</span>
+            <span>Geotag Your First Reserve</span>
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredLocations.map((loc) => {
+            const pct = Math.round((loc.treesPlanted / loc.capacity) * 100);
+            return (
             <div
               key={loc.id}
               className="bg-white rounded-3xl border border-[#e2eae5] overflow-hidden shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between"
@@ -95,11 +114,27 @@ export function LocationsTab({
                     </div>
                   </div>
                 </div>
+
+                {onDeleteLocation && (
+                  <div className="px-5 py-3 border-t border-[#f0f4f1] bg-[#fafcfa] flex items-center justify-between text-xs">
+                    <span className="text-[11px] text-[#7a8c81]">Capacity: {loc.capacity.toLocaleString()}</span>
+                    <button
+                      type="button"
+                      onClick={() => onDeleteLocation(loc.id, loc.name)}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-2.5 py-1.5 rounded-xl transition-colors cursor-pointer"
+                      title={`Delete reserve ${loc.name}`}
+                    >
+                      <TrashIcon className="w-3.5 h-3.5" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           );
         })}
       </div>
+      )}
     </div>
   );
 }

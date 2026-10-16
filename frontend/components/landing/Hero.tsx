@@ -7,13 +7,20 @@ import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
 
 import { HeroSectionContent } from "@/services/landing-page/landing-page.service";
 
-interface HeroProps {
+export interface HeroLiveStats {
+  totalTrees: number;
+  totalVarieties: number;
+  totalReserves: number;
+}
+
+export interface HeroProps {
   openPlant: () => void;
   goImpact: () => void;
   content?: HeroSectionContent;
+  liveStats?: HeroLiveStats;
 }
 
-export function Hero({ openPlant, goImpact, content }: HeroProps) {
+export function Hero({ openPlant, goImpact, content, liveStats }: HeroProps) {
   const user = useHydratedStore(useAuthStore, (s) => s.user);
   const isAuthenticated = useHydratedStore(useAuthStore, (s) => s.isAuthenticated);
   const { scrollY } = useScroll();
@@ -29,17 +36,23 @@ export function Hero({ openPlant, goImpact, content }: HeroProps) {
   const bgImg =
     content?.bgImageUrl ||
     "https://images.unsplash.com/photo-1568241640298-1adf2974314c?w=1920&h=1080&fit=crop&auto=format";
-  const stats = content?.stats && content.stats.length > 0
+  const stats = liveStats
+    ? [
+        { target: liveStats.totalTrees, suffix: liveStats.totalTrees > 0 ? "+" : "", label: "Trees Planted & Geotagged" },
+        { target: liveStats.totalVarieties, suffix: "", label: "Native Tree Varieties" },
+        { target: liveStats.totalReserves, suffix: liveStats.totalReserves > 0 ? "+" : "", label: "Protected Bio-Reserves" },
+      ]
+    : content?.stats && content.stats.length > 0
     ? content.stats
     : [
-        { target: 25000, suffix: "+", label: "Trees Planted" },
-        { target: 12500, suffix: "+", label: "People Participated" },
-        { target: 150, suffix: "+", label: "Plantation Projects" },
+        { target: 0, suffix: "", label: "Trees Planted & Geotagged" },
+        { target: 0, suffix: "", label: "Native Tree Varieties" },
+        { target: 0, suffix: "", label: "Protected Bio-Reserves" },
       ];
 
   const bgY = useTransform(scrollY, [0, 1000], [0, 300]);
   const textY = useTransform(scrollY, [0, 1000], [0, 100]);
-  const scale = useTransform(scrollY, [0, 500], [1, 1.25]);
+
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-between pt-28 pb-10 sm:pb-12 md:pt-36 md:pb-16 overflow-hidden">
       {/* BG image */}
@@ -107,8 +120,9 @@ export function Hero({ openPlant, goImpact, content }: HeroProps) {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 sm:mb-16">
           <button
+            id="hero-plant-btn"
             onClick={openPlant}
-            className="px-8 py-4 rounded-full font-semibold text-base text-white transition-all duration-200 hover:scale-105 hover:shadow-2xl"
+            className="px-8 py-4 rounded-full font-semibold text-base text-white transition-all duration-200 hover:scale-105 hover:shadow-2xl cursor-pointer"
             style={{
               background: "linear-gradient(135deg,#52b788,#1e4433)",
               boxShadow: "0 8px 32px rgba(82,183,136,0.35)",
@@ -118,7 +132,7 @@ export function Hero({ openPlant, goImpact, content }: HeroProps) {
           </button>
           <button
             onClick={goImpact}
-            className="px-8 py-4 rounded-full font-semibold text-base transition-all duration-200 hover:scale-105"
+            className="px-8 py-4 rounded-full font-semibold text-base transition-all duration-200 hover:scale-105 cursor-pointer"
             style={{
               background: "rgba(255,255,255,0.12)",
               color: "#fff",
