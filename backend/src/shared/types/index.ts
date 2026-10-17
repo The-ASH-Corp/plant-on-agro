@@ -1,3 +1,5 @@
+import { UserPayload } from '../../core/interfaces/jwt-service.interface';
+
 export type Nullable<T> = T | null;
 
 export type PaginationParams = {
@@ -12,3 +14,11 @@ export type PaginatedResult<T> = {
   limit: number;
   totalPages: number;
 };
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: UserPayload;
+    }
+  }
+}
