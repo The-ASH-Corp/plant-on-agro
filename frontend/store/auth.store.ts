@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { AuthState, RegisterPayload, LoginPayload, User } from '@/types/auth';
 import { authService } from '@/services/auth/auth.service';
+import { setAuthHeaderToken } from '@/services/api/api-client';
 import { ApiError } from '@/types/api';
 
 export const useAuthStore = create<AuthState>()(
@@ -18,7 +19,6 @@ export const useAuthStore = create<AuthState>()(
 
       setHasHydrated: (state: boolean) => set({ hasHydrated: state }),
 
-   
       register: async (payload: RegisterPayload) => {
         set({
           isLoading: true,
@@ -29,10 +29,13 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           const response = await authService.register(payload);
-          const userData = response.data as User;
+          const authData = response.data;
+          const userData = (authData?.user || authData) as User;
+          const token = authData?.token || null;
 
           set({
             user: userData,
+            token: token,
             isAuthenticated: true,
             isLoading: false,
             successMessage: response.message || 'Account created successfully!',
@@ -40,7 +43,9 @@ export const useAuthStore = create<AuthState>()(
             fieldErrors: {},
           });
 
-          return { success: true, data: userData };
+          setAuthHeaderToken(token);
+
+          return { success: true, data: userData, token: token || undefined };
         } catch (err: unknown) {
           const apiError = err as ApiError;
           const errorMessage = apiError.message || 'Registration failed. Please check your information.';
@@ -57,7 +62,6 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-     
       login: async (payload: LoginPayload) => {
         set({
           isLoading: true,
@@ -68,10 +72,13 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           const response = await authService.login(payload);
-          const userData = response.data as User;
+          const authData = response.data;
+          const userData = (authData?.user || authData) as User;
+          const token = authData?.token || null;
 
           set({
             user: userData,
+            token: token,
             isAuthenticated: true,
             isLoading: false,
             error: null,
@@ -79,7 +86,9 @@ export const useAuthStore = create<AuthState>()(
             successMessage: 'Logged in successfully',
           });
 
-          return { success: true, data: userData };
+          setAuthHeaderToken(token);
+
+          return { success: true, data: userData, token: token || undefined };
         } catch (err: unknown) {
           const apiError = err as ApiError;
           const errorMessage = apiError.message || 'Login failed. Invalid credentials.';
@@ -101,11 +110,13 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: !!user,
         }),
 
-      setToken: (token: string | null) =>
+      setToken: (token: string | null) => {
         set({
           token,
           isAuthenticated: !!token,
-        }),
+        });
+        setAuthHeaderToken(token);
+      },
 
       clearError: () =>
         set({
@@ -127,6 +138,7 @@ export const useAuthStore = create<AuthState>()(
           fieldErrors: {},
           successMessage: null,
         });
+        setAuthHeaderToken(null);
       },
     }),
     {
@@ -149,6 +161,9 @@ export const useAuthStore = create<AuthState>()(
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
+        if (state?.token) {
+          setAuthHeaderToken(state.token);
+        }
       },
     }
   )

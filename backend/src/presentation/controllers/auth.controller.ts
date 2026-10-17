@@ -15,8 +15,8 @@ export class AuthController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const userResponse = await this.registerUserUseCase.execute(req.body);
-      ApiResponse.created(res, userResponse, 'User registered successfully');
+      const authResponse = await this.registerUserUseCase.execute(req.body);
+      ApiResponse.created(res, authResponse, 'User registered successfully');
     } catch (error) {
       next(error);
     }
@@ -28,8 +28,8 @@ export class AuthController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const userResponse = await this.loginUserUseCase.execute(req.body);
-      ApiResponse.success(res, userResponse, 'Login successful');
+      const authResponse = await this.loginUserUseCase.execute(req.body);
+      ApiResponse.success(res, authResponse, 'Login successful');
     } catch (error) {
       next(error);
     }

@@ -1,8 +1,9 @@
 import { IUserRepository } from '../../core/interfaces/user.repository.interface';
 import { IPasswordHasher } from '../../core/interfaces/password-hasher.interface';
+import { IJwtService } from '../../core/interfaces/jwt-service.interface';
 import { UnauthorizedError, ForbiddenError } from '../../core/errors/app-error';
 import { Email } from '../../core/value-objects/email.vo';
-import { RegisterUserResponseDto } from '../dto/register-user.dto';
+import { AuthResponseDto } from '../dto/auth-response.dto';
 
 export interface LoginUserInputDto {
   email: string;
@@ -12,10 +13,11 @@ export interface LoginUserInputDto {
 export class LoginUserUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly passwordHasher: IPasswordHasher
+    private readonly passwordHasher: IPasswordHasher,
+    private readonly jwtService: IJwtService
   ) {}
 
-  public async execute(input: LoginUserInputDto): Promise<RegisterUserResponseDto> {
+  public async execute(input: LoginUserInputDto): Promise<AuthResponseDto> {
     const emailVO = Email.create(input.email);
 
     // Fetch user with hashed password from database
@@ -39,7 +41,7 @@ export class LoginUserUseCase {
       throw new UnauthorizedError('Invalid email or password');
     }
 
-    return {
+    const userDto = {
       id: user.id ?? '',
       name: user.name,
       email: user.email.getValue(),
@@ -47,5 +49,17 @@ export class LoginUserUseCase {
       isActive: user.isActive,
       createdAt: user.createdAt.toISOString(),
     };
+
+    const token = this.jwtService.generateToken({
+      id: userDto.id,
+      email: userDto.email,
+      role: userDto.role,
+    });
+
+    return {
+      user: userDto,
+      token,
+    };
   }
 }
+

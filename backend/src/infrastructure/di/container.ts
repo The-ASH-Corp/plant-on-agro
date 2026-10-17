@@ -3,6 +3,7 @@ import { MongoTreeVarietyRepository } from '../repositories/mongo-tree-variety.r
 import { MongoAdoptionPlanRepository } from '../repositories/mongo-adoption-plan.repository';
 import { MongoTreeInstanceRepository } from '../repositories/mongo-tree-instance.repository';
 import { Argon2PasswordHasher } from '../services/argon2-password-hasher.service';
+import { JsonWebTokenService } from '../services/jwt.service';
 
 import { CreateUserUseCase } from '../../application/use-cases/create-user.use-case';
 import { RegisterUserUseCase } from '../../application/use-cases/register-user.use-case';
@@ -43,6 +44,7 @@ import { TreeInstanceController } from '../../presentation/controllers/tree-inst
 export class Container {
   // Services & Adapters
   private static readonly passwordHasher = new Argon2PasswordHasher();
+  public static readonly jwtService = new JsonWebTokenService();
 
   // Repositories
   public static readonly userRepository = new MongoUserRepository();
@@ -65,11 +67,13 @@ export class Container {
   // User Use Cases
   private static readonly registerUserUseCase = new RegisterUserUseCase(
     Container.userRepository,
-    Container.passwordHasher
+    Container.passwordHasher,
+    Container.jwtService
   );
   private static readonly loginUserUseCase = new LoginUserUseCase(
     Container.userRepository,
-    Container.passwordHasher
+    Container.passwordHasher,
+    Container.jwtService
   );
   
   private static readonly createUserUseCase = new CreateUserUseCase(Container.userRepository);
