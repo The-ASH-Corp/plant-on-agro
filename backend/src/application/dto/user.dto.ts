@@ -15,3 +15,5 @@ export interface UserResponseDto {
   createdAt: string;
   updatedAt: string;
 }
+
+export type UserDto = UserResponseDto;

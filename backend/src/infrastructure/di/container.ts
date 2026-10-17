@@ -9,6 +9,7 @@ import { CreateUserUseCase } from '../../application/use-cases/create-user.use-c
 import { RegisterUserUseCase } from '../../application/use-cases/register-user.use-case';
 import { LoginUserUseCase } from '../../application/use-cases/login-user.use-case';
 import { GetUserByIdUseCase } from '../../application/use-cases/get-user-by-id.use-case';
+import { GetCurrentUserUseCase } from '../../application/use-cases/get-current-user.use-case';
 
 import { CreateTreeVarietyUseCase } from '../../application/use-cases/tree-varieties/create-tree-variety.use-case';
 import { GetTreeVarietiesUseCase } from '../../application/use-cases/tree-varieties/get-tree-varieties.use-case';
@@ -75,6 +76,9 @@ export class Container {
     Container.passwordHasher,
     Container.jwtService
   );
+  private static readonly getCurrentUserUseCase = new GetCurrentUserUseCase(
+    Container.userRepository
+  );
   
   private static readonly createUserUseCase = new CreateUserUseCase(Container.userRepository);
   private static readonly getUserByIdUseCase = new GetUserByIdUseCase(Container.userRepository);
@@ -136,13 +140,15 @@ export class Container {
   // Controllers
   public static readonly authController = new AuthController(
     Container.registerUserUseCase,
-    Container.loginUserUseCase
+    Container.loginUserUseCase,
+    Container.getCurrentUserUseCase
   );
 
   public static readonly userController = new UserController(
     Container.createUserUseCase,
     Container.getUserByIdUseCase
   );
+
 
   public static readonly treeVarietyController = new TreeVarietyController(
     Container.createTreeVarietyUseCase,
