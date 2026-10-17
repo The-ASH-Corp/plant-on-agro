@@ -52,4 +52,9 @@ export class MongoUserRepository implements IUserRepository {
     const docs = await UserModel.find().limit(limit).skip(skip).exec();
     return docs.map(UserMapper.toDomain);
   }
+
+  public async count(): Promise<number> {
+    return UserModel.countDocuments().exec();
+  }
 }
+

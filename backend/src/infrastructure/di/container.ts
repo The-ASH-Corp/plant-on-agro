@@ -11,6 +11,10 @@ import { RegisterUserUseCase } from '../../application/use-cases/register-user.u
 import { LoginUserUseCase } from '../../application/use-cases/login-user.use-case';
 import { GetUserByIdUseCase } from '../../application/use-cases/get-user-by-id.use-case';
 import { GetCurrentUserUseCase } from '../../application/use-cases/get-current-user.use-case';
+import { GetUsersUseCase } from '../../application/use-cases/get-users.use-case';
+import { UpdateUserUseCase } from '../../application/use-cases/update-user.use-case';
+import { DeleteUserUseCase } from '../../application/use-cases/delete-user.use-case';
+
 
 import { CreateTreeVarietyUseCase } from '../../application/use-cases/tree-varieties/create-tree-variety.use-case';
 import { GetTreeVarietiesUseCase } from '../../application/use-cases/tree-varieties/get-tree-varieties.use-case';
@@ -94,6 +98,10 @@ export class Container {
   
   private static readonly createUserUseCase = new CreateUserUseCase(Container.userRepository);
   private static readonly getUserByIdUseCase = new GetUserByIdUseCase(Container.userRepository);
+  private static readonly getUsersUseCase = new GetUsersUseCase(Container.userRepository);
+  private static readonly updateUserUseCase = new UpdateUserUseCase(Container.userRepository);
+  private static readonly deleteUserUseCase = new DeleteUserUseCase(Container.userRepository);
+
 
   // Tree Variety Use Cases
   private static readonly createTreeVarietyUseCase = new CreateTreeVarietyUseCase(
@@ -181,8 +189,12 @@ export class Container {
 
   public static readonly userController = new UserController(
     Container.createUserUseCase,
-    Container.getUserByIdUseCase
+    Container.getUserByIdUseCase,
+    Container.getUsersUseCase,
+    Container.updateUserUseCase,
+    Container.deleteUserUseCase
   );
+
 
   public static readonly treeVarietyController = new TreeVarietyController(
     Container.createTreeVarietyUseCase,

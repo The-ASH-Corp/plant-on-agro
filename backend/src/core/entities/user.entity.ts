@@ -86,6 +86,11 @@ export class User {
     this._updatedAt = new Date();
   }
 
+  public updateEmail(newEmail: Email): void {
+    this._email = newEmail;
+    this._updatedAt = new Date();
+  }
+
   public changeRole(newRole: UserRole): void {
     this._role = newRole;
     this._updatedAt = new Date();
@@ -101,3 +106,4 @@ export class User {
     this._updatedAt = new Date();
   }
 }
+

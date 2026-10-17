@@ -17,3 +17,11 @@ export interface UserResponseDto {
 }
 
 export type UserDto = UserResponseDto;
+
+export interface UpdateUserDto {
+  name?: string;
+  email?: string;
+  role?: UserRole;
+  isActive?: boolean;
+}
+
