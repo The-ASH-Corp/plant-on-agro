@@ -4,6 +4,7 @@ import { userRoutes } from './user.routes';
 import { treeVarietyRoutes } from './tree-variety.routes';
 import { adoptionPlanRoutes } from './adoption-plan.routes';
 import { treeInstanceRoutes } from './tree-instance.routes';
+import { certificateRoutes } from './certificate.routes';
 import { landingPageRoutes } from './landing-page.routes';
 import { ApiResponse } from '../../shared/utils/api-response';
 
@@ -28,6 +29,8 @@ apiRouter.use('/users', userRoutes);
 apiRouter.use('/tree-varieties', treeVarietyRoutes);
 apiRouter.use('/adoption-plans', adoptionPlanRoutes);
 apiRouter.use('/tree-instances', treeInstanceRoutes);
+apiRouter.use('/certificates', certificateRoutes);
 apiRouter.use('/landing-page', landingPageRoutes);
 
 export const routes = apiRouter;
+

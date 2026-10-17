@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { Container } from '../../infrastructure/di/container';
 import { validateRequest } from '../middlewares/validate.middleware';
+import { authenticate, authorize } from '../middlewares/auth.middleware';
 import {
   createTreeVarietySchema,
   updateTreeVarietySchema,
@@ -27,6 +28,8 @@ router.get(
 // POST /api/v1/tree-varieties - Create a new tree variety
 router.post(
   '/',
+  authenticate,
+  authorize('admin'),
   validateRequest({ body: createTreeVarietySchema }),
   Container.treeVarietyController.create
 );
@@ -34,6 +37,8 @@ router.post(
 // PUT /api/v1/tree-varieties/:id - Update an existing tree variety
 router.put(
   '/:id',
+  authenticate,
+  authorize('admin'),
   validateRequest({
     params: getTreeVarietyByIdSchema,
     body: updateTreeVarietySchema,
@@ -44,8 +49,11 @@ router.put(
 // DELETE /api/v1/tree-varieties/:id - Delete a tree variety
 router.delete(
   '/:id',
+  authenticate,
+  authorize('admin'),
   validateRequest({ params: getTreeVarietyByIdSchema }),
   Container.treeVarietyController.delete
 );
 
 export const treeVarietyRoutes = router;
+

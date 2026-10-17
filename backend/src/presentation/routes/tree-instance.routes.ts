@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { Container } from '../../infrastructure/di/container';
 import { validateRequest } from '../middlewares/validate.middleware';
+import { authenticate, authorize } from '../middlewares/auth.middleware';
 import {
   createTreeInstanceSchema,
   updateTreeInstanceSchema,
@@ -35,6 +36,8 @@ router.get(
 // POST /api/v1/tree-instances - Create / log a new tree instance
 router.post(
   '/',
+  authenticate,
+  authorize('admin'),
   validateRequest({ body: createTreeInstanceSchema }),
   Container.treeInstanceController.create
 );
@@ -42,6 +45,8 @@ router.post(
 // PUT /api/v1/tree-instances/:id - Update an existing tree instance (e.g. health status, GPS)
 router.put(
   '/:id',
+  authenticate,
+  authorize('admin'),
   validateRequest({
     params: getTreeInstanceByIdSchema,
     body: updateTreeInstanceSchema,
@@ -52,8 +57,11 @@ router.put(
 // DELETE /api/v1/tree-instances/:id - Delete a tree instance
 router.delete(
   '/:id',
+  authenticate,
+  authorize('admin'),
   validateRequest({ params: getTreeInstanceByIdSchema }),
   Container.treeInstanceController.delete
 );
 
 export const treeInstanceRoutes = router;
+

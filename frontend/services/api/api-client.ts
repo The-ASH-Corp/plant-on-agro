@@ -41,10 +41,18 @@ export const axiosInstance: AxiosInstance = axios.create({
 });
 
 
+export function setAuthHeaderToken(token: string | null): void {
+  if (token) {
+    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete axiosInstance.defaults.headers.common['Authorization'];
+  }
+}
+
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = getStoredAuthToken();
-    if (token && config.headers && !config.headers.Authorization) {
+    if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 

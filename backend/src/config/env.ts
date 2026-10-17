@@ -8,6 +8,8 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(5000),
   MONGO_URI: z.string().min(1, 'MONGO_URI is required').default('mongodb://localhost:27017/plant_on_agro'),
   CORS_ORIGIN: z.string().default('*'),
+  JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 characters').default('plant_on_agro_jwt_super_secret_key_2026_secure'),
+  JWT_EXPIRES_IN: z.string().default('7d'),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

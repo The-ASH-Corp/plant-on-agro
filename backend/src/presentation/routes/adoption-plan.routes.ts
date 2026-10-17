@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { Container } from '../../infrastructure/di/container';
 import { validateRequest } from '../middlewares/validate.middleware';
+import { authenticate, authorize } from '../middlewares/auth.middleware';
 import {
   createAdoptionPlanSchema,
   updateAdoptionPlanSchema,
@@ -27,6 +28,8 @@ router.get(
 // POST /api/v1/adoption-plans - Create a new plan
 router.post(
   '/',
+  authenticate,
+  authorize('admin'),
   validateRequest({ body: createAdoptionPlanSchema }),
   Container.adoptionPlanController.create
 );
@@ -34,6 +37,8 @@ router.post(
 // PUT /api/v1/adoption-plans/:id - Update an existing plan
 router.put(
   '/:id',
+  authenticate,
+  authorize('admin'),
   validateRequest({
     params: getAdoptionPlanByIdSchema,
     body: updateAdoptionPlanSchema,
@@ -44,8 +49,11 @@ router.put(
 // DELETE /api/v1/adoption-plans/:id - Delete a plan
 router.delete(
   '/:id',
+  authenticate,
+  authorize('admin'),
   validateRequest({ params: getAdoptionPlanByIdSchema }),
   Container.adoptionPlanController.delete
 );
 
 export const adoptionPlanRoutes = router;
+

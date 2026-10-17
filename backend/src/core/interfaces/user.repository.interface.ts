@@ -9,4 +9,6 @@ export interface IUserRepository {
   update(user: User): Promise<User>;
   delete(id: string): Promise<boolean>;
   findAll(limit?: number, skip?: number): Promise<User[]>;
+  count(): Promise<number>;
 }
+

@@ -2,12 +2,19 @@ import { MongoUserRepository } from '../repositories/mongo-user.repository';
 import { MongoTreeVarietyRepository } from '../repositories/mongo-tree-variety.repository';
 import { MongoAdoptionPlanRepository } from '../repositories/mongo-adoption-plan.repository';
 import { MongoTreeInstanceRepository } from '../repositories/mongo-tree-instance.repository';
+import { MongoCertificateRepository } from '../repositories/mongo-certificate.repository';
 import { Argon2PasswordHasher } from '../services/argon2-password-hasher.service';
+import { JsonWebTokenService } from '../services/jwt.service';
 
 import { CreateUserUseCase } from '../../application/use-cases/create-user.use-case';
 import { RegisterUserUseCase } from '../../application/use-cases/register-user.use-case';
 import { LoginUserUseCase } from '../../application/use-cases/login-user.use-case';
 import { GetUserByIdUseCase } from '../../application/use-cases/get-user-by-id.use-case';
+import { GetCurrentUserUseCase } from '../../application/use-cases/get-current-user.use-case';
+import { GetUsersUseCase } from '../../application/use-cases/get-users.use-case';
+import { UpdateUserUseCase } from '../../application/use-cases/update-user.use-case';
+import { DeleteUserUseCase } from '../../application/use-cases/delete-user.use-case';
+
 
 import { CreateTreeVarietyUseCase } from '../../application/use-cases/tree-varieties/create-tree-variety.use-case';
 import { GetTreeVarietiesUseCase } from '../../application/use-cases/tree-varieties/get-tree-varieties.use-case';
@@ -28,6 +35,14 @@ import { GetTreeInstanceByTagUseCase } from '../../application/use-cases/tree-in
 import { UpdateTreeInstanceUseCase } from '../../application/use-cases/tree-instances/update-tree-instance.use-case';
 import { DeleteTreeInstanceUseCase } from '../../application/use-cases/tree-instances/delete-tree-instance.use-case';
 
+import { CreateCertificateUseCase } from '../../application/use-cases/certificates/create-certificate.use-case';
+import { GetCertificatesUseCase } from '../../application/use-cases/certificates/get-certificates.use-case';
+import { GetCertificateByIdUseCase } from '../../application/use-cases/certificates/get-certificate-by-id.use-case';
+import { GetCertificateByNumberUseCase } from '../../application/use-cases/certificates/get-certificate-by-number.use-case';
+import { VerifyCertificateUseCase } from '../../application/use-cases/certificates/verify-certificate.use-case';
+import { UpdateCertificateUseCase } from '../../application/use-cases/certificates/update-certificate.use-case';
+import { DeleteCertificateUseCase } from '../../application/use-cases/certificates/delete-certificate.use-case';
+
 import { MongoLandingPageRepository } from '../repositories/mongo-landing-page.repository';
 import { GetLandingPageUseCase } from '../../application/use-cases/landing-page/get-landing-page.use-case';
 import { UpdateLandingPageUseCase } from '../../application/use-cases/landing-page/update-landing-page.use-case';
@@ -39,17 +54,21 @@ import { AuthController } from '../../presentation/controllers/auth.controller';
 import { TreeVarietyController } from '../../presentation/controllers/tree-variety.controller';
 import { AdoptionPlanController } from '../../presentation/controllers/adoption-plan.controller';
 import { TreeInstanceController } from '../../presentation/controllers/tree-instance.controller';
+import { CertificateController } from '../../presentation/controllers/certificate.controller';
 
 export class Container {
   // Services & Adapters
   private static readonly passwordHasher = new Argon2PasswordHasher();
+  public static readonly jwtService = new JsonWebTokenService();
 
   // Repositories
   public static readonly userRepository = new MongoUserRepository();
   public static readonly treeVarietyRepository = new MongoTreeVarietyRepository();
   public static readonly adoptionPlanRepository = new MongoAdoptionPlanRepository();
   public static readonly treeInstanceRepository = new MongoTreeInstanceRepository();
+  public static readonly certificateRepository = new MongoCertificateRepository();
   public static readonly landingPageRepository = new MongoLandingPageRepository();
+
 
   // Landing Page Use Cases
   private static readonly getLandingPageUseCase = new GetLandingPageUseCase(
@@ -65,15 +84,24 @@ export class Container {
   // User Use Cases
   private static readonly registerUserUseCase = new RegisterUserUseCase(
     Container.userRepository,
-    Container.passwordHasher
+    Container.passwordHasher,
+    Container.jwtService
   );
   private static readonly loginUserUseCase = new LoginUserUseCase(
     Container.userRepository,
-    Container.passwordHasher
+    Container.passwordHasher,
+    Container.jwtService
+  );
+  private static readonly getCurrentUserUseCase = new GetCurrentUserUseCase(
+    Container.userRepository
   );
   
   private static readonly createUserUseCase = new CreateUserUseCase(Container.userRepository);
   private static readonly getUserByIdUseCase = new GetUserByIdUseCase(Container.userRepository);
+  private static readonly getUsersUseCase = new GetUsersUseCase(Container.userRepository);
+  private static readonly updateUserUseCase = new UpdateUserUseCase(Container.userRepository);
+  private static readonly deleteUserUseCase = new DeleteUserUseCase(Container.userRepository);
+
 
   // Tree Variety Use Cases
   private static readonly createTreeVarietyUseCase = new CreateTreeVarietyUseCase(
@@ -129,16 +157,44 @@ export class Container {
     Container.treeInstanceRepository
   );
 
+  // Certificate Use Cases
+  private static readonly createCertificateUseCase = new CreateCertificateUseCase(
+    Container.certificateRepository
+  );
+  private static readonly getCertificatesUseCase = new GetCertificatesUseCase(
+    Container.certificateRepository
+  );
+  private static readonly getCertificateByIdUseCase = new GetCertificateByIdUseCase(
+    Container.certificateRepository
+  );
+  private static readonly getCertificateByNumberUseCase = new GetCertificateByNumberUseCase(
+    Container.certificateRepository
+  );
+  private static readonly verifyCertificateUseCase = new VerifyCertificateUseCase(
+    Container.certificateRepository
+  );
+  private static readonly updateCertificateUseCase = new UpdateCertificateUseCase(
+    Container.certificateRepository
+  );
+  private static readonly deleteCertificateUseCase = new DeleteCertificateUseCase(
+    Container.certificateRepository
+  );
+
   // Controllers
   public static readonly authController = new AuthController(
     Container.registerUserUseCase,
-    Container.loginUserUseCase
+    Container.loginUserUseCase,
+    Container.getCurrentUserUseCase
   );
 
   public static readonly userController = new UserController(
     Container.createUserUseCase,
-    Container.getUserByIdUseCase
+    Container.getUserByIdUseCase,
+    Container.getUsersUseCase,
+    Container.updateUserUseCase,
+    Container.deleteUserUseCase
   );
+
 
   public static readonly treeVarietyController = new TreeVarietyController(
     Container.createTreeVarietyUseCase,
@@ -165,9 +221,20 @@ export class Container {
     Container.deleteTreeInstanceUseCase
   );
 
+  public static readonly certificateController = new CertificateController(
+    Container.createCertificateUseCase,
+    Container.getCertificatesUseCase,
+    Container.getCertificateByIdUseCase,
+    Container.getCertificateByNumberUseCase,
+    Container.verifyCertificateUseCase,
+    Container.updateCertificateUseCase,
+    Container.deleteCertificateUseCase
+  );
+
   public static readonly landingPageController = new LandingPageController(
     Container.getLandingPageUseCase,
     Container.updateLandingPageUseCase,
     Container.resetLandingPageUseCase
   );
 }
+

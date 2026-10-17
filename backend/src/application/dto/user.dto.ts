@@ -15,3 +15,13 @@ export interface UserResponseDto {
   createdAt: string;
   updatedAt: string;
 }
+
+export type UserDto = UserResponseDto;
+
+export interface UpdateUserDto {
+  name?: string;
+  email?: string;
+  role?: UserRole;
+  isActive?: boolean;
+}
+

@@ -9,6 +9,11 @@ export interface User {
   createdAt: string;
 }
 
+export interface AuthResponse {
+  user: User;
+  token: string;
+}
+
 export interface RegisterPayload {
   name: string;
   email: string;
@@ -32,8 +37,8 @@ export interface AuthState {
   hasHydrated: boolean;
 
   // Actions
-  register: (payload: RegisterPayload) => Promise<{ success: boolean; data?: User; error?: string }>;
-  login: (payload: LoginPayload) => Promise<{ success: boolean; data?: User; error?: string }>;
+  register: (payload: RegisterPayload) => Promise<{ success: boolean; data?: User; token?: string; error?: string }>;
+  login: (payload: LoginPayload) => Promise<{ success: boolean; data?: User; token?: string; error?: string }>;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
   clearError: () => void;
@@ -41,3 +46,4 @@ export interface AuthState {
   logout: () => void;
   setHasHydrated: (state: boolean) => void;
 }
+

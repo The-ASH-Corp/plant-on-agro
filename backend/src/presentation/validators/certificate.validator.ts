@@ -37,12 +37,19 @@ export const getCertificateByIdSchema = z.object({
 });
 
 export const getCertificateByNumberSchema = z.object({
-  number: z.string().min(1, 'Certificate number is required'),
+  certificateNumber: z.string().min(1, 'Certificate number is required').optional(),
+  number: z.string().min(1, 'Certificate number is required').optional(),
+}).refine((data) => !!(data.certificateNumber || data.number), {
+  message: 'Certificate number is required',
 });
 
 export const verifyCertificateSchema = z.object({
-  identifier: z.string().min(1, 'Verification hash or certificate number is required'),
+  hashOrNumber: z.string().min(1, 'Verification hash or certificate number is required').optional(),
+  identifier: z.string().min(1, 'Verification hash or certificate number is required').optional(),
+}).refine((data) => !!(data.hashOrNumber || data.identifier), {
+  message: 'Verification hash or certificate number is required',
 });
+
 
 export const queryCertificatesSchema = z.object({
   orderRef: z.string().optional(),

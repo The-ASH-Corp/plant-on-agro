@@ -18,6 +18,16 @@ export interface ApiResponse<T = unknown> {
   timestamp: string;
 }
 
+export interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  limit: number;
+  skip?: number;
+  page?: number;
+  totalPages?: number;
+}
+
+
 export class ApiError extends Error {
   public readonly statusCode: number;
   public readonly fieldErrors: Record<string, string>;
