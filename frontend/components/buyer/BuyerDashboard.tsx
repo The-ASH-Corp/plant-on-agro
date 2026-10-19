@@ -321,7 +321,7 @@ export function BuyerDashboard() {
 
         {/* Scrollable Stage Body */}
         <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5">
-          {/* Executive Hero Banner with Progress Milestone */}
+          {/* Executive Hero Banner */}
           <BuyerHeroBanner
             user={user}
             totalTrees={totalTrees}

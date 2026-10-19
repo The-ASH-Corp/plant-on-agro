@@ -8,4 +8,5 @@ export * from './adoption-plans/adoption-plan.service';
 export * from './tree-instances/tree-instance.service';
 export * from './certificates/certificate.service';
 export * from './landing-page/landing-page.service';
+export * from './orders/order.service';
 

@@ -151,7 +151,7 @@ export function BuyerOrdersTab({
               <thead className="bg-[#f7faf8] border-b border-[#e2eae5] text-[#6b7c72] uppercase font-bold text-[10px] tracking-wider">
                 <tr>
                   <th className="py-3 px-4">Order / Invoice</th>
-                  <th className="py-3 px-4">Species & Tier</th>
+                  <th className="py-3 px-4">Tree Species</th>
                   <th className="py-3 px-4">Reserve Parcel</th>
                   <th className="py-3 px-4">Date</th>
                   <th className="py-3 px-4">Amount Paid</th>
@@ -180,7 +180,7 @@ export function BuyerOrdersTab({
                       <td className="py-3.5 px-4">
                         <span className="font-bold text-[#173324] block">{order.treeSpecies}</span>
                         <span className="text-[10px] text-[#52796f]">
-                          {order.quantity} {order.quantity > 1 ? "Trees" : "Tree"} • {order.planType}
+                          {order.quantity} {order.quantity > 1 ? "Trees" : "Tree"} Planted
                         </span>
                       </td>
 

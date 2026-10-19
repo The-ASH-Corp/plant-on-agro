@@ -122,9 +122,9 @@ export const DEFAULT_LANDING_PAGE_CONTENT: LandingPageContent = {
     steps: [
       {
         num: '01',
-        icon: '📋',
-        title: 'Choose Your Plan',
-        desc: 'Individual, student, family, occasion, or corporate — every milestone deserves roots.',
+        icon: '🌱',
+        title: 'Choose Your Tree',
+        desc: 'Select native fruit, timber, or medicinal species suited to regional agroforestry reserves.',
       },
       {
         num: '02',
@@ -134,9 +134,9 @@ export const DEFAULT_LANDING_PAGE_CONTENT: LandingPageContent = {
       },
       {
         num: '03',
-        icon: '📸',
+        icon: '📜',
         title: 'Watch It Grow',
-        desc: 'Track your tree with geo-tagged photos, growth milestones, and a digital certificate.',
+        desc: 'Track your tree with geo-tagged photos, verified field reports, and a legal digital deed.',
       },
     ],
   },

@@ -16,88 +16,9 @@ export function BuyerSidebarWidgets({
   onOpenPlantFlow,
   onSelectTreeDeed,
 }: BuyerSidebarWidgetsProps) {
-  const activeTree = trees[0] || null;
-
   return (
     <div className="space-y-4">
-      {/* Widget 1: Live Drone Telemetry & Reserve Radar */}
-      <div className="bg-gradient-to-br from-[#0c2417] via-[#123624] to-[#081810] rounded-2xl p-4 sm:p-5 text-white border border-emerald-500/25 shadow-lg relative overflow-hidden">
-        {/* Radar ambient sweep glow */}
-        <div className="absolute top-0 right-0 w-44 h-44 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
-
-        <div className="relative z-10 space-y-3">
-          <div className="flex items-center justify-between border-b border-white/15 pb-2.5">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-300 font-mono">
-                Live Drone Telemetry
-              </h3>
-            </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-              DRONE-04 ONLINE
-            </span>
-          </div>
-
-          {/* Reserve Satellite Quick View Card */}
-          <div className="p-3 rounded-xl bg-black/40 border border-white/10 space-y-2">
-            {activeTree ? (
-              <>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-white/60 font-medium">Assigned Bio-Reserve:</span>
-                  <span className="font-bold text-white text-right truncate max-w-[170px]">
-                    {activeTree.assignedReserve}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 pt-1 text-[11px] font-mono">
-                  <div className="bg-white/5 p-2 rounded-lg border border-white/5">
-                    <span className="text-white/40 block text-[9px] uppercase font-sans">Coordinates</span>
-                    <span className="text-emerald-300 font-bold truncate block">
-                      {activeTree.formattedGps}
-                    </span>
-                  </div>
-                  <div className="bg-white/5 p-2 rounded-lg border border-white/5">
-                    <span className="text-white/40 block text-[9px] uppercase font-sans">Condition</span>
-                    <span className="text-white font-bold">{activeTree.healthStatus}</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-1.5 pt-1 text-center text-[10px]">
-                  <div className="p-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/20">
-                    <span className="text-white/50 block text-[8px]">Tag</span>
-                    <strong className="text-emerald-300 font-bold">{activeTree.treeTag}</strong>
-                  </div>
-                  <div className="p-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/20">
-                    <span className="text-white/50 block text-[8px]">Planted</span>
-                    <strong className="text-amber-300 font-bold truncate block">{activeTree.datePlanted}</strong>
-                  </div>
-                  <div className="p-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/20">
-                    <span className="text-white/50 block text-[8px]">Audited</span>
-                    <strong className="text-blue-300 font-bold truncate block">{activeTree.lastInspectedAt || "Recent"}</strong>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="py-4 text-center">
-                <span className="text-xl">🛰️</span>
-                <p className="text-[11px] text-white/70 mt-1">No active trees adopted yet.</p>
-                <button
-                  onClick={onOpenPlantFlow}
-                  className="mt-2 text-[10px] font-bold text-emerald-300 underline cursor-pointer"
-                >
-                  Adopt a tree to activate GPS telemetry →
-                </button>
-              </div>
-            )}
-          </div>
-
-          <p className="text-[10px] text-white/60 leading-snug">
-            Autonomous drone sweeps cross-reference sapling foliage index with multi-spectral satellite imagery every 14 days.
-          </p>
-        </div>
-      </div>
-
-      {/* Widget 2: Field Care & Arborist Inspection Timeline */}
+      {/* Widget: Field Care & Arborist Inspection Timeline */}
       <div className="bg-white rounded-2xl p-4 sm:p-5 border border-[#e2eae5] shadow-xs space-y-3">
         <div className="flex items-center justify-between border-b border-[#f0f4f1] pb-2.5">
           <h4 className="text-xs font-bold text-[#173324] flex items-center gap-1.5">
@@ -123,14 +44,14 @@ export function BuyerSidebarWidgets({
           </div>
 
           <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[#f7faf8] border border-[#e2eae5]">
-            <span className="text-base text-blue-600 mt-0.5">🛰️</span>
+            <span className="text-base text-blue-600 mt-0.5">🌿</span>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
-                <strong className="text-[#173324] text-xs">Drone Canopy Photogrammetry</strong>
+                <strong className="text-[#173324] text-xs">Field Arborist Canopy Audit</strong>
                 <span className="text-[10px] text-blue-700 font-semibold font-mono">24 Oct 2026</span>
               </div>
               <p className="text-[11px] text-[#52796f] mt-0.5 leading-snug">
-                High-resolution 4K orthomosaic scan of foliage expansion.
+                On-ground botanical health check, height measurement, and foliage expansion review.
               </p>
             </div>
           </div>

@@ -48,7 +48,7 @@ export function BuyerTreesTab({
             </span>
           </div>
           <p className="text-xs text-[#52796f] mt-0.5">
-            Living saplings geotagged, monitored via autonomous drones, and protected under permanent forestry care.
+            Living saplings geotagged, cared for by dedicated field arborists, and protected under permanent forestry care.
           </p>
         </div>
 
@@ -197,9 +197,9 @@ export function BuyerTreesTab({
                     </div>
 
                     <div>
-                      <span className="text-[9px] font-semibold text-[#52796f] block">Drone Inspection</span>
+                      <span className="text-[9px] font-semibold text-[#52796f] block">Field Inspection</span>
                       <span className="text-emerald-700 font-bold text-[11px] flex items-center gap-1">
-                        <span>🛰️</span> {tree.lastInspectedAt || "14 Days Ago"}
+                        <span>🌿</span> {tree.lastInspectedAt || "Recently Audited"}
                       </span>
                     </div>
 

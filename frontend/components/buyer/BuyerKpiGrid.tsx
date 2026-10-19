@@ -14,7 +14,7 @@ export function BuyerKpiGrid({ kpi }: BuyerKpiGridProps) {
       unit: "Trees",
       badge: "100% Thriving",
       badgeColor: "bg-emerald-500/15 text-emerald-700 border-emerald-300",
-      description: "Alive and verified through drone telemetry",
+      description: "Alive and verified through ground arborist inspections",
       icon: "🌳",
       iconBg: "bg-gradient-to-tr from-emerald-500/20 to-emerald-500/10 text-emerald-700",
       accentBorder: "border-emerald-500/30",

@@ -179,7 +179,6 @@ const OrderSchema = new Schema<IOrderDocument>(
         'New Request',
         'Verified & Tagged',
         'Planted',
-        'Pending Drone Scan',
         'Certificate Issued',
         'Completed',
       ],

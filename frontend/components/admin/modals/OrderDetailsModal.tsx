@@ -30,12 +30,6 @@ const ALL_STATUSES: { value: AdoptionOrderStatus; label: string; desc: string; c
     color: "bg-lime-50 text-lime-800 border-lime-300",
   },
   {
-    value: "Pending Drone Scan",
-    label: "Pending Drone Scan",
-    desc: "Awaiting NDVI canopy index and telemetry scan",
-    color: "bg-purple-50 text-purple-800 border-purple-300",
-  },
-  {
     value: "Certificate Issued",
     label: "Certificate Issued",
     desc: "Digital deed generated & verified with blockchain timestamp",
@@ -75,8 +69,6 @@ export function OrderDetailsModal({
       case "Verified & Tagged":
         return "Planted";
       case "Planted":
-        return "Pending Drone Scan";
-      case "Pending Drone Scan":
         return "Certificate Issued";
       case "Certificate Issued":
         return "Completed";

@@ -4,7 +4,6 @@ const adoptionOrderStatusEnum = z.enum([
   'New Request',
   'Verified & Tagged',
   'Planted',
-  'Pending Drone Scan',
   'Certificate Issued',
   'Completed',
 ]);

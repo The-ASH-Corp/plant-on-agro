@@ -32,11 +32,6 @@ const STATUS_CONFIG: Record<
     badgeClass: "bg-lime-50 text-lime-800 border-lime-300",
     dotClass: "bg-lime-500",
   },
-  "Pending Drone Scan": {
-    label: "Pending Drone Scan",
-    badgeClass: "bg-purple-50 text-purple-800 border-purple-300",
-    dotClass: "bg-purple-500",
-  },
   "Certificate Issued": {
     label: "Certificate Issued",
     badgeClass: "bg-emerald-50 text-emerald-800 border-emerald-300",
@@ -53,7 +48,6 @@ const ALL_STATUSES: AdoptionOrderStatus[] = [
   "New Request",
   "Verified & Tagged",
   "Planted",
-  "Pending Drone Scan",
   "Certificate Issued",
   "Completed",
 ];
