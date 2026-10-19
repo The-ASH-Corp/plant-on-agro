@@ -31,6 +31,7 @@ import { LandingPageTab } from "./tabs/LandingPageTab";
 
 // Modal Components
 import { AddTreeModal } from "./modals/AddTreeModal";
+import { EditTreeModal } from "./modals/EditTreeModal";
 import { AddPlanModal } from "./modals/AddPlanModal";
 import { AddTreeInstanceModal } from "./modals/AddTreeInstanceModal";
 import { AddLocationModal } from "./modals/AddLocationModal";
@@ -341,6 +342,8 @@ export function AdminDashboard() {
 
   // Modals State
   const [showAddTreeModal, setShowAddTreeModal] = useState(false);
+  const [selectedTreeForEdit, setSelectedTreeForEdit] = useState<TreeVarietyItem | null>(null);
+  const [isUpdatingTree, setIsUpdatingTree] = useState(false);
   const [showAddPlanModal, setShowAddPlanModal] = useState(false);
   const [showAddInstanceModal, setShowAddInstanceModal] = useState(false);
   const [showAddLocationModal, setShowAddLocationModal] = useState(false);
@@ -622,6 +625,111 @@ export function AdminDashboard() {
       setShowAddTreeModal(false);
       showToast(`Added "${commonName}" to tree catalog!`);
       setActiveTab("trees");
+    }
+  };
+
+  const handleUpdateTree = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedTreeForEdit) return;
+
+    const fd = new FormData(e.currentTarget);
+    const id = (fd.get("id") as string) || selectedTreeForEdit.id;
+    const commonName = (fd.get("name") as string)?.trim() || selectedTreeForEdit.name;
+    const scientificName = (fd.get("sci") as string)?.trim() || selectedTreeForEdit.sci;
+    const category = (fd.get("category") as TreeVarietyItem["category"]) || selectedTreeForEdit.category;
+    const price = Number(fd.get("price")) || selectedTreeForEdit.price;
+    const co2 = Number(fd.get("co2")) || selectedTreeForEdit.co2PerYearKg || 25;
+    const location = (fd.get("location") as string)?.trim() || selectedTreeForEdit.location;
+    const growth = (fd.get("growth") as string)?.trim() || selectedTreeForEdit.growth;
+    const careRequirements =
+      (fd.get("careRequirements") as string)?.trim() ||
+      selectedTreeForEdit.careRequirements ||
+      "Weekly watering in early stages, adequate sunlight, organic soil";
+    const img = (fd.get("img") as string)?.trim() || selectedTreeForEdit.img;
+    const desc = (fd.get("desc") as string)?.trim() || selectedTreeForEdit.desc;
+    const isActive = fd.get("isActive") !== null;
+
+    setIsUpdatingTree(true);
+    try {
+      const res = await treeVarietyService.update(id, {
+        commonName,
+        scientificName,
+        category,
+        price,
+        co2AbsorptionRateKgYear: co2,
+        growthTimeline: growth,
+        careRequirements,
+        coverImages: img ? [img] : undefined,
+        location,
+        description: desc,
+        isActive,
+      });
+
+      if (res.data) {
+        const updatedUiTree = treeVarietyService.mapToUiItem(res.data);
+        setTrees((prev) => prev.map((t) => (t.id === id ? updatedUiTree : t)));
+      } else {
+        setTrees((prev) =>
+          prev.map((t) =>
+            t.id === id
+              ? {
+                  ...t,
+                  name: commonName,
+                  sci: scientificName,
+                  commonName,
+                  scientificName,
+                  category,
+                  price,
+                  location,
+                  growth,
+                  growthTimeline: growth,
+                  img,
+                  coverImages: [img],
+                  desc,
+                  description: desc,
+                  co2PerYearKg: co2,
+                  co2AbsorptionRateKgYear: co2,
+                  careRequirements,
+                  isActive,
+                }
+              : t
+          )
+        );
+      }
+      setSelectedTreeForEdit(null);
+      showToast(`Updated tree variety "${commonName}"!`);
+    } catch (err) {
+      console.warn("Tree update notice:", err);
+      setTrees((prev) =>
+        prev.map((t) =>
+          t.id === id
+            ? {
+                ...t,
+                name: commonName,
+                sci: scientificName,
+                commonName,
+                scientificName,
+                category,
+                price,
+                location,
+                growth,
+                growthTimeline: growth,
+                img,
+                coverImages: [img],
+                desc,
+                description: desc,
+                co2PerYearKg: co2,
+                co2AbsorptionRateKgYear: co2,
+                careRequirements,
+                isActive,
+              }
+            : t
+        )
+      );
+      setSelectedTreeForEdit(null);
+      showToast(`Updated "${commonName}" locally.`);
+    } finally {
+      setIsUpdatingTree(false);
     }
   };
 
@@ -997,6 +1105,7 @@ export function AdminDashboard() {
               trees={trees}
               searchQuery={searchQuery}
               onOpenAddTree={() => setShowAddTreeModal(true)}
+              onEditTree={(tree) => setSelectedTreeForEdit(tree)}
               onDeleteTree={handleDeleteTree}
             />
           )}
@@ -1052,6 +1161,14 @@ export function AdminDashboard() {
         isOpen={showAddTreeModal}
         onClose={() => setShowAddTreeModal(false)}
         onSubmit={handleCreateTree}
+      />
+
+      <EditTreeModal
+        isOpen={Boolean(selectedTreeForEdit)}
+        tree={selectedTreeForEdit}
+        onClose={() => setSelectedTreeForEdit(null)}
+        onSubmit={handleUpdateTree}
+        isSubmitting={isUpdatingTree}
       />
 
       <AddPlanModal
