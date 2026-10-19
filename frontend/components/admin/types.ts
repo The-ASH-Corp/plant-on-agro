@@ -5,6 +5,7 @@ export type AdminTabType =
   | "locations"
   | "orders"
   | "instances"
+  | "users"
   | "landing-page";
 
 export type TreeHealthStatus =

@@ -7,6 +7,7 @@ export interface User {
   role: UserRole;
   isActive: boolean;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface AuthResponse {
