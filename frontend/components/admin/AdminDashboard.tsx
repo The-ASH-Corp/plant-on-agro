@@ -40,6 +40,7 @@ import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
 import { treeVarietyService } from "@/services/tree-varieties/tree-variety.service";
 import { adoptionPlanService } from "@/services/adoption-plans/adoption-plan.service";
 import { treeInstanceService } from "@/services/tree-instances/tree-instance.service";
+import { orderService } from "@/services/orders/order.service";
 import { OccasionDedicationType, TreeInstanceItem, TreeHealthStatus } from "./types";
 
 // Re-export types for backward compatibility
@@ -284,10 +285,11 @@ export function AdminDashboard() {
     let isMounted = true;
     async function loadCatalog() {
       try {
-        const [treesRes, plansRes, instancesRes] = await Promise.all([
+        const [treesRes, plansRes, instancesRes, ordersRes] = await Promise.all([
           treeVarietyService.getAll(),
           adoptionPlanService.getAll(),
           treeInstanceService.getAll(),
+          orderService.getAll({ limit: 200 }),
         ]);
         if (isMounted) {
           const apiTrees = treesRes.data?.items ? treesRes.data.items.map(treeVarietyService.mapToUiItem) : [];
@@ -314,12 +316,18 @@ export function AdminDashboard() {
           );
           setLocations(derivedLocations);
 
-          // Dynamically derive adoption orders strictly from database instances
-          const derivedOrders = deriveOrdersFromInstances(
-            instancesRes.data?.items || [],
-            []
-          );
-          setOrders(derivedOrders);
+          // Dynamically load adoption orders directly from MongoDB database (collection: adoptionorders)
+          if (ordersRes.data?.items && ordersRes.data.items.length > 0) {
+            const apiOrders = ordersRes.data.items.map(orderService.mapToUiItem);
+            setOrders(apiOrders);
+          } else {
+            // Graceful fallback to derive from instances if adoptionorders collection is empty
+            const derivedOrders = deriveOrdersFromInstances(
+              instancesRes.data?.items || [],
+              []
+            );
+            setOrders(derivedOrders);
+          }
         }
       } catch (err) {
         console.warn("Could not load catalog from backend:", err);
@@ -358,10 +366,14 @@ export function AdminDashboard() {
     (o) => o.isRead === false || o.status === "New Request"
   ).length;
 
-  const handleUpdateOrderStatus = async (orderNumber: string, newStatus: AdoptionOrderStatus) => {
+  const handleUpdateOrderStatus = async (orderIdentifier: string, newStatus: AdoptionOrderStatus) => {
+    const targetOrder = orders.find(
+      (o) => o.orderNumber === orderIdentifier || o.id === orderIdentifier
+    );
+
     setOrders((prev) => {
       const updated = prev.map((o) => {
-        if (o.orderNumber === orderNumber || o.id === orderNumber) {
+        if (o.orderNumber === orderIdentifier || o.id === orderIdentifier) {
           return { ...o, status: newStatus, isRead: true };
         }
         return o;
@@ -374,13 +386,25 @@ export function AdminDashboard() {
       return updated;
     });
 
-    if (selectedOrder && (selectedOrder.orderNumber === orderNumber || selectedOrder.id === orderNumber)) {
+    if (
+      selectedOrder &&
+      (selectedOrder.orderNumber === orderIdentifier || selectedOrder.id === orderIdentifier)
+    ) {
       setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus, isRead: true } : null));
+    }
+
+    // Persist status change directly to MongoDB backend order entity
+    if (targetOrder?.id) {
+      try {
+        await orderService.updateStatus(targetOrder.id, newStatus);
+      } catch (orderApiErr) {
+        console.warn("Failed to persist order status to backend API:", orderApiErr);
+      }
     }
 
     // Persist status change to matching tree instances in database
     const matchingInsts = instances.filter(
-      (i) => i.orderRef === orderNumber || i.treeTag === orderNumber
+      (i) => i.orderRef === orderIdentifier || i.treeTag === orderIdentifier
     );
     for (const inst of matchingInsts) {
       try {
@@ -393,10 +417,16 @@ export function AdminDashboard() {
       }
     }
 
-    showToast(`✓ Order ${orderNumber} status changed to "${newStatus}"`);
+    showToast(`✓ Order ${targetOrder?.orderNumber || orderIdentifier} status changed to "${newStatus}"`);
   };
 
-  const handleMarkAllOrdersAsRead = () => {
+  const handleMarkAllOrdersAsRead = async () => {
+    try {
+      await orderService.markAllAsRead();
+    } catch (err) {
+      console.warn("Failed to mark all orders as read in backend:", err);
+    }
+
     setOrders((prev) => {
       const updated = prev.map((o) => ({ ...o, isRead: true }));
       try {
@@ -409,7 +439,7 @@ export function AdminDashboard() {
     showToast("✓ All adoption requests marked as reviewed.");
   };
 
-  const handleSelectOrder = (order: AdoptionOrder) => {
+  const handleSelectOrder = async (order: AdoptionOrder) => {
     setSelectedOrder(order);
     if (order.isRead === false) {
       setOrders((prev) => {
@@ -419,7 +449,75 @@ export function AdminDashboard() {
         } catch {}
         return updated;
       });
+
+      if (order.id) {
+        try {
+          await orderService.updateStatus(order.id, order.status);
+        } catch (err) {
+          console.warn("Could not mark order read on backend:", err);
+        }
+      }
     }
+  };
+
+  const handleExportOrdersCSV = () => {
+    if (orders.length === 0) {
+      showToast("No orders available to export.");
+      return;
+    }
+    const headers = [
+      "Order Number",
+      "Invoice Number",
+      "Adopter Name",
+      "Adopter Email",
+      "Phone",
+      "Species",
+      "Plantation Reserve",
+      "GPS Coordinates",
+      "Plan Package",
+      "Quantity",
+      "Total Amount (INR)",
+      "Payment Method",
+      "Payment Status",
+      "Transaction Ref",
+      "Order Status",
+      "Certificate ID",
+      "Date Adopted",
+    ];
+    const rows = orders.map((o) => [
+      `"${o.orderNumber}"`,
+      `"${o.invoiceNumber || ""}"`,
+      `"${(o.adopterName || "").replace(/"/g, '""')}"`,
+      `"${(o.adopterEmail || "").replace(/"/g, '""')}"`,
+      `"${o.adopterPhone || ""}"`,
+      `"${(o.treeSpecies || "").replace(/"/g, '""')}"`,
+      `"${(o.reserveName || "").replace(/"/g, '""')}"`,
+      `"${(o.gpsCoords || "").replace(/"/g, '""')}"`,
+      `"${(o.planType || "").replace(/"/g, '""')}"`,
+      o.quantity || 1,
+      o.totalAmount || 0,
+      `"${o.paymentMethod || "sandbox"}"`,
+      `"${o.paymentStatus || "Paid"}"`,
+      `"${o.transactionRef || ""}"`,
+      `"${o.status || ""}"`,
+      `"${o.certificateId || ""}"`,
+      `"${o.datePlanted || ""}"`,
+    ]);
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute(
+      "download",
+      `PlantOnAgro_Adoption_Orders_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("✓ Downloaded adoption orders CSV register.");
   };
 
   // Auth Store & Access Guard
@@ -936,7 +1034,7 @@ export function AdminDashboard() {
               orders={orders}
               searchQuery={searchQuery}
               onSelectOrder={handleSelectOrder}
-              onExportCSV={() => showToast("Exporting order ledger CSV...")}
+              onExportCSV={handleExportOrdersCSV}
               onUpdateStatus={handleUpdateOrderStatus}
               onMarkAllAsRead={handleMarkAllOrdersAsRead}
               unreadCount={unreadOrdersCount}

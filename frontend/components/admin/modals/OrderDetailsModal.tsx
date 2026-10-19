@@ -170,13 +170,25 @@ export function OrderDetailsModal({
             <span className="text-[#7a8a80]">Adopter Email:</span>
             <span className="font-semibold text-[#173324]">{order.adopterEmail}</span>
           </div>
+          {order.adopterPhone && (
+            <div className="flex justify-between">
+              <span className="text-[#7a8a80]">Adopter Phone:</span>
+              <span className="font-semibold text-[#173324]">{order.adopterPhone}</span>
+            </div>
+          )}
+          {order.invoiceNumber && (
+            <div className="flex justify-between">
+              <span className="text-[#7a8a80]">Tax Invoice No:</span>
+              <span className="font-mono font-semibold text-[#1b7a43]">{order.invoiceNumber}</span>
+            </div>
+          )}
           <div className="flex justify-between">
             <span className="text-[#7a8a80]">Botanical Name:</span>
             <span className="font-semibold italic text-[#173324]">{order.scientificName}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-[#7a8a80]">Reserve Parcel:</span>
-            <span className="font-semibold text-[#173324]">{order.reserveName}</span>
+            <span className="text-[#7a8a80]">Plantation Reserve:</span>
+            <span className="font-semibold text-[#173324]">{order.reserveName} (On-Site Planting)</span>
           </div>
           <div className="flex justify-between">
             <span className="text-[#7a8a80]">GPS Coordinates:</span>
@@ -192,6 +204,18 @@ export function OrderDetailsModal({
               {order.quantity}x • ₹{order.totalAmount.toLocaleString()}
             </span>
           </div>
+          {order.paymentMethod && (
+            <div className="flex justify-between">
+              <span className="text-[#7a8a80]">Payment Method:</span>
+              <span className="font-semibold text-[#173324] uppercase tracking-wider">{order.paymentMethod}</span>
+            </div>
+          )}
+          {order.transactionRef && (
+            <div className="flex justify-between">
+              <span className="text-[#7a8a80]">Transaction Reference:</span>
+              <span className="font-mono text-[11px] text-[#2d6a4f]">{order.transactionRef}</span>
+            </div>
+          )}
           <div className="flex justify-between">
             <span className="text-[#7a8a80]">Certificate Serial:</span>
             <span className="font-mono font-semibold text-[#2d6a4f]">{order.certificateId}</span>
@@ -200,6 +224,12 @@ export function OrderDetailsModal({
             <span className="text-[#7a8a80]">NDVI Vigour Score:</span>
             <span className="font-bold text-[#10b981]">{order.ndviScore} (High Quality)</span>
           </div>
+          {order.notes && (
+            <div className="pt-2 border-t border-[#e2eae5] text-[#55695d]">
+              <span className="text-[11px] font-semibold text-[#7a8a80] block mb-0.5">Plantation Notes / Dedication:</span>
+              <p className="text-[11px] italic bg-white p-2 rounded-xl border border-[#e8efe9]">{order.notes}</p>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-3">

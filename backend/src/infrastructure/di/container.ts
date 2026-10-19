@@ -49,6 +49,16 @@ import { UpdateLandingPageUseCase } from '../../application/use-cases/landing-pa
 import { ResetLandingPageUseCase } from '../../application/use-cases/landing-page/reset-landing-page.use-case';
 import { LandingPageController } from '../../presentation/controllers/landing-page.controller';
 
+import { MongoOrderRepository } from '../repositories/mongo-order.repository';
+import { CreateOrderUseCase } from '../../application/use-cases/orders/create-order.use-case';
+import { GetOrdersUseCase } from '../../application/use-cases/orders/get-orders.use-case';
+import { GetOrderByIdUseCase } from '../../application/use-cases/orders/get-order-by-id.use-case';
+import { GetOrderByNumberUseCase } from '../../application/use-cases/orders/get-order-by-number.use-case';
+import { UpdateOrderStatusUseCase } from '../../application/use-cases/orders/update-order-status.use-case';
+import { MarkOrdersReadUseCase } from '../../application/use-cases/orders/mark-orders-read.use-case';
+import { DeleteOrderUseCase } from '../../application/use-cases/orders/delete-order.use-case';
+import { OrderController } from '../../presentation/controllers/order.controller';
+
 import { UserController } from '../../presentation/controllers/user.controller';
 import { AuthController } from '../../presentation/controllers/auth.controller';
 import { TreeVarietyController } from '../../presentation/controllers/tree-variety.controller';
@@ -68,6 +78,30 @@ export class Container {
   public static readonly treeInstanceRepository = new MongoTreeInstanceRepository();
   public static readonly certificateRepository = new MongoCertificateRepository();
   public static readonly landingPageRepository = new MongoLandingPageRepository();
+  public static readonly orderRepository = new MongoOrderRepository();
+
+  // Order Use Cases
+  private static readonly createOrderUseCase = new CreateOrderUseCase(
+    Container.orderRepository
+  );
+  private static readonly getOrdersUseCase = new GetOrdersUseCase(
+    Container.orderRepository
+  );
+  private static readonly getOrderByIdUseCase = new GetOrderByIdUseCase(
+    Container.orderRepository
+  );
+  private static readonly getOrderByNumberUseCase = new GetOrderByNumberUseCase(
+    Container.orderRepository
+  );
+  private static readonly updateOrderStatusUseCase = new UpdateOrderStatusUseCase(
+    Container.orderRepository
+  );
+  private static readonly markOrdersReadUseCase = new MarkOrdersReadUseCase(
+    Container.orderRepository
+  );
+  private static readonly deleteOrderUseCase = new DeleteOrderUseCase(
+    Container.orderRepository
+  );
 
 
   // Landing Page Use Cases
@@ -235,6 +269,16 @@ export class Container {
     Container.getLandingPageUseCase,
     Container.updateLandingPageUseCase,
     Container.resetLandingPageUseCase
+  );
+
+  public static readonly orderController = new OrderController(
+    Container.createOrderUseCase,
+    Container.getOrdersUseCase,
+    Container.getOrderByIdUseCase,
+    Container.getOrderByNumberUseCase,
+    Container.updateOrderStatusUseCase,
+    Container.markOrdersReadUseCase,
+    Container.deleteOrderUseCase
   );
 }
 

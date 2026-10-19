@@ -34,6 +34,13 @@ export const API_ENDPOINTS = {
     BASE: '/landing-page',
     RESET: '/landing-page/reset',
   },
+  ORDERS: {
+    BASE: '/orders',
+    BY_ID: (id: string) => `/orders/${id}`,
+    BY_NUMBER: (orderNumber: string) => `/orders/number/${orderNumber}`,
+    STATUS: (id: string) => `/orders/${id}/status`,
+    MARK_ALL_READ: '/orders/mark-all-read',
+  },
   HEALTH: '/health',
 
 } as const;

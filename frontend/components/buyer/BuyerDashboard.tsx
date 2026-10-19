@@ -9,6 +9,7 @@ import {
   treeInstanceService,
   BackendTreeInstance,
 } from "@/services/tree-instances/tree-instance.service";
+import { orderService } from "@/services/orders/order.service";
 
 import { BuyerDashboardTab, BuyerKpiData, BuyerOrderRecord } from "./types";
 import { BuyerSidebar } from "./BuyerSidebar";
@@ -134,10 +135,16 @@ export function BuyerDashboard() {
         setLoading(true);
         // Query by user's email or name if authenticated, otherwise fetch latest general instances
         const searchQuery = user?.email || user?.name || "";
-        const res = await treeInstanceService.getAll({
-          search: searchQuery,
-          limit: 50,
-        });
+        const [res, ordersRes] = await Promise.all([
+          treeInstanceService.getAll({
+            search: searchQuery,
+            limit: 50,
+          }),
+          orderService.getAll({
+            adopterEmail: user?.email,
+            limit: 50,
+          }),
+        ]);
 
         // Also check if any trees were adopted during this session in local storage
         const storedBuyerTrees: BackendTreeInstance[] = (() => {
@@ -152,17 +159,19 @@ export function BuyerDashboard() {
           return [];
         })();
 
-        // Load stored orders from localStorage
+        // Load stored orders from localStorage + backend database
         const storedOrders: any[] = (() => {
+          let local: any[] = [];
           if (typeof window !== "undefined") {
             try {
               const raw = localStorage.getItem("poa_orders");
-              return raw ? JSON.parse(raw) : [];
+              if (raw) local = JSON.parse(raw);
             } catch {
-              return [];
+              local = [];
             }
           }
-          return [];
+          const backendOrders = ordersRes.data?.items || [];
+          return [...backendOrders, ...local];
         })();
 
         if (isMounted) {

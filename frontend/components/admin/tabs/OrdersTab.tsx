@@ -224,6 +224,11 @@ export function OrdersTab({
                             </span>
                           )}
                         </div>
+                        {order.invoiceNumber && (
+                          <span className="font-mono text-[9px] text-[#7a8a80] block">
+                            {order.invoiceNumber}
+                          </span>
+                        )}
                         <span className="font-semibold text-[#173324] block mt-0.5">{order.adopterName}</span>
                         <span className="text-[11px] text-[#73877b]">{order.adopterEmail}</span>
                       </td>
@@ -235,8 +240,13 @@ export function OrdersTab({
                         <span className="text-[#173324] font-medium block">{order.reserveName}</span>
                         <span className="font-mono text-[10px] text-[#73877b]">{order.gpsCoords}</span>
                       </td>
-                      <td className="py-3.5 px-4 font-bold text-[#173324]">
-                        ₹{order.totalAmount.toLocaleString()}
+                      <td className="py-3.5 px-4">
+                        <span className="font-bold text-[#173324] block">
+                          ₹{order.totalAmount.toLocaleString()}
+                        </span>
+                        <span className="inline-block mt-0.5 text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                          {order.paymentStatus || "Paid"}
+                        </span>
                       </td>
 
                       {/* Status changing dropdown selector */}
