@@ -2,12 +2,13 @@
 
 import { useState, useMemo } from "react";
 import { TreeInstanceItem, TreeHealthStatus } from "../types";
-import { TrashIcon } from "@/components/ui/TrashIcon";
+import { TrashIcon, PencilIcon } from "@/components/ui";
 
 interface TreeInstancesTabProps {
   instances: TreeInstanceItem[];
   searchQuery: string;
   onOpenAddInstance: () => void;
+  onEditInstance?: (instance: TreeInstanceItem) => void;
   onUpdateHealth?: (id: string, status: TreeHealthStatus) => void;
   onDeleteInstance?: (id: string, tag?: string) => void;
 }
@@ -33,6 +34,7 @@ export function TreeInstancesTab({
   instances,
   searchQuery,
   onOpenAddInstance,
+  onEditInstance,
   onUpdateHealth,
   onDeleteInstance,
 }: TreeInstancesTabProps) {
@@ -304,16 +306,28 @@ export function TreeInstancesTab({
 
                       {/* Actions */}
                       <td className="py-3.5 px-4 text-right">
-                        {onDeleteInstance && (
-                          <button
-                            type="button"
-                            onClick={() => onDeleteInstance(item.id, item.treeTag ? `${item.treeTag} (${item.treeVarietyName})` : item.treeVarietyName)}
-                            className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 p-1.5 rounded-lg transition-colors cursor-pointer text-xs inline-flex items-center justify-center"
-                            title={`Delete tree instance ${item.treeTag}`}
-                          >
-                            <TrashIcon className="w-3.5 h-3.5" />
-                          </button>
-                        )}
+                        <div className="inline-flex items-center justify-end gap-1.5">
+                          {onEditInstance && (
+                            <button
+                              type="button"
+                              onClick={() => onEditInstance(item)}
+                              className="text-[#173324] hover:text-[#1b7a43] hover:bg-emerald-50 p-1.5 rounded-lg transition-colors cursor-pointer text-xs inline-flex items-center justify-center border border-transparent hover:border-emerald-200"
+                              title={`Edit tree instance ${item.treeTag}`}
+                            >
+                              <PencilIcon className="w-3.5 h-3.5 text-[#1b7a43]" />
+                            </button>
+                          )}
+                          {onDeleteInstance && (
+                            <button
+                              type="button"
+                              onClick={() => onDeleteInstance(item.id, item.treeTag ? `${item.treeTag} (${item.treeVarietyName})` : item.treeVarietyName)}
+                              className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 p-1.5 rounded-lg transition-colors cursor-pointer text-xs inline-flex items-center justify-center border border-transparent hover:border-rose-200"
+                              title={`Delete tree instance ${item.treeTag}`}
+                            >
+                              <TrashIcon className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -410,17 +424,30 @@ export function TreeInstancesTab({
                     </select>
                   )}
 
-                  {onDeleteInstance && (
-                    <button
-                      type="button"
-                      onClick={() => onDeleteInstance(item.id, item.treeTag ? `${item.treeTag} (${item.treeVarietyName})` : item.treeVarietyName)}
-                      className="inline-flex items-center gap-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-2.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
-                      title={`Delete tree instance ${item.treeTag}`}
-                    >
-                      <TrashIcon className="w-3.5 h-3.5" />
-                      <span>Delete</span>
-                    </button>
-                  )}
+                  <div className="flex items-center gap-1.5">
+                    {onEditInstance && (
+                      <button
+                        type="button"
+                        onClick={() => onEditInstance(item)}
+                        className="inline-flex items-center gap-1 text-[#173324] hover:text-[#1b7a43] hover:bg-emerald-50 px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors border border-transparent hover:border-emerald-200"
+                        title={`Edit tree instance ${item.treeTag}`}
+                      >
+                        <PencilIcon className="w-3.5 h-3.5 text-[#1b7a43]" />
+                        <span>Edit</span>
+                      </button>
+                    )}
+                    {onDeleteInstance && (
+                      <button
+                        type="button"
+                        onClick={() => onDeleteInstance(item.id, item.treeTag ? `${item.treeTag} (${item.treeVarietyName})` : item.treeVarietyName)}
+                        className="inline-flex items-center gap-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors border border-transparent hover:border-rose-200"
+                        title={`Delete tree instance ${item.treeTag}`}
+                      >
+                        <TrashIcon className="w-3.5 h-3.5" />
+                        <span>Delete</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             );

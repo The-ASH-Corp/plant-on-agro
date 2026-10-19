@@ -35,6 +35,7 @@ import { EditTreeModal } from "./modals/EditTreeModal";
 import { AddPlanModal } from "./modals/AddPlanModal";
 import { EditPlanModal } from "./modals/EditPlanModal";
 import { AddTreeInstanceModal } from "./modals/AddTreeInstanceModal";
+import { EditTreeInstanceModal } from "./modals/EditTreeInstanceModal";
 import { AddLocationModal } from "./modals/AddLocationModal";
 import { OrderDetailsModal } from "./modals/OrderDetailsModal";
 import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
@@ -349,6 +350,8 @@ export function AdminDashboard() {
   const [selectedPlanForEdit, setSelectedPlanForEdit] = useState<AdoptionPlanItem | null>(null);
   const [isUpdatingPlan, setIsUpdatingPlan] = useState(false);
   const [showAddInstanceModal, setShowAddInstanceModal] = useState(false);
+  const [selectedInstanceForEdit, setSelectedInstanceForEdit] = useState<TreeInstanceItem | null>(null);
+  const [isUpdatingInstance, setIsUpdatingInstance] = useState(false);
   const [showAddLocationModal, setShowAddLocationModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<AdoptionOrder | null>(null);
   const [deleteModal, setDeleteModal] = useState<{
@@ -1047,6 +1050,118 @@ export function AdminDashboard() {
     }
   };
 
+  const handleUpdateInstance = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedInstanceForEdit) return;
+
+    const fd = new FormData(e.currentTarget);
+    const id = (fd.get("id") as string) || selectedInstanceForEdit.id;
+    const treeTag = (fd.get("treeTag") as string)?.trim().toUpperCase() || selectedInstanceForEdit.treeTag;
+    const orderRef = (fd.get("orderRef") as string)?.trim() || "";
+    const assignedReserve =
+      (fd.get("assignedReserve") as string)?.trim() || selectedInstanceForEdit.assignedReserve;
+    const latitude =
+      parseFloat(fd.get("latitude") as string) ||
+      selectedInstanceForEdit.gpsCoordinates?.latitude ||
+      18.5204;
+    const longitude =
+      parseFloat(fd.get("longitude") as string) ||
+      selectedInstanceForEdit.gpsCoordinates?.longitude ||
+      73.8567;
+    const datePlanted =
+      (fd.get("datePlanted") as string)?.trim() || selectedInstanceForEdit.datePlanted;
+    const healthStatus =
+      (fd.get("healthStatus") as TreeHealthStatus) || selectedInstanceForEdit.healthStatus;
+    const treeVarietyName = (fd.get("treeVarietyName") as string)?.trim() || "";
+    const adopterName = (fd.get("adopterName") as string)?.trim() || "";
+    const adopterEmail = (fd.get("adopterEmail") as string)?.trim() || "";
+    const notes = (fd.get("notes") as string)?.trim() || "";
+    const imageUrl =
+      (fd.get("imageUrl") as string)?.trim() || selectedInstanceForEdit.imageUrl || "";
+    const isActive = fd.get("isActive") !== null;
+
+    const gpsCoordinates = { latitude, longitude };
+    const formattedGps = `${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E`;
+
+    setIsUpdatingInstance(true);
+    try {
+      const res = await treeInstanceService.update(id, {
+        treeTag,
+        orderRef,
+        assignedReserve,
+        gpsCoordinates,
+        datePlanted,
+        healthStatus,
+        treeVarietyName,
+        adopterName,
+        adopterEmail,
+        notes,
+        imageUrl,
+        isActive,
+      });
+
+      if (res.data) {
+        const uiItem = treeInstanceService.mapToUiItem(res.data);
+        setInstances((prev) => prev.map((item) => (item.id === id ? uiItem : item)));
+      } else {
+        setInstances((prev) =>
+          prev.map((item) =>
+            item.id === id
+              ? {
+                  ...item,
+                  treeTag,
+                  orderRef,
+                  assignedReserve,
+                  gpsCoordinates,
+                  formattedGps,
+                  datePlanted,
+                  healthStatus,
+                  treeVarietyName,
+                  adopterName,
+                  adopterEmail,
+                  notes,
+                  imageUrl,
+                  isActive,
+                }
+              : item
+          )
+        );
+      }
+
+      setSelectedInstanceForEdit(null);
+      showToast(`Updated tree sapling ${treeTag}!`);
+    } catch (err: any) {
+      console.warn("Tree instance update notice:", err);
+      // Fallback local update
+      setInstances((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                treeTag,
+                orderRef,
+                assignedReserve,
+                gpsCoordinates,
+                formattedGps,
+                datePlanted,
+                healthStatus,
+                treeVarietyName,
+                adopterName,
+                adopterEmail,
+                notes,
+                imageUrl,
+                isActive,
+              }
+            : item
+        )
+      );
+      setSelectedInstanceForEdit(null);
+      showToast(`Updated ${treeTag} locally.`);
+    } finally {
+      setIsUpdatingInstance(false);
+    }
+  };
+
   const handleDeleteInstance = (id: string, tag?: string) => {
     const item = instances.find((i) => i.id === id);
     setDeleteModal({
@@ -1239,6 +1354,7 @@ export function AdminDashboard() {
               instances={instances}
               searchQuery={searchQuery}
               onOpenAddInstance={() => setShowAddInstanceModal(true)}
+              onEditInstance={(inst) => setSelectedInstanceForEdit(inst)}
               onUpdateHealth={handleUpdateInstanceHealth}
               onDeleteInstance={handleDeleteInstance}
             />
@@ -1304,6 +1420,14 @@ export function AdminDashboard() {
         isOpen={showAddInstanceModal}
         onClose={() => setShowAddInstanceModal(false)}
         onSubmit={handleCreateInstance}
+      />
+
+      <EditTreeInstanceModal
+        isOpen={Boolean(selectedInstanceForEdit)}
+        instance={selectedInstanceForEdit}
+        onClose={() => setSelectedInstanceForEdit(null)}
+        onSubmit={handleUpdateInstance}
+        isSubmitting={isUpdatingInstance}
       />
 
       <AddLocationModal
