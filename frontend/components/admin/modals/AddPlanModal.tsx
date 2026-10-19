@@ -39,16 +39,28 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !isSubmitting) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+    >
       <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-[#e2eae5] relative animate-fadeIn max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
+          type="button"
           className="absolute top-5 right-5 text-[#7a8a80] hover:text-[#173324] text-lg font-bold cursor-pointer"
           aria-label="Close modal"
         >
           ✕
         </button>
-        <h3 style={{ fontFamily: "var(--font-display)" }} className="text-2xl text-[#173324] mb-1">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+          <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">
+            Adoption Program Setup
+          </span>
+        </div>
+        <h3 style={{ fontFamily: "var(--font-display)" }} className="text-2xl text-[#173324] mb-1 font-bold">
           Add Adoption Plan
         </h3>
         <p className="text-xs text-[#55695d] mb-4">
@@ -56,12 +68,15 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
         </p>
 
         <form onSubmit={onSubmit} className="space-y-4 text-xs">
-          {/* Hidden input to pass selected occasion dedications */}
+          {/* Hidden inputs to pass selected occasion dedications */}
           <input
             type="hidden"
             name="occasionDedications"
             value={JSON.stringify(selectedOccasions)}
           />
+          {selectedOccasions.map((occ) => (
+            <input key={`hidden-${occ}`} type="hidden" name="occasions" value={occ} />
+          ))}
 
           {/* Plan Label and Icon */}
           <div className="grid grid-cols-3 gap-3">
@@ -74,7 +89,7 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
                 type="text"
                 required
                 placeholder="e.g. Occasion Dedication Pack"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7]"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7] focus:border-[#173324] transition-colors"
               />
             </div>
             <div>
@@ -86,7 +101,7 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
                 type="text"
                 required
                 defaultValue="🎉"
-                className="w-full px-3 py-2.5 text-center text-base rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7]"
+                className="w-full px-3 py-2.5 text-center text-base rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7] focus:border-[#173324] transition-colors"
               />
             </div>
           </div>
@@ -103,7 +118,7 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
                 required
                 defaultValue={150}
                 placeholder="e.g. 150 (Extra), 0, or -50 (Subsidy)"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7]"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7] focus:border-[#173324] transition-colors"
               />
               <span className="text-[10px] text-[#73877b] mt-0.5 block">
                 0 = base price, &gt;0 = premium, &lt;0 = subsidy
@@ -119,7 +134,7 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
                 required
                 defaultValue="Popular"
                 placeholder="e.g. Popular, Premium, CSR Tier"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7]"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7] focus:border-[#173324] transition-colors"
               />
             </div>
           </div>
@@ -134,7 +149,7 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
               rows={2}
               required
               placeholder="e.g. Dedicate a grove for lifetime celebrations with physical wooden plaques and digital updates."
-              className="w-full px-3.5 py-2 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7]"
+              className="w-full px-3.5 py-2 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7] focus:border-[#173324] transition-colors"
             />
           </div>
 
@@ -148,18 +163,42 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
               rows={3}
               placeholder="Geo-tagged physical plaque&#10;Quarterly high-res field photo logs&#10;Framed digital certificate of adoption&#10;Direct farmer community support"
               defaultValue={`Geo-tagged physical plaque\nQuarterly arborist health monitoring\nFramed dedication certificate\nAnnual impact report`}
-              className="w-full px-3.5 py-2 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7]"
+              className="w-full px-3.5 py-2 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7] focus:border-[#173324] transition-colors"
             />
             <span className="text-[10px] text-[#73877b] mt-0.5 block">
               Enter each feature on a separate line or separated by commas.
             </span>
           </div>
 
-          {/* Occasion Dedication Options */}
-          <div>
-            <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1.5">
-              Occasion Dedication Options *
-            </label>
+          {/* Occasion Dedication Options Multi-Select */}
+          <div className="p-3 bg-[#f8faf8] rounded-2xl border border-[#e2eae5] space-y-2.5">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="font-bold text-[#173324] uppercase tracking-wider text-[11px] block">
+                  Occasion Dedication Options *
+                </label>
+                <span className="text-[10px] text-[#73877b]">
+                  {selectedOccasions.length} of {OCCASIONS.length} occasions selected
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-[10px]">
+                <button
+                  type="button"
+                  onClick={() => setSelectedOccasions(OCCASIONS.map((o) => o.value))}
+                  className="px-2 py-0.5 rounded-md border border-[#e2eae5] bg-white text-[#173324] hover:bg-[#f2f6f3] font-medium cursor-pointer transition-colors"
+                >
+                  Select All
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedOccasions(["general"])}
+                  className="px-2 py-0.5 rounded-md border border-[#e2eae5] bg-white text-[#55695d] hover:bg-[#f2f6f3] font-medium cursor-pointer transition-colors"
+                >
+                  General Only
+                </button>
+              </div>
+            </div>
+
             <div className="flex flex-wrap gap-2">
               {OCCASIONS.map((occ) => {
                 const isChecked = selectedOccasions.includes(occ.value);
@@ -168,20 +207,25 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
                     key={occ.value}
                     type="button"
                     onClick={() => toggleOccasion(occ.value)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 border transition-all cursor-pointer ${
                       isChecked
-                        ? "bg-[#173324] text-white border-[#173324] shadow-xs"
-                        : "bg-white text-[#55695d] border-[#e2eae5] hover:border-[#173324]"
+                        ? "bg-[#173324] text-white border-[#173324] shadow-xs ring-1 ring-[#173324]"
+                        : "bg-white text-[#55695d] border-[#e2eae5] hover:border-[#173324] hover:text-[#173324]"
                     }`}
                   >
                     <span>{occ.icon}</span>
                     <span>{occ.label}</span>
+                    {isChecked ? (
+                      <span className="text-emerald-300 font-bold text-xs leading-none">✓</span>
+                    ) : (
+                      <span className="w-2 h-2 rounded-full border border-gray-300 inline-block" />
+                    )}
                   </button>
                 );
               })}
             </div>
-            <span className="text-[10px] text-[#73877b] mt-1 block">
-              Select which occasions adopters can dedicate this plan towards (e.g. birthday, memorial, anniversary, corporate).
+            <span className="text-[10px] text-[#73877b] block leading-relaxed">
+              Adopters can choose to dedicate their tree adoption towards any of the active checked occasion programs.
             </span>
           </div>
 
@@ -190,10 +234,13 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 py-3 rounded-xl bg-[#173324] text-white font-semibold hover:bg-[#1e4433] disabled:opacity-50 transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="flex-1 py-3 rounded-xl bg-[#173324] text-white font-semibold hover:bg-[#1e4433] disabled:opacity-50 transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs"
             >
               {isSubmitting ? (
-                <span>Saving Plan...</span>
+                <>
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Saving Plan...</span>
+                </>
               ) : (
                 <span>Save Adoption Plan</span>
               )}
@@ -201,7 +248,8 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
             <button
               type="button"
               onClick={onClose}
-              className="py-3 px-4 rounded-xl border border-[#e2eae5] text-[#55695d] hover:bg-[#f4f7f5] font-semibold cursor-pointer"
+              disabled={isSubmitting}
+              className="py-3 px-4 rounded-xl border border-[#e2eae5] text-[#55695d] hover:bg-[#f4f7f5] font-semibold cursor-pointer transition-colors"
             >
               Cancel
             </button>

@@ -33,6 +33,7 @@ import { LandingPageTab } from "./tabs/LandingPageTab";
 import { AddTreeModal } from "./modals/AddTreeModal";
 import { EditTreeModal } from "./modals/EditTreeModal";
 import { AddPlanModal } from "./modals/AddPlanModal";
+import { EditPlanModal } from "./modals/EditPlanModal";
 import { AddTreeInstanceModal } from "./modals/AddTreeInstanceModal";
 import { AddLocationModal } from "./modals/AddLocationModal";
 import { OrderDetailsModal } from "./modals/OrderDetailsModal";
@@ -345,6 +346,8 @@ export function AdminDashboard() {
   const [selectedTreeForEdit, setSelectedTreeForEdit] = useState<TreeVarietyItem | null>(null);
   const [isUpdatingTree, setIsUpdatingTree] = useState(false);
   const [showAddPlanModal, setShowAddPlanModal] = useState(false);
+  const [selectedPlanForEdit, setSelectedPlanForEdit] = useState<AdoptionPlanItem | null>(null);
+  const [isUpdatingPlan, setIsUpdatingPlan] = useState(false);
   const [showAddInstanceModal, setShowAddInstanceModal] = useState(false);
   const [showAddLocationModal, setShowAddLocationModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<AdoptionOrder | null>(null);
@@ -801,6 +804,117 @@ export function AdminDashboard() {
     }
   };
 
+  const handleUpdatePlan = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedPlanForEdit) return;
+
+    const fd = new FormData(e.currentTarget);
+    const id = (fd.get("id") as string) || selectedPlanForEdit.id;
+    const planLabel = (fd.get("label") as string)?.trim() || selectedPlanForEdit.label;
+    const icon = (fd.get("icon") as string)?.trim() || selectedPlanForEdit.icon || "🌱";
+    const priceModifier = Number(fd.get("price")) || 0;
+    const badge = (fd.get("badge") as string)?.trim() || "Standard";
+    const description = (fd.get("desc") as string)?.trim() || "";
+
+    // Parse features
+    const rawFeatures = (fd.get("features") as string) || "";
+    const features = rawFeatures
+      .split(/[\n,]+/)
+      .map((f) => f.trim())
+      .filter((f) => f.length > 0);
+
+    // Parse occasion dedications
+    let occasionDedications: OccasionDedicationType[] = [];
+    const occasionFromAll = fd.getAll("occasions") as string[];
+    if (occasionFromAll.length > 0) {
+      occasionDedications = occasionFromAll as OccasionDedicationType[];
+    } else {
+      try {
+        const rawOccasions = fd.get("occasionDedications") as string;
+        if (rawOccasions) {
+          occasionDedications = JSON.parse(rawOccasions);
+        }
+      } catch {
+        occasionDedications = selectedPlanForEdit.occasionDedications || ["general"];
+      }
+    }
+    if (occasionDedications.length === 0) {
+      occasionDedications = ["general"];
+    }
+
+    const isActive = fd.get("isActive") !== null;
+
+    setIsUpdatingPlan(true);
+    try {
+      const res = await adoptionPlanService.update(id, {
+        planLabel,
+        icon,
+        priceModifier,
+        badge,
+        description,
+        features,
+        occasionDedications,
+        isActive,
+      });
+
+      if (res.data) {
+        const updatedUiPlan = adoptionPlanService.mapToUiItem(res.data);
+        setPlans((prev) => prev.map((p) => (p.id === id ? updatedUiPlan : p)));
+      } else {
+        setPlans((prev) =>
+          prev.map((p) =>
+            p.id === id
+              ? {
+                  ...p,
+                  label: planLabel,
+                  planLabel,
+                  icon,
+                  desc: description,
+                  description,
+                  price: priceModifier,
+                  priceModifier,
+                  features,
+                  occasionDedications,
+                  badge,
+                  isActive,
+                }
+              : p
+          )
+        );
+      }
+
+      setSelectedPlanForEdit(null);
+      showToast(`Updated adoption plan "${planLabel}"!`);
+    } catch (err: any) {
+      console.warn("Plan update notice:", err);
+      // Fallback optimistic update
+      setPlans((prev) =>
+        prev.map((p) =>
+          p.id === id
+            ? {
+                ...p,
+                label: planLabel,
+                planLabel,
+                icon,
+                desc: description,
+                description,
+                price: priceModifier,
+                priceModifier,
+                features,
+                occasionDedications,
+                badge,
+                isActive,
+              }
+            : p
+        )
+      );
+      setSelectedPlanForEdit(null);
+      showToast(`Updated "${planLabel}" locally.`);
+    } finally {
+      setIsUpdatingPlan(false);
+    }
+  };
+
   const handleCreateLocation = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
@@ -1115,6 +1229,7 @@ export function AdminDashboard() {
               plans={plans}
               searchQuery={searchQuery}
               onOpenAddPlan={() => setShowAddPlanModal(true)}
+              onEditPlan={(plan) => setSelectedPlanForEdit(plan)}
               onDeletePlan={handleDeletePlan}
             />
           )}
@@ -1175,6 +1290,14 @@ export function AdminDashboard() {
         isOpen={showAddPlanModal}
         onClose={() => setShowAddPlanModal(false)}
         onSubmit={handleCreatePlan}
+      />
+
+      <EditPlanModal
+        isOpen={Boolean(selectedPlanForEdit)}
+        plan={selectedPlanForEdit}
+        onClose={() => setSelectedPlanForEdit(null)}
+        onSubmit={handleUpdatePlan}
+        isSubmitting={isUpdatingPlan}
       />
 
       <AddTreeInstanceModal
