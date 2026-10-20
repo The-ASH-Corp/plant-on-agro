@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { TreeInstanceItem, TreeHealthStatus } from "../types";
 import { TrashIcon, PencilIcon } from "@/components/ui";
+import { treeInstanceService } from "@/services/tree-instances/tree-instance.service";
 
 interface TreeInstancesTabProps {
   instances: TreeInstanceItem[];
@@ -40,20 +41,39 @@ export function TreeInstancesTab({
 }: TreeInstancesTabProps) {
   const [selectedHealth, setSelectedHealth] = useState<string>("All");
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [debouncedSearch, setDebouncedSearch] = useState<string>(searchQuery);
+  const [serverInstances, setServerInstances] = useState<TreeInstanceItem[] | null>(null);
+  const [serverTotal, setServerTotal] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Summary Metrics
+  // Debounce search query to prevent excessive backend queries
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 250);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  // Reset page to 1 whenever filters or page size change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, selectedHealth, pageSize]);
+
+  // Summary Metrics (derived from instances)
   const stats = useMemo(() => {
-    const total = instances.length;
+    const total = serverTotal !== null ? serverTotal : instances.length;
     const thrivingOrHealthy = instances.filter((i) => i.healthStatus === "Thriving" || i.healthStatus === "Healthy").length;
     const saplings = instances.filter((i) => i.healthStatus === "Sapling Growing").length;
     const attentionNeeded = instances.filter((i) => i.healthStatus === "Needs Attention" || i.healthStatus === "Critical").length;
     return { total, thrivingOrHealthy, saplings, attentionNeeded };
-  }, [instances]);
+  }, [instances, serverTotal]);
 
-  // Filtered List
+  // Fallback client-side filtered list
   const filtered = useMemo(() => {
     return instances.filter((item) => {
-      const q = searchQuery.toLowerCase();
+      const q = debouncedSearch.toLowerCase();
       const matchesSearch =
         item.treeTag.toLowerCase().includes(q) ||
         (item.orderRef && item.orderRef.toLowerCase().includes(q)) ||
@@ -66,7 +86,89 @@ export function TreeInstancesTab({
 
       return matchesSearch && matchesHealth;
     });
-  }, [instances, searchQuery, selectedHealth]);
+  }, [instances, debouncedSearch, selectedHealth]);
+
+  // Fetch paginated data from backend API
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchInstancesFromBackend() {
+      setIsLoading(true);
+      try {
+        const skip = (currentPage - 1) * pageSize;
+        const res = await treeInstanceService.getAll({
+          limit: pageSize,
+          skip,
+          search: debouncedSearch.trim() || undefined,
+          healthStatus: selectedHealth !== "All" ? selectedHealth : undefined,
+        });
+
+        if (isMounted && res.data) {
+          const uiItems = res.data.items.map(treeInstanceService.mapToUiItem);
+          setServerInstances(uiItems);
+          setServerTotal(res.data.total);
+        }
+      } catch (err) {
+        console.warn("Backend tree instances pagination notice:", err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    }
+
+    fetchInstancesFromBackend();
+    return () => {
+      isMounted = false;
+    };
+  }, [currentPage, pageSize, debouncedSearch, selectedHealth, instances]);
+
+  // Total records count and pagination calculations
+  const totalCount = serverTotal !== null ? serverTotal : filtered.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (safeCurrentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalCount);
+
+  // Active items to render
+  const displayInstances = useMemo(() => {
+    if (serverInstances !== null) {
+      return serverInstances;
+    }
+    return filtered.slice(startIndex, endIndex);
+  }, [serverInstances, filtered, startIndex, endIndex]);
+
+  // Dynamic pagination pill generator with ellipsis
+  const pageNumbers = useMemo(() => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (safeCurrentPage > 3) {
+        pages.push("ellipsis-1");
+      }
+      const start = Math.max(2, safeCurrentPage - 1);
+      const end = Math.min(totalPages - 1, safeCurrentPage + 1);
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      if (safeCurrentPage < totalPages - 2) {
+        pages.push("ellipsis-2");
+      }
+      pages.push(totalPages);
+    }
+    return pages;
+  }, [totalPages, safeCurrentPage]);
+
+  // Optimistic health status change
+  const handleHealthChange = (id: string, status: TreeHealthStatus) => {
+    if (serverInstances) {
+      setServerInstances((prev) =>
+        prev ? prev.map((item) => (item.id === id ? { ...item, healthStatus: status } : item)) : prev
+      );
+    }
+    if (onUpdateHealth) {
+      onUpdateHealth(id, status);
+    }
+  };
 
   const formatDate = (dateStr: string) => {
     try {
@@ -85,9 +187,19 @@ export function TreeInstancesTab({
       {/* Top Banner & Action */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-[#e2eae5] shadow-xs">
         <div>
-          <h2 style={{ fontFamily: "var(--font-display)" }} className="text-xl font-bold text-[#173324]">
-            Individual Tree Instances & Geotags ({filtered.length})
-          </h2>
+          <div className="flex items-center gap-2.5">
+            <h2 style={{ fontFamily: "var(--font-display)" }} className="text-xl font-bold text-[#173324]">
+              Individual Tree Instances & Geotags ({totalCount})
+            </h2>
+            {totalPages > 1 && (
+              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#1b7a43] border border-emerald-200">
+                Page {safeCurrentPage} of {totalPages}
+              </span>
+            )}
+            {isLoading && (
+              <span className="w-3.5 h-3.5 border-2 border-[#1b7a43] border-t-transparent rounded-full animate-spin" />
+            )}
+          </div>
           <p className="text-xs text-[#73877b]">
             Physical saplings with unique serial tags, verified GPS coordinates, and ground health logs
           </p>
@@ -179,7 +291,7 @@ export function TreeInstancesTab({
       </div>
 
       {/* Empty State */}
-      {filtered.length === 0 ? (
+      {totalCount === 0 && !isLoading ? (
         <div className="p-12 text-center bg-white rounded-3xl border border-[#e2eae5] space-y-3">
           <div className="text-4xl">🏷️</div>
           <h3 className="text-base font-bold text-[#173324]">No Tree Instances Found</h3>
@@ -212,7 +324,7 @@ export function TreeInstancesTab({
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#f0f4f1]">
-                {filtered.map((item) => {
+                {displayInstances.map((item) => {
                   const badge = HEALTH_BADGES[item.healthStatus] || {
                     label: item.healthStatus,
                     icon: "🌱",
@@ -285,7 +397,7 @@ export function TreeInstancesTab({
                         {onUpdateHealth ? (
                           <select
                             value={item.healthStatus}
-                            onChange={(e) => onUpdateHealth(item.id, e.target.value as TreeHealthStatus)}
+                            onChange={(e) => handleHealthChange(item.id, e.target.value as TreeHealthStatus)}
                             className={`px-2.5 py-1 rounded-lg border text-xs font-semibold outline-none cursor-pointer ${badge.bg} ${badge.text} ${badge.border}`}
                           >
                             <option value="Sapling Growing">🌱 Sapling Growing</option>
@@ -339,7 +451,7 @@ export function TreeInstancesTab({
       ) : (
         /* Card View */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filtered.map((item) => {
+          {displayInstances.map((item) => {
             const badge = HEALTH_BADGES[item.healthStatus] || {
               label: item.healthStatus,
               icon: "🌱",
@@ -413,7 +525,7 @@ export function TreeInstancesTab({
                   {onUpdateHealth && (
                     <select
                       value={item.healthStatus}
-                      onChange={(e) => onUpdateHealth(item.id, e.target.value as TreeHealthStatus)}
+                      onChange={(e) => handleHealthChange(item.id, e.target.value as TreeHealthStatus)}
                       className="text-xs font-semibold px-2 py-1 rounded-lg border border-[#e2eae5] bg-[#f7faf8] text-[#173324] outline-none cursor-pointer"
                     >
                       <option value="Sapling Growing">🌱 Sapling Growing</option>
@@ -452,6 +564,83 @@ export function TreeInstancesTab({
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination Controls Bar */}
+      {totalCount > 0 && (
+        <div className="bg-white p-4 rounded-3xl border border-[#e2eae5] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+          {/* Record summary */}
+          <div className="text-xs text-[#55695d]">
+            Showing <span className="font-bold text-[#173324]">{startIndex + 1}</span> to{" "}
+            <span className="font-bold text-[#173324]">{endIndex}</span> of{" "}
+            <span className="font-bold text-[#173324]">{totalCount}</span> tree instances
+          </div>
+
+          {/* Page navigation buttons */}
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={safeCurrentPage === 1}
+              className="px-3 py-1.5 rounded-xl border border-[#e2eae5] text-xs font-semibold text-[#173324] hover:bg-[#f2f6f3] disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center gap-1"
+            >
+              <span>‹</span>
+              <span className="hidden sm:inline">Previous</span>
+            </button>
+
+            <div className="flex items-center gap-1">
+              {pageNumbers.map((p, idx) =>
+                typeof p === "number" ? (
+                  <button
+                    key={`page-${p}`}
+                    type="button"
+                    onClick={() => setCurrentPage(p)}
+                    className={`min-w-8 h-8 px-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+                      safeCurrentPage === p
+                        ? "bg-[#173324] text-white shadow-xs"
+                        : "bg-white text-[#55695d] border border-[#e2eae5] hover:bg-[#f2f6f3]"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ) : (
+                  <span
+                    key={`ellipsis-${idx}`}
+                    className="px-1 text-xs text-[#73877b] select-none"
+                  >
+                    •••
+                  </span>
+                )
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={safeCurrentPage === totalPages}
+              className="px-3 py-1.5 rounded-xl border border-[#e2eae5] text-xs font-semibold text-[#173324] hover:bg-[#f2f6f3] disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center gap-1"
+            >
+              <span className="hidden sm:inline">Next</span>
+              <span>›</span>
+            </button>
+          </div>
+
+          {/* Page size dropdown */}
+          <div className="flex items-center gap-2 text-xs text-[#73877b]">
+            <span>Show</span>
+            <select
+              value={pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+              className="px-2.5 py-1.5 rounded-xl border border-[#e2eae5] bg-[#fcfaf7] text-xs font-semibold text-[#173324] focus:border-[#173324] outline-none cursor-pointer"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+            <span>per page</span>
+          </div>
         </div>
       )}
     </div>

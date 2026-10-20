@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { AdoptionOrder, AdoptionOrderStatus } from "../types";
+import { orderService } from "@/services/orders/order.service";
 
 interface OrdersTabProps {
   orders: AdoptionOrder[];
@@ -62,6 +63,25 @@ export function OrdersTab({
   unreadCount = 0,
 }: OrdersTabProps) {
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [debouncedSearch, setDebouncedSearch] = useState<string>(searchQuery);
+  const [serverOrders, setServerOrders] = useState<AdoptionOrder[] | null>(null);
+  const [serverTotal, setServerTotal] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Debounce search query to prevent rapid requests while typing
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 250);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  // Reset page to 1 whenever filters or page size change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, selectedStatusFilter, pageSize]);
 
   const countsByStatus = useMemo(() => {
     const counts: Record<string, number> = { all: orders.length };
@@ -71,21 +91,104 @@ export function OrdersTab({
     return counts;
   }, [orders]);
 
+  // Fallback client-side filter
   const filteredOrders = useMemo(() => {
     return orders.filter((o) => {
       const matchesSearch =
-        o.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        o.adopterName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        o.adopterEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        o.treeSpecies.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        o.reserveName.toLowerCase().includes(searchQuery.toLowerCase());
+        o.orderNumber.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        o.adopterName.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        o.adopterEmail.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        o.treeSpecies.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        o.reserveName.toLowerCase().includes(debouncedSearch.toLowerCase());
 
       const matchesStatus =
         selectedStatusFilter === "all" || o.status === selectedStatusFilter;
 
       return matchesSearch && matchesStatus;
     });
-  }, [orders, searchQuery, selectedStatusFilter]);
+  }, [orders, debouncedSearch, selectedStatusFilter]);
+
+  // Fetch paginated data from backend API
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchOrdersFromBackend() {
+      setIsLoading(true);
+      try {
+        const skip = (currentPage - 1) * pageSize;
+        const res = await orderService.getAll({
+          limit: pageSize,
+          skip,
+          search: debouncedSearch.trim() || undefined,
+          status: selectedStatusFilter !== "all" ? selectedStatusFilter : undefined,
+        });
+
+        if (isMounted && res.data) {
+          const uiItems = res.data.items.map(orderService.mapToUiItem);
+          setServerOrders(uiItems);
+          setServerTotal(res.data.total);
+        }
+      } catch (err) {
+        console.warn("Backend orders pagination notice:", err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    }
+
+    fetchOrdersFromBackend();
+    return () => {
+      isMounted = false;
+    };
+  }, [currentPage, pageSize, debouncedSearch, selectedStatusFilter, orders]);
+
+  // Total records and pagination calculations
+  const totalCount = serverTotal !== null ? serverTotal : filteredOrders.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (safeCurrentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalCount);
+
+  // Active orders to display
+  const displayOrders = useMemo(() => {
+    if (serverOrders !== null) {
+      return serverOrders;
+    }
+    return filteredOrders.slice(startIndex, endIndex);
+  }, [serverOrders, filteredOrders, startIndex, endIndex]);
+
+  // Optimistic status change
+  const handleStatusChange = (orderNumber: string, newStatus: AdoptionOrderStatus) => {
+    if (serverOrders) {
+      setServerOrders((prev) =>
+        prev ? prev.map((o) => (o.orderNumber === orderNumber ? { ...o, status: newStatus } : o)) : prev
+      );
+    }
+    if (onUpdateStatus) {
+      onUpdateStatus(orderNumber, newStatus);
+    }
+  };
+
+  // Dynamic pagination pill generator with ellipsis
+  const pageNumbers = useMemo(() => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (safeCurrentPage > 3) {
+        pages.push("ellipsis-1");
+      }
+      const start = Math.max(2, safeCurrentPage - 1);
+      const end = Math.min(totalPages - 1, safeCurrentPage + 1);
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      if (safeCurrentPage < totalPages - 2) {
+        pages.push("ellipsis-2");
+      }
+      pages.push(totalPages);
+    }
+    return pages;
+  }, [totalPages, safeCurrentPage]);
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -94,8 +197,16 @@ export function OrdersTab({
         <div>
           <div className="flex items-center gap-3">
             <h2 style={{ fontFamily: "var(--font-display)" }} className="text-xl font-bold text-[#173324]">
-              Adoption Orders & Certificate Register ({filteredOrders.length})
+              Adoption Orders & Certificate Register ({totalCount})
             </h2>
+            {totalPages > 1 && (
+              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#1b7a43] border border-emerald-200">
+                Page {safeCurrentPage} of {totalPages}
+              </span>
+            )}
+            {isLoading && (
+              <span className="w-3.5 h-3.5 border-2 border-[#1b7a43] border-t-transparent rounded-full animate-spin" />
+            )}
             {unreadCount > 0 && (
               <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500 text-white animate-pulse">
                 {unreadCount} New Requests
@@ -187,7 +298,7 @@ export function OrdersTab({
               </tr>
             </thead>
             <tbody className="divide-y divide-[#f0f4f1]">
-              {filteredOrders.length === 0 ? (
+              {totalCount === 0 && !isLoading ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-[#73877b]">
                     <div className="text-3xl mb-2">🔍</div>
@@ -196,7 +307,7 @@ export function OrdersTab({
                   </td>
                 </tr>
               ) : (
-                filteredOrders.map((order) => {
+                displayOrders.map((order) => {
                   const isUnread = order.isRead === false || order.status === "New Request";
                   const config = STATUS_CONFIG[order.status] || STATUS_CONFIG["Certificate Issued"];
 
@@ -251,9 +362,7 @@ export function OrdersTab({
                             value={order.status}
                             onChange={(e) => {
                               const newSt = e.target.value as AdoptionOrderStatus;
-                              if (onUpdateStatus) {
-                                onUpdateStatus(order.orderNumber, newSt);
-                              }
+                              handleStatusChange(order.orderNumber, newSt);
                             }}
                             className={`text-[11px] font-bold py-1.5 pl-3 pr-7 rounded-full border cursor-pointer appearance-none outline-none transition-all ${config.badgeClass}`}
                           >
@@ -285,6 +394,83 @@ export function OrdersTab({
           </table>
         </div>
       </div>
+
+      {/* Pagination Controls Bar */}
+      {totalCount > 0 && (
+        <div className="bg-white p-4 rounded-3xl border border-[#e2eae5] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+          {/* Record summary */}
+          <div className="text-xs text-[#55695d]">
+            Showing <span className="font-bold text-[#173324]">{startIndex + 1}</span> to{" "}
+            <span className="font-bold text-[#173324]">{endIndex}</span> of{" "}
+            <span className="font-bold text-[#173324]">{totalCount}</span> orders
+          </div>
+
+          {/* Page navigation buttons */}
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={safeCurrentPage === 1}
+              className="px-3 py-1.5 rounded-xl border border-[#e2eae5] text-xs font-semibold text-[#173324] hover:bg-[#f2f6f3] disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center gap-1"
+            >
+              <span>‹</span>
+              <span className="hidden sm:inline">Previous</span>
+            </button>
+
+            <div className="flex items-center gap-1">
+              {pageNumbers.map((p, idx) =>
+                typeof p === "number" ? (
+                  <button
+                    key={`page-${p}`}
+                    type="button"
+                    onClick={() => setCurrentPage(p)}
+                    className={`min-w-8 h-8 px-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+                      safeCurrentPage === p
+                        ? "bg-[#173324] text-white shadow-xs"
+                        : "bg-white text-[#55695d] border border-[#e2eae5] hover:bg-[#f2f6f3]"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ) : (
+                  <span
+                    key={`ellipsis-${idx}`}
+                    className="px-1 text-xs text-[#73877b] select-none"
+                  >
+                    •••
+                  </span>
+                )
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={safeCurrentPage === totalPages}
+              className="px-3 py-1.5 rounded-xl border border-[#e2eae5] text-xs font-semibold text-[#173324] hover:bg-[#f2f6f3] disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center gap-1"
+            >
+              <span className="hidden sm:inline">Next</span>
+              <span>›</span>
+            </button>
+          </div>
+
+          {/* Page size dropdown */}
+          <div className="flex items-center gap-2 text-xs text-[#73877b]">
+            <span>Show</span>
+            <select
+              value={pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+              className="px-2.5 py-1.5 rounded-xl border border-[#e2eae5] bg-[#fcfaf7] text-xs font-semibold text-[#173324] focus:border-[#173324] outline-none cursor-pointer"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+            <span>per page</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
