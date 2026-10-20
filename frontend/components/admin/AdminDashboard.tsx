@@ -27,6 +27,7 @@ import { PlansTab } from "./tabs/PlansTab";
 import { TreeInstancesTab } from "./tabs/TreeInstancesTab";
 import { LocationsTab } from "./tabs/LocationsTab";
 import { OrdersTab } from "./tabs/OrdersTab";
+import { UsersTab } from "./tabs/UsersTab";
 import { LandingPageTab } from "./tabs/LandingPageTab";
 
 // Modal Components
@@ -38,11 +39,14 @@ import { AddTreeInstanceModal } from "./modals/AddTreeInstanceModal";
 import { EditTreeInstanceModal } from "./modals/EditTreeInstanceModal";
 import { AddLocationModal } from "./modals/AddLocationModal";
 import { OrderDetailsModal } from "./modals/OrderDetailsModal";
+import { UserDetailsModal } from "./modals/UserDetailsModal";
 import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
 
 import { treeVarietyService } from "@/services/tree-varieties/tree-variety.service";
 import { adoptionPlanService } from "@/services/adoption-plans/adoption-plan.service";
 import { treeInstanceService } from "@/services/tree-instances/tree-instance.service";
+import { userService } from "@/services/user/user.service";
+import { User } from "@/types/auth";
 import { orderService } from "@/services/orders/order.service";
 import { OccasionDedicationType, TreeInstanceItem, TreeHealthStatus } from "./types";
 
@@ -234,6 +238,9 @@ export function AdminDashboard() {
   const [plans, setPlans] = useState<AdoptionPlanItem[]>([]);
   const [instances, setInstances] = useState<TreeInstanceItem[]>([]);
   const [locations, setLocations] = useState<PlantationLocationItem[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isRefreshingUsers, setIsRefreshingUsers] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [orders, setOrders] = useState<AdoptionOrder[]>(() => {
     if (typeof window !== "undefined") {
       try {
@@ -288,11 +295,16 @@ export function AdminDashboard() {
     let isMounted = true;
     async function loadCatalog() {
       try {
-        const [treesRes, plansRes, instancesRes, ordersRes] = await Promise.all([
+        const [treesRes, plansRes, instancesRes, usersRes,ordersRes] = await Promise.all([
           treeVarietyService.getAll(),
           adoptionPlanService.getAll(),
           treeInstanceService.getAll(),
+          userService.listUsers(100, 0).catch((err) => {
+            console.warn("Could not load users:", err);
+            return null;
+          }),
           orderService.getAll({ limit: 200 }),
+         
         ]);
         if (isMounted) {
           const apiTrees = treesRes.data?.items ? treesRes.data.items.map(treeVarietyService.mapToUiItem) : [];
@@ -302,6 +314,12 @@ export function AdminDashboard() {
           setTrees(apiTrees);
           setPlans(apiPlans);
           setInstances(apiInstances);
+
+          if (usersRes?.data) {
+            const raw = usersRes.data;
+            const userItems = Array.isArray(raw) ? raw : (raw.items || []);
+            setUsers(userItems);
+          }
 
           // Dynamically derive bio-reserves from database records + custom locations
           let customLocations: PlantationLocationItem[] = [];
@@ -368,6 +386,51 @@ export function AdminDashboard() {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  // User Management Actions
+  const handleRefreshUsers = async () => {
+    setIsRefreshingUsers(true);
+    try {
+      const res = await userService.listUsers(100, 0);
+      if (res?.data) {
+        const raw = res.data;
+        const items = Array.isArray(raw) ? raw : (raw.items || []);
+        setUsers(items);
+        showToast("User directory refreshed successfully");
+      }
+    } catch {
+      showToast("Failed to refresh user list");
+    } finally {
+      setIsRefreshingUsers(false);
+    }
+  };
+
+  const handleToggleBlockUser = async (targetUser: User) => {
+    const newIsActive = !targetUser.isActive;
+    // Optimistic state update
+    setUsers((prev) =>
+      prev.map((u) => (u.id === targetUser.id ? { ...u, isActive: newIsActive } : u))
+    );
+    if (selectedUser?.id === targetUser.id) {
+      setSelectedUser((prev) => (prev ? { ...prev, isActive: newIsActive } : null));
+    }
+
+    try {
+      await userService.updateUser(targetUser.id, { isActive: newIsActive });
+      showToast(
+        `User "${targetUser.name}" has been ${newIsActive ? "unblocked (activated)" : "blocked (deactivated)"}.`
+      );
+    } catch {
+      // Rollback on failure
+      setUsers((prev) =>
+        prev.map((u) => (u.id === targetUser.id ? { ...u, isActive: targetUser.isActive } : u))
+      );
+      if (selectedUser?.id === targetUser.id) {
+        setSelectedUser((prev) => (prev ? { ...prev, isActive: targetUser.isActive } : null));
+      }
+      showToast(`Failed to update status for ${targetUser.name}`);
+    }
   };
 
   // Unread / New Orders Tracking
@@ -1288,6 +1351,7 @@ export function AdminDashboard() {
         locationsCount={locations.length}
         ordersCount={orders.length}
         unreadOrdersCount={unreadOrdersCount}
+        usersCount={users.filter((u) => u.role !== "admin").length}
         userName={user?.name}
         onLogout={logout}
         onOpenAddTree={() => setShowAddTreeModal(true)}
@@ -1381,6 +1445,18 @@ export function AdminDashboard() {
             />
           )}
 
+          {activeTab === "users" && (
+            <UsersTab
+              users={users.filter((u) => u.role !== "admin")}
+              searchQuery={searchQuery}
+              onToggleBlockUser={handleToggleBlockUser}
+              onRefreshUsers={handleRefreshUsers}
+              isRefreshing={isRefreshingUsers}
+              orders={orders}
+              onViewUserDetails={(u) => setSelectedUser(u)}
+            />
+          )}
+
           {activeTab === "landing-page" && (
             <LandingPageTab showToast={showToast} />
           )}
@@ -1444,6 +1520,13 @@ export function AdminDashboard() {
           setSelectedOrder(null);
         }}
         onUpdateStatus={handleUpdateOrderStatus}
+      />
+
+      <UserDetailsModal
+        user={selectedUser}
+        onClose={() => setSelectedUser(null)}
+        onToggleBlockUser={handleToggleBlockUser}
+        orders={orders}
       />
 
       {/* 4. Custom Delete Confirmation Popup Modal */}

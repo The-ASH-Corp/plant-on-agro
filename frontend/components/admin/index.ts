@@ -9,8 +9,11 @@ export * from "./tabs/TreesTab";
 export * from "./tabs/PlansTab";
 export * from "./tabs/LocationsTab";
 export * from "./tabs/OrdersTab";
+export * from "./tabs/UsersTab";
 
 export * from "./modals/AddTreeModal";
 export * from "./modals/AddPlanModal";
 export * from "./modals/AddLocationModal";
 export * from "./modals/OrderDetailsModal";
+export * from "./modals/UserDetailsModal";
+
