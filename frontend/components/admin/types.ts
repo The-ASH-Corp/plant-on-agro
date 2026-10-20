@@ -42,29 +42,36 @@ export type AdoptionOrderStatus =
   | "New Request"
   | "Verified & Tagged"
   | "Planted"
-  | "Pending Drone Scan"
   | "Certificate Issued"
   | "Completed";
 
 export interface AdoptionOrder {
   id: string;
   orderNumber: string;
+  invoiceNumber?: string;
   adopterName: string;
   adopterEmail: string;
+  adopterPhone?: string;
   treeSpecies: string;
   scientificName: string;
   category: string;
   reserveName: string;
   gpsCoords: string;
   planType: string;
+  dedicationMessage?: string;
   quantity: number;
   totalAmount: number;
+  paymentMethod?: string;
+  paymentStatus?: "Pending" | "Paid" | "Failed" | "Refunded";
+  transactionRef?: string;
   datePlanted: string;
   status: AdoptionOrderStatus;
   certificateId: string;
   ndviScore: number;
   isRead?: boolean;
+  notes?: string;
   createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface TreeVarietyItem {

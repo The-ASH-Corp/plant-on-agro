@@ -18,9 +18,6 @@ export function BuyerHeroBanner({
   onOpenPlantFlow,
   onSelectTab,
 }: BuyerHeroBannerProps) {
-  const targetMilestone = 5;
-  const progressPercent = Math.min(Math.round((totalTrees / targetMilestone) * 100), 100);
-
   return (
     <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#0c2417] via-[#143926] to-[#081810] text-white p-5 sm:p-6 md:p-7 border border-emerald-500/25 shadow-xl">
       {/* Decorative ambient light orbs */}
@@ -46,10 +43,6 @@ export function BuyerHeroBanner({
               <span>Verified Tree Adopter</span>
             </span>
 
-            <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-300/30">
-              🌿 Tier 1 • Carbon Guardian
-            </span>
-
             {ordersCount > 0 && (
               <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-300 border border-blue-400/30">
                 📦 {ordersCount} Verified Orders
@@ -65,29 +58,27 @@ export function BuyerHeroBanner({
               </span>
             </h1>
             <p className="text-xs sm:text-sm text-white/75 mt-1 leading-relaxed max-w-xl font-light">
-              Your living environmental legacy is monitored 24/7. Inspect real-time drone telemetry, geotagged satellite coordinates, and legal plantation deed certificates.
+              Your living environmental legacy is nurtured and protected by verified field arborists. Inspect verified GPS coordinates, health logs, and legal plantation deeds.
             </p>
           </div>
 
-          {/* Gamified Milestone Progress Bar */}
-          <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-md max-w-lg space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-white/80 font-medium">
-                Milestone: <strong className="text-emerald-300">Carbon Neutral Hero</strong>
-              </span>
-              <span className="font-mono text-emerald-400 font-bold">
-                {totalTrees} / {targetMilestone} Trees ({progressPercent}%)
-              </span>
+          {/* Clean Forest Summary Card */}
+          <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-md max-w-lg flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🌳</span>
+              <div>
+                <span className="text-[11px] text-white/60 uppercase font-semibold block">Active Living Trees</span>
+                <span className="text-sm font-bold text-white">
+                  {totalTrees} {totalTrees === 1 ? "Tree Planted" : "Trees Planted & Geotagged"}
+                </span>
+              </div>
             </div>
-            <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden relative">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-[#1b7a43] via-[#52b788] to-[#95d5b2] transition-all duration-700 shadow-sm"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-            <p className="text-[10px] text-white/50">
-              Plant {Math.max(0, targetMilestone - totalTrees)} more trees to unlock the Gold Tier Adopter Certificate and commemorative seed pack.
-            </p>
+            <button
+              onClick={() => onSelectTab("trees")}
+              className="text-xs text-emerald-300 hover:text-emerald-200 font-semibold cursor-pointer underline"
+            >
+              View Trees →
+            </button>
           </div>
         </div>
 

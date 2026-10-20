@@ -6,6 +6,7 @@ import { adoptionPlanRoutes } from './adoption-plan.routes';
 import { treeInstanceRoutes } from './tree-instance.routes';
 import { certificateRoutes } from './certificate.routes';
 import { landingPageRoutes } from './landing-page.routes';
+import { orderRoutes } from './order.routes';
 import { ApiResponse } from '../../shared/utils/api-response';
 
 const apiRouter = Router();
@@ -31,6 +32,7 @@ apiRouter.use('/adoption-plans', adoptionPlanRoutes);
 apiRouter.use('/tree-instances', treeInstanceRoutes);
 apiRouter.use('/certificates', certificateRoutes);
 apiRouter.use('/landing-page', landingPageRoutes);
+apiRouter.use('/orders', orderRoutes);
 
 export const routes = apiRouter;
 

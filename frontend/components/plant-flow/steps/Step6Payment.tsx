@@ -62,9 +62,9 @@ export function Step6Payment({
             <span className="text-[#173324] font-medium">{selectedTree?.name}</span>
           </div>
           <div className="flex justify-between text-[#4a6557]">
-            <span>Dedication Tier</span>
+            <span>Dedication Package</span>
             <span className="text-[#173324] font-medium">
-              {selectedPlanData?.label}
+              {selectedPlanData?.label || "General Dedication"}
             </span>
           </div>
           <div className="flex justify-between text-[#4a6557]">
@@ -100,7 +100,7 @@ export function Step6Payment({
               One-Time Single Payment Guarantee:
             </span>{" "}
             No recurring subscriptions, annual renewal charges, or hidden maintenance
-            fees. Covers sapling plantation, lifelong forestry care, drone telemetry,
+            fees. Covers sapling plantation, lifelong forestry care, verified GPS mapping,
             and permanent digital deed.
           </div>
         </div>
