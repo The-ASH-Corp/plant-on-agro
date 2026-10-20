@@ -14,6 +14,7 @@ export * from "./tabs/UsersTab";
 export * from "./modals/AddTreeModal";
 export * from "./modals/AddPlanModal";
 export * from "./modals/AddLocationModal";
+export * from "./modals/EditLocationModal";
 export * from "./modals/OrderDetailsModal";
 export * from "./modals/UserDetailsModal";
 

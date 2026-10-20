@@ -41,6 +41,10 @@ export const API_ENDPOINTS = {
     STATUS: (id: string) => `/orders/${id}/status`,
     MARK_ALL_READ: '/orders/mark-all-read',
   },
+  LOCATIONS: {
+    BASE: '/locations',
+    BY_ID: (id: string) => `/locations/${id}`,
+  },
   HEALTH: '/health',
 
 } as const;

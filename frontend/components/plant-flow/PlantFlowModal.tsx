@@ -6,6 +6,7 @@ import { treeVarietyService, BackendTreeVariety } from "@/services/tree-varietie
 import { adoptionPlanService, BackendAdoptionPlan } from "@/services/adoption-plans/adoption-plan.service";
 import { treeInstanceService } from "@/services/tree-instances/tree-instance.service";
 import { orderService } from "@/services/orders/order.service";
+import { locationService } from "@/services/locations/location.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
 import { PlantFlowHeader } from "./PlantFlowHeader";
@@ -108,9 +109,10 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
     async function fetchCatalog() {
       try {
         setLoadingCatalog(true);
-        const [treesRes, plansRes] = await Promise.all([
+        const [treesRes, plansRes, locationsRes] = await Promise.all([
           treeVarietyService.getAll({ limit: 50 }),
           adoptionPlanService.getAll({ limit: 50 }),
+          locationService.getAll({ limit: 100 }).catch(() => null),
         ]);
 
         if (isMounted) {
@@ -131,16 +133,23 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
             }));
             setTrees(mappedTrees);
 
-            // Extract unique active bio-reserves from database
-            const dbLocations = Array.from(
-              new Set(
-                mappedTrees
-                  .map((t) => t.location)
-                  .filter((loc): loc is string => Boolean(loc && loc.trim()))
-              )
+            // Extract unique active bio-reserves from database trees
+            const treeLocations = mappedTrees
+              .map((t) => t.location)
+              .filter((loc): loc is string => Boolean(loc && loc.trim()));
+
+            // Extract bio-reserves from locations API
+            const apiLocations =
+              locationsRes?.data?.items?.map((l) => l.name).filter(Boolean) || [];
+
+            const combinedLocations = Array.from(
+              new Set([...treeLocations, ...apiLocations])
             );
-            if (dbLocations.length > 0) {
-              setLocations((prev) => Array.from(new Set([...prev, ...dbLocations])));
+
+            if (combinedLocations.length > 0) {
+              setLocations((prev) =>
+                Array.from(new Set([...prev, ...combinedLocations]))
+              );
             }
           }
 

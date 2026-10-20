@@ -38,6 +38,7 @@ import { EditPlanModal } from "./modals/EditPlanModal";
 import { AddTreeInstanceModal } from "./modals/AddTreeInstanceModal";
 import { EditTreeInstanceModal } from "./modals/EditTreeInstanceModal";
 import { AddLocationModal } from "./modals/AddLocationModal";
+import { EditLocationModal } from "./modals/EditLocationModal";
 import { OrderDetailsModal } from "./modals/OrderDetailsModal";
 import { UserDetailsModal } from "./modals/UserDetailsModal";
 import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
@@ -45,6 +46,7 @@ import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
 import { treeVarietyService } from "@/services/tree-varieties/tree-variety.service";
 import { adoptionPlanService } from "@/services/adoption-plans/adoption-plan.service";
 import { treeInstanceService } from "@/services/tree-instances/tree-instance.service";
+import { locationService } from "@/services/locations/location.service";
 import { userService } from "@/services/user/user.service";
 import { User } from "@/types/auth";
 import { orderService } from "@/services/orders/order.service";
@@ -295,7 +297,7 @@ export function AdminDashboard() {
     let isMounted = true;
     async function loadCatalog() {
       try {
-        const [treesRes, plansRes, instancesRes, usersRes,ordersRes] = await Promise.all([
+        const [treesRes, plansRes, instancesRes, usersRes, ordersRes, locationsRes] = await Promise.all([
           treeVarietyService.getAll(),
           adoptionPlanService.getAll(),
           treeInstanceService.getAll(),
@@ -304,7 +306,10 @@ export function AdminDashboard() {
             return null;
           }),
           orderService.getAll({ limit: 200 }),
-         
+          locationService.getAll({ limit: 100 }).catch((err) => {
+            console.warn("Could not load locations from backend:", err);
+            return null;
+          }),
         ]);
         if (isMounted) {
           const apiTrees = treesRes.data?.items ? treesRes.data.items.map(treeVarietyService.mapToUiItem) : [];
@@ -321,21 +326,43 @@ export function AdminDashboard() {
             setUsers(userItems);
           }
 
-          // Dynamically derive bio-reserves from database records + custom locations
-          let customLocations: PlantationLocationItem[] = [];
-          if (typeof window !== "undefined") {
-            try {
-              const raw = localStorage.getItem("poa_custom_locations");
-              if (raw) customLocations = JSON.parse(raw);
-            } catch {}
-          }
+          // Count live trees planted per reserve
+          const treeCountMap: Record<string, number> = {};
+          (instancesRes.data?.items || []).forEach((i: any) => {
+            const resName = i.assignedReserve;
+            if (resName) {
+              treeCountMap[resName] = (treeCountMap[resName] || 0) + 1;
+            }
+          });
 
-          const derivedLocations = deriveLocationsFromData(
-            instancesRes.data?.items || [],
-            treesRes.data?.items || [],
-            customLocations
-          );
-          setLocations(derivedLocations);
+          // Load bio-reserves from backend API with fallback to local deriving
+          if (locationsRes?.data?.items && locationsRes.data.items.length > 0) {
+            const apiLocations = locationsRes.data.items.map((item) => {
+              const uiLoc = locationService.mapToUiItem(item);
+              const liveCount = treeCountMap[uiLoc.name] || uiLoc.treesPlanted || 0;
+              return {
+                ...uiLoc,
+                treesPlanted: liveCount,
+                status: liveCount >= uiLoc.capacity ? ("Full" as const) : liveCount > 500 ? ("Expanding" as const) : uiLoc.status,
+              };
+            });
+            setLocations(apiLocations);
+          } else {
+            let customLocations: PlantationLocationItem[] = [];
+            if (typeof window !== "undefined") {
+              try {
+                const raw = localStorage.getItem("poa_custom_locations");
+                if (raw) customLocations = JSON.parse(raw);
+              } catch {}
+            }
+
+            const derivedLocations = deriveLocationsFromData(
+              instancesRes.data?.items || [],
+              treesRes.data?.items || [],
+              customLocations
+            );
+            setLocations(derivedLocations);
+          }
 
           // Dynamically load adoption orders directly from MongoDB database (collection: adoptionorders)
           if (ordersRes.data?.items && ordersRes.data.items.length > 0) {
@@ -371,6 +398,8 @@ export function AdminDashboard() {
   const [selectedInstanceForEdit, setSelectedInstanceForEdit] = useState<TreeInstanceItem | null>(null);
   const [isUpdatingInstance, setIsUpdatingInstance] = useState(false);
   const [showAddLocationModal, setShowAddLocationModal] = useState(false);
+  const [selectedLocationForEdit, setSelectedLocationForEdit] = useState<PlantationLocationItem | null>(null);
+  const [isUpdatingLocation, setIsUpdatingLocation] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<AdoptionOrder | null>(null);
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
@@ -981,39 +1010,162 @@ export function AdminDashboard() {
     }
   };
 
-  const handleCreateLocation = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateLocation = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const newLoc: PlantationLocationItem = {
-      id: "loc-" + Date.now(),
-      name: (fd.get("name") as string).trim(),
-      region: (fd.get("region") as string).trim(),
-      gps: (fd.get("gps") as string).trim() || "18.5204° N, 73.8567° E",
-      areaHectares: Number(fd.get("areaHectares")) || 10,
-      capacity: Number(fd.get("capacity")) || 5000,
-      treesPlanted: 0,
-      survivalRate: "99.0%",
-      ndviScore: 0.85,
-      soilHealth: (fd.get("soilHealth") as string).trim() || "Rich Red Soil (pH 6.5, Moisture 35%)",
-      image:
-        (fd.get("image") as string).trim() ||
-        "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
-      status: "Active",
-    };
-    setLocations((prev) => {
-      const next = [...prev, newLoc];
-      if (typeof window !== "undefined") {
-        try {
-          const raw = localStorage.getItem("poa_custom_locations");
-          const custom = raw ? JSON.parse(raw) : [];
-          localStorage.setItem("poa_custom_locations", JSON.stringify([...custom, newLoc]));
-        } catch {}
+    const name = (fd.get("name") as string).trim();
+    const region = (fd.get("region") as string).trim();
+    const gps = (fd.get("gps") as string).trim() || "18.5204° N, 73.8567° E";
+    const areaHectares = Number(fd.get("areaHectares")) || 10;
+    const capacity = Number(fd.get("capacity")) || 5000;
+    const soilHealth = (fd.get("soilHealth") as string).trim() || "Rich Red Soil (pH 6.5, Moisture 35%)";
+    const image =
+      (fd.get("image") as string).trim() ||
+      "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format";
+
+    try {
+      const res = await locationService.create({
+        name,
+        region,
+        gps,
+        areaHectares,
+        capacity,
+        soilHealth,
+        image,
+        status: "Active",
+      });
+
+      if (res.data) {
+        const newLoc = locationService.mapToUiItem(res.data);
+        setLocations((prev) => [...prev, newLoc]);
+      } else {
+        throw new Error("No location data returned from API");
       }
-      return next;
+      setShowAddLocationModal(false);
+      showToast(`Added reserve location "${name}"!`);
+      setActiveTab("locations");
+    } catch (err: any) {
+      console.warn("Backend location creation failed, saving locally:", err);
+      const fallbackLoc: PlantationLocationItem = {
+        id: "loc-" + Date.now(),
+        name,
+        region,
+        gps,
+        areaHectares,
+        capacity,
+        treesPlanted: 0,
+        survivalRate: "99.0%",
+        ndviScore: 0.88,
+        soilHealth,
+        image,
+        status: "Active",
+      };
+      setLocations((prev) => [...prev, fallbackLoc]);
+      setShowAddLocationModal(false);
+      showToast(`Added reserve location "${fallbackLoc.name}"!`);
+      setActiveTab("locations");
+    }
+
+    if (typeof window !== "undefined") {
+      try {
+        const raw = localStorage.getItem("poa_custom_locations");
+        const custom = raw ? JSON.parse(raw) : [];
+        localStorage.setItem(
+          "poa_custom_locations",
+          JSON.stringify([
+            ...custom,
+            { name, region, gps, areaHectares, capacity, soilHealth, image },
+          ])
+        );
+      } catch {}
+    }
+  };
+
+  const handleOpenEditLocation = (loc: PlantationLocationItem) => {
+    setSelectedLocationForEdit(loc);
+  };
+
+  const handleUpdateLocation = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedLocationForEdit) return;
+    setIsUpdatingLocation(true);
+    const fd = new FormData(e.currentTarget);
+    const id = (fd.get("id") as string) || selectedLocationForEdit.id;
+    const name = (fd.get("name") as string).trim();
+    const region = (fd.get("region") as string).trim();
+    const gps = (fd.get("gps") as string).trim();
+    const areaHectares = Number(fd.get("areaHectares")) || selectedLocationForEdit.areaHectares;
+    const capacity = Number(fd.get("capacity")) || selectedLocationForEdit.capacity;
+    const soilHealth = (fd.get("soilHealth") as string).trim() || selectedLocationForEdit.soilHealth;
+    const ndviScore = Number(fd.get("ndviScore")) || selectedLocationForEdit.ndviScore;
+    const survivalRate = (fd.get("survivalRate") as string).trim() || selectedLocationForEdit.survivalRate;
+    const image = (fd.get("image") as string).trim() || selectedLocationForEdit.image;
+    const status = (fd.get("status") as PlantationLocationItem["status"]) || selectedLocationForEdit.status;
+
+    try {
+      const res = await locationService.update(id, {
+        name,
+        region,
+        gps,
+        areaHectares,
+        capacity,
+        soilHealth,
+        ndviScore,
+        survivalRate,
+        image,
+        status,
+      });
+
+      if (res.data) {
+        const updatedLoc = locationService.mapToUiItem(res.data);
+        updatedLoc.treesPlanted = selectedLocationForEdit.treesPlanted;
+        setLocations((prev) =>
+          prev.map((l) =>
+            l.id === id || l.name === selectedLocationForEdit.name ? updatedLoc : l
+          )
+        );
+      } else {
+        throw new Error("No location data returned from API");
+      }
+      setSelectedLocationForEdit(null);
+      showToast(`Updated reserve "${name}"!`);
+    } catch (err: any) {
+      console.warn("Backend location update failed, updating locally:", err);
+      const fallbackLoc: PlantationLocationItem = {
+        ...selectedLocationForEdit,
+        name,
+        region,
+        gps,
+        areaHectares,
+        capacity,
+        soilHealth,
+        ndviScore,
+        survivalRate,
+        image,
+        status,
+      };
+      setLocations((prev) =>
+        prev.map((l) =>
+          l.id === id || l.name === selectedLocationForEdit.name ? fallbackLoc : l
+        )
+      );
+      setSelectedLocationForEdit(null);
+      showToast(`Updated reserve "${fallbackLoc.name}"!`);
+    } finally {
+      setIsUpdatingLocation(false);
+    }
+  };
+
+  const handleDeleteLocation = (id: string, name?: string) => {
+    const item = locations.find((l) => l.id === id);
+    setDeleteModal({
+      isOpen: true,
+      type: "location",
+      id,
+      name: name || item?.name || "Reserve Location",
+      description:
+        "Are you sure you want to delete this protected bio-reserve location? This cannot be undone.",
     });
-    setShowAddLocationModal(false);
-    showToast(`Added reserve location "${newLoc.name}"!`);
-    setActiveTab("locations");
   };
 
   const handleDeleteTree = (id: string, name?: string) => {
@@ -1237,18 +1389,6 @@ export function AdminDashboard() {
     });
   };
 
-  const handleDeleteLocation = (id: string, name?: string) => {
-    const item = locations.find((l) => l.id === id);
-    setDeleteModal({
-      isOpen: true,
-      type: "location",
-      id,
-      name: name || item?.name || "Reserve Location",
-      description:
-        "Are you sure you want to remove this agroforestry bio-sanctuary and its boundary data?",
-    });
-  };
-
   const handleConfirmDelete = async () => {
     if (!deleteModal) return;
     setIsDeleting(true);
@@ -1279,6 +1419,11 @@ export function AdminDashboard() {
         setInstances((prev) => prev.filter((i) => i.id !== id));
         showToast(`Tree instance "${name}" record removed.`);
       } else if (type === "location") {
+        try {
+          await locationService.delete(id);
+        } catch (err) {
+          console.warn("Location deletion API notice:", err);
+        }
         setLocations((prev) => prev.filter((l) => l.id !== id));
         if (typeof window !== "undefined") {
           try {
@@ -1429,6 +1574,7 @@ export function AdminDashboard() {
               locations={locations}
               searchQuery={searchQuery}
               onOpenAddLocation={() => setShowAddLocationModal(true)}
+              onEditLocation={handleOpenEditLocation}
               onDeleteLocation={handleDeleteLocation}
             />
           )}
@@ -1510,6 +1656,14 @@ export function AdminDashboard() {
         isOpen={showAddLocationModal}
         onClose={() => setShowAddLocationModal(false)}
         onSubmit={handleCreateLocation}
+      />
+
+      <EditLocationModal
+        isOpen={Boolean(selectedLocationForEdit)}
+        location={selectedLocationForEdit}
+        onClose={() => setSelectedLocationForEdit(null)}
+        onSubmit={handleUpdateLocation}
+        isSubmitting={isUpdatingLocation}
       />
 
       <OrderDetailsModal
