@@ -23,6 +23,7 @@ const TAB_META: Record<AdminTabType, { label: string }> = {
   locations: { label: "Reserves & GPS" },
   orders: { label: "Adoption Orders" },
   users: { label: "All Users Directory" },
+  certificates: { label: "Certificate Deeds" },
   "landing-page": { label: "Landing Page CMS" },
 };
 

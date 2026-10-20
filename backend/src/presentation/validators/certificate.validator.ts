@@ -30,6 +30,8 @@ export const updateCertificateSchema = z.object({
   adopterName: z.string().trim().optional(),
   status: certificateStatusEnum.optional(),
   isActive: z.boolean().optional(),
+  regenerate: z.boolean().optional(),
+  reissue: z.boolean().optional(),
 });
 
 export const getCertificateByIdSchema = z.object({

@@ -25,6 +25,10 @@ export class UpdateCertificateUseCase {
       }
     }
 
+    if (input.regenerate || input.reissue) {
+      existing.reissue(input.issueDate ? new Date(input.issueDate) : new Date());
+    }
+
     existing.update({
       ...input,
       issueDate: input.issueDate ? new Date(input.issueDate) : undefined,

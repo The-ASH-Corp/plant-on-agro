@@ -29,6 +29,7 @@ import { LocationsTab } from "./tabs/LocationsTab";
 import { OrdersTab } from "./tabs/OrdersTab";
 import { UsersTab } from "./tabs/UsersTab";
 import { LandingPageTab } from "./tabs/LandingPageTab";
+import { CertificatesTab } from "./tabs/CertificatesTab";
 
 // Modal Components
 import { AddTreeModal } from "./modals/AddTreeModal";
@@ -41,6 +42,9 @@ import { AddLocationModal } from "./modals/AddLocationModal";
 import { OrderDetailsModal } from "./modals/OrderDetailsModal";
 import { UserDetailsModal } from "./modals/UserDetailsModal";
 import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
+import { IssueCertificateModal } from "./modals/IssueCertificateModal";
+import { InspectCertificateModal } from "./modals/InspectCertificateModal";
+import { EditCertificateModal } from "./modals/EditCertificateModal";
 
 import { treeVarietyService } from "@/services/tree-varieties/tree-variety.service";
 import { adoptionPlanService } from "@/services/adoption-plans/adoption-plan.service";
@@ -48,6 +52,7 @@ import { treeInstanceService } from "@/services/tree-instances/tree-instance.ser
 import { userService } from "@/services/user/user.service";
 import { User } from "@/types/auth";
 import { orderService } from "@/services/orders/order.service";
+import { certificateService, Certificate } from "@/services/certificates/certificate.service";
 import { OccasionDedicationType, TreeInstanceItem, TreeHealthStatus } from "./types";
 
 // Re-export types for backward compatibility
@@ -295,7 +300,7 @@ export function AdminDashboard() {
     let isMounted = true;
     async function loadCatalog() {
       try {
-        const [treesRes, plansRes, instancesRes, usersRes,ordersRes] = await Promise.all([
+        const [treesRes, plansRes, instancesRes, usersRes, ordersRes, certsRes] = await Promise.all([
           treeVarietyService.getAll(),
           adoptionPlanService.getAll(),
           treeInstanceService.getAll(),
@@ -304,7 +309,10 @@ export function AdminDashboard() {
             return null;
           }),
           orderService.getAll({ limit: 200 }),
-         
+          certificateService.getCertificates({ limit: 200 }).catch((err) => {
+            console.warn("Could not load certificates:", err);
+            return null;
+          }),
         ]);
         if (isMounted) {
           const apiTrees = treesRes.data?.items ? treesRes.data.items.map(treeVarietyService.mapToUiItem) : [];
@@ -319,6 +327,10 @@ export function AdminDashboard() {
             const raw = usersRes.data;
             const userItems = Array.isArray(raw) ? raw : (raw.items || []);
             setUsers(userItems);
+          }
+
+          if (certsRes?.data?.items) {
+            setCertificates(certsRes.data.items);
           }
 
           // Dynamically derive bio-reserves from database records + custom locations
@@ -372,9 +384,17 @@ export function AdminDashboard() {
   const [isUpdatingInstance, setIsUpdatingInstance] = useState(false);
   const [showAddLocationModal, setShowAddLocationModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<AdoptionOrder | null>(null);
+
+  // Certificate Management State
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [showIssueCertModal, setShowIssueCertModal] = useState(false);
+  const [selectedCertForInspect, setSelectedCertForInspect] = useState<Certificate | null>(null);
+  const [selectedCertForEdit, setSelectedCertForEdit] = useState<Certificate | null>(null);
+  const [isSubmittingCert, setIsSubmittingCert] = useState(false);
+
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
-    type: "tree" | "plan" | "instance" | "location";
+    type: "tree" | "plan" | "instance" | "location" | "certificate";
     id: string;
     name: string;
     description?: string;
@@ -486,6 +506,34 @@ export function AdminDashboard() {
         });
       } catch (err) {
         console.warn("Failed to persist order status to instance in DB:", err);
+      }
+    }
+
+    // If order was moved to "Certificate Issued", ensure a certificate deed exists
+    if (newStatus === "Certificate Issued" && targetOrder) {
+      const orderNum = targetOrder.orderNumber;
+      const alreadyHasCert = certificates.some(
+        (c) => c.orderRef === orderNum || c.certificateNumber === targetOrder.certificateId
+      );
+      if (!alreadyHasCert) {
+        try {
+          const autoCert = await certificateService.createCertificate({
+            orderRef: orderNum,
+            recipientName: targetOrder.adopterName,
+            adopterName: targetOrder.adopterName,
+            treeSpecies: targetOrder.treeSpecies,
+            reserveName: targetOrder.reserveName,
+            dedicatedMessage: `PlantOn Agro certified green deed honoring ${targetOrder.adopterName} for sustainable environmental stewardship.`,
+            status: "Issued",
+          });
+          if (autoCert.data) {
+            const newCert = autoCert.data;
+            setCertificates((prev) => [newCert, ...prev]);
+            showToast(`📜 Deed certificate generated for ${orderNum}!`);
+          }
+        } catch (cErr) {
+          console.warn("Auto-issue certificate notice:", cErr);
+        }
       }
     }
 
@@ -1249,6 +1297,167 @@ export function AdminDashboard() {
     });
   };
 
+  // Certificate Management Handlers
+  const handleRefreshCertificates = async () => {
+    try {
+      const res = await certificateService.getCertificates({ limit: 200 });
+      if (res?.data?.items) {
+        setCertificates(res.data.items);
+        showToast("Certificate registry refreshed from ledger.");
+      }
+    } catch {
+      showToast("Failed to refresh certificates.");
+    }
+  };
+
+  const handleCreateCertificate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmittingCert(true);
+    const fd = new FormData(e.currentTarget);
+    const orderRef = (fd.get("orderRef") as string)?.trim();
+    const recipientName = (fd.get("recipientName") as string)?.trim();
+    const adopterName = (fd.get("adopterName") as string)?.trim() || recipientName;
+    const dedicatedMessage = (fd.get("dedicatedMessage") as string)?.trim();
+    const treeSpecies = (fd.get("treeSpecies") as string)?.trim() || undefined;
+    const treeTag = (fd.get("treeTag") as string)?.trim() || undefined;
+    const reserveName = (fd.get("reserveName") as string)?.trim() || undefined;
+    const status = (fd.get("status") as any) || "Issued";
+    const certificateNumber = (fd.get("certificateNumber") as string)?.trim() || undefined;
+
+    try {
+      const res = await certificateService.createCertificate({
+        orderRef,
+        recipientName,
+        adopterName,
+        dedicatedMessage,
+        treeSpecies,
+        treeTag,
+        reserveName,
+        status,
+        certificateNumber,
+      });
+
+      if (res.data) {
+        const newCert = res.data;
+        setCertificates((prev) => [newCert, ...prev.filter((c) => c.id !== newCert.id)]);
+        if (orderRef) {
+          setOrders((prev) =>
+            prev.map((o) =>
+              o.orderNumber === orderRef ? { ...o, certificateId: newCert.certificateNumber } : o
+            )
+          );
+        }
+      }
+      setShowIssueCertModal(false);
+      showToast(`✓ Certificate Deed issued successfully for "${recipientName}"!`);
+      setActiveTab("certificates");
+    } catch (err: any) {
+      console.warn("Certificate creation error:", err);
+      showToast(err.message || "Failed to issue certificate deed.");
+    } finally {
+      setIsSubmittingCert(false);
+    }
+  };
+
+  const handleUpdateCertificate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedCertForEdit) return;
+    setIsSubmittingCert(true);
+    const fd = new FormData(e.currentTarget);
+    const id = (fd.get("id") as string) || selectedCertForEdit.id;
+    const recipientName = (fd.get("recipientName") as string)?.trim() || selectedCertForEdit.recipientName;
+    const adopterName = (fd.get("adopterName") as string)?.trim() || selectedCertForEdit.adopterName;
+    const treeSpecies = (fd.get("treeSpecies") as string)?.trim() || selectedCertForEdit.treeSpecies;
+    const treeTag = (fd.get("treeTag") as string)?.trim() || selectedCertForEdit.treeTag;
+    const reserveName = (fd.get("reserveName") as string)?.trim() || selectedCertForEdit.reserveName;
+    const dedicatedMessage = (fd.get("dedicatedMessage") as string)?.trim() || selectedCertForEdit.dedicatedMessage;
+    const status = (fd.get("status") as any) || selectedCertForEdit.status;
+    const certificateNumber = (fd.get("certificateNumber") as string)?.trim() || selectedCertForEdit.certificateNumber;
+
+    try {
+      const res = await certificateService.updateCertificate(id, {
+        recipientName,
+        adopterName,
+        treeSpecies,
+        treeTag,
+        reserveName,
+        dedicatedMessage,
+        status,
+        certificateNumber,
+      });
+
+      const updated = res.data || {
+        ...selectedCertForEdit,
+        recipientName,
+        adopterName,
+        treeSpecies,
+        treeTag,
+        reserveName,
+        dedicatedMessage,
+        status,
+        certificateNumber,
+      };
+
+      setCertificates((prev) => prev.map((c) => (c.id === id ? updated : c)));
+      if (selectedCertForInspect?.id === id) {
+        setSelectedCertForInspect(updated);
+      }
+      setSelectedCertForEdit(null);
+      showToast(`✓ Certificate deed ${certificateNumber} updated.`);
+    } catch (err: any) {
+      console.warn("Certificate update error:", err);
+      showToast(err.message || "Failed to update certificate deed.");
+    } finally {
+      setIsSubmittingCert(false);
+    }
+  };
+
+  const handleRevokeCertificate = async (id: string, certNumber?: string) => {
+    try {
+      const res = await certificateService.revokeCertificate(id);
+      const updated = res.data;
+      setCertificates((prev) =>
+        prev.map((c) => (c.id === id ? (updated ? updated : { ...c, status: "Revoked" }) : c))
+      );
+      if (selectedCertForInspect?.id === id) {
+        setSelectedCertForInspect((prev) => (prev ? (updated ? updated : { ...prev, status: "Revoked" }) : null));
+      }
+      showToast(`🚫 Deed ${certNumber || id} has been officially revoked.`);
+    } catch (err: any) {
+      console.warn("Certificate revocation error:", err);
+      showToast(err.message || "Failed to revoke certificate.");
+    }
+  };
+
+  const handleRegenerateCertificate = async (id: string, certNumber?: string) => {
+    try {
+      const res = await certificateService.regenerateCertificate(id);
+      if (res.data) {
+        const regenCert = res.data;
+        setCertificates((prev) => prev.map((c) => (c.id === id ? regenCert : c)));
+        if (selectedCertForInspect?.id === id) {
+          setSelectedCertForInspect(regenCert);
+        }
+      }
+      showToast(`⚡ Certificate ${certNumber || id} regenerated with fresh cryptographic hash!`);
+    } catch (err: any) {
+      console.warn("Certificate regeneration error:", err);
+      showToast(err.message || "Failed to regenerate certificate.");
+    }
+  };
+
+  const handleDeleteCertificate = (id: string, certNumber?: string) => {
+    const item = certificates.find((c) => c.id === id);
+    setDeleteModal({
+      isOpen: true,
+      type: "certificate",
+      id,
+      name: certNumber || item?.certificateNumber || "Certificate Deed",
+      description:
+        "Are you sure you want to permanently delete this certificate deed record and cryptographic proof?",
+    });
+  };
+
   const handleConfirmDelete = async () => {
     if (!deleteModal) return;
     setIsDeleting(true);
@@ -1290,6 +1499,15 @@ export function AdminDashboard() {
           } catch {}
         }
         showToast(`Reserve location "${name}" removed.`);
+      } else if (type === "certificate") {
+        try {
+          await certificateService.deleteCertificate(id);
+        } catch (err) {
+          console.warn("Certificate deletion notice:", err);
+        }
+        setCertificates((prev) => prev.filter((c) => c.id !== id));
+        if (selectedCertForInspect?.id === id) setSelectedCertForInspect(null);
+        showToast(`Certificate deed "${name}" removed.`);
       }
       setDeleteModal(null);
     } catch (err: any) {
@@ -1351,6 +1569,7 @@ export function AdminDashboard() {
         locationsCount={locations.length}
         ordersCount={orders.length}
         unreadOrdersCount={unreadOrdersCount}
+        certificatesCount={certificates.length}
         usersCount={users.filter((u) => u.role !== "admin").length}
         userName={user?.name}
         onLogout={logout}
@@ -1358,6 +1577,7 @@ export function AdminDashboard() {
         onOpenAddPlan={() => setShowAddPlanModal(true)}
         onOpenAddLocation={() => setShowAddLocationModal(true)}
         onOpenAddInstance={() => setShowAddInstanceModal(true)}
+        onOpenIssueCertificate={() => setShowIssueCertModal(true)}
       />
 
       {/* 2. Main Application Content Area */}
@@ -1460,6 +1680,20 @@ export function AdminDashboard() {
           {activeTab === "landing-page" && (
             <LandingPageTab showToast={showToast} />
           )}
+
+          {activeTab === "certificates" && (
+            <CertificatesTab
+              certificates={certificates}
+              searchQuery={searchQuery}
+              onOpenIssueCertificate={() => setShowIssueCertModal(true)}
+              onInspectCertificate={(cert) => setSelectedCertForInspect(cert)}
+              onEditCertificate={(cert) => setSelectedCertForEdit(cert)}
+              onRevokeCertificate={(id, num) => handleRevokeCertificate(id, num)}
+              onRegenerateCertificate={(id, num) => handleRegenerateCertificate(id, num)}
+              onDeleteCertificate={handleDeleteCertificate}
+              onRefresh={handleRefreshCertificates}
+            />
+          )}
         </main>
       </div>
 
@@ -1516,10 +1750,48 @@ export function AdminDashboard() {
         order={selectedOrder}
         onClose={() => setSelectedOrder(null)}
         onDownloadCertificate={(certId) => {
-          showToast(`Digital Certificate ${certId} downloaded!`);
+          const foundCert = certificates.find(
+            (c) =>
+              c.certificateNumber === certId ||
+              c.orderRef === selectedOrder?.orderNumber ||
+              c.id === certId
+          );
+          if (foundCert) {
+            setSelectedCertForInspect(foundCert);
+          } else {
+            showToast(`Digital Certificate ${certId} downloaded!`);
+          }
           setSelectedOrder(null);
         }}
         onUpdateStatus={handleUpdateOrderStatus}
+      />
+
+      <IssueCertificateModal
+        isOpen={showIssueCertModal}
+        onClose={() => setShowIssueCertModal(false)}
+        onSubmit={handleCreateCertificate}
+        isSubmitting={isSubmittingCert}
+        orders={orders}
+        instances={instances}
+      />
+
+      <InspectCertificateModal
+        certificate={selectedCertForInspect}
+        onClose={() => setSelectedCertForInspect(null)}
+        onRevoke={(id) => handleRevokeCertificate(id, selectedCertForInspect?.certificateNumber)}
+        onRegenerate={(id) => handleRegenerateCertificate(id, selectedCertForInspect?.certificateNumber)}
+        onOpenEdit={(cert) => {
+          setSelectedCertForInspect(null);
+          setSelectedCertForEdit(cert);
+        }}
+      />
+
+      <EditCertificateModal
+        isOpen={Boolean(selectedCertForEdit)}
+        certificate={selectedCertForEdit}
+        onClose={() => setSelectedCertForEdit(null)}
+        onSubmit={handleUpdateCertificate}
+        isSubmitting={isSubmittingCert}
       />
 
       <UserDetailsModal
@@ -1539,6 +1811,8 @@ export function AdminDashboard() {
             ? "Adoption Plan"
             : deleteModal?.type === "instance"
             ? "Tree Sapling Instance"
+            : deleteModal?.type === "certificate"
+            ? "Certificate Deed"
             : "Reserve Location"
         }
         itemName={deleteModal?.name}

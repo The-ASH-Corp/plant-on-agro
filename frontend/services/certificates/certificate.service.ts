@@ -39,6 +39,38 @@ export interface CertificateQueryParams {
   skip?: number;
 }
 
+export interface CreateCertificatePayload {
+  certificateNumber?: string;
+  orderRef: string;
+  recipientName: string;
+  dedicatedMessage: string;
+  issueDate?: string | Date;
+  pdfUrl?: string;
+  qrCodeVerificationUrl?: string;
+  treeTag?: string;
+  treeSpecies?: string;
+  reserveName?: string;
+  adopterName?: string;
+  status?: CertificateStatus;
+}
+
+export interface UpdateCertificatePayload {
+  certificateNumber?: string;
+  recipientName?: string;
+  dedicatedMessage?: string;
+  issueDate?: string | Date;
+  pdfUrl?: string;
+  qrCodeVerificationUrl?: string;
+  treeTag?: string;
+  treeSpecies?: string;
+  reserveName?: string;
+  adopterName?: string;
+  status?: CertificateStatus;
+  isActive?: boolean;
+  regenerate?: boolean;
+  reissue?: boolean;
+}
+
 export const certificateService = {
   /**
    * Fetches paginated certificates with optional status/order/search filtering.
@@ -76,4 +108,46 @@ export const certificateService = {
   async verifyCertificate(tokenOrNumber: string): Promise<ApiResponse<VerifyCertificateResult>> {
     return apiClient.get<VerifyCertificateResult>(API_ENDPOINTS.CERTIFICATES.VERIFY(tokenOrNumber));
   },
+
+  /**
+   * Creates/issues a new certificate deed record.
+   */
+  async createCertificate(payload: CreateCertificatePayload): Promise<ApiResponse<Certificate>> {
+    return apiClient.post<Certificate>(API_ENDPOINTS.CERTIFICATES.BASE, payload);
+  },
+
+  /**
+   * Updates an existing certificate deed record.
+   */
+  async updateCertificate(id: string, payload: UpdateCertificatePayload): Promise<ApiResponse<Certificate>> {
+    return apiClient.put<Certificate>(API_ENDPOINTS.CERTIFICATES.BY_ID(id), payload);
+  },
+
+  /**
+   * Revokes an existing certificate deed.
+   */
+  async revokeCertificate(id: string): Promise<ApiResponse<Certificate>> {
+    return apiClient.put<Certificate>(API_ENDPOINTS.CERTIFICATES.BY_ID(id), {
+      status: 'Revoked',
+    });
+  },
+
+  /**
+   * Regenerates cryptographic hash and reissues the certificate.
+   */
+  async regenerateCertificate(id: string): Promise<ApiResponse<Certificate>> {
+    return apiClient.put<Certificate>(API_ENDPOINTS.CERTIFICATES.BY_ID(id), {
+      status: 'Issued',
+      regenerate: true,
+      issueDate: new Date().toISOString(),
+    });
+  },
+
+  /**
+   * Permanently deletes a certificate deed record.
+   */
+  async deleteCertificate(id: string): Promise<ApiResponse<{ deleted: boolean }>> {
+    return apiClient.delete<{ deleted: boolean }>(API_ENDPOINTS.CERTIFICATES.BY_ID(id));
+  },
 };
+

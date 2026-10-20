@@ -5,6 +5,7 @@ export type AdminTabType =
   | "locations"
   | "orders"
   | "instances"
+  | "certificates"
   | "users"
   | "landing-page";
 
