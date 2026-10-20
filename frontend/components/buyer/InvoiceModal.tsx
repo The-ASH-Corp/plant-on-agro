@@ -134,8 +134,8 @@ export function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                 <span className="font-mono">₹0</span>
               </div>
               <div className="flex justify-between text-gray-600">
-                <span>Drone Telemetry & Maintenance Fee:</span>
-                <span className="font-mono text-emerald-700 font-bold">Waived (Lifetime Single-Payment)</span>
+                <span>Lifelong Forestry Care & GPS Mapping Fee:</span>
+                <span className="font-mono text-emerald-700 font-bold">Included (Lifetime Single-Payment)</span>
               </div>
               <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-200">
                 <span>Total Paid:</span>

@@ -252,7 +252,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
           </h2>
           <p className="text-[#55695d] text-sm leading-relaxed">
             {mode === "register"
-              ? "Create an account to plant your first tree and track its lifelong growth via satellite and drone telemetry."
+              ? "Create an account to plant your first tree and track its lifelong growth with verified GPS geotagging."
               : "Sign in to track your trees, view your impact, and access certificates."}
           </p>
         </div>

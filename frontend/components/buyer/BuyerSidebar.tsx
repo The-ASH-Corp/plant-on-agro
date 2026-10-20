@@ -203,22 +203,6 @@ export function BuyerSidebar({
             })}
           </nav>
 
-          {/* Mini Telemetry Status Widget in Sidebar */}
-          <div className="px-4 py-3 mx-4 mb-4 rounded-xl bg-black/40 border border-emerald-500/20 space-y-2">
-            <div className="flex items-center justify-between text-[10px]">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span className="font-mono text-emerald-300 font-bold uppercase">
-                  Drone-04 Sweep
-                </span>
-              </div>
-              <span className="font-mono text-emerald-400 text-[9px]">ACTIVE</span>
-            </div>
-            <p className="text-[10px] text-white/50 leading-relaxed font-sans">
-              Autonomous satellite & multispectral radar monitoring active reserves.
-            </p>
-          </div>
-
           {/* Bottom Footer Actions */}
           <div className="p-4 pb-8 border-t border-white/10 space-y-2">
             <Link

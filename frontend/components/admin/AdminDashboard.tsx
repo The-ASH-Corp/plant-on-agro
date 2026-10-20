@@ -31,8 +31,11 @@ import { LandingPageTab } from "./tabs/LandingPageTab";
 
 // Modal Components
 import { AddTreeModal } from "./modals/AddTreeModal";
+import { EditTreeModal } from "./modals/EditTreeModal";
 import { AddPlanModal } from "./modals/AddPlanModal";
+import { EditPlanModal } from "./modals/EditPlanModal";
 import { AddTreeInstanceModal } from "./modals/AddTreeInstanceModal";
+import { EditTreeInstanceModal } from "./modals/EditTreeInstanceModal";
 import { AddLocationModal } from "./modals/AddLocationModal";
 import { OrderDetailsModal } from "./modals/OrderDetailsModal";
 import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
@@ -40,6 +43,7 @@ import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
 import { treeVarietyService } from "@/services/tree-varieties/tree-variety.service";
 import { adoptionPlanService } from "@/services/adoption-plans/adoption-plan.service";
 import { treeInstanceService } from "@/services/tree-instances/tree-instance.service";
+import { orderService } from "@/services/orders/order.service";
 import { OccasionDedicationType, TreeInstanceItem, TreeHealthStatus } from "./types";
 
 // Re-export types for backward compatibility
@@ -284,10 +288,11 @@ export function AdminDashboard() {
     let isMounted = true;
     async function loadCatalog() {
       try {
-        const [treesRes, plansRes, instancesRes] = await Promise.all([
+        const [treesRes, plansRes, instancesRes, ordersRes] = await Promise.all([
           treeVarietyService.getAll(),
           adoptionPlanService.getAll(),
           treeInstanceService.getAll(),
+          orderService.getAll({ limit: 200 }),
         ]);
         if (isMounted) {
           const apiTrees = treesRes.data?.items ? treesRes.data.items.map(treeVarietyService.mapToUiItem) : [];
@@ -314,12 +319,18 @@ export function AdminDashboard() {
           );
           setLocations(derivedLocations);
 
-          // Dynamically derive adoption orders strictly from database instances
-          const derivedOrders = deriveOrdersFromInstances(
-            instancesRes.data?.items || [],
-            []
-          );
-          setOrders(derivedOrders);
+          // Dynamically load adoption orders directly from MongoDB database (collection: adoptionorders)
+          if (ordersRes.data?.items && ordersRes.data.items.length > 0) {
+            const apiOrders = ordersRes.data.items.map(orderService.mapToUiItem);
+            setOrders(apiOrders);
+          } else {
+            // Graceful fallback to derive from instances if adoptionorders collection is empty
+            const derivedOrders = deriveOrdersFromInstances(
+              instancesRes.data?.items || [],
+              []
+            );
+            setOrders(derivedOrders);
+          }
         }
       } catch (err) {
         console.warn("Could not load catalog from backend:", err);
@@ -333,8 +344,14 @@ export function AdminDashboard() {
 
   // Modals State
   const [showAddTreeModal, setShowAddTreeModal] = useState(false);
+  const [selectedTreeForEdit, setSelectedTreeForEdit] = useState<TreeVarietyItem | null>(null);
+  const [isUpdatingTree, setIsUpdatingTree] = useState(false);
   const [showAddPlanModal, setShowAddPlanModal] = useState(false);
+  const [selectedPlanForEdit, setSelectedPlanForEdit] = useState<AdoptionPlanItem | null>(null);
+  const [isUpdatingPlan, setIsUpdatingPlan] = useState(false);
   const [showAddInstanceModal, setShowAddInstanceModal] = useState(false);
+  const [selectedInstanceForEdit, setSelectedInstanceForEdit] = useState<TreeInstanceItem | null>(null);
+  const [isUpdatingInstance, setIsUpdatingInstance] = useState(false);
   const [showAddLocationModal, setShowAddLocationModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<AdoptionOrder | null>(null);
   const [deleteModal, setDeleteModal] = useState<{
@@ -358,10 +375,14 @@ export function AdminDashboard() {
     (o) => o.isRead === false || o.status === "New Request"
   ).length;
 
-  const handleUpdateOrderStatus = async (orderNumber: string, newStatus: AdoptionOrderStatus) => {
+  const handleUpdateOrderStatus = async (orderIdentifier: string, newStatus: AdoptionOrderStatus) => {
+    const targetOrder = orders.find(
+      (o) => o.orderNumber === orderIdentifier || o.id === orderIdentifier
+    );
+
     setOrders((prev) => {
       const updated = prev.map((o) => {
-        if (o.orderNumber === orderNumber || o.id === orderNumber) {
+        if (o.orderNumber === orderIdentifier || o.id === orderIdentifier) {
           return { ...o, status: newStatus, isRead: true };
         }
         return o;
@@ -374,13 +395,25 @@ export function AdminDashboard() {
       return updated;
     });
 
-    if (selectedOrder && (selectedOrder.orderNumber === orderNumber || selectedOrder.id === orderNumber)) {
+    if (
+      selectedOrder &&
+      (selectedOrder.orderNumber === orderIdentifier || selectedOrder.id === orderIdentifier)
+    ) {
       setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus, isRead: true } : null));
+    }
+
+    // Persist status change directly to MongoDB backend order entity
+    if (targetOrder?.id) {
+      try {
+        await orderService.updateStatus(targetOrder.id, newStatus);
+      } catch (orderApiErr) {
+        console.warn("Failed to persist order status to backend API:", orderApiErr);
+      }
     }
 
     // Persist status change to matching tree instances in database
     const matchingInsts = instances.filter(
-      (i) => i.orderRef === orderNumber || i.treeTag === orderNumber
+      (i) => i.orderRef === orderIdentifier || i.treeTag === orderIdentifier
     );
     for (const inst of matchingInsts) {
       try {
@@ -393,10 +426,16 @@ export function AdminDashboard() {
       }
     }
 
-    showToast(`✓ Order ${orderNumber} status changed to "${newStatus}"`);
+    showToast(`✓ Order ${targetOrder?.orderNumber || orderIdentifier} status changed to "${newStatus}"`);
   };
 
-  const handleMarkAllOrdersAsRead = () => {
+  const handleMarkAllOrdersAsRead = async () => {
+    try {
+      await orderService.markAllAsRead();
+    } catch (err) {
+      console.warn("Failed to mark all orders as read in backend:", err);
+    }
+
     setOrders((prev) => {
       const updated = prev.map((o) => ({ ...o, isRead: true }));
       try {
@@ -409,7 +448,7 @@ export function AdminDashboard() {
     showToast("✓ All adoption requests marked as reviewed.");
   };
 
-  const handleSelectOrder = (order: AdoptionOrder) => {
+  const handleSelectOrder = async (order: AdoptionOrder) => {
     setSelectedOrder(order);
     if (order.isRead === false) {
       setOrders((prev) => {
@@ -419,7 +458,75 @@ export function AdminDashboard() {
         } catch {}
         return updated;
       });
+
+      if (order.id) {
+        try {
+          await orderService.updateStatus(order.id, order.status);
+        } catch (err) {
+          console.warn("Could not mark order read on backend:", err);
+        }
+      }
     }
+  };
+
+  const handleExportOrdersCSV = () => {
+    if (orders.length === 0) {
+      showToast("No orders available to export.");
+      return;
+    }
+    const headers = [
+      "Order Number",
+      "Invoice Number",
+      "Adopter Name",
+      "Adopter Email",
+      "Phone",
+      "Species",
+      "Plantation Reserve",
+      "GPS Coordinates",
+      "Plan Package",
+      "Quantity",
+      "Total Amount (INR)",
+      "Payment Method",
+      "Payment Status",
+      "Transaction Ref",
+      "Order Status",
+      "Certificate ID",
+      "Date Adopted",
+    ];
+    const rows = orders.map((o) => [
+      `"${o.orderNumber}"`,
+      `"${o.invoiceNumber || ""}"`,
+      `"${(o.adopterName || "").replace(/"/g, '""')}"`,
+      `"${(o.adopterEmail || "").replace(/"/g, '""')}"`,
+      `"${o.adopterPhone || ""}"`,
+      `"${(o.treeSpecies || "").replace(/"/g, '""')}"`,
+      `"${(o.reserveName || "").replace(/"/g, '""')}"`,
+      `"${(o.gpsCoords || "").replace(/"/g, '""')}"`,
+      `"${(o.planType || "").replace(/"/g, '""')}"`,
+      o.quantity || 1,
+      o.totalAmount || 0,
+      `"${o.paymentMethod || "sandbox"}"`,
+      `"${o.paymentStatus || "Paid"}"`,
+      `"${o.transactionRef || ""}"`,
+      `"${o.status || ""}"`,
+      `"${o.certificateId || ""}"`,
+      `"${o.datePlanted || ""}"`,
+    ]);
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute(
+      "download",
+      `PlantOnAgro_Adoption_Orders_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("✓ Downloaded adoption orders CSV register.");
   };
 
   // Auth Store & Access Guard
@@ -527,6 +634,111 @@ export function AdminDashboard() {
     }
   };
 
+  const handleUpdateTree = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedTreeForEdit) return;
+
+    const fd = new FormData(e.currentTarget);
+    const id = (fd.get("id") as string) || selectedTreeForEdit.id;
+    const commonName = (fd.get("name") as string)?.trim() || selectedTreeForEdit.name;
+    const scientificName = (fd.get("sci") as string)?.trim() || selectedTreeForEdit.sci;
+    const category = (fd.get("category") as TreeVarietyItem["category"]) || selectedTreeForEdit.category;
+    const price = Number(fd.get("price")) || selectedTreeForEdit.price;
+    const co2 = Number(fd.get("co2")) || selectedTreeForEdit.co2PerYearKg || 25;
+    const location = (fd.get("location") as string)?.trim() || selectedTreeForEdit.location;
+    const growth = (fd.get("growth") as string)?.trim() || selectedTreeForEdit.growth;
+    const careRequirements =
+      (fd.get("careRequirements") as string)?.trim() ||
+      selectedTreeForEdit.careRequirements ||
+      "Weekly watering in early stages, adequate sunlight, organic soil";
+    const img = (fd.get("img") as string)?.trim() || selectedTreeForEdit.img;
+    const desc = (fd.get("desc") as string)?.trim() || selectedTreeForEdit.desc;
+    const isActive = fd.get("isActive") !== null;
+
+    setIsUpdatingTree(true);
+    try {
+      const res = await treeVarietyService.update(id, {
+        commonName,
+        scientificName,
+        category,
+        price,
+        co2AbsorptionRateKgYear: co2,
+        growthTimeline: growth,
+        careRequirements,
+        coverImages: img ? [img] : undefined,
+        location,
+        description: desc,
+        isActive,
+      });
+
+      if (res.data) {
+        const updatedUiTree = treeVarietyService.mapToUiItem(res.data);
+        setTrees((prev) => prev.map((t) => (t.id === id ? updatedUiTree : t)));
+      } else {
+        setTrees((prev) =>
+          prev.map((t) =>
+            t.id === id
+              ? {
+                  ...t,
+                  name: commonName,
+                  sci: scientificName,
+                  commonName,
+                  scientificName,
+                  category,
+                  price,
+                  location,
+                  growth,
+                  growthTimeline: growth,
+                  img,
+                  coverImages: [img],
+                  desc,
+                  description: desc,
+                  co2PerYearKg: co2,
+                  co2AbsorptionRateKgYear: co2,
+                  careRequirements,
+                  isActive,
+                }
+              : t
+          )
+        );
+      }
+      setSelectedTreeForEdit(null);
+      showToast(`Updated tree variety "${commonName}"!`);
+    } catch (err) {
+      console.warn("Tree update notice:", err);
+      setTrees((prev) =>
+        prev.map((t) =>
+          t.id === id
+            ? {
+                ...t,
+                name: commonName,
+                sci: scientificName,
+                commonName,
+                scientificName,
+                category,
+                price,
+                location,
+                growth,
+                growthTimeline: growth,
+                img,
+                coverImages: [img],
+                desc,
+                description: desc,
+                co2PerYearKg: co2,
+                co2AbsorptionRateKgYear: co2,
+                careRequirements,
+                isActive,
+              }
+            : t
+        )
+      );
+      setSelectedTreeForEdit(null);
+      showToast(`Updated "${commonName}" locally.`);
+    } finally {
+      setIsUpdatingTree(false);
+    }
+  };
+
   const handleCreatePlan = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
@@ -592,6 +804,117 @@ export function AdminDashboard() {
     } catch (err: any) {
       console.warn("Plan creation notice:", err);
       showToast(err.message || "Failed to create adoption plan");
+    }
+  };
+
+  const handleUpdatePlan = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedPlanForEdit) return;
+
+    const fd = new FormData(e.currentTarget);
+    const id = (fd.get("id") as string) || selectedPlanForEdit.id;
+    const planLabel = (fd.get("label") as string)?.trim() || selectedPlanForEdit.label;
+    const icon = (fd.get("icon") as string)?.trim() || selectedPlanForEdit.icon || "🌱";
+    const priceModifier = Number(fd.get("price")) || 0;
+    const badge = (fd.get("badge") as string)?.trim() || "Standard";
+    const description = (fd.get("desc") as string)?.trim() || "";
+
+    // Parse features
+    const rawFeatures = (fd.get("features") as string) || "";
+    const features = rawFeatures
+      .split(/[\n,]+/)
+      .map((f) => f.trim())
+      .filter((f) => f.length > 0);
+
+    // Parse occasion dedications
+    let occasionDedications: OccasionDedicationType[] = [];
+    const occasionFromAll = fd.getAll("occasions") as string[];
+    if (occasionFromAll.length > 0) {
+      occasionDedications = occasionFromAll as OccasionDedicationType[];
+    } else {
+      try {
+        const rawOccasions = fd.get("occasionDedications") as string;
+        if (rawOccasions) {
+          occasionDedications = JSON.parse(rawOccasions);
+        }
+      } catch {
+        occasionDedications = selectedPlanForEdit.occasionDedications || ["general"];
+      }
+    }
+    if (occasionDedications.length === 0) {
+      occasionDedications = ["general"];
+    }
+
+    const isActive = fd.get("isActive") !== null;
+
+    setIsUpdatingPlan(true);
+    try {
+      const res = await adoptionPlanService.update(id, {
+        planLabel,
+        icon,
+        priceModifier,
+        badge,
+        description,
+        features,
+        occasionDedications,
+        isActive,
+      });
+
+      if (res.data) {
+        const updatedUiPlan = adoptionPlanService.mapToUiItem(res.data);
+        setPlans((prev) => prev.map((p) => (p.id === id ? updatedUiPlan : p)));
+      } else {
+        setPlans((prev) =>
+          prev.map((p) =>
+            p.id === id
+              ? {
+                  ...p,
+                  label: planLabel,
+                  planLabel,
+                  icon,
+                  desc: description,
+                  description,
+                  price: priceModifier,
+                  priceModifier,
+                  features,
+                  occasionDedications,
+                  badge,
+                  isActive,
+                }
+              : p
+          )
+        );
+      }
+
+      setSelectedPlanForEdit(null);
+      showToast(`Updated adoption plan "${planLabel}"!`);
+    } catch (err: any) {
+      console.warn("Plan update notice:", err);
+      // Fallback optimistic update
+      setPlans((prev) =>
+        prev.map((p) =>
+          p.id === id
+            ? {
+                ...p,
+                label: planLabel,
+                planLabel,
+                icon,
+                desc: description,
+                description,
+                price: priceModifier,
+                priceModifier,
+                features,
+                occasionDedications,
+                badge,
+                isActive,
+              }
+            : p
+        )
+      );
+      setSelectedPlanForEdit(null);
+      showToast(`Updated "${planLabel}" locally.`);
+    } finally {
+      setIsUpdatingPlan(false);
     }
   };
 
@@ -724,6 +1047,118 @@ export function AdminDashboard() {
     } catch (err: any) {
       console.warn("Failed to update health status:", err);
       showToast(err.message || "Could not update health status");
+    }
+  };
+
+  const handleUpdateInstance = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedInstanceForEdit) return;
+
+    const fd = new FormData(e.currentTarget);
+    const id = (fd.get("id") as string) || selectedInstanceForEdit.id;
+    const treeTag = (fd.get("treeTag") as string)?.trim().toUpperCase() || selectedInstanceForEdit.treeTag;
+    const orderRef = (fd.get("orderRef") as string)?.trim() || "";
+    const assignedReserve =
+      (fd.get("assignedReserve") as string)?.trim() || selectedInstanceForEdit.assignedReserve;
+    const latitude =
+      parseFloat(fd.get("latitude") as string) ||
+      selectedInstanceForEdit.gpsCoordinates?.latitude ||
+      18.5204;
+    const longitude =
+      parseFloat(fd.get("longitude") as string) ||
+      selectedInstanceForEdit.gpsCoordinates?.longitude ||
+      73.8567;
+    const datePlanted =
+      (fd.get("datePlanted") as string)?.trim() || selectedInstanceForEdit.datePlanted;
+    const healthStatus =
+      (fd.get("healthStatus") as TreeHealthStatus) || selectedInstanceForEdit.healthStatus;
+    const treeVarietyName = (fd.get("treeVarietyName") as string)?.trim() || "";
+    const adopterName = (fd.get("adopterName") as string)?.trim() || "";
+    const adopterEmail = (fd.get("adopterEmail") as string)?.trim() || "";
+    const notes = (fd.get("notes") as string)?.trim() || "";
+    const imageUrl =
+      (fd.get("imageUrl") as string)?.trim() || selectedInstanceForEdit.imageUrl || "";
+    const isActive = fd.get("isActive") !== null;
+
+    const gpsCoordinates = { latitude, longitude };
+    const formattedGps = `${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E`;
+
+    setIsUpdatingInstance(true);
+    try {
+      const res = await treeInstanceService.update(id, {
+        treeTag,
+        orderRef,
+        assignedReserve,
+        gpsCoordinates,
+        datePlanted,
+        healthStatus,
+        treeVarietyName,
+        adopterName,
+        adopterEmail,
+        notes,
+        imageUrl,
+        isActive,
+      });
+
+      if (res.data) {
+        const uiItem = treeInstanceService.mapToUiItem(res.data);
+        setInstances((prev) => prev.map((item) => (item.id === id ? uiItem : item)));
+      } else {
+        setInstances((prev) =>
+          prev.map((item) =>
+            item.id === id
+              ? {
+                  ...item,
+                  treeTag,
+                  orderRef,
+                  assignedReserve,
+                  gpsCoordinates,
+                  formattedGps,
+                  datePlanted,
+                  healthStatus,
+                  treeVarietyName,
+                  adopterName,
+                  adopterEmail,
+                  notes,
+                  imageUrl,
+                  isActive,
+                }
+              : item
+          )
+        );
+      }
+
+      setSelectedInstanceForEdit(null);
+      showToast(`Updated tree sapling ${treeTag}!`);
+    } catch (err: any) {
+      console.warn("Tree instance update notice:", err);
+      // Fallback local update
+      setInstances((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                treeTag,
+                orderRef,
+                assignedReserve,
+                gpsCoordinates,
+                formattedGps,
+                datePlanted,
+                healthStatus,
+                treeVarietyName,
+                adopterName,
+                adopterEmail,
+                notes,
+                imageUrl,
+                isActive,
+              }
+            : item
+        )
+      );
+      setSelectedInstanceForEdit(null);
+      showToast(`Updated ${treeTag} locally.`);
+    } finally {
+      setIsUpdatingInstance(false);
     }
   };
 
@@ -899,6 +1334,7 @@ export function AdminDashboard() {
               trees={trees}
               searchQuery={searchQuery}
               onOpenAddTree={() => setShowAddTreeModal(true)}
+              onEditTree={(tree) => setSelectedTreeForEdit(tree)}
               onDeleteTree={handleDeleteTree}
             />
           )}
@@ -908,6 +1344,7 @@ export function AdminDashboard() {
               plans={plans}
               searchQuery={searchQuery}
               onOpenAddPlan={() => setShowAddPlanModal(true)}
+              onEditPlan={(plan) => setSelectedPlanForEdit(plan)}
               onDeletePlan={handleDeletePlan}
             />
           )}
@@ -917,6 +1354,7 @@ export function AdminDashboard() {
               instances={instances}
               searchQuery={searchQuery}
               onOpenAddInstance={() => setShowAddInstanceModal(true)}
+              onEditInstance={(inst) => setSelectedInstanceForEdit(inst)}
               onUpdateHealth={handleUpdateInstanceHealth}
               onDeleteInstance={handleDeleteInstance}
             />
@@ -936,7 +1374,7 @@ export function AdminDashboard() {
               orders={orders}
               searchQuery={searchQuery}
               onSelectOrder={handleSelectOrder}
-              onExportCSV={() => showToast("Exporting order ledger CSV...")}
+              onExportCSV={handleExportOrdersCSV}
               onUpdateStatus={handleUpdateOrderStatus}
               onMarkAllAsRead={handleMarkAllOrdersAsRead}
               unreadCount={unreadOrdersCount}
@@ -956,16 +1394,40 @@ export function AdminDashboard() {
         onSubmit={handleCreateTree}
       />
 
+      <EditTreeModal
+        isOpen={Boolean(selectedTreeForEdit)}
+        tree={selectedTreeForEdit}
+        onClose={() => setSelectedTreeForEdit(null)}
+        onSubmit={handleUpdateTree}
+        isSubmitting={isUpdatingTree}
+      />
+
       <AddPlanModal
         isOpen={showAddPlanModal}
         onClose={() => setShowAddPlanModal(false)}
         onSubmit={handleCreatePlan}
       />
 
+      <EditPlanModal
+        isOpen={Boolean(selectedPlanForEdit)}
+        plan={selectedPlanForEdit}
+        onClose={() => setSelectedPlanForEdit(null)}
+        onSubmit={handleUpdatePlan}
+        isSubmitting={isUpdatingPlan}
+      />
+
       <AddTreeInstanceModal
         isOpen={showAddInstanceModal}
         onClose={() => setShowAddInstanceModal(false)}
         onSubmit={handleCreateInstance}
+      />
+
+      <EditTreeInstanceModal
+        isOpen={Boolean(selectedInstanceForEdit)}
+        instance={selectedInstanceForEdit}
+        onClose={() => setSelectedInstanceForEdit(null)}
+        onSubmit={handleUpdateInstance}
+        isSubmitting={isUpdatingInstance}
       />
 
       <AddLocationModal

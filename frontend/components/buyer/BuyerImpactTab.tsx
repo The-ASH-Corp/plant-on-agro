@@ -74,7 +74,7 @@ export function BuyerImpactTab({ totalTrees, estimatedCO2 }: BuyerImpactTabProps
             Growth Roadmap
           </span>
           <h3 className="text-base font-bold text-[#173324] mt-0.5">
-            Plantation Lifecycle & Drone Monitoring Journey
+            Afforestation Lifecycle & Field Care Journey
           </h3>
           <p className="text-xs text-[#52796f]">
             How your adopted living trees are nurtured, GPS tagged, and audited over their lifespan.
@@ -104,8 +104,8 @@ export function BuyerImpactTab({ totalTrees, estimatedCO2 }: BuyerImpactTabProps
               title: "Root Anchoring & Telemetry",
               status: "Active Monitoring",
               statusColor: "text-blue-700 bg-blue-100",
-              desc: "Quarterly drone flyovers inspect foliage canopy, soil hydration, and stem girth.",
-              icon: "🛰️",
+              desc: "Quarterly field visits by trained arborists inspect foliage canopy, soil hydration, and stem girth.",
+              icon: "🌿",
             },
             {
               step: "04",

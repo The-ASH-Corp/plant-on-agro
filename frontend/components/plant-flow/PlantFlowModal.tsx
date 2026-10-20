@@ -5,6 +5,7 @@ import { PlantStep, Tree, Plan } from "@/types";
 import { treeVarietyService, BackendTreeVariety } from "@/services/tree-varieties/tree-variety.service";
 import { adoptionPlanService, BackendAdoptionPlan } from "@/services/adoption-plans/adoption-plan.service";
 import { treeInstanceService } from "@/services/tree-instances/tree-instance.service";
+import { orderService } from "@/services/orders/order.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
 import { PlantFlowHeader } from "./PlantFlowHeader";
@@ -292,27 +293,90 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
       }
     }
 
-    // 2. Order Record
-    const newOrder = {
-      id: "ord-" + Date.now(),
-      orderNumber: orderId,
-      adopterName: name || user?.name || "Verified Adopter",
-      adopterEmail: email || user?.email || "adopter@example.com",
-      treeSpecies: selectedTree?.name || "Indigenous Tree",
-      scientificName: selectedTree?.sci || "Botanical Tree",
-      category: selectedTree?.category || "Fruit Trees",
-      reserveName: location || "Nashik Valley, Maharashtra",
-      gpsCoords: chosenCoords.formatted,
-      planType: selectedPlanData?.label || "Individual",
-      quantity: qty,
-      totalAmount: total,
-      datePlanted: dateStr,
-      status: "New Request" as const,
-      certificateId: certNumber,
-      ndviScore: 0.91,
-      isRead: false,
-      createdAt: new Date().toISOString(),
-    };
+    // 2. Order Record - Persist directly to backend database collection: adoptionorders
+    const invNumber = `INV-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
+    const txRef = `TXN-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+    const orderNotes = `Adoption contract for ${qty}x ${selectedTree?.name || "tree"} planted at ${location || "Nashik Valley, Maharashtra"}. Geotagged and physically nurtured.`;
+
+    let finalOrderRecord: any = null;
+
+    try {
+      const orderRes = await orderService.create({
+        orderNumber: orderId,
+        invoiceNumber: invNumber,
+        adopterName: name || user?.name || "Verified Adopter",
+        adopterEmail: email || user?.email || "adopter@example.com",
+        adopterPhone: phone || "",
+        items: [
+          {
+            treeVarietyId: selectedTree?.id ? String(selectedTree.id) : undefined,
+            treeSpecies: selectedTree?.name || "Indigenous Tree",
+            scientificName: selectedTree?.sci || "Botanical Tree",
+            category: selectedTree?.category || "Fruit Trees",
+            planType: selectedPlanData?.label || "Individual",
+            reserveName: location || "Nashik Valley, Maharashtra",
+            gpsCoords: chosenCoords.formatted,
+            quantity: qty,
+            unitPrice: pricePerTree,
+            subtotal: total,
+          },
+        ],
+        treeSpecies: selectedTree?.name || "Indigenous Tree",
+        scientificName: selectedTree?.sci || "Botanical Tree",
+        category: selectedTree?.category || "Fruit Trees",
+        reserveName: location || "Nashik Valley, Maharashtra",
+        gpsCoords: chosenCoords.formatted,
+        planType: selectedPlanData?.label || "Individual",
+        dedicationMessage: "",
+        quantity: qty,
+        totalAmount: total,
+        paymentMethod: selectedPaymentMethod || "sandbox",
+        paymentStatus: "Paid",
+        transactionRef: txRef,
+        status: "New Request",
+        certificateId: certNumber,
+        ndviScore: 0.91,
+        isRead: false,
+        notes: orderNotes,
+        datePlanted: dateStr,
+      });
+
+      if (orderRes.data) {
+        finalOrderRecord = orderService.mapToUiItem(orderRes.data);
+      }
+    } catch (orderApiErr) {
+      console.warn("Could not save order directly to backend API, using local fallback:", orderApiErr);
+    }
+
+    if (!finalOrderRecord) {
+      finalOrderRecord = {
+        id: "ord-" + Date.now(),
+        orderNumber: orderId,
+        invoiceNumber: invNumber,
+        adopterName: name || user?.name || "Verified Adopter",
+        adopterEmail: email || user?.email || "adopter@example.com",
+        adopterPhone: phone || "",
+        treeSpecies: selectedTree?.name || "Indigenous Tree",
+        scientificName: selectedTree?.sci || "Botanical Tree",
+        category: selectedTree?.category || "Fruit Trees",
+        reserveName: location || "Nashik Valley, Maharashtra",
+        gpsCoords: chosenCoords.formatted,
+        planType: selectedPlanData?.label || "Individual",
+        dedicationMessage: "",
+        quantity: qty,
+        totalAmount: total,
+        paymentMethod: selectedPaymentMethod || "sandbox",
+        paymentStatus: "Paid" as const,
+        transactionRef: txRef,
+        datePlanted: dateStr,
+        status: "New Request" as const,
+        certificateId: certNumber,
+        ndviScore: 0.91,
+        isRead: false,
+        notes: orderNotes,
+        createdAt: new Date().toISOString(),
+      };
+    }
 
     try {
       // Update orders ledger in localStorage for instant fast UI responsiveness
@@ -321,7 +385,7 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
       );
       localStorage.setItem(
         "poa_orders",
-        JSON.stringify([newOrder, ...existingOrders])
+        JSON.stringify([finalOrderRecord, ...existingOrders])
       );
 
       // Update tree instances ledger in localStorage
@@ -346,7 +410,7 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
       window.dispatchEvent(
         new CustomEvent("poa-new-order", {
           detail: {
-            order: newOrder,
+            order: finalOrderRecord,
             instance: newInstances[0],
             instances: newInstances,
           },
