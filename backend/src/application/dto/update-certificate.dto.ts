@@ -13,4 +13,6 @@ export interface UpdateCertificateDto {
   adopterName?: string;
   status?: CertificateStatus;
   isActive?: boolean;
+  regenerate?: boolean;
+  reissue?: boolean;
 }

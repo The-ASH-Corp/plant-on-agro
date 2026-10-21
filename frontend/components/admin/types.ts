@@ -5,6 +5,7 @@ export type AdminTabType =
   | "locations"
   | "orders"
   | "instances"
+  | "certificates"
   | "users"
   | "landing-page";
 
@@ -18,6 +19,15 @@ export type TreeHealthStatus =
 export interface GpsCoordinates {
   latitude: number;
   longitude: number;
+}
+
+export interface TreeGrowthUpdateItem {
+  id?: string;
+  imageUrl: string;
+  stageName?: string;
+  notes?: string;
+  recordedAt: string;
+  heightCm?: number;
 }
 
 export interface TreeInstanceItem {
@@ -34,6 +44,7 @@ export interface TreeInstanceItem {
   adopterEmail: string;
   notes: string;
   imageUrl?: string;
+  growthUpdates?: TreeGrowthUpdateItem[];
   lastInspectedAt?: string | null;
   isActive: boolean;
 }

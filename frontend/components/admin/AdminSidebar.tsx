@@ -24,6 +24,7 @@ interface AdminSidebarProps {
   locationsCount: number;
   ordersCount: number;
   unreadOrdersCount?: number;
+  certificatesCount?: number;
   usersCount?: number;
   userName?: string;
   onLogout: () => void;
@@ -31,6 +32,7 @@ interface AdminSidebarProps {
   onOpenAddPlan: () => void;
   onOpenAddLocation: () => void;
   onOpenAddInstance?: () => void;
+  onOpenIssueCertificate?: () => void;
 }
 
 export function AdminSidebar({
@@ -44,6 +46,7 @@ export function AdminSidebar({
   locationsCount,
   ordersCount,
   unreadOrdersCount = 0,
+  certificatesCount = 0,
   usersCount,
   userName = "Admin User",
   onLogout,
@@ -51,6 +54,7 @@ export function AdminSidebar({
   onOpenAddPlan,
   onOpenAddLocation,
   onOpenAddInstance,
+  onOpenIssueCertificate,
 }: AdminSidebarProps) {
   const navItems: NavItemDef[] = [
     { id: "overview", label: "Overview", icon: "📊", badge: "Live" },
@@ -65,6 +69,7 @@ export function AdminSidebar({
       count: ordersCount,
       badge: unreadOrdersCount > 0 ? `${unreadOrdersCount} New` : undefined,
     },
+    { id: "certificates", label: "Certificates", icon: "📜", count: certificatesCount },
     { id: "users", label: "All Users", icon: "👥", count: usersCount },
     { id: "landing-page", label: "Landing Page CMS", icon: "🎨", badge: "Editor" },
   ];
@@ -178,6 +183,14 @@ export function AdminSidebar({
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
                   >
                     <span className="text-emerald-400">+</span> Tag & Plant Sapling
+                  </button>
+                )}
+                {onOpenIssueCertificate && (
+                  <button
+                    onClick={onOpenIssueCertificate}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
+                  >
+                    <span className="text-emerald-400">+</span> Issue Certificate Deed
                   </button>
                 )}
               </div>

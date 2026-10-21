@@ -4,6 +4,15 @@ import {
   GpsCoordinates,
 } from '../../core/entities/tree-instance.entity';
 
+export interface TreeGrowthUpdateDto {
+  id?: string;
+  imageUrl: string;
+  stageName: string;
+  notes: string;
+  recordedAt: string;
+  heightCm?: number;
+}
+
 export interface TreeInstanceResponseDto {
   id: string;
   treeTag: string;
@@ -18,6 +27,7 @@ export interface TreeInstanceResponseDto {
   adopterEmail: string;
   notes: string;
   imageUrl: string;
+  growthUpdates: TreeGrowthUpdateDto[];
   lastInspectedAt: string | null;
   isActive: boolean;
   createdAt: string;
@@ -46,6 +56,14 @@ export class TreeInstanceResponseMapper {
       adopterEmail: entity.adopterEmail,
       notes: entity.notes,
       imageUrl: entity.imageUrl,
+      growthUpdates: entity.growthUpdates.map((u) => ({
+        id: u.id,
+        imageUrl: u.imageUrl,
+        stageName: u.stageName || 'Vegetative Growth',
+        notes: u.notes || '',
+        recordedAt: u.recordedAt.toISOString(),
+        heightCm: u.heightCm,
+      })),
       lastInspectedAt: entity.lastInspectedAt ? entity.lastInspectedAt.toISOString() : null,
       isActive: entity.isActive,
       createdAt: entity.createdAt.toISOString(),

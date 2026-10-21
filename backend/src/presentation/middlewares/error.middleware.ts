@@ -46,6 +46,15 @@ export const errorHandler = (
     return ApiResponse.error(res, 'Invalid resource identifier format', HttpStatus.BAD_REQUEST);
   }
 
+  // Multer upload errors
+  if (err.name === 'MulterError') {
+    const multerCode = (err as { code?: string }).code;
+    if (multerCode === 'LIMIT_FILE_SIZE') {
+      return ApiResponse.error(res, 'File size exceeds the 10MB limit', HttpStatus.BAD_REQUEST);
+    }
+    return ApiResponse.error(res, err.message, HttpStatus.BAD_REQUEST);
+  }
+
   // Unhandled / unexpected internal server errors
   console.error('💥 Unhandled Error:', err);
 

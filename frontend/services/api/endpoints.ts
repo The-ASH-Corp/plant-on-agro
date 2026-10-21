@@ -45,6 +45,8 @@ export const API_ENDPOINTS = {
     BASE: '/locations',
     BY_ID: (id: string) => `/locations/${id}`,
   },
+  UPLOAD: {
+    TREE_IMAGE: '/upload/tree-image',
+  },
   HEALTH: '/health',
-
 } as const;

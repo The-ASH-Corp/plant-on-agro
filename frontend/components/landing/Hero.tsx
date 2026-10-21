@@ -87,9 +87,6 @@ export function Hero({ openPlant, goImpact, content, liveStats }: HeroProps) {
           >
             <span className="w-2 h-2 rounded-full bg-[#52b788] animate-pulse"></span>
             <span>Welcome, {user.name}!</span>
-            <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/25 text-emerald-200 border border-emerald-400/40">
-              {user.role === "admin" ? "Admin Mode" : "Buyer Mode • Logged In"}
-            </span>
           </div>
         ) : (
           <div

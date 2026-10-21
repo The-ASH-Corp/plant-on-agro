@@ -131,8 +131,11 @@ export function BuyerTreesTab({
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={
-                      tree.imageUrl ||
-                      "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format"
+                      tree.imageUrl
+                        ? tree.imageUrl.startsWith("http") || tree.imageUrl.startsWith("data:")
+                          ? tree.imageUrl
+                          : `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1").replace(/\/api\/v1\/?$/, "")}${tree.imageUrl.startsWith("/") ? "" : "/"}${tree.imageUrl}`
+                        : "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format"
                     }
                     alt={tree.treeVarietyName}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90"
