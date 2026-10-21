@@ -15,5 +15,9 @@ export const authService = {
   async getProfile(): Promise<ApiResponse<User>> {
     return apiClient.get<User>(API_ENDPOINTS.AUTH.ME);
   },
+
+  async checkEmail(email: string): Promise<ApiResponse<{ exists: boolean; email: string }>> {
+    return apiClient.post<{ exists: boolean; email: string }>(API_ENDPOINTS.AUTH.CHECK_EMAIL, { email });
+  },
 };
 

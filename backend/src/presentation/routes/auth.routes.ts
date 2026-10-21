@@ -3,9 +3,15 @@ import { Container } from "../../infrastructure/di/container";
 import { validateRequest } from "../middlewares/validate.middleware";
 import { authRateLimiter } from "../middlewares/rate-limiter.middleware";
 import { authenticate } from "../middlewares/auth.middleware";
-import { registerSchema, loginSchema } from "../validators/auth.validator";
+import { registerSchema, loginSchema, checkEmailSchema } from "../validators/auth.validator";
 
 const router = Router();
+
+router.post(
+  "/check-email",
+  validateRequest({ body: checkEmailSchema }),
+  Container.authController.checkEmail
+);
 
 router.post(
   "/register",
