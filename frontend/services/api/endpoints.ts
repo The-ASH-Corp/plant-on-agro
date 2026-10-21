@@ -41,6 +41,9 @@ export const API_ENDPOINTS = {
     STATUS: (id: string) => `/orders/${id}/status`,
     MARK_ALL_READ: '/orders/mark-all-read',
   },
+  UPLOAD: {
+    TREE_IMAGE: '/upload/tree-image',
+  },
   HEALTH: '/health',
 
 } as const;

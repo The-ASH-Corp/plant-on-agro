@@ -1,4 +1,5 @@
 import express, { Application } from 'express';
+import path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
 import { env } from './config/env';
@@ -14,8 +15,9 @@ export const createApp = (): Application => {
   app.disable('x-powered-by');
   app.use(
     helmet({
-      contentSecurityPolicy: true,
-      crossOriginEmbedderPolicy: true,
+      contentSecurityPolicy: false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      crossOriginEmbedderPolicy: false,
     })
   );
   app.use(
@@ -25,10 +27,13 @@ export const createApp = (): Application => {
     })
   );
 
+  // Static uploads directory for tree photographs
+  app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
+
   app.use(express.json({ limit: '100kb' }));
   app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 
-  app.use(morgan("dev"))
+  app.use(morgan('dev'));
   // Root redirect/health
   app.get('/', (_req, res) => {
     res.json({

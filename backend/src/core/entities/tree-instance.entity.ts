@@ -10,6 +10,15 @@ export interface GpsCoordinates {
   longitude: number;
 }
 
+export interface TreeGrowthUpdate {
+  id?: string;
+  imageUrl: string;
+  stageName?: string;
+  notes?: string;
+  recordedAt: Date;
+  heightCm?: number;
+}
+
 export interface TreeInstanceProps {
   id?: string;
   treeTag: string; // Unique serial tag e.g. "POA-TR-2026-0001"
@@ -23,6 +32,7 @@ export interface TreeInstanceProps {
   adopterEmail?: string;
   notes?: string;
   imageUrl?: string;
+  growthUpdates?: TreeGrowthUpdate[];
   lastInspectedAt?: Date;
   isActive?: boolean;
   createdAt?: Date;
@@ -42,6 +52,7 @@ export class TreeInstance {
   private _adopterEmail: string;
   private _notes: string;
   private _imageUrl: string;
+  private _growthUpdates: TreeGrowthUpdate[];
   private _lastInspectedAt?: Date;
   private _isActive: boolean;
   private readonly _createdAt: Date;
@@ -65,6 +76,10 @@ export class TreeInstance {
     this._adopterEmail = props.adopterEmail ? props.adopterEmail.trim().toLowerCase() : '';
     this._notes = props.notes ? props.notes.trim() : '';
     this._imageUrl = props.imageUrl ? props.imageUrl.trim() : '';
+    this._growthUpdates = (props.growthUpdates || []).map((u) => ({
+      ...u,
+      recordedAt: u.recordedAt instanceof Date ? u.recordedAt : new Date(u.recordedAt),
+    }));
     this._lastInspectedAt = props.lastInspectedAt;
     this._isActive = props.isActive !== undefined ? props.isActive : true;
     this._createdAt = props.createdAt ?? new Date();
@@ -142,6 +157,10 @@ export class TreeInstance {
     return this._imageUrl;
   }
 
+  public get growthUpdates(): TreeGrowthUpdate[] {
+    return [...this._growthUpdates];
+  }
+
   public get lastInspectedAt(): Date | undefined {
     return this._lastInspectedAt;
   }
@@ -158,8 +177,8 @@ export class TreeInstance {
     return this._updatedAt;
   }
 
-  // Domain behavior / state changes
-  public update(props: Partial<Omit<TreeInstanceProps, 'id' | 'createdAt' | 'updatedAt'>>): void {
+  // Domain logic
+  public update(props: Partial<TreeInstanceProps>): void {
     if (props.treeTag !== undefined) {
       if (!props.treeTag.trim()) throw new Error('Tree tag cannot be empty');
       this._treeTag = props.treeTag.trim().toUpperCase();
@@ -202,6 +221,12 @@ export class TreeInstance {
     if (props.imageUrl !== undefined) {
       this._imageUrl = props.imageUrl.trim();
     }
+    if (props.growthUpdates !== undefined) {
+      this._growthUpdates = props.growthUpdates.map((u) => ({
+        ...u,
+        recordedAt: u.recordedAt instanceof Date ? u.recordedAt : new Date(u.recordedAt),
+      }));
+    }
     if (props.lastInspectedAt !== undefined) {
       this._lastInspectedAt = props.lastInspectedAt;
     }
@@ -209,6 +234,53 @@ export class TreeInstance {
       this._isActive = props.isActive;
     }
 
+    this._updatedAt = new Date();
+  }
+
+  public addGrowthUpdate(update: TreeGrowthUpdate): void {
+    const newUpdate: TreeGrowthUpdate = {
+      id: update.id || `upd-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
+      imageUrl: update.imageUrl.trim(),
+      stageName: update.stageName?.trim() || 'Vegetative Growth',
+      notes: update.notes?.trim() || '',
+      recordedAt: update.recordedAt instanceof Date ? update.recordedAt : new Date(update.recordedAt),
+      heightCm: update.heightCm,
+    };
+    this._growthUpdates.push(newUpdate);
+    this._growthUpdates.sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime());
+    if (newUpdate.imageUrl) {
+      this._imageUrl = newUpdate.imageUrl;
+    }
+    this._lastInspectedAt = newUpdate.recordedAt;
+    this._updatedAt = new Date();
+  }
+
+  public updateGrowthUpdate(updateId: string, data: Partial<TreeGrowthUpdate>): void {
+    const idx = this._growthUpdates.findIndex((u) => u.id === updateId);
+    if (idx !== -1) {
+      const existing = this._growthUpdates[idx];
+      this._growthUpdates[idx] = {
+        ...existing,
+        ...data,
+        imageUrl: data.imageUrl !== undefined ? data.imageUrl.trim() : existing.imageUrl,
+        stageName: data.stageName !== undefined ? data.stageName.trim() : existing.stageName,
+        notes: data.notes !== undefined ? data.notes.trim() : existing.notes,
+        recordedAt: data.recordedAt
+          ? data.recordedAt instanceof Date
+            ? data.recordedAt
+            : new Date(data.recordedAt)
+          : existing.recordedAt,
+        heightCm: data.heightCm !== undefined ? data.heightCm : existing.heightCm,
+      };
+      if (this._growthUpdates[idx].imageUrl) {
+        this._imageUrl = this._growthUpdates[idx].imageUrl;
+      }
+      this._updatedAt = new Date();
+    }
+  }
+
+  public removeGrowthUpdate(updateId: string): void {
+    this._growthUpdates = this._growthUpdates.filter((u) => u.id !== updateId);
     this._updatedAt = new Date();
   }
 

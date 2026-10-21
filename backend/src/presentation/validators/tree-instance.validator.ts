@@ -41,6 +41,15 @@ export const createTreeInstanceSchema = z.object({
   imageUrl: z.string().trim().optional().default(''),
 });
 
+export const treeGrowthUpdateSchema = z.object({
+  id: z.string().optional(),
+  imageUrl: z.string().trim().min(1, 'Image URL is required'),
+  stageName: z.string().trim().optional().default('Vegetative Growth'),
+  notes: z.string().trim().optional().default(''),
+  recordedAt: z.coerce.date().optional().default(() => new Date()),
+  heightCm: z.coerce.number().min(0).optional(),
+});
+
 export const updateTreeInstanceSchema = z.object({
   treeTag: z.string().trim().min(1).max(50).optional(),
   orderRef: z.string().trim().optional(),
@@ -53,6 +62,7 @@ export const updateTreeInstanceSchema = z.object({
   adopterEmail: z.string().trim().email('Invalid adopter email').optional().or(z.literal('')),
   notes: z.string().trim().optional(),
   imageUrl: z.string().trim().optional(),
+  growthUpdates: z.array(treeGrowthUpdateSchema).optional(),
   lastInspectedAt: z.coerce.date().optional(),
   isActive: z.boolean().optional(),
 });

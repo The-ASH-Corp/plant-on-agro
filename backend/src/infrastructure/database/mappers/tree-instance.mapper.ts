@@ -19,6 +19,14 @@ export class TreeInstanceMapper {
       adopterEmail: doc.adopterEmail,
       notes: doc.notes,
       imageUrl: doc.imageUrl,
+      growthUpdates: (doc.growthUpdates || []).map((u) => ({
+        id: u._id ? String(u._id) : undefined,
+        imageUrl: u.imageUrl,
+        stageName: u.stageName,
+        notes: u.notes,
+        recordedAt: u.recordedAt,
+        heightCm: u.heightCm !== null && u.heightCm !== undefined ? Number(u.heightCm) : undefined,
+      })),
       lastInspectedAt: doc.lastInspectedAt || undefined,
       isActive: doc.isActive,
       createdAt: doc.createdAt,
@@ -42,6 +50,13 @@ export class TreeInstanceMapper {
       adopterEmail: entity.adopterEmail,
       notes: entity.notes,
       imageUrl: entity.imageUrl,
+      growthUpdates: entity.growthUpdates.map((u) => ({
+        imageUrl: u.imageUrl,
+        stageName: u.stageName || 'Vegetative Growth',
+        notes: u.notes || '',
+        recordedAt: u.recordedAt,
+        heightCm: u.heightCm ?? null,
+      })),
       lastInspectedAt: entity.lastInspectedAt || null,
       isActive: entity.isActive,
     };

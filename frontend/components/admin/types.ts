@@ -21,6 +21,15 @@ export interface GpsCoordinates {
   longitude: number;
 }
 
+export interface TreeGrowthUpdateItem {
+  id?: string;
+  imageUrl: string;
+  stageName?: string;
+  notes?: string;
+  recordedAt: string;
+  heightCm?: number;
+}
+
 export interface TreeInstanceItem {
   id: string;
   treeTag: string;
@@ -35,6 +44,7 @@ export interface TreeInstanceItem {
   adopterEmail: string;
   notes: string;
   imageUrl?: string;
+  growthUpdates?: TreeGrowthUpdateItem[];
   lastInspectedAt?: string | null;
   isActive: boolean;
 }

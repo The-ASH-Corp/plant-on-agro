@@ -1,4 +1,4 @@
-import { TreeHealthStatus, GpsCoordinates } from '../../core/entities/tree-instance.entity';
+import { TreeHealthStatus, GpsCoordinates, TreeGrowthUpdate } from '../../core/entities/tree-instance.entity';
 
 export interface UpdateTreeInstanceDto {
   treeTag?: string;
@@ -12,6 +12,7 @@ export interface UpdateTreeInstanceDto {
   adopterEmail?: string;
   notes?: string;
   imageUrl?: string;
+  growthUpdates?: TreeGrowthUpdate[];
   lastInspectedAt?: string | Date;
   isActive?: boolean;
 }

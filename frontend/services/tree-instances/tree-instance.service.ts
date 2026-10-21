@@ -1,7 +1,7 @@
-import { apiClient } from '../api/api-client';
+import { apiClient, axiosInstance } from '../api/api-client';
 import { API_ENDPOINTS } from '../api/endpoints';
 import { ApiResponse } from '@/types/api';
-import { TreeInstanceItem, TreeHealthStatus, GpsCoordinates } from '@/components/admin/types';
+import { TreeInstanceItem, TreeHealthStatus, GpsCoordinates, TreeGrowthUpdateItem } from '@/components/admin/types';
 
 export interface BackendTreeInstance {
   id: string;
@@ -17,6 +17,7 @@ export interface BackendTreeInstance {
   adopterEmail: string;
   notes: string;
   imageUrl: string;
+  growthUpdates?: TreeGrowthUpdateItem[];
   lastInspectedAt: string | null;
   isActive: boolean;
   createdAt: string;
@@ -42,6 +43,7 @@ export interface CreateTreeInstancePayload {
   adopterEmail?: string;
   notes?: string;
   imageUrl?: string;
+  growthUpdates?: TreeGrowthUpdateItem[];
 }
 
 export interface UpdateTreeInstancePayload {
@@ -56,8 +58,16 @@ export interface UpdateTreeInstancePayload {
   adopterEmail?: string;
   notes?: string;
   imageUrl?: string;
+  growthUpdates?: TreeGrowthUpdateItem[];
   lastInspectedAt?: string;
   isActive?: boolean;
+}
+
+export interface UploadImageResponse {
+  imageUrl: string;
+  filename: string;
+  size: number;
+  mimetype: string;
 }
 
 export const treeInstanceService = {
@@ -97,12 +107,29 @@ export const treeInstanceService = {
     return apiClient.post<BackendTreeInstance>(API_ENDPOINTS.TREE_INSTANCES.BASE, payload);
   },
 
-  // PUT update a tree instance (health, GPS, notes, inspection)
+  // PUT update a tree instance (health, GPS, notes, image, growthUpdates)
   async update(
     id: string,
     payload: UpdateTreeInstancePayload
   ): Promise<ApiResponse<BackendTreeInstance>> {
     return apiClient.put<BackendTreeInstance>(API_ENDPOINTS.TREE_INSTANCES.BY_ID(id), payload);
+  },
+
+  // Upload an image file for a tree instance via multipart/form-data
+  async uploadImage(file: File): Promise<ApiResponse<UploadImageResponse>> {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const response = await axiosInstance.post<ApiResponse<UploadImageResponse>>(
+      API_ENDPOINTS.UPLOAD.TREE_IMAGE,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
   },
 
   // DELETE tree instance
@@ -126,6 +153,7 @@ export const treeInstanceService = {
       adopterEmail: item.adopterEmail,
       notes: item.notes,
       imageUrl: item.imageUrl,
+      growthUpdates: item.growthUpdates || [],
       lastInspectedAt: item.lastInspectedAt,
       isActive: item.isActive,
     };

@@ -119,6 +119,16 @@ export function useInstanceActions({ data, showToast, setActiveTab }: Params) {
       (fd.get("imageUrl") as string)?.trim() || selectedInstanceForEdit.imageUrl || "";
     const isActive = fd.get("isActive") !== null;
 
+    let growthUpdates = selectedInstanceForEdit.growthUpdates || [];
+    const growthUpdatesRaw = fd.get("growthUpdates") as string;
+    if (growthUpdatesRaw) {
+      try {
+        growthUpdates = JSON.parse(growthUpdatesRaw);
+      } catch (e) {
+        console.warn("Could not parse growth updates JSON:", e);
+      }
+    }
+
     const gpsCoordinates = { latitude, longitude };
     const formattedGps = `${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E`;
 
@@ -140,6 +150,7 @@ export function useInstanceActions({ data, showToast, setActiveTab }: Params) {
                 adopterEmail,
                 notes,
                 imageUrl,
+                growthUpdates,
                 isActive,
               }
             : item
@@ -160,6 +171,7 @@ export function useInstanceActions({ data, showToast, setActiveTab }: Params) {
         adopterEmail,
         notes,
         imageUrl,
+        growthUpdates,
         isActive,
       });
 

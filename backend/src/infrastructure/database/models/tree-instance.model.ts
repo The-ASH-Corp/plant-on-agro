@@ -1,6 +1,15 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { TreeHealthStatus } from '../../../core/entities/tree-instance.entity';
 
+export interface ITreeGrowthUpdateDocument {
+  _id?: mongoose.Types.ObjectId;
+  imageUrl: string;
+  stageName: string;
+  notes: string;
+  recordedAt: Date;
+  heightCm?: number | null;
+}
+
 export interface ITreeInstanceDocument extends Document {
   treeTag: string;
   orderRef: string;
@@ -16,6 +25,7 @@ export interface ITreeInstanceDocument extends Document {
   adopterEmail: string;
   notes: string;
   imageUrl: string;
+  growthUpdates: ITreeGrowthUpdateDocument[];
   lastInspectedAt: Date | null;
   isActive: boolean;
   createdAt: Date;
@@ -61,8 +71,6 @@ const TreeInstanceSchema = new Schema<ITreeInstanceDocument>(
     datePlanted: {
       type: Date,
       required: true,
-      default: Date.now,
-      index: true,
     },
     healthStatus: {
       type: String,
@@ -96,6 +104,33 @@ const TreeInstanceSchema = new Schema<ITreeInstanceDocument>(
       default: '',
       trim: true,
     },
+    growthUpdates: [
+      {
+        imageUrl: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        stageName: {
+          type: String,
+          default: 'Vegetative Growth',
+          trim: true,
+        },
+        notes: {
+          type: String,
+          default: '',
+          trim: true,
+        },
+        recordedAt: {
+          type: Date,
+          default: Date.now,
+        },
+        heightCm: {
+          type: Number,
+          default: null,
+        },
+      },
+    ],
     lastInspectedAt: {
       type: Date,
       default: null,
