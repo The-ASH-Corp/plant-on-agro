@@ -55,3 +55,15 @@ export const loginSchema = z
 
 export type LoginSchemaInput = z.infer<typeof loginSchema>;
 
+export const checkEmailSchema = z
+  .object({
+    email: z
+      .string({ error: 'Email is required' })
+      .trim()
+      .toLowerCase()
+      .email('Invalid email address format'),
+  })
+  .strict();
+
+export type CheckEmailSchemaInput = z.infer<typeof checkEmailSchema>;
+

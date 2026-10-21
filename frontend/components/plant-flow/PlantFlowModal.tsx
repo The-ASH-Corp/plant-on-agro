@@ -512,6 +512,8 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
               selectedTree={selectedTree}
               location={location}
               orderId={orderId}
+              buyerEmail={email}
+              buyerName={name}
               onClose={onClose}
             />
           )}

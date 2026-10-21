@@ -244,7 +244,8 @@ export class Container {
   public static readonly authController = new AuthController(
     Container.registerUserUseCase,
     Container.loginUserUseCase,
-    Container.getCurrentUserUseCase
+    Container.getCurrentUserUseCase,
+    Container.userRepository
   );
 
   public static readonly userController = new UserController(
