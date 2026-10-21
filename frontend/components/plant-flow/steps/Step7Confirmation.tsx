@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Tree } from "@/types";
 import { useAuthStore } from "@/store/auth.store";
@@ -37,6 +37,26 @@ export function Step7Confirmation({
   // View state
   const [viewMode, setViewMode] = useState<Step7ViewMode>("summary");
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [cachedEmailExists, setCachedEmailExists] = useState<boolean | null>(null);
+
+  // Background pre-check email existence as soon as Step 7 renders
+  useEffect(() => {
+    let isMounted = true;
+    const effectiveEmail = (buyerEmail || "").trim().toLowerCase();
+    if (!isAuthenticated && effectiveEmail) {
+      authService
+        .checkEmail(effectiveEmail)
+        .then((res) => {
+          if (isMounted && res.data) {
+            setCachedEmailExists(Boolean(res.data.exists));
+          }
+        })
+        .catch(() => {});
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [buyerEmail, isAuthenticated]);
 
   // Account creation form state
   const [fullName, setFullName] = useState(buyerName || "");
@@ -56,7 +76,7 @@ export function Step7Confirmation({
   const isPasswordValid =
     hasMinLength && hasUpper && hasLower && hasNumber && hasSpecial;
 
-  // Handle clicking "View in Buyer Dashboard" button
+  // Handle clicking "View in Dashboard" button
   const handleViewDashboardClick = async () => {
     // 1. If user is already logged in, redirect directly into the Dashboard
     if (isAuthenticated && user) {
@@ -74,11 +94,22 @@ export function Step7Confirmation({
       return;
     }
 
+    // If already pre-checked in background, transition with zero delay
+    if (cachedEmailExists !== null) {
+      if (!cachedEmailExists) {
+        setViewMode("create-account");
+      } else {
+        setViewMode("login");
+      }
+      return;
+    }
+
     try {
       setIsCheckingEmail(true);
       setFormError(null);
       const res = await authService.checkEmail(effectiveEmail);
       const exists = Boolean(res.data?.exists);
+      setCachedEmailExists(exists);
 
       if (!exists) {
         // Buyer's email is not in the db of user collection -> Show option to create account with that email
@@ -89,7 +120,6 @@ export function Step7Confirmation({
       }
     } catch (err: any) {
       console.warn("Could not check email status, proceeding to create-account view:", err);
-      // Default to create-account so user can register
       setViewMode("create-account");
     } finally {
       setIsCheckingEmail(false);
@@ -574,7 +604,7 @@ export function Step7Confirmation({
           ) : (
             <>
               <span>🌳</span>
-              <span>View in Buyer Dashboard</span>
+              <span>View in Dashboard</span>
             </>
           )}
         </button>
