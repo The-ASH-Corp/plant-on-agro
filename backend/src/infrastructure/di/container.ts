@@ -59,6 +59,14 @@ import { MarkOrdersReadUseCase } from '../../application/use-cases/orders/mark-o
 import { DeleteOrderUseCase } from '../../application/use-cases/orders/delete-order.use-case';
 import { OrderController } from '../../presentation/controllers/order.controller';
 
+import { MongoLocationRepository } from '../repositories/mongo-location.repository';
+import { CreateLocationUseCase } from '../../application/use-cases/locations/create-location.use-case';
+import { GetLocationsUseCase } from '../../application/use-cases/locations/get-locations.use-case';
+import { GetLocationByIdUseCase } from '../../application/use-cases/locations/get-location-by-id.use-case';
+import { UpdateLocationUseCase } from '../../application/use-cases/locations/update-location.use-case';
+import { DeleteLocationUseCase } from '../../application/use-cases/locations/delete-location.use-case';
+import { LocationController } from '../../presentation/controllers/location.controller';
+
 import { UserController } from '../../presentation/controllers/user.controller';
 import { AuthController } from '../../presentation/controllers/auth.controller';
 import { TreeVarietyController } from '../../presentation/controllers/tree-variety.controller';
@@ -79,6 +87,24 @@ export class Container {
   public static readonly certificateRepository = new MongoCertificateRepository();
   public static readonly landingPageRepository = new MongoLandingPageRepository();
   public static readonly orderRepository = new MongoOrderRepository();
+  public static readonly locationRepository = new MongoLocationRepository();
+
+  // Location Use Cases
+  private static readonly createLocationUseCase = new CreateLocationUseCase(
+    Container.locationRepository
+  );
+  private static readonly getLocationsUseCase = new GetLocationsUseCase(
+    Container.locationRepository
+  );
+  private static readonly getLocationByIdUseCase = new GetLocationByIdUseCase(
+    Container.locationRepository
+  );
+  private static readonly updateLocationUseCase = new UpdateLocationUseCase(
+    Container.locationRepository
+  );
+  private static readonly deleteLocationUseCase = new DeleteLocationUseCase(
+    Container.locationRepository
+  );
 
   // Order Use Cases
   private static readonly createOrderUseCase = new CreateOrderUseCase(
@@ -279,6 +305,14 @@ export class Container {
     Container.updateOrderStatusUseCase,
     Container.markOrdersReadUseCase,
     Container.deleteOrderUseCase
+  );
+
+  public static readonly locationController = new LocationController(
+    Container.createLocationUseCase,
+    Container.getLocationsUseCase,
+    Container.getLocationByIdUseCase,
+    Container.updateLocationUseCase,
+    Container.deleteLocationUseCase
   );
 }
 

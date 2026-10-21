@@ -13,6 +13,7 @@ import { adoptionPlanService } from "@/services/adoption-plans/adoption-plan.ser
 import { treeInstanceService } from "@/services/tree-instances/tree-instance.service";
 import { userService } from "@/services/user/user.service";
 import { orderService } from "@/services/orders/order.service";
+import { locationService } from "@/services/locations/location.service";
 import { deriveLocationsFromData, deriveOrdersFromInstances } from "../utils/deriveAdminData";
 import type { ShowToast } from "./useAdminToast";
 
@@ -80,7 +81,7 @@ export function useAdminData(showToast: ShowToast) {
     let isMounted = true;
     async function loadCatalog() {
       try {
-        const [treesRes, plansRes, instancesRes, usersRes, ordersRes, certsRes] = await Promise.all([
+        const [treesRes, plansRes, instancesRes, usersRes, ordersRes, certsRes, locationsRes] = await Promise.all([
           treeVarietyService.getAll(),
           adoptionPlanService.getAll(),
           treeInstanceService.getAll(),
@@ -91,6 +92,10 @@ export function useAdminData(showToast: ShowToast) {
           orderService.getAll({ limit: 200 }),
           certificateService.getCertificates({ limit: 200 }).catch((err) => {
             console.warn("Could not load certificates:", err);
+            return null;
+          }),
+          locationService.getAll({ limit: 100 }).catch((err) => {
+            console.warn("Could not load locations from backend:", err);
             return null;
           }),
         ]);
@@ -114,18 +119,40 @@ export function useAdminData(showToast: ShowToast) {
           setCertificates(certsRes.data.items);
         }
 
-        // Dynamically derive bio-reserves from database records + custom locations
-        let customLocations: PlantationLocationItem[] = [];
-        if (typeof window !== "undefined") {
-          try {
-            const raw = localStorage.getItem("poa_custom_locations");
-            if (raw) customLocations = JSON.parse(raw);
-          } catch {}
-        }
+        // Count live trees planted per reserve
+        const treeCountMap: Record<string, number> = {};
+        (instancesRes.data?.items || []).forEach((i: any) => {
+          const resName = i.assignedReserve;
+          if (resName) {
+            treeCountMap[resName] = (treeCountMap[resName] || 0) + 1;
+          }
+        });
 
-        setLocations(
-          deriveLocationsFromData(instancesRes.data?.items || [], treesRes.data?.items || [], customLocations)
-        );
+        // Load bio-reserves from backend API with fallback to local deriving
+        if (locationsRes?.data?.items && locationsRes.data.items.length > 0) {
+          const apiLocations = locationsRes.data.items.map((item) => {
+            const uiLoc = locationService.mapToUiItem(item);
+            const liveCount = treeCountMap[uiLoc.name] || uiLoc.treesPlanted || 0;
+            return {
+              ...uiLoc,
+              treesPlanted: liveCount,
+              status: liveCount >= uiLoc.capacity ? ("Full" as const) : liveCount > 500 ? ("Expanding" as const) : uiLoc.status,
+            };
+          });
+          setLocations(apiLocations);
+        } else {
+          let customLocations: PlantationLocationItem[] = [];
+          if (typeof window !== "undefined") {
+            try {
+              const raw = localStorage.getItem("poa_custom_locations");
+              if (raw) customLocations = JSON.parse(raw);
+            } catch {}
+          }
+
+          setLocations(
+            deriveLocationsFromData(instancesRes.data?.items || [], treesRes.data?.items || [], customLocations)
+          );
+        }
 
         // Dynamically load adoption orders directly from MongoDB database (collection: adoptionorders)
         if (ordersRes.data?.items && ordersRes.data.items.length > 0) {

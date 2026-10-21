@@ -108,6 +108,7 @@ export function AdminTabContent({
           locations={locations}
           searchQuery={searchQuery}
           onOpenAddLocation={() => locationActions.setShowAddLocationModal(true)}
+          onEditLocation={(loc) => locationActions.setSelectedLocationForEdit(loc)}
           onDeleteLocation={deleteActions.handleDeleteLocation}
         />
       );

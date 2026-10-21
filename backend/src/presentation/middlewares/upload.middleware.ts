@@ -2,6 +2,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { Request } from 'express';
+import { BadRequestError } from '../../core/errors/app-error';
 
 // Ensure the tree uploads folder exists
 const uploadDir = path.resolve(process.cwd(), 'uploads/trees');
@@ -38,7 +39,7 @@ const fileFilter = (
   if (allowedMimeTypes.includes(file.mimetype.toLowerCase())) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only JPEG, PNG, WEBP, and GIF images are permitted.'));
+    cb(new BadRequestError('Invalid file type. Only JPEG, PNG, WEBP, and GIF images are permitted.'));
   }
 };
 

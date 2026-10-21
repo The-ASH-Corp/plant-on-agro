@@ -16,6 +16,7 @@ import { EditPlanModal } from "./modals/EditPlanModal";
 import { AddTreeInstanceModal } from "./modals/AddTreeInstanceModal";
 import { EditTreeInstanceModal } from "./modals/EditTreeInstanceModal";
 import { AddLocationModal } from "./modals/AddLocationModal";
+import { EditLocationModal } from "./modals/EditLocationModal";
 import { OrderDetailsModal } from "./modals/OrderDetailsModal";
 import { UserDetailsModal } from "./modals/UserDetailsModal";
 import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
@@ -107,6 +108,13 @@ export function AdminModals({
         isOpen={locationActions.showAddLocationModal}
         onClose={() => locationActions.setShowAddLocationModal(false)}
         onSubmit={locationActions.handleCreateLocation}
+      />
+      <EditLocationModal
+        isOpen={Boolean(locationActions.selectedLocationForEdit)}
+        location={locationActions.selectedLocationForEdit}
+        onClose={() => locationActions.setSelectedLocationForEdit(null)}
+        onSubmit={locationActions.handleUpdateLocation}
+        isSubmitting={locationActions.isUpdatingLocation}
       />
 
       {/* Orders */}

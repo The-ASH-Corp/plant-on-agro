@@ -31,6 +31,14 @@ const HEALTH_BADGES: Record<TreeHealthStatus, { label: string; icon: string; bg:
   Critical: { label: "Critical", icon: "🚨", bg: "bg-rose-50", text: "text-rose-800", border: "border-rose-200" },
 };
 
+const resolveImageUrl = (url?: string) => {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) return url;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+  const origin = apiUrl.replace(/\/api\/v1\/?$/, "");
+  return `${origin}${url.startsWith("/") ? "" : "/"}${url}`;
+};
+
 export function TreeInstancesTab({
   instances,
   searchQuery,
@@ -337,11 +345,26 @@ export function TreeInstancesTab({
 
                   return (
                     <tr key={item.id} className="hover:bg-[#fbfcfb] transition-colors">
-                      {/* Tree Tag */}
+                      {/* Tree Tag & Thumbnail */}
                       <td className="py-3.5 px-4 font-mono">
-                        <span className="font-bold text-[#1b7a43] bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200 text-xs block w-fit">
-                          {item.treeTag}
-                        </span>
+                        <div className="flex items-center gap-2.5">
+                          {item.imageUrl ? (
+                            <div className="w-8 h-8 rounded-lg overflow-hidden border border-[#d2ded7] shrink-0 bg-gray-100">
+                              <img
+                                src={resolveImageUrl(item.imageUrl)}
+                                alt={item.treeTag}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-8 h-8 rounded-lg border border-dashed border-[#ccd9d1] bg-[#f4f7f5] flex items-center justify-center text-xs shrink-0 text-[#8b9c92]">
+                              🌳
+                            </div>
+                          )}
+                          <span className="font-bold text-[#1b7a43] bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200 text-xs block w-fit">
+                            {item.treeTag}
+                          </span>
+                        </div>
                       </td>
 
                       {/* Order Ref & Adopter */}
@@ -464,9 +487,18 @@ export function TreeInstancesTab({
             return (
               <div
                 key={item.id}
-                className="p-5 rounded-3xl bg-white border border-[#e2eae5] shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow relative"
+                className="p-5 rounded-3xl bg-white border border-[#e2eae5] shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden"
               >
                 <div>
+                  {item.imageUrl && (
+                    <div className="h-32 -mx-5 -mt-5 mb-3 overflow-hidden bg-gray-100">
+                      <img
+                        src={resolveImageUrl(item.imageUrl)}
+                        alt={item.treeTag}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
                   <div className="flex items-start justify-between mb-3">
                     <span className="font-mono text-xs font-bold text-[#1b7a43] bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200">
                       {item.treeTag}
