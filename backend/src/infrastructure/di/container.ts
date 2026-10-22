@@ -162,10 +162,16 @@ export class Container {
     env.RAZORPAY_KEY_SECRET
   );
   private static readonly createRazorpayOrderUseCase = new CreateRazorpayOrderUseCase(
-    Container.paymentGatewayService
+    Container.paymentGatewayService,
+    Container.treeVarietyRepository,
+    Container.adoptionPlanRepository,
+    Container.orderRepository
   );
   private static readonly verifyRazorpayPaymentUseCase = new VerifyRazorpayPaymentUseCase(
-    Container.paymentGatewayService
+    Container.paymentGatewayService,
+    Container.orderRepository,
+    Container.treeInstanceRepository,
+    Container.certificateRepository
   );
 
   // Location Use Cases

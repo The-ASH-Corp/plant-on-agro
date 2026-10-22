@@ -9,12 +9,18 @@ export interface PaymentConfig {
 }
 
 export interface CreatePaymentOrderPayload {
-  amount: number; // in INR
-  receipt?: string;
+  treeVarietyId?: string;
   treeSpecies?: string;
-  quantity?: number;
-  adopterName?: string;
-  adopterEmail?: string;
+  planId?: string;
+  planLabel?: string;
+  quantity: number;
+  reserveLocation?: string;
+  adopterName: string;
+  adopterEmail: string;
+  adopterPhone?: string;
+  dedicationMessage?: string;
+  amount?: number;
+  receipt?: string;
 }
 
 export interface RazorpayOrderResponse {
@@ -24,6 +30,8 @@ export interface RazorpayOrderResponse {
   receipt: string;
   keyId: string;
   isMock: boolean;
+  authoritativeTotal?: number;
+  orderNumber?: string;
 }
 
 export interface VerifyPaymentPayload {
@@ -36,6 +44,9 @@ export interface VerifyPaymentResponse {
   verified: boolean;
   paymentId: string;
   orderId: string;
+  order?: any;
+  treeInstances?: any[];
+  certificate?: any;
 }
 
 /**

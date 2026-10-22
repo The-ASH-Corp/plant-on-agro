@@ -38,7 +38,7 @@ export class PaymentController {
 
   public verifyPayment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const result = this.verifyRazorpayPaymentUseCase.execute(req.body);
+      const result = await this.verifyRazorpayPaymentUseCase.execute(req.body);
       ApiResponse.success(res, result, 'Payment signature verified successfully');
     } catch (error) {
       next(error);
