@@ -6,7 +6,7 @@ interface PlantFlowFooterProps {
   step: PlantStep;
   canNext: boolean;
   isProcessing: boolean;
-  paymentMethod?: string;
+  total?: number;
   onBack: () => void;
   onNext: () => void;
 }
@@ -15,13 +15,11 @@ export function PlantFlowFooter({
   step,
   canNext,
   isProcessing,
-  paymentMethod = "razorpay",
+  total,
   onBack,
   onNext,
 }: PlantFlowFooterProps) {
   if (step >= 7) return null;
-
-  const isSandbox = paymentMethod === "sandbox";
 
   return (
     <div
@@ -72,16 +70,12 @@ export function PlantFlowFooter({
               ></path>
             </svg>
             <span>
-              {step === 6
-                ? isSandbox
-                  ? "Simulating Test Verification..."
-                  : "Connecting to Razorpay..."
-                : "Processing..."}
+              {step === 6 ? "Connecting to Razorpay..." : "Processing..."}
             </span>
           </>
         ) : step === 6 ? (
-          isSandbox ? (
-            "Complete Order (Sandbox Test)"
+          total !== undefined ? (
+            `Proceed to Pay ₹${total.toLocaleString("en-IN")} with Razorpay 💳`
           ) : (
             "Proceed to Pay with Razorpay 💳"
           )

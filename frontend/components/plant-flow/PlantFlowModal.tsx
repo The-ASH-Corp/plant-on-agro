@@ -73,7 +73,6 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("razorpay");
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [orderId] = useState(
@@ -436,13 +435,6 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
     setPaymentError(null);
     setIsProcessing(true);
 
-    // Sandbox Test Mode
-    if (selectedPaymentMethod === "sandbox") {
-      const sandboxTx = `TXN-SANDBOX-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-      await completeOrderAndAdoption(sandboxTx, "sandbox");
-      return;
-    }
-
     // Razorpay Flow
     try {
       const orderRes = await paymentService.createOrder({
@@ -628,8 +620,6 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
                 qty={qty}
                 location={location}
                 total={total}
-                selectedPaymentMethod={selectedPaymentMethod}
-                setSelectedPaymentMethod={setSelectedPaymentMethod}
               />
             </>
           )}
@@ -650,7 +640,7 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
           step={step}
           canNext={Boolean(canNext)}
           isProcessing={isProcessing}
-          paymentMethod={selectedPaymentMethod}
+          total={total}
           onBack={() => setStep((s) => (s - 1) as PlantStep)}
           onNext={handleNext}
         />
