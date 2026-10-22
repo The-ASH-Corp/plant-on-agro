@@ -193,7 +193,11 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
     step === 6 ||
     step === 7;
 
-  const completeOrderAndAdoption = async (txRef: string, methodUsed: string) => {
+  const completeOrderAndAdoption = async (
+    txRef: string,
+    methodUsed: string,
+    serverData?: any
+  ) => {
     const chosenCoords =
       (location && LOCATION_COORDINATES[location]) || {
         lat: 19.9975,
@@ -213,9 +217,12 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
     });
 
     // 1. Physical Tree Instance Records for Database
-    const newInstances = [];
-    for (let i = 0; i < qty; i++) {
-      const serialNum = Math.floor(1000 + Math.random() * 9000);
+    const newInstances: any[] = [];
+    if (serverData?.treeInstances && Array.isArray(serverData.treeInstances) && serverData.treeInstances.length > 0) {
+      newInstances.push(...serverData.treeInstances);
+    } else {
+      for (let i = 0; i < qty; i++) {
+        const serialNum = Math.floor(1000 + Math.random() * 9000);
       const treeTag = `POA-${speciesShort}-${serialNum}`;
       const jitterLat = Number(
         (chosenCoords.lat + (Math.random() - 0.5) * 0.004).toFixed(4)
@@ -295,15 +302,17 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
         });
       }
     }
+  }
 
-    // 2. Order Record - Persist directly to backend database collection: adoptionorders
+    // 2. Order Record - Use server-verified order directly
     const invNumber = `INV-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
     const orderNotes = `Adoption contract for ${qty}x ${selectedTree?.name || "tree"} planted at ${location || "Flagship Living Forest — Wayanad, Kerala"}. Geotagged and physically nurtured. Paid via ${methodUsed}.`;
 
-    let finalOrderRecord: any = null;
+    let finalOrderRecord: any = serverData?.order ? orderService.mapToUiItem(serverData.order) : null;
 
-    try {
-      const orderRes = await orderService.create({
+    if (!finalOrderRecord) {
+      try {
+        const orderRes = await orderService.create({
         orderNumber: orderId,
         invoiceNumber: invNumber,
         adopterName: name || user?.name || "Verified Adopter",
@@ -379,6 +388,7 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
         createdAt: new Date().toISOString(),
       };
     }
+  }
 
     try {
       // Update orders ledger in localStorage for instant fast UI responsiveness
@@ -435,15 +445,19 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
     setPaymentError(null);
     setIsProcessing(true);
 
-    // Razorpay Flow
+    // Razorpay Flow with Server-Side Authoritative Pricing
     try {
       const orderRes = await paymentService.createOrder({
-        amount: total,
-        receipt: orderId,
+        treeVarietyId: selectedTree?.id ? String(selectedTree.id) : undefined,
         treeSpecies: selectedTree?.name,
+        planId: selectedPlan || undefined,
+        planLabel: selectedPlanData?.label,
         quantity: qty,
+        reserveLocation: location || undefined,
+        receipt: orderId,
         adopterName: name || user?.name || "Verified Adopter",
         adopterEmail: email || user?.email || "adopter@example.com",
+        adopterPhone: phone || undefined,
       });
 
       if (!orderRes.data) {
@@ -453,12 +467,12 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
       // Check if sandbox simulator mode
       if (orderRes.data.isMock) {
         const mockPaymentId = `pay_mock_${Date.now()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-        await paymentService.verifyPayment({
+        const verifyRes = await paymentService.verifyPayment({
           razorpayOrderId: orderRes.data.orderId,
           razorpayPaymentId: mockPaymentId,
           razorpaySignature: "mock_signature_valid",
         });
-        await completeOrderAndAdoption(mockPaymentId, "razorpay");
+        await completeOrderAndAdoption(mockPaymentId, "razorpay", verifyRes.data);
         return;
       }
 
@@ -484,13 +498,13 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
           razorpay_signature: string;
         }) => {
           try {
-            await paymentService.verifyPayment({
+            const verifyRes = await paymentService.verifyPayment({
               razorpayOrderId: response.razorpay_order_id,
               razorpayPaymentId: response.razorpay_payment_id,
               razorpaySignature: response.razorpay_signature,
             });
 
-            await completeOrderAndAdoption(response.razorpay_payment_id, "razorpay");
+            await completeOrderAndAdoption(response.razorpay_payment_id, "razorpay", verifyRes.data);
           } catch (verifyErr: any) {
             console.error("Razorpay verification failed:", verifyErr);
             setPaymentError(

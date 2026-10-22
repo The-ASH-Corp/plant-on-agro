@@ -91,25 +91,42 @@ export class RazorpayPaymentService implements IPaymentGatewayService {
       return false;
     }
 
-    // If sandbox simulator or zero payment order
-    if (
-      params.razorpayOrderId.startsWith('order_sim_') ||
-      params.razorpayOrderId.startsWith('order_zero_') ||
-      !this.isLiveConfigured()
-    ) {
-      return true;
+    // Only allow simulator verification if live keys are NOT configured
+    if (!this.isLiveConfigured()) {
+      return (
+        params.razorpaySignature === 'mock_signature_valid' ||
+        params.razorpayOrderId.startsWith('order_sim_')
+      );
     }
 
+    // When Live/Test keys are configured, HMAC SHA-256 calculation is MANDATORY
     try {
       const generatedSignature = crypto
         .createHmac('sha256', this.keySecret)
         .update(`${params.razorpayOrderId}|${params.razorpayPaymentId}`)
         .digest('hex');
 
-      return generatedSignature === params.razorpaySignature;
+      const expectedBuffer = Buffer.from(generatedSignature, 'utf-8');
+      const actualBuffer = Buffer.from(params.razorpaySignature, 'utf-8');
+      if (expectedBuffer.length !== actualBuffer.length) {
+        return false;
+      }
+      return crypto.timingSafeEqual(expectedBuffer, actualBuffer);
     } catch (err) {
       console.error('Error verifying Razorpay HMAC signature:', err);
       return false;
     }
+  }
+
+  public async fetchPayment(paymentId: string): Promise<any> {
+    if (this.isLiveConfigured() && this.client) {
+      try {
+        return await this.client.payments.fetch(paymentId);
+      } catch (err) {
+        console.error('Failed to fetch payment from Razorpay API:', err);
+        return null;
+      }
+    }
+    return null;
   }
 }

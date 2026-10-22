@@ -13,6 +13,7 @@ export interface OrderFilter {
 export interface IOrderRepository {
   findById(id: string): Promise<Nullable<Order>>;
   findByOrderNumber(orderNumber: string): Promise<Nullable<Order>>;
+  findByTransactionRef(transactionRef: string): Promise<Nullable<Order>>;
   findAll(filter?: OrderFilter, limit?: number, skip?: number): Promise<Order[]>;
   count(filter?: OrderFilter): Promise<number>;
   save(order: Order): Promise<Order>;

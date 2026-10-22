@@ -36,8 +36,9 @@ export class CreateOrderUseCase {
       dedicationMessage: input.dedicationMessage,
       quantity: input.quantity,
       totalAmount: input.totalAmount,
-      paymentMethod: input.paymentMethod || 'sandbox',
-      paymentStatus: input.paymentStatus || 'Paid',
+      paymentMethod: input.paymentMethod || 'razorpay',
+      // Orders initiated via direct API cannot claim 'Paid' status unless verified by Razorpay
+      paymentStatus: 'Pending',
       transactionRef: input.transactionRef,
       status: input.status || 'New Request',
       certificateId: input.certificateId || `CERT-${orderNumber}`,

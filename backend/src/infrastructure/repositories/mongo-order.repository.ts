@@ -66,6 +66,14 @@ export class MongoOrderRepository implements IOrderRepository {
     return OrderMapper.toDomain(doc);
   }
 
+  public async findByTransactionRef(transactionRef: string): Promise<Nullable<Order>> {
+    const doc = await OrderModel.findOne({
+      transactionRef: transactionRef.trim(),
+    }).exec();
+    if (!doc) return null;
+    return OrderMapper.toDomain(doc);
+  }
+
   public async findAll(
     filter?: OrderFilter,
     limit = 50,
