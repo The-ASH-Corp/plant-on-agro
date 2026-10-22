@@ -92,6 +92,12 @@ import { AddVisitMemoryUseCase } from '../../application/use-cases/visits/add-vi
 import { DeleteVisitBookingUseCase } from '../../application/use-cases/visits/delete-visit-booking.use-case';
 import { VisitBookingController } from '../../presentation/controllers/visit-booking.controller';
 
+import { env } from '../../config/env';
+import { RazorpayPaymentService } from '../services/razorpay.service';
+import { CreateRazorpayOrderUseCase } from '../../application/use-cases/payment/create-razorpay-order.use-case';
+import { VerifyRazorpayPaymentUseCase } from '../../application/use-cases/payment/verify-razorpay-payment.use-case';
+import { PaymentController } from '../../presentation/controllers/payment.controller';
+
 export class Container {
 
   // Services & Adapters
@@ -150,6 +156,17 @@ export class Container {
     Container.visitBookingRepository
   );
 
+  // Razorpay Payment Services & Use Cases
+  public static readonly paymentGatewayService = new RazorpayPaymentService(
+    env.RAZORPAY_KEY_ID,
+    env.RAZORPAY_KEY_SECRET
+  );
+  private static readonly createRazorpayOrderUseCase = new CreateRazorpayOrderUseCase(
+    Container.paymentGatewayService
+  );
+  private static readonly verifyRazorpayPaymentUseCase = new VerifyRazorpayPaymentUseCase(
+    Container.paymentGatewayService
+  );
 
   // Location Use Cases
   private static readonly createLocationUseCase = new CreateLocationUseCase(
@@ -394,6 +411,12 @@ export class Container {
     Container.updateVisitStatusUseCase,
     Container.addVisitMemoryUseCase,
     Container.deleteVisitBookingUseCase
+  );
+
+  public static readonly paymentController = new PaymentController(
+    Container.paymentGatewayService,
+    Container.createRazorpayOrderUseCase,
+    Container.verifyRazorpayPaymentUseCase
   );
 }
 

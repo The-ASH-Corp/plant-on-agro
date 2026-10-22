@@ -6,6 +6,7 @@ interface PlantFlowFooterProps {
   step: PlantStep;
   canNext: boolean;
   isProcessing: boolean;
+  paymentMethod?: string;
   onBack: () => void;
   onNext: () => void;
 }
@@ -14,10 +15,13 @@ export function PlantFlowFooter({
   step,
   canNext,
   isProcessing,
+  paymentMethod = "razorpay",
   onBack,
   onNext,
 }: PlantFlowFooterProps) {
   if (step >= 7) return null;
+
+  const isSandbox = paymentMethod === "sandbox";
 
   return (
     <div
@@ -28,7 +32,8 @@ export function PlantFlowFooter({
         <button
           id="btn-back-step"
           onClick={onBack}
-          className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer"
+          disabled={isProcessing}
+          className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all cursor-pointer disabled:opacity-50"
           style={{ background: "#eaf2ec", color: "#4a6557" }}
         >
           Back
@@ -36,9 +41,9 @@ export function PlantFlowFooter({
       )}
       <button
         onClick={onNext}
-        id={step === 6 ? "btn-complete-sandbox-order" : "btn-continue-step"}
+        id={step === 6 ? "btn-complete-order" : "btn-continue-step"}
         disabled={!canNext || isProcessing}
-        className="flex-1 py-3 rounded-xl font-semibold text-sm text-white transition-all disabled:opacity-40 cursor-pointer flex items-center justify-center gap-2"
+        className="flex-1 py-3 rounded-xl font-semibold text-sm text-white transition-all disabled:opacity-40 cursor-pointer flex items-center justify-center gap-2 shadow-sm"
         style={{
           background: canNext
             ? "linear-gradient(135deg,#52b788,#2d6a4f)"
@@ -66,10 +71,20 @@ export function PlantFlowFooter({
                 d="M4 12a8 8 0 018-8v8H4z"
               ></path>
             </svg>
-            <span>Simulating Test Verification...</span>
+            <span>
+              {step === 6
+                ? isSandbox
+                  ? "Simulating Test Verification..."
+                  : "Connecting to Razorpay..."
+                : "Processing..."}
+            </span>
           </>
         ) : step === 6 ? (
-          "Complete Order (Sandbox Test)"
+          isSandbox ? (
+            "Complete Order (Sandbox Test)"
+          ) : (
+            "Proceed to Pay with Razorpay 💳"
+          )
         ) : (
           "Continue"
         )}

@@ -11,6 +11,7 @@ import { locationRoutes } from './location.routes';
 import { uploadRoutes } from './upload.routes';
 import { experienceRoutes } from './experience.routes';
 import { visitBookingRoutes } from './visit-booking.routes';
+import { paymentRoutes } from './payment.routes';
 import { ApiResponse } from '../../shared/utils/api-response';
 
 const apiRouter = Router();
@@ -41,6 +42,7 @@ apiRouter.use('/locations', locationRoutes);
 apiRouter.use('/upload', uploadRoutes);
 apiRouter.use('/experiences', experienceRoutes);
 apiRouter.use('/visits', visitBookingRoutes);
+apiRouter.use('/payment', paymentRoutes);
 
 export const routes = apiRouter;
 

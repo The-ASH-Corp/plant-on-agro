@@ -62,6 +62,11 @@ export const API_ENDPOINTS = {
     MULTIPLE: '/upload/multiple',
     EXPERIENCE_IMAGES: '/upload/experience-images',
   },
+  PAYMENT: {
+    CONFIG: '/payment/config',
+    CREATE_ORDER: '/payment/create-order',
+    VERIFY: '/payment/verify',
+  },
   HEALTH: '/health',
 } as const;
 
