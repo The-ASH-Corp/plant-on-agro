@@ -24,8 +24,10 @@ const TAB_META: Record<AdminTabType, { label: string }> = {
   orders: { label: "Adoption Orders" },
   users: { label: "All Users Directory" },
   certificates: { label: "Certificate Deeds" },
+  visits: { label: "Plantation Visits & Tours" },
   "landing-page": { label: "Landing Page CMS" },
 };
+
 
 export function AdminHeader({
   onOpenSidebar,

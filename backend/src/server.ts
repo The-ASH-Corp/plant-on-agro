@@ -2,15 +2,20 @@ import http from 'http';
 import { createApp } from './app';
 import { env } from './config/env';
 import { Database } from './infrastructure/database/connection';
+import { seedExperiencesIfEmpty } from './infrastructure/database/seeds/experience.seeder';
 
 const bootstrap = async (): Promise<void> => {
   try {
     // 1. Initialize Database connection
     await Database.connect();
 
+    // 1.1 Seed initial Flagship Experiences if none exist
+    await seedExperiencesIfEmpty();
+
     // 2. Initialize Express application
     const app = createApp();
     const server = http.createServer(app);
+
 
     // 3. Start listening
     server.listen(env.PORT, () => {

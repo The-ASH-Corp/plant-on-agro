@@ -20,6 +20,8 @@ import { BuyerTreesTab } from "./BuyerTreesTab";
 import { BuyerCertificatesTab } from "./BuyerCertificatesTab";
 import { BuyerImpactTab } from "./BuyerImpactTab";
 import { BuyerOrdersTab } from "./BuyerOrdersTab";
+import { BuyerVisitsTab } from "./BuyerVisitsTab";
+
 import { CertificateModal } from "./CertificateModal";
 import { TreeInspectModal } from "./TreeInspectModal";
 import { InvoiceModal } from "./InvoiceModal";
@@ -363,6 +365,11 @@ export function BuyerDashboard() {
                     count: orders.length,
                     desc: "Receipts & ledger",
                   },
+                  {
+                    id: "visits" as const,
+                    label: "🗺️ My Visits & Tours",
+                    desc: "Plantation passes & experiences",
+                  },
                 ].map((tab) => {
                   const isActive = activeTab === tab.id;
                   return (
@@ -425,7 +432,16 @@ export function BuyerDashboard() {
                   onViewInvoice={(order) => setSelectedOrderInvoice(order)}
                 />
               )}
+
+              {activeTab === "visits" && (
+                <BuyerVisitsTab
+                  user={user ?? null}
+                  instances={trees}
+                />
+              )}
             </div>
+
+
 
             {/* Right Telemetry Column (4 Cols on Desktop) */}
             <div className="lg:col-span-4">

@@ -38,8 +38,10 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
   const links: { label: string; id: Section; href: string }[] = [
     { label: "Home", id: "home", href: "/" },
     { label: "How It Works", id: "how-it-works", href: "/#how-it-works" },
+    { label: "Experiences", id: "experiences", href: "/#experiences" },
     { label: "Impact", id: "impact", href: "/#impact" },
   ];
+
 
   const handleLinkClick = (l: (typeof links)[0]) => {
     if (isHome && setActive) {

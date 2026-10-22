@@ -74,7 +74,32 @@ import { AdoptionPlanController } from '../../presentation/controllers/adoption-
 import { TreeInstanceController } from '../../presentation/controllers/tree-instance.controller';
 import { CertificateController } from '../../presentation/controllers/certificate.controller';
 
+import { MongoExperienceRepository } from '../repositories/mongo-experience.repository';
+import { CreateExperienceUseCase } from '../../application/use-cases/experiences/create-experience.use-case';
+import { GetExperiencesUseCase } from '../../application/use-cases/experiences/get-experiences.use-case';
+import { GetExperienceByIdUseCase } from '../../application/use-cases/experiences/get-experience-by-id.use-case';
+import { UpdateExperienceUseCase } from '../../application/use-cases/experiences/update-experience.use-case';
+import { DeleteExperienceUseCase } from '../../application/use-cases/experiences/delete-experience.use-case';
+import { ExperienceController } from '../../presentation/controllers/experience.controller';
+
+import { MongoVisitBookingRepository } from '../repositories/mongo-visit-booking.repository';
+import { CreateVisitBookingUseCase } from '../../application/use-cases/visits/create-visit-booking.use-case';
+import { GetVisitBookingsUseCase } from '../../application/use-cases/visits/get-visit-bookings.use-case';
+import { GetVisitBookingByIdUseCase } from '../../application/use-cases/visits/get-visit-booking-by-id.use-case';
+import { GetMyVisitsUseCase } from '../../application/use-cases/visits/get-my-visits.use-case';
+import { UpdateVisitStatusUseCase } from '../../application/use-cases/visits/update-visit-status.use-case';
+import { AddVisitMemoryUseCase } from '../../application/use-cases/visits/add-visit-memory.use-case';
+import { DeleteVisitBookingUseCase } from '../../application/use-cases/visits/delete-visit-booking.use-case';
+import { VisitBookingController } from '../../presentation/controllers/visit-booking.controller';
+
+import { env } from '../../config/env';
+import { RazorpayPaymentService } from '../services/razorpay.service';
+import { CreateRazorpayOrderUseCase } from '../../application/use-cases/payment/create-razorpay-order.use-case';
+import { VerifyRazorpayPaymentUseCase } from '../../application/use-cases/payment/verify-razorpay-payment.use-case';
+import { PaymentController } from '../../presentation/controllers/payment.controller';
+
 export class Container {
+
   // Services & Adapters
   private static readonly passwordHasher = new Argon2PasswordHasher();
   public static readonly jwtService = new JsonWebTokenService();
@@ -88,6 +113,60 @@ export class Container {
   public static readonly landingPageRepository = new MongoLandingPageRepository();
   public static readonly orderRepository = new MongoOrderRepository();
   public static readonly locationRepository = new MongoLocationRepository();
+  public static readonly experienceRepository = new MongoExperienceRepository();
+  public static readonly visitBookingRepository = new MongoVisitBookingRepository();
+
+  // Experience Use Cases
+  private static readonly createExperienceUseCase = new CreateExperienceUseCase(
+    Container.experienceRepository
+  );
+  private static readonly getExperiencesUseCase = new GetExperiencesUseCase(
+    Container.experienceRepository
+  );
+  private static readonly getExperienceByIdUseCase = new GetExperienceByIdUseCase(
+    Container.experienceRepository
+  );
+  private static readonly updateExperienceUseCase = new UpdateExperienceUseCase(
+    Container.experienceRepository
+  );
+  private static readonly deleteExperienceUseCase = new DeleteExperienceUseCase(
+    Container.experienceRepository
+  );
+
+  // Visit Booking Use Cases
+  private static readonly createVisitBookingUseCase = new CreateVisitBookingUseCase(
+    Container.visitBookingRepository
+  );
+  private static readonly getVisitBookingsUseCase = new GetVisitBookingsUseCase(
+    Container.visitBookingRepository
+  );
+  private static readonly getVisitBookingByIdUseCase = new GetVisitBookingByIdUseCase(
+    Container.visitBookingRepository
+  );
+  private static readonly getMyVisitsUseCase = new GetMyVisitsUseCase(
+    Container.visitBookingRepository
+  );
+  private static readonly updateVisitStatusUseCase = new UpdateVisitStatusUseCase(
+    Container.visitBookingRepository
+  );
+  private static readonly addVisitMemoryUseCase = new AddVisitMemoryUseCase(
+    Container.visitBookingRepository
+  );
+  private static readonly deleteVisitBookingUseCase = new DeleteVisitBookingUseCase(
+    Container.visitBookingRepository
+  );
+
+  // Razorpay Payment Services & Use Cases
+  public static readonly paymentGatewayService = new RazorpayPaymentService(
+    env.RAZORPAY_KEY_ID,
+    env.RAZORPAY_KEY_SECRET
+  );
+  private static readonly createRazorpayOrderUseCase = new CreateRazorpayOrderUseCase(
+    Container.paymentGatewayService
+  );
+  private static readonly verifyRazorpayPaymentUseCase = new VerifyRazorpayPaymentUseCase(
+    Container.paymentGatewayService
+  );
 
   // Location Use Cases
   private static readonly createLocationUseCase = new CreateLocationUseCase(
@@ -315,5 +394,30 @@ export class Container {
     Container.updateLocationUseCase,
     Container.deleteLocationUseCase
   );
+
+  public static readonly experienceController = new ExperienceController(
+    Container.createExperienceUseCase,
+    Container.getExperiencesUseCase,
+    Container.getExperienceByIdUseCase,
+    Container.updateExperienceUseCase,
+    Container.deleteExperienceUseCase
+  );
+
+  public static readonly visitBookingController = new VisitBookingController(
+    Container.createVisitBookingUseCase,
+    Container.getVisitBookingsUseCase,
+    Container.getVisitBookingByIdUseCase,
+    Container.getMyVisitsUseCase,
+    Container.updateVisitStatusUseCase,
+    Container.addVisitMemoryUseCase,
+    Container.deleteVisitBookingUseCase
+  );
+
+  public static readonly paymentController = new PaymentController(
+    Container.paymentGatewayService,
+    Container.createRazorpayOrderUseCase,
+    Container.verifyRazorpayPaymentUseCase
+  );
 }
+
 

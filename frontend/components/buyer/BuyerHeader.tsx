@@ -34,7 +34,13 @@ const TAB_TITLES: Record<BuyerDashboardTab, { title: string; subtitle: string; i
     subtitle: "Verified payment history, tax receipts & transaction ledger",
     icon: "📦",
   },
+  visits: {
+    title: "Plantation Visits & Tours",
+    subtitle: "Phase 04 • Schedule plantation walks, inspect your trees & RAC wellness",
+    icon: "🗺️",
+  },
 };
+
 
 export function BuyerHeader({
   user,

@@ -46,8 +46,27 @@ export const API_ENDPOINTS = {
     BASE: '/locations',
     BY_ID: (id: string) => `/locations/${id}`,
   },
+  EXPERIENCES: {
+    BASE: '/experiences',
+    BY_ID: (id: string) => `/experiences/${id}`,
+  },
+  VISITS: {
+    BASE: '/visits',
+    MY_VISITS: '/visits/my-visits',
+    BY_ID: (id: string) => `/visits/${id}`,
+    STATUS: (id: string) => `/visits/${id}/status`,
+    MEMORIES: (id: string) => `/visits/${id}/memories`,
+  },
   UPLOAD: {
     TREE_IMAGE: '/upload/tree-image',
+    MULTIPLE: '/upload/multiple',
+    EXPERIENCE_IMAGES: '/upload/experience-images',
+  },
+  PAYMENT: {
+    CONFIG: '/payment/config',
+    CREATE_ORDER: '/payment/create-order',
+    VERIFY: '/payment/verify',
   },
   HEALTH: '/health',
 } as const;
+

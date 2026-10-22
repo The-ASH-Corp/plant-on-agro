@@ -7,7 +7,9 @@ export type AdminTabType =
   | "instances"
   | "certificates"
   | "users"
+  | "visits"
   | "landing-page";
+
 
 export type TreeHealthStatus =
   | "Healthy"

@@ -70,9 +70,11 @@ export function AdminSidebar({
       badge: unreadOrdersCount > 0 ? `${unreadOrdersCount} New` : undefined,
     },
     { id: "certificates", label: "Certificates", icon: "📜", count: certificatesCount },
+    { id: "visits", label: "Visits & Tours", icon: "🗺️", badge: "04 They Visit" },
     { id: "users", label: "All Users", icon: "👥", count: usersCount },
     { id: "landing-page", label: "Landing Page CMS", icon: "🎨", badge: "Editor" },
   ];
+
 
   return (
     <>

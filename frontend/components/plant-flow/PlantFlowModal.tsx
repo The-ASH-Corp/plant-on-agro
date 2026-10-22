@@ -7,6 +7,7 @@ import { adoptionPlanService, BackendAdoptionPlan } from "@/services/adoption-pl
 import { treeInstanceService } from "@/services/tree-instances/tree-instance.service";
 import { orderService } from "@/services/orders/order.service";
 import { locationService } from "@/services/locations/location.service";
+import { paymentService, loadRazorpayCheckoutScript } from "@/services/payment/payment.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
 import { PlantFlowHeader } from "./PlantFlowHeader";
@@ -72,8 +73,9 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("sandbox");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("razorpay");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
   const [orderId] = useState(
     () => "POA-" + Math.random().toString(36).substring(2, 8).toUpperCase()
   );
@@ -192,14 +194,7 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
     step === 6 ||
     step === 7;
 
-  const handleNext = async () => {
-    if (step < 6) {
-      setStep((s) => (s + 1) as PlantStep);
-      return;
-    }
-
-    setIsProcessing(true);
-
+  const completeOrderAndAdoption = async (txRef: string, methodUsed: string) => {
     const chosenCoords =
       (location && LOCATION_COORDINATES[location]) || {
         lat: 19.9975,
@@ -240,7 +235,7 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
         const createdTreeRes = await treeInstanceService.create({
           treeTag,
           orderRef: orderId,
-          assignedReserve: location || "Nashik Valley, Maharashtra",
+          assignedReserve: location || "Flagship Living Forest — Wayanad, Kerala",
           gpsCoordinates: { latitude: jitterLat, longitude: jitterLng },
           datePlanted: new Date().toISOString(),
           healthStatus: "Sapling Growing",
@@ -282,7 +277,7 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
           id: `inst-${Date.now()}-${i}`,
           treeTag: treeTag,
           orderRef: orderId,
-          assignedReserve: location || "Nashik Valley, Maharashtra",
+          assignedReserve: location || "Flagship Living Forest — Wayanad, Kerala",
           gpsCoordinates: { latitude: jitterLat, longitude: jitterLng },
           formattedGps: `${jitterLat}° N, ${jitterLng}° E`,
           datePlanted: formattedDate,
@@ -304,8 +299,7 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
 
     // 2. Order Record - Persist directly to backend database collection: adoptionorders
     const invNumber = `INV-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
-    const txRef = `TXN-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
-    const orderNotes = `Adoption contract for ${qty}x ${selectedTree?.name || "tree"} planted at ${location || "Nashik Valley, Maharashtra"}. Geotagged and physically nurtured.`;
+    const orderNotes = `Adoption contract for ${qty}x ${selectedTree?.name || "tree"} planted at ${location || "Flagship Living Forest — Wayanad, Kerala"}. Geotagged and physically nurtured. Paid via ${methodUsed}.`;
 
     let finalOrderRecord: any = null;
 
@@ -323,7 +317,7 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
             scientificName: selectedTree?.sci || "Botanical Tree",
             category: selectedTree?.category || "Fruit Trees",
             planType: selectedPlanData?.label || "Individual",
-            reserveName: location || "Nashik Valley, Maharashtra",
+            reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
             gpsCoords: chosenCoords.formatted,
             quantity: qty,
             unitPrice: pricePerTree,
@@ -333,13 +327,13 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
         treeSpecies: selectedTree?.name || "Indigenous Tree",
         scientificName: selectedTree?.sci || "Botanical Tree",
         category: selectedTree?.category || "Fruit Trees",
-        reserveName: location || "Nashik Valley, Maharashtra",
+        reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
         gpsCoords: chosenCoords.formatted,
         planType: selectedPlanData?.label || "Individual",
         dedicationMessage: "",
         quantity: qty,
         totalAmount: total,
-        paymentMethod: selectedPaymentMethod || "sandbox",
+        paymentMethod: methodUsed,
         paymentStatus: "Paid",
         transactionRef: txRef,
         status: "New Request",
@@ -368,13 +362,13 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
         treeSpecies: selectedTree?.name || "Indigenous Tree",
         scientificName: selectedTree?.sci || "Botanical Tree",
         category: selectedTree?.category || "Fruit Trees",
-        reserveName: location || "Nashik Valley, Maharashtra",
+        reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
         gpsCoords: chosenCoords.formatted,
         planType: selectedPlanData?.label || "Individual",
         dedicationMessage: "",
         quantity: qty,
         totalAmount: total,
-        paymentMethod: selectedPaymentMethod || "sandbox",
+        paymentMethod: methodUsed,
         paymentStatus: "Paid" as const,
         transactionRef: txRef,
         datePlanted: dateStr,
@@ -431,6 +425,123 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
 
     setIsProcessing(false);
     setStep(7);
+  };
+
+  const handleNext = async () => {
+    if (step < 6) {
+      setStep((s) => (s + 1) as PlantStep);
+      return;
+    }
+
+    setPaymentError(null);
+    setIsProcessing(true);
+
+    // Sandbox Test Mode
+    if (selectedPaymentMethod === "sandbox") {
+      const sandboxTx = `TXN-SANDBOX-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      await completeOrderAndAdoption(sandboxTx, "sandbox");
+      return;
+    }
+
+    // Razorpay Flow
+    try {
+      const orderRes = await paymentService.createOrder({
+        amount: total,
+        receipt: orderId,
+        treeSpecies: selectedTree?.name,
+        quantity: qty,
+        adopterName: name || user?.name || "Verified Adopter",
+        adopterEmail: email || user?.email || "adopter@example.com",
+      });
+
+      if (!orderRes.data) {
+        throw new Error(orderRes.message || "Failed to initialize Razorpay checkout");
+      }
+
+      // Check if sandbox simulator mode
+      if (orderRes.data.isMock) {
+        const mockPaymentId = `pay_mock_${Date.now()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+        await paymentService.verifyPayment({
+          razorpayOrderId: orderRes.data.orderId,
+          razorpayPaymentId: mockPaymentId,
+          razorpaySignature: "mock_signature_valid",
+        });
+        await completeOrderAndAdoption(mockPaymentId, "razorpay");
+        return;
+      }
+
+      // Live / Test mode with valid Razorpay credentials
+      const scriptLoaded = await loadRazorpayCheckoutScript();
+      if (!scriptLoaded) {
+        throw new Error("Unable to load Razorpay Checkout SDK. Please check your internet connection.");
+      }
+
+      const rzpOptions = {
+        key: orderRes.data.keyId,
+        amount: orderRes.data.amount,
+        currency: orderRes.data.currency || "INR",
+        name: "PlantOn Agro",
+        description: `${qty}x ${selectedTree?.name || "Tree"} Adoption (${selectedPlanData?.label || "Lifetime"})`,
+        image:
+          selectedTree?.img ||
+          "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=200&h=200&fit=crop",
+        order_id: orderRes.data.orderId,
+        handler: async (response: {
+          razorpay_payment_id: string;
+          razorpay_order_id: string;
+          razorpay_signature: string;
+        }) => {
+          try {
+            await paymentService.verifyPayment({
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            });
+
+            await completeOrderAndAdoption(response.razorpay_payment_id, "razorpay");
+          } catch (verifyErr: any) {
+            console.error("Razorpay verification failed:", verifyErr);
+            setPaymentError(
+              verifyErr?.message || "Payment verification failed. Please contact support."
+            );
+            setIsProcessing(false);
+          }
+        },
+        prefill: {
+          name: name || user?.name || "",
+          email: email || user?.email || "",
+          contact: phone || "",
+        },
+        notes: {
+          orderNumber: orderId,
+          treeSpecies: selectedTree?.name || "Tree",
+          quantity: String(qty),
+          location: location || "Flagship Living Forest — Wayanad, Kerala",
+        },
+        theme: {
+          color: "#2d6a4f",
+        },
+        modal: {
+          ondismiss: () => {
+            setIsProcessing(false);
+          },
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(rzpOptions);
+      rzp.on("payment.failed", (resp: any) => {
+        console.error("Razorpay payment failed:", resp.error);
+        setPaymentError(resp.error?.description || "Payment was declined or failed.");
+        setIsProcessing(false);
+      });
+      rzp.open();
+    } catch (err: any) {
+      console.error("Failed to process Razorpay checkout:", err);
+      setPaymentError(
+        err?.message || "Failed to start Razorpay payment. Please try again or use sandbox mode."
+      );
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -496,15 +607,31 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
           )}
 
           {step === 6 && (
-            <Step6Payment
-              selectedTree={selectedTree}
-              selectedPlanData={selectedPlanData}
-              qty={qty}
-              location={location}
-              total={total}
-              selectedPaymentMethod={selectedPaymentMethod}
-              setSelectedPaymentMethod={setSelectedPaymentMethod}
-            />
+            <>
+              {paymentError && (
+                <div className="mb-4 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center justify-between shadow-2xs">
+                  <span className="flex items-center gap-2">
+                    <span>⚠️</span>
+                    <span>{paymentError}</span>
+                  </span>
+                  <button
+                    onClick={() => setPaymentError(null)}
+                    className="text-red-500 hover:text-red-700 font-bold ml-2 cursor-pointer text-sm"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+              <Step6Payment
+                selectedTree={selectedTree}
+                selectedPlanData={selectedPlanData}
+                qty={qty}
+                location={location}
+                total={total}
+                selectedPaymentMethod={selectedPaymentMethod}
+                setSelectedPaymentMethod={setSelectedPaymentMethod}
+              />
+            </>
           )}
 
           {step === 7 && (
@@ -523,6 +650,7 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
           step={step}
           canNext={Boolean(canNext)}
           isProcessing={isProcessing}
+          paymentMethod={selectedPaymentMethod}
           onBack={() => setStep((s) => (s - 1) as PlantStep)}
           onNext={handleNext}
         />

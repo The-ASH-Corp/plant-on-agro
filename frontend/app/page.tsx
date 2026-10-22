@@ -7,9 +7,11 @@ import {
   Hero,
   HowItWorks,
   ExploreTrees,
+  ExperienceSection,
   ImpactSection,
   CertificateSection,
 } from "@/components/landing";
+
 import { HeroLiveStats } from "@/components/landing/Hero";
 import { ImpactLiveStats, ImpactProjectItem } from "@/components/landing/ImpactSection";
 import { SampleTreeCertificate } from "@/components/landing/CertificateSection";
@@ -214,6 +216,7 @@ export default function App() {
     const map: Partial<Record<Section, string>> = {
       "how-it-works": "how-it-works",
       trees: "trees",
+      experiences: "experiences",
       impact: "impact",
       home: "home",
     };
@@ -247,6 +250,8 @@ export default function App() {
 
         <ExploreTrees openPlant={() => setPlantOpen(true)} />
 
+        <ExperienceSection onScheduleVisit={() => setPlantOpen(true)} />
+
         {cmsContent.impact?.isEnabled !== false && (
           <ImpactSection
             content={cmsContent.impact}
@@ -254,6 +259,7 @@ export default function App() {
             liveProjects={liveProjects}
           />
         )}
+
 
         {cmsContent.certificate?.isEnabled !== false && (
           <CertificateSection
