@@ -23,6 +23,7 @@ interface BuyerSidebarProps {
   totalTrees: number;
   certificatesCount: number;
   ordersCount: number;
+  visitsCount?: number;
   user?: User | null;
   onLogout: () => void;
   onOpenPlantFlow: () => void;
@@ -36,10 +37,12 @@ export function BuyerSidebar({
   totalTrees,
   certificatesCount,
   ordersCount,
+  visitsCount,
   user,
   onLogout,
   onOpenPlantFlow,
 }: BuyerSidebarProps) {
+
   const navItems: NavItemDef[] = [
     {
       id: "trees",
@@ -69,7 +72,16 @@ export function BuyerSidebar({
       count: ordersCount,
       desc: "Receipts & ledger",
     },
+    {
+      id: "visits",
+      label: "My Visits & Tours",
+      icon: "🗺️",
+      count: visitsCount,
+      badge: "04 They Visit",
+      desc: "Plantation passes & trails",
+    },
   ];
+
 
   return (
     <>

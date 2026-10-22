@@ -10,4 +10,6 @@ export * from './certificates/certificate.service';
 export * from './landing-page/landing-page.service';
 export * from './orders/order.service';
 export * from './locations/location.service';
-
+export * from './experiences/experience.service';
+export * from './visits/visit.service';
+export * from './upload/upload.service';

@@ -1,7 +1,8 @@
 import { BackendTreeInstance } from "@/services/tree-instances/tree-instance.service";
 import { User } from "@/types/auth";
 
-export type BuyerDashboardTab = "trees" | "certificates" | "impact" | "orders";
+export type BuyerDashboardTab = "trees" | "certificates" | "impact" | "orders" | "visits";
+
 
 export interface BuyerKpiData {
   totalTrees: number;

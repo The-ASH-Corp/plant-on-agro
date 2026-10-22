@@ -10,3 +10,5 @@ export { ImpactSection } from "./ImpactSection";
 export type { ImpactSectionProps } from "./ImpactSection";
 export { CertificateSection } from "./CertificateSection";
 export type { CertificateSectionProps } from "./CertificateSection";
+export { ExperienceSection } from "./ExperienceSection";
+

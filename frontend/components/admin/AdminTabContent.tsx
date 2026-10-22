@@ -19,6 +19,8 @@ import { OrdersTab } from "./tabs/OrdersTab";
 import { UsersTab } from "./tabs/UsersTab";
 import { LandingPageTab } from "./tabs/LandingPageTab";
 import { CertificatesTab } from "./tabs/CertificatesTab";
+import { VisitsTab } from "./tabs/VisitsTab";
+
 
 interface AdminTabContentProps {
   activeTab: AdminTabType;
@@ -157,7 +159,11 @@ export function AdminTabContent({
         />
       );
 
+    case "visits":
+      return <VisitsTab />;
+
     default:
       return null;
   }
 }
+
