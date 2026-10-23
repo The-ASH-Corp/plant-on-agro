@@ -19,13 +19,40 @@ export function getStoredAuthToken(): string | null {
 }
 
 
-function handleUnauthorized(): void {
+function handleUnauthorized(requestUrl?: string): void {
   if (typeof window === 'undefined') return;
+
+  // Do not redirect on active login or registration endpoint attempts
+  const isAuthAttempt =
+    requestUrl &&
+    (requestUrl.includes('/auth/login') ||
+      requestUrl.includes('/auth/register') ||
+      requestUrl.includes('/auth/check-email'));
+
+  if (isAuthAttempt) {
+    return;
+  }
+
   try {
     localStorage.removeItem('plant_on_agro_auth');
+    delete axiosInstance.defaults.headers.common['Authorization'];
     window.dispatchEvent(new Event('auth:unauthorized'));
   } catch {
     // Ignore storage errors
+  }
+
+  // Cleanly redirect to login with sessionExpired query parameter if not already on an auth page
+  if (
+    !window.location.pathname.startsWith('/login') &&
+    !window.location.pathname.startsWith('/register') &&
+    !window.location.pathname.startsWith('/forgot-password')
+  ) {
+    const currentPath = window.location.pathname;
+    const redirectParam =
+      currentPath && currentPath !== '/'
+        ? `&redirect=${encodeURIComponent(currentPath)}`
+        : '';
+    window.location.href = `/login?sessionExpired=true${redirectParam}`;
   }
 }
 
@@ -84,7 +111,7 @@ axiosInstance.interceptors.response.use(
     const apiError = extractApiError(error);
 
     if (apiError.statusCode === 401) {
-      handleUnauthorized();
+      handleUnauthorized(error?.config?.url);
     }
 
     return Promise.reject(apiError);
