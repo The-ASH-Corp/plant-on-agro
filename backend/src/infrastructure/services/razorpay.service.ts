@@ -30,7 +30,6 @@ export class RazorpayPaymentService implements IPaymentGatewayService {
           key_id: this.keyId,
           key_secret: this.keySecret,
         });
-        console.log('💳 Razorpay Gateway initialized in LIVE/TEST mode with Key ID:', this.keyId);
       } catch (err) {
         console.warn('⚠️ Razorpay initialization failed, falling back to sandbox simulator mode:', err);
         this.client = null;

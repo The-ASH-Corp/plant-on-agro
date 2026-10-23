@@ -135,25 +135,35 @@ export function BuyerDashboard() {
     async function fetchUserData() {
       try {
         setLoading(true);
-        // Query by user's email or name if authenticated, otherwise fetch latest general instances
-        const searchQuery = user?.email || user?.name || "";
+        const userEmail = user?.email?.trim().toLowerCase();
+
+        // Query exclusively by authenticated user's email
         const [res, ordersRes] = await Promise.all([
-          treeInstanceService.getAll({
-            search: searchQuery,
-            limit: 50,
-          }),
-          orderService.getAll({
-            adopterEmail: user?.email,
-            limit: 50,
-          }),
+          userEmail
+            ? treeInstanceService.getAll({
+                adopterEmail: userEmail,
+                limit: 50,
+              })
+            : Promise.resolve({ data: { items: [], total: 0 } } as any),
+          userEmail
+            ? orderService.getAll({
+                adopterEmail: userEmail,
+                limit: 50,
+              })
+            : Promise.resolve({ data: { items: [], total: 0 } } as any),
         ]);
 
-        // Also check if any trees were adopted during this session in local storage
+        // Check if any trees were adopted during this session matching the current user
         const storedBuyerTrees: BackendTreeInstance[] = (() => {
           if (typeof window !== "undefined") {
             try {
               const raw = localStorage.getItem("poa_buyer_trees");
-              return raw ? JSON.parse(raw) : [];
+              const parsed: BackendTreeInstance[] = raw ? JSON.parse(raw) : [];
+              return userEmail
+                ? parsed.filter(
+                    (t) => t.adopterEmail?.toLowerCase() === userEmail
+                  )
+                : parsed;
             } catch {
               return [];
             }
@@ -161,13 +171,18 @@ export function BuyerDashboard() {
           return [];
         })();
 
-        // Load stored orders from localStorage + backend database
+        // Load stored orders from localStorage + backend database matching current user
         const storedOrders: any[] = (() => {
           let local: any[] = [];
           if (typeof window !== "undefined") {
             try {
               const raw = localStorage.getItem("poa_orders");
-              if (raw) local = JSON.parse(raw);
+              const parsed = raw ? JSON.parse(raw) : [];
+              local = userEmail
+                ? parsed.filter(
+                    (o: any) => o.adopterEmail?.toLowerCase() === userEmail
+                  )
+                : parsed;
             } catch {
               local = [];
             }
@@ -181,7 +196,7 @@ export function BuyerDashboard() {
           let currentTrees: BackendTreeInstance[] = [];
 
           if (apiItems.length > 0) {
-            const apiIds = new Set(apiItems.map((i) => i.id));
+            const apiIds = new Set(apiItems.map((i: BackendTreeInstance) => i.id));
             currentTrees = [
               ...storedBuyerTrees.filter((s) => !apiIds.has(s.id)),
               ...apiItems,
@@ -189,11 +204,8 @@ export function BuyerDashboard() {
           } else if (storedBuyerTrees.length > 0) {
             currentTrees = storedBuyerTrees;
           } else {
-            // If user has no specific trees, fetch general trees
-            const generalRes = await treeInstanceService.getAll({ limit: 10 });
-            if (isMounted) {
-              currentTrees = generalRes.data?.items || [];
-            }
+            // Clean empty state: No fallback to other customers' trees
+            currentTrees = [];
           }
 
           setTrees(currentTrees);

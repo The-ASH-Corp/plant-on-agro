@@ -29,6 +29,10 @@ export class MongoTreeInstanceRepository implements ITreeInstanceRepository {
       query.orderRef = filter.orderRef.trim();
     }
 
+    if (filter.adopterEmail && filter.adopterEmail.trim().length > 0) {
+      query.adopterEmail = filter.adopterEmail.trim().toLowerCase();
+    }
+
     if (filter.search && filter.search.trim().length > 0) {
       const searchRegex = new RegExp(filter.search.trim(), 'i');
       query.$or = [

@@ -80,6 +80,7 @@ export const queryTreeInstancesSchema = z.object({
   healthStatus: z.string().optional(),
   orderRef: z.string().optional(),
   search: z.string().optional(),
+  adopterEmail: z.string().trim().email().optional().or(z.literal('')),
   isActive: z
     .enum(['true', 'false'])
     .transform((val) => val === 'true')

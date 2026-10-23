@@ -98,21 +98,23 @@ export function BuyerTreesTab({
           <p className="text-xs font-medium text-[#52796f]">Querying living tree instances & GPS telemetry...</p>
         </div>
       ) : filteredTrees.length === 0 ? (
-        <div className="bg-white rounded-3xl p-10 text-center border border-[#e2eae5] space-y-3 max-w-md mx-auto shadow-xs">
-          <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-3xl mx-auto shadow-inner">
+        <div className="bg-white rounded-3xl p-10 text-center border border-[#e2eae5] space-y-4 max-w-lg mx-auto shadow-xs my-6">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-3xl mx-auto shadow-inner border border-emerald-100">
             🌱
           </div>
           <div>
-            <h3 className="text-base font-bold text-[#173324]">No Trees Found</h3>
-            <p className="text-xs text-[#52796f] mt-1 leading-relaxed">
+            <h3 className="text-base font-bold text-[#173324]">
+              {searchTerm || statusFilter !== "All" ? "No Trees Matched" : "No Trees Adopted Yet"}
+            </h3>
+            <p className="text-xs text-[#52796f] mt-1.5 leading-relaxed max-w-sm mx-auto">
               {searchTerm || statusFilter !== "All"
-                ? "No trees matched your search query. Try clearing filters."
-                : "You haven't planted your first tree yet! Start your personal green legacy today."}
+                ? "No living trees matched your search query. Try clearing or resetting the filters."
+                : "You haven't adopted any trees yet. Explore our living reserves to adopt your first tree."}
             </p>
           </div>
           <button
             onClick={onOpenPlantFlow}
-            className="px-5 py-2.5 rounded-xl text-xs font-bold bg-[#1b7a43] text-white hover:bg-[#145c32] shadow-sm cursor-pointer transition-transform hover:scale-105 inline-flex items-center gap-1.5"
+            className="px-6 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[#1b7a43] to-[#2d6a4f] text-white hover:from-[#145c32] hover:to-[#22543d] shadow-sm cursor-pointer transition-all hover:scale-105 inline-flex items-center gap-2"
           >
             <span>🌱</span>
             <span>Adopt Your First Tree</span>

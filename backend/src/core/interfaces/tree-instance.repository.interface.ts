@@ -6,6 +6,7 @@ export interface TreeInstanceFilter {
   healthStatus?: TreeHealthStatus | string;
   orderRef?: string;
   search?: string;
+  adopterEmail?: string;
   isActive?: boolean;
 }
 

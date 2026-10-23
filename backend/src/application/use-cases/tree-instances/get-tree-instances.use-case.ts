@@ -12,6 +12,7 @@ export interface GetTreeInstancesQuery {
   healthStatus?: string;
   orderRef?: string;
   search?: string;
+  adopterEmail?: string;
   isActive?: boolean;
   limit?: number;
   skip?: number;
@@ -36,6 +37,7 @@ export class GetTreeInstancesUseCase {
       healthStatus: query.healthStatus,
       orderRef: query.orderRef,
       search: query.search,
+      adopterEmail: query.adopterEmail,
       isActive: query.isActive,
     };
 
