@@ -118,6 +118,18 @@ export function BuyerDashboard() {
   const user = useHydratedStore(useAuthStore, (s) => s.user);
   const isAuthenticated = useHydratedStore(useAuthStore, (s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    if (!hasHydrated && useAuthStore.persist?.hasHydrated?.()) {
+      useAuthStore.getState().setHasHydrated(true);
+    }
+  }, [hasHydrated]);
+
+  const isReady = mounted && (hasHydrated || (useAuthStore.persist?.hasHydrated?.() ?? false));
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<BuyerDashboardTab>("trees");
@@ -163,7 +175,7 @@ export function BuyerDashboard() {
                 ? parsed.filter(
                     (t) => t.adopterEmail?.toLowerCase() === userEmail
                   )
-                : parsed;
+                : [];
             } catch {
               return [];
             }
@@ -182,7 +194,7 @@ export function BuyerDashboard() {
                 ? parsed.filter(
                     (o: any) => o.adopterEmail?.toLowerCase() === userEmail
                   )
-                : parsed;
+                : [];
             } catch {
               local = [];
             }
@@ -274,19 +286,14 @@ export function BuyerDashboard() {
     };
   }, [user]);
 
-  // Protected route check
+  // Strict protected route check: unauthenticated users are immediately redirected to /login
   useEffect(() => {
-    const hasTestTrees =
-      typeof window !== "undefined" &&
-      Boolean(localStorage.getItem("poa_buyer_trees"));
+    if (!isReady) return;
 
-    if (!isAuthenticated && !user && !hasTestTrees) {
-      const timeout = setTimeout(() => {
-        router.push("/login");
-      }, 500);
-      return () => clearTimeout(timeout);
+    if (!isAuthenticated || !user) {
+      router.replace("/login");
     }
-  }, [isAuthenticated, user, router]);
+  }, [isReady, isAuthenticated, user, router]);
 
   const totalTrees = trees.length;
   const estimatedCO2 = totalTrees * 22; // ~22kg of CO2 absorbed per tree per year
@@ -305,6 +312,20 @@ export function BuyerDashboard() {
     ordersCount: orders.length,
     totalSpent,
   };
+
+  // Auth Guard: Prevent unauthorized flash and wait for store hydration
+  if (!isReady || !isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#173324] text-white">
+        <div className="text-center space-y-3">
+          <div className="w-8 h-8 border-3 border-emerald-400 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-xs text-emerald-200 font-medium">
+            {!isReady ? "Verifying security credentials..." : "Redirecting to login..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f3f7f4] text-[#173324] flex font-sans selection:bg-emerald-500 selection:text-white">
