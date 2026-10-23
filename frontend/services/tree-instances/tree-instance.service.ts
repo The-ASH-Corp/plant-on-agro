@@ -77,6 +77,7 @@ export const treeInstanceService = {
     healthStatus?: string;
     orderRef?: string;
     search?: string;
+    adopterEmail?: string;
     limit?: number;
     skip?: number;
   }): Promise<ApiResponse<TreeInstancesListResponse>> {
@@ -85,6 +86,7 @@ export const treeInstanceService = {
     if (params?.healthStatus && params.healthStatus !== 'All') query.set('healthStatus', params.healthStatus);
     if (params?.orderRef) query.set('orderRef', params.orderRef);
     if (params?.search) query.set('search', params.search);
+    if (params?.adopterEmail) query.set('adopterEmail', params.adopterEmail);
     if (params?.limit) query.set('limit', String(params.limit));
     if (params?.skip) query.set('skip', String(params.skip));
 
