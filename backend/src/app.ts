@@ -6,6 +6,7 @@ import { env } from './config/env';
 import { routes } from './presentation/routes';
 import { notFoundHandler } from './presentation/middlewares/not-found.middleware';
 import { errorHandler } from './presentation/middlewares/error.middleware';
+import { globalRateLimiter } from './presentation/middlewares/rate-limiter.middleware';
 import morgan from 'morgan';
 
 export const createApp = (): Application => {
@@ -34,6 +35,10 @@ export const createApp = (): Application => {
   app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 
   app.use(morgan('dev'));
+
+  // Global Rate Limiter applied to all API endpoints
+  app.use('/api', globalRateLimiter);
+
   // Root redirect/health
   app.get('/', (_req, res) => {
     res.json({
