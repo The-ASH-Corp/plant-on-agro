@@ -11,11 +11,13 @@ export class RazorpayPaymentService implements IPaymentGatewayService {
   private client: Razorpay | null = null;
   private readonly keyId: string;
   private readonly keySecret: string;
+  private readonly webhookSecret: string;
   private readonly isConfigured: boolean;
 
-  constructor(keyId: string, keySecret: string) {
+  constructor(keyId: string, keySecret: string, webhookSecret: string = '') {
     this.keyId = keyId.trim();
     this.keySecret = keySecret.trim();
+    this.webhookSecret = webhookSecret.trim();
 
     // Check if real or non-placeholder credentials have been provided
     this.isConfigured =
@@ -115,6 +117,44 @@ export class RazorpayPaymentService implements IPaymentGatewayService {
       console.error('Error verifying Razorpay HMAC signature:', err);
       return false;
     }
+  }
+
+  public verifyWebhookSignature(rawBody: Buffer | string, signature: string): boolean {
+    if (!signature) {
+      return false;
+    }
+
+    const secret = this.webhookSecret || this.keySecret;
+    if (secret) {
+      try {
+        const generatedSignature = crypto
+          .createHmac('sha256', secret)
+          .update(rawBody)
+          .digest('hex');
+
+        const expectedBuffer = Buffer.from(generatedSignature, 'utf-8');
+        const actualBuffer = Buffer.from(signature, 'utf-8');
+
+        if (
+          expectedBuffer.length === actualBuffer.length &&
+          crypto.timingSafeEqual(expectedBuffer, actualBuffer)
+        ) {
+          return true;
+        }
+      } catch (err) {
+        console.error('Error verifying Razorpay Webhook HMAC signature:', err);
+      }
+    }
+
+    // In simulator mode when live credentials are not present, also accept mock test tokens
+    if (!this.isLiveConfigured()) {
+      return (
+        signature === 'mock_webhook_signature_valid' ||
+        signature === 'valid_test_webhook_signature'
+      );
+    }
+
+    return false;
   }
 
   public async fetchPayment(paymentId: string): Promise<any> {

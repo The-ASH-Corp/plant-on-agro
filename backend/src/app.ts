@@ -31,7 +31,14 @@ export const createApp = (): Application => {
   // Static uploads directory for tree photographs
   app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
 
-  app.use(express.json({ limit: '100kb' }));
+  app.use(
+    express.json({
+      limit: '100kb',
+      verify: (req: any, _res, buf) => {
+        req.rawBody = buf;
+      },
+    })
+  );
   app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 
   app.use(morgan('dev'));

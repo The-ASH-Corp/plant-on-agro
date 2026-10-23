@@ -79,7 +79,7 @@ export class VisitBookingController {
   public addMemories = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
-      const result = await this.addVisitMemoryUseCase.execute(id as string, req.body);
+      const result = await this.addVisitMemoryUseCase.execute(id as string, req.body, req.user);
       ApiResponse.success(res, result, 'Visit memories recorded successfully');
     } catch (error) {
       next(error);

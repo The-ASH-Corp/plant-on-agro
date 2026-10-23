@@ -32,6 +32,16 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
     email: string;
     role: string;
   } | null>(null);
+  const [isSessionExpired, setIsSessionExpired] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("sessionExpired") === "true") {
+        setIsSessionExpired(true);
+      }
+    }
+  }, []);
 
   // Zustand State Management Store
   const {
@@ -257,6 +267,38 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
           </p>
         </div>
 
+        {/* Session Expired Informational Banner */}
+        {isSessionExpired && (
+          <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm flex items-start gap-2.5 shadow-xs">
+            <svg
+              className="w-5 h-5 shrink-0 text-amber-600 mt-0.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+            <div className="flex-1">
+              <span className="font-semibold block mb-0.5">Session Expired</span>
+              <p className="text-amber-800 leading-snug">
+                Your login session has expired for security. Please sign in with your credentials to continue.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsSessionExpired(false)}
+              className="text-amber-500 hover:text-amber-700 font-bold text-sm leading-none cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {/* API Error Alert Banner */}
         {apiError && (
           <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm flex items-start gap-2.5">
@@ -334,7 +376,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
         </div>
 
         {/* Social Buttons: Google & Apple */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* <div className="grid grid-cols-2 gap-3">
           <button
             id="auth-social-google"
             type="button"
@@ -376,7 +418,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
             </svg>
             <span>Apple</span>
           </button>
-        </div>
+        </div> */}
 
         {/* OR WITH EMAIL Divider */}
         <div className="relative flex items-center justify-center my-1">

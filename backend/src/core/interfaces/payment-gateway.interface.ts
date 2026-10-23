@@ -23,6 +23,7 @@ export interface VerifyPaymentParams {
 export interface IPaymentGatewayService {
   createOrder(params: CreatePaymentOrderParams): Promise<PaymentOrderResult>;
   verifyPayment(params: VerifyPaymentParams): boolean;
+  verifyWebhookSignature?(rawBody: Buffer | string, signature: string): boolean;
   fetchPayment?(paymentId: string): Promise<any>;
   getKeyId(): string;
   isLiveConfigured(): boolean;
