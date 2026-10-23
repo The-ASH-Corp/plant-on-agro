@@ -29,9 +29,10 @@ router.patch(
   (req, res, next) => Container.visitBookingController.updateStatus(req, res, next)
 );
 
-// POST /api/v1/visits/:id/memories - Add memory photos & notes to visit
+// POST /api/v1/visits/:id/memories - Add memory photos & notes to visit (Admin or registered buyer)
 router.post(
   '/:id/memories',
+  authenticate,
   (req, res, next) => Container.visitBookingController.addMemories(req, res, next)
 );
 
