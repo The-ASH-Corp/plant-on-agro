@@ -20,4 +20,9 @@ router.post('/verify', paymentVerifyRateLimiter, (req, res, next) =>
   Container.paymentController.verifyPayment(req, res, next)
 );
 
+// POST /api/v1/payment/webhook - Razorpay Server-to-Server Webhook handler (Captures payment.captured & order.paid)
+router.post('/webhook', (req, res, next) =>
+  Container.paymentController.handleWebhook(req, res, next)
+);
+
 export const paymentRoutes = router;

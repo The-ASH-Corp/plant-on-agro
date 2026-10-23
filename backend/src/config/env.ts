@@ -12,6 +12,7 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('7d'),
   RAZORPAY_KEY_ID: z.string().default('rzp_test_placeholder'),
   RAZORPAY_KEY_SECRET: z.string().default('rzp_secret_placeholder'),
+  RAZORPAY_WEBHOOK_SECRET: z.string().default('plant_on_agro_webhook_secret_2026'),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

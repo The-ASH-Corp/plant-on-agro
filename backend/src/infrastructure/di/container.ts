@@ -96,6 +96,8 @@ import { env } from '../../config/env';
 import { RazorpayPaymentService } from '../services/razorpay.service';
 import { CreateRazorpayOrderUseCase } from '../../application/use-cases/payment/create-razorpay-order.use-case';
 import { VerifyRazorpayPaymentUseCase } from '../../application/use-cases/payment/verify-razorpay-payment.use-case';
+import { ProcessRazorpayWebhookUseCase } from '../../application/use-cases/payment/process-razorpay-webhook.use-case';
+import { OrderFulfillmentService } from '../../application/services/order-fulfillment.service';
 import { PaymentController } from '../../presentation/controllers/payment.controller';
 
 export class Container {
@@ -159,7 +161,13 @@ export class Container {
   // Razorpay Payment Services & Use Cases
   public static readonly paymentGatewayService = new RazorpayPaymentService(
     env.RAZORPAY_KEY_ID,
-    env.RAZORPAY_KEY_SECRET
+    env.RAZORPAY_KEY_SECRET,
+    env.RAZORPAY_WEBHOOK_SECRET
+  );
+  private static readonly orderFulfillmentService = new OrderFulfillmentService(
+    Container.orderRepository,
+    Container.treeInstanceRepository,
+    Container.certificateRepository
   );
   private static readonly createRazorpayOrderUseCase = new CreateRazorpayOrderUseCase(
     Container.paymentGatewayService,
@@ -171,7 +179,13 @@ export class Container {
     Container.paymentGatewayService,
     Container.orderRepository,
     Container.treeInstanceRepository,
-    Container.certificateRepository
+    Container.certificateRepository,
+    Container.orderFulfillmentService
+  );
+  private static readonly processRazorpayWebhookUseCase = new ProcessRazorpayWebhookUseCase(
+    Container.paymentGatewayService,
+    Container.orderRepository,
+    Container.orderFulfillmentService
   );
 
   // Location Use Cases
@@ -422,7 +436,8 @@ export class Container {
   public static readonly paymentController = new PaymentController(
     Container.paymentGatewayService,
     Container.createRazorpayOrderUseCase,
-    Container.verifyRazorpayPaymentUseCase
+    Container.verifyRazorpayPaymentUseCase,
+    Container.processRazorpayWebhookUseCase
   );
 }
 
