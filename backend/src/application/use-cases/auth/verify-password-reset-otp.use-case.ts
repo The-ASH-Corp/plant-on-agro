@@ -1,6 +1,7 @@
 import { IPasswordResetOtpRepository } from '../../../core/interfaces/password-reset-otp.repository.interface';
 import { IJwtService } from '../../../core/interfaces/jwt-service.interface';
 import { BadRequestError, NotFoundError } from '../../../core/errors/app-error';
+import { normalizeEmail } from '../../../shared/utils/string.util';
 
 export interface VerifyPasswordResetOtpDto {
   email: string;
@@ -16,7 +17,7 @@ export class VerifyPasswordResetOtpUseCase {
   public async execute(
     dto: VerifyPasswordResetOtpDto
   ): Promise<{ valid: boolean; resetToken: string; message: string }> {
-    const email = dto.email.trim().toLowerCase();
+    const email = normalizeEmail(dto.email);
     const otp = dto.otp.trim();
 
     const record = await this.otpRepository.findLatestActiveByEmail(email);
@@ -54,8 +55,9 @@ export class VerifyPasswordResetOtpUseCase {
       purpose: 'password_reset',
     });
 
-    // Bind resetToken to the OTP record
-    await this.otpRepository.saveResetToken(record.id!, resetToken);
+    // Synchronize DB record expiry with the 15-minute binding token TTL
+    const extendedExpiry = new Date(Date.now() + 15 * 60 * 1000);
+    await this.otpRepository.saveResetToken(record.id!, resetToken, extendedExpiry);
 
     return {
       valid: true,

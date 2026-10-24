@@ -1,4 +1,3 @@
-
 import { PasswordResetOtp } from '../entities/password-reset-otp.entity';
 import { Nullable } from '../../shared/types';
 
@@ -24,9 +23,9 @@ export interface IPasswordResetOtpRepository {
   findByResetToken(resetToken: string): Promise<Nullable<PasswordResetOtp>>;
 
   /**
-   * Saves the generated verification resetToken against the OTP record.
+   * Saves the generated verification resetToken against the OTP record, optionally extending the expiry window.
    */
-  saveResetToken(id: string, resetToken: string): Promise<boolean>;
+  saveResetToken(id: string, resetToken: string, newExpiresAt?: Date): Promise<boolean>;
 
   /**
    * Atomically increments the attempt counter for an OTP document.

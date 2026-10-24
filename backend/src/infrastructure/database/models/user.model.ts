@@ -46,4 +46,23 @@ const UserSchema = new Schema<IUserDocument>(
   }
 );
 
+// Ensure email is always trimmed and lowercase on save
+UserSchema.pre('save', function () {
+  if (this.email) {
+    this.email = this.email.trim().toLowerCase();
+  }
+});
+
+// Ensure email is always trimmed and lowercase on findOneAndUpdate
+UserSchema.pre('findOneAndUpdate', function () {
+  const update = this.getUpdate() as Record<string, any>;
+  if (!update) return;
+  if (typeof update.email === 'string') {
+    update.email = update.email.trim().toLowerCase();
+  }
+  if (update.$set && typeof update.$set.email === 'string') {
+    update.$set.email = update.$set.email.trim().toLowerCase();
+  }
+});
+
 export const UserModel = mongoose.model<IUserDocument>('User', UserSchema);

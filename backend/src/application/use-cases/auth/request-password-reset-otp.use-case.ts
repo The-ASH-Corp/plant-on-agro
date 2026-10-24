@@ -3,6 +3,7 @@ import { IUserRepository } from '../../../core/interfaces/user.repository.interf
 import { IPasswordResetOtpRepository } from '../../../core/interfaces/password-reset-otp.repository.interface';
 import { IMailService } from '../../../core/interfaces/mail-service.interface';
 import { BadRequestError, NotFoundError } from '../../../core/errors/app-error';
+import { normalizeEmail } from '../../../shared/utils/string.util';
 
 export interface RequestPasswordResetOtpDto {
   email: string;
@@ -16,13 +17,11 @@ export class RequestPasswordResetOtpUseCase {
   ) {}
 
   public async execute(dto: RequestPasswordResetOtpDto): Promise<{ success: boolean; message: string }> {
-    const email = dto.email.trim().toLowerCase();
+    const email = normalizeEmail(dto.email);
 
     // Check if user exists
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
-      // In accordance with security practices, avoid leaking whether the user exists,
-      // but return an explicit user-friendly response or throw NotFound if explicit check preferred.
       throw new NotFoundError('No account found with this email address.');
     }
 
@@ -37,7 +36,6 @@ export class RequestPasswordResetOtpUseCase {
     // Dispatch email
     const dispatched = await this.mailService.sendOtpEmail(email, user.name, otp, expiresInMinutes);
     if (!dispatched) {
-      // Rollback created OTP record so user is not stuck with an undelivered code
       if (otpRecord.id) {
         await this.otpRepository.deleteById(otpRecord.id);
       }
