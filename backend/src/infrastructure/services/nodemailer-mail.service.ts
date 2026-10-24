@@ -65,7 +65,13 @@ export class NodemailerMailService implements IMailService {
   public async sendMail(options: SendEmailOptions): Promise<boolean> {
     const from = this.defaultFrom;
 
-    if (this.isConfigured && this.transporter) {
+    // 1. Live SMTP Mode (Configured)
+    if (this.isConfigured) {
+      if (!this.transporter) {
+        console.error(`❌ [EMAIL ERROR] SMTP is configured, but transporter is unavailable.`);
+        return false;
+      }
+
       try {
         const info = await this.transporter.sendMail({
           from,
@@ -80,13 +86,13 @@ export class NodemailerMailService implements IMailService {
         return true;
       } catch (error) {
         console.error(`❌ [EMAIL ERROR] Failed to send email via SMTP to ${options.to}:`, error);
-        // Fall back to local console dispatch so flow doesn't break
+        return false;
       }
     }
 
-    // Simulation / Development Fallback output
+    // 2. Development / Simulation Mode (Only when SMTP credentials are NOT provided in .env)
     console.log('\n───────────────────────────────────────────────────────────────────');
-    console.log(`📨 [SIMULATED EMAIL DISPATCH]`);
+    console.log(`📨 [SIMULATED EMAIL DISPATCH] (SMTP credentials not configured)`);
     console.log(`   To:      ${options.to}`);
     console.log(`   From:    ${from}`);
     console.log(`   Subject: ${options.subject}`);

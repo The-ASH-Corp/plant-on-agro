@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { IUserRepository } from '../../../core/interfaces/user.repository.interface';
 import { IMailService } from '../../../core/interfaces/mail-service.interface';
 import { PasswordResetOtpModel } from '../../../infrastructure/database/models/password-reset-otp.model';
-import { NotFoundError } from '../../../core/errors/app-error';
+import { BadRequestError, NotFoundError } from '../../../core/errors/app-error';
 
 export interface RequestPasswordResetOtpDto {
   email: string;
@@ -32,7 +32,7 @@ export class RequestPasswordResetOtpUseCase {
 
     // Invalidate any existing unused OTPs for this email and save new one
     await PasswordResetOtpModel.deleteMany({ email });
-    await PasswordResetOtpModel.create({
+    const otpRecord = await PasswordResetOtpModel.create({
       email,
       otp,
       expiresAt,
@@ -41,7 +41,12 @@ export class RequestPasswordResetOtpUseCase {
     });
 
     // Dispatch email
-    await this.mailService.sendOtpEmail(email, user.name, otp, expiresInMinutes);
+    const dispatched = await this.mailService.sendOtpEmail(email, user.name, otp, expiresInMinutes);
+    if (!dispatched) {
+      // Rollback created OTP record so user is not stuck with an undelivered code
+      await PasswordResetOtpModel.deleteOne({ _id: otpRecord._id });
+      throw new BadRequestError('Failed to dispatch verification code email. Please check your email service or try again later.');
+    }
 
     return {
       success: true,

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
+import { ErrorPopup } from "@/components/ui/ErrorPopup";
 
 export type AuthMode = "login" | "register" | "forgot-password";
 
@@ -299,6 +300,22 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
           </div>
         )}
 
+        {/* Floating Error & Success Popups */}
+        <ErrorPopup
+          message={apiError}
+          title={mode === "register" ? "Registration Failed" : "Sign In Failed"}
+          type="error"
+          onClose={clearError}
+        />
+
+        <ErrorPopup
+          message={successMessage}
+          title="Success"
+          type="success"
+          duration={5000}
+          onClose={clearSuccess}
+        />
+
         {/* API Error Alert Banner */}
         {apiError && (
           <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm flex items-start gap-2.5">
@@ -421,12 +438,12 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
         </div> */}
 
         {/* OR WITH EMAIL Divider */}
-        <div className="relative flex items-center justify-center my-1">
+        {/* <div className="relative flex items-center justify-center my-1">
           <div className="w-full border-t border-[#e2eae5]"></div>
           <span className="absolute bg-white px-3 text-[10px] font-bold tracking-widest uppercase text-[#7a8a80]">
             OR WITH EMAIL
           </span>
-        </div>
+        </div> */}
 
         {/* Form Body */}
         <form id="auth-form" onSubmit={handleSubmit} className="space-y-4">

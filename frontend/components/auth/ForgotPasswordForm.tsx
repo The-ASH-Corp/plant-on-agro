@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authService } from "@/services/auth/auth.service";
 import { ApiError } from "@/types/api";
+import { ErrorPopup } from "@/components/ui/ErrorPopup";
 
 interface ForgotPasswordFormProps {
   onToggleMode?: (mode: "login" | "register" | "forgot-password") => void;
@@ -236,7 +237,27 @@ export function ForgotPasswordForm({
           </div>
         )}
 
-        {/* Error Alert Banner */}
+        {/* Floating Animated Error & Success Popups */}
+        <ErrorPopup
+          message={errorMessage}
+          title={
+            step === "request"
+              ? "Reset Request Failed"
+              : step === "verify_otp"
+              ? "Verification Error"
+              : "Password Reset Failed"
+          }
+          type="error"
+          onClose={() => setErrorMessage(null)}
+        />
+
+        <ErrorPopup
+          message={successMessage && step !== "completed" ? successMessage : null}
+          title={step === "verify_otp" ? "Code Sent" : "Verified"}
+          type="success"
+          duration={5000}
+          onClose={() => setSuccessMessage(null)}
+        />
         {errorMessage && (
           <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm flex items-start gap-2.5 animate-fadeIn">
             <svg
