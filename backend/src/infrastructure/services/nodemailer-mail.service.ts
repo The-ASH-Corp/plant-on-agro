@@ -25,16 +25,34 @@ export class NodemailerMailService implements IMailService {
 
     if (this.isConfigured) {
       try {
-        this.transporter = nodemailer.createTransport({
-          host: this.host.trim(),
-          port: this.port,
-          secure: this.secure,
-          auth: {
-            user: this.user.trim(),
-            pass: this.pass ? this.pass.trim() : '',
-          },
+        const isGmail = this.host.toLowerCase().includes('gmail');
+        const isPort465 = this.port === 465;
+        const isSecure = this.port === 587 ? false : (this.secure ?? isPort465);
+
+        this.transporter = isGmail
+          ? nodemailer.createTransport({
+              service: 'gmail',
+              auth: {
+                user: this.user.trim(),
+                pass: this.pass ? this.pass.trim() : '',
+              },
+            })
+          : nodemailer.createTransport({
+              host: this.host.trim(),
+              port: this.port,
+              secure: isSecure,
+              auth: {
+                user: this.user.trim(),
+                pass: this.pass ? this.pass.trim() : '',
+              },
+            });
+
+
+        this.transporter.verify((verifyErr) => {
+          if (verifyErr) {
+            console.error('❌ [EMAIL SERVICE] SMTP Transporter Verification Error:', verifyErr.message);
+          }
         });
-        console.log(`📧 [EMAIL SERVICE] Configured with SMTP host: ${this.host}:${this.port}`);
       } catch (err) {
         console.error('❌ [EMAIL SERVICE] Failed to initialize SMTP transporter:', err);
       }

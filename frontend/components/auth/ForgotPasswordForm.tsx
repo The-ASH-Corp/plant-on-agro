@@ -11,7 +11,7 @@ interface ForgotPasswordFormProps {
   onSubmitSuccess?: (email: string) => void;
 }
 
-type Step = "request" | "verify_and_reset" | "completed";
+type Step = "request" | "verify_otp" | "reset_password" | "completed";
 
 export function ForgotPasswordForm({
   onToggleMode,
@@ -73,7 +73,7 @@ export function ForgotPasswordForm({
     passwordCriteria.special &&
     passwordCriteria.match;
 
-  // 1. Request OTP Handler
+  // 1. Request OTP Handler (Step 1 -> Step 2)
   const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
@@ -84,8 +84,8 @@ export function ForgotPasswordForm({
 
     try {
       const res = await authService.requestPasswordResetOtp(email.trim().toLowerCase());
-      setSuccessMessage(res.message || `Verification code sent to ${email}`);
-      setStep("verify_and_reset");
+      setSuccessMessage(res.message || `A 6-digit verification code has been dispatched to ${email}`);
+      setStep("verify_otp");
       setResendCooldown(60);
 
       if (onSubmitSuccess) {
@@ -110,7 +110,7 @@ export function ForgotPasswordForm({
 
     try {
       const res = await authService.requestPasswordResetOtp(email.trim().toLowerCase());
-      setSuccessMessage(res.message || "A fresh 6-digit code has been dispatched.");
+      setSuccessMessage(res.message || "A fresh 6-digit code has been dispatched to your email.");
       setResendCooldown(60);
     } catch (err: unknown) {
       const apiErr = err as ApiError;
@@ -120,7 +120,32 @@ export function ForgotPasswordForm({
     }
   };
 
-  // 3. Reset Password with OTP Handler
+  // 3. Verify OTP Handler (Step 2 -> Step 3)
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanOtp = otp.trim();
+    if (!cleanOtp || cleanOtp.length !== 6) {
+      setErrorMessage("Please enter the complete 6-digit verification code.");
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      const res = await authService.verifyPasswordResetOtp(email.trim().toLowerCase(), cleanOtp);
+      setSuccessMessage(res.message || "Code verified successfully! You can now choose a new password.");
+      setStep("reset_password");
+    } catch (err: unknown) {
+      const apiErr = err as ApiError;
+      setErrorMessage(apiErr.message || "Invalid or expired verification code. Please check and try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 4. Reset Password with OTP Handler (Step 3 -> Step 4)
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otp.trim() || !isPasswordValid) return;
@@ -153,6 +178,16 @@ export function ForgotPasswordForm({
     }
   };
 
+  // Step indicator steps mapping
+  const stepsList = [
+    { key: "request", label: "Email" },
+    { key: "verify_otp", label: "Verify OTP" },
+    { key: "reset_password", label: "New Password" },
+  ];
+
+  const currentStepIndex =
+    step === "request" ? 0 : step === "verify_otp" ? 1 : step === "reset_password" ? 2 : 3;
+
   return (
     <div className="w-full md:w-7/12 lg:w-1/2 h-full md:h-screen flex flex-col px-6 sm:px-10 py-6 sm:py-8 md:py-10 overflow-y-auto overflow-x-hidden bg-white relative font-sans">
       {/* Subtle ambient mint glows strictly clipped within container */}
@@ -162,6 +197,45 @@ export function ForgotPasswordForm({
       </div>
 
       <div className="max-w-[440px] w-full mx-auto relative z-10 flex flex-col gap-5 my-auto">
+        {/* Visual Multi-step Progression Tracker */}
+        {step !== "completed" && (
+          <div className="flex items-center justify-between pb-2 border-b border-[#eef4f0]">
+            {stepsList.map((s, idx) => {
+              const isActive = idx === currentStepIndex;
+              const isPast = idx < currentStepIndex;
+              return (
+                <div key={s.key} className="flex items-center gap-2">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                      isActive
+                        ? "bg-[#1d553a] text-white shadow-xs"
+                        : isPast
+                        ? "bg-[#dcfce7] text-[#15803d]"
+                        : "bg-[#f0f4f1] text-[#819588]"
+                    }`}
+                  >
+                    {isPast ? "✓" : idx + 1}
+                  </div>
+                  <span
+                    className={`text-xs font-medium hidden sm:inline ${
+                      isActive ? "text-[#173324] font-semibold" : "text-[#7a8e81]"
+                    }`}
+                  >
+                    {s.label}
+                  </span>
+                  {idx < stepsList.length - 1 && (
+                    <div
+                      className={`w-8 sm:w-12 h-[2px] transition-all ${
+                        idx < currentStepIndex ? "bg-[#15803d]" : "bg-[#e5ece7]"
+                      }`}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {/* Error Alert Banner */}
         {errorMessage && (
           <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm flex items-start gap-2.5 animate-fadeIn">
@@ -209,7 +283,9 @@ export function ForgotPasswordForm({
           </div>
         )}
 
-        {/* STEP 1: REQUEST OTP */}
+        {/* ============================================================ */}
+        {/* STEP 1: REQUEST OTP (Email Entry) */}
+        {/* ============================================================ */}
         {step === "request" && (
           <>
             <div className="w-12 h-12 rounded-2xl bg-[#eef7f2] border border-[#d8ebe0] flex items-center justify-center text-[#1b7a43] shadow-xs">
@@ -231,7 +307,7 @@ export function ForgotPasswordForm({
                 Reset Password
               </h2>
               <p className="text-[#55695d] text-sm leading-relaxed">
-                Enter your registered email address and we will dispatch a 6-digit one-time verification code (OTP) to reset your password.
+                Enter your registered email address and we will dispatch a 6-digit one-time verification code (OTP) to your inbox.
               </p>
             </div>
 
@@ -305,8 +381,10 @@ export function ForgotPasswordForm({
           </>
         )}
 
-        {/* STEP 2: VERIFY OTP & SET NEW PASSWORD */}
-        {step === "verify_and_reset" && (
+        {/* ============================================================ */}
+        {/* STEP 2: VERIFY OTP (Only OTP Input & Verification) */}
+        {/* ============================================================ */}
+        {step === "verify_otp" && (
           <>
             <div className="w-12 h-12 rounded-2xl bg-[#eef7f2] border border-[#d8ebe0] flex items-center justify-center text-[#1b7a43] shadow-xs">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -314,7 +392,7 @@ export function ForgotPasswordForm({
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth="2"
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
                 />
               </svg>
             </div>
@@ -324,11 +402,11 @@ export function ForgotPasswordForm({
                 style={{ fontFamily: "var(--font-display)" }}
                 className="text-[#173324] text-3xl sm:text-4xl font-normal tracking-tight mb-2"
               >
-                Enter OTP &amp; Reset
+                Verify Code
               </h2>
               <div className="text-[#55695d] text-xs sm:text-sm flex items-center justify-between gap-2 bg-[#f4f8f5] p-2.5 rounded-lg border border-[#e1ece4]">
                 <span className="truncate">
-                  Code sent to: <strong className="text-[#173324] font-semibold">{email}</strong>
+                  Code dispatched to: <strong className="text-[#173324] font-semibold">{email}</strong>
                 </span>
                 <button
                   type="button"
@@ -344,14 +422,13 @@ export function ForgotPasswordForm({
               </div>
             </div>
 
-            <form onSubmit={handleResetPassword} className="space-y-4">
-              {/* OTP Field */}
+            <form onSubmit={handleVerifyOtp} className="space-y-5">
               <div>
-                <label className="text-[11px] font-bold text-[#3d4f45] uppercase tracking-wider mb-1.5 flex justify-between items-center">
-                  <span>6-DIGIT VERIFICATION CODE</span>
+                <label className="text-[11px] font-bold text-[#3d4f45] uppercase tracking-wider mb-2 flex justify-between items-center">
+                  <span>ENTER 6-DIGIT VERIFICATION CODE</span>
                   {resendCooldown > 0 ? (
                     <span className="text-[#72857a] text-[10px] font-normal lowercase">
-                      resend in {resendCooldown}s
+                      resend code in {resendCooldown}s
                     </span>
                   ) : null}
                 </label>
@@ -360,10 +437,11 @@ export function ForgotPasswordForm({
                     type="text"
                     required
                     maxLength={6}
+                    autoFocus
                     value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
                     placeholder="• • • • • •"
-                    className="w-full text-center tracking-[8px] font-mono font-bold text-2xl py-3 rounded-xl outline-none transition-all"
+                    className="w-full text-center tracking-[10px] font-mono font-bold text-2xl sm:text-3xl py-3.5 rounded-xl outline-none transition-all shadow-inner"
                     style={{
                       border: "2px dashed #2d6a4f",
                       color: "#173324",
@@ -371,8 +449,88 @@ export function ForgotPasswordForm({
                     }}
                   />
                 </div>
+                <p className="text-[11px] text-[#677b70] mt-1.5 text-center">
+                  Please check your inbox or spam folder. The code expires in 10 minutes.
+                </p>
               </div>
 
+              <button
+                type="submit"
+                disabled={loading || otp.length !== 6}
+                className="w-full py-3.5 px-6 rounded-xl font-semibold text-sm sm:text-base text-white transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-md hover:shadow-xl hover:scale-[1.01] disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{
+                  background: "linear-gradient(135deg, #1d553a 0%, #173324 100%)",
+                  boxShadow: "0 8px 24px rgba(23,51,36,0.25)",
+                }}
+              >
+                {loading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Verifying Code...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Verify Code</span>
+                    <span className="text-lg leading-none">✓</span>
+                  </>
+                )}
+              </button>
+
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={resendCooldown > 0 || loading}
+                  className="text-xs font-semibold text-[#1b7a43] hover:text-[#173324] disabled:text-[#88998f] cursor-pointer"
+                >
+                  {resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : "Resend OTP Code"}
+                </button>
+
+                <Link
+                  href="/login"
+                  onClick={handleBackToLogin}
+                  className="text-xs font-semibold text-[#526659] hover:text-[#173324] cursor-pointer"
+                >
+                  Return to Sign In
+                </Link>
+              </div>
+            </form>
+          </>
+        )}
+
+        {/* ============================================================ */}
+        {/* STEP 3: RESET PASSWORD (Shown ONLY AFTER OTP is Verified) */}
+        {/* ============================================================ */}
+        {step === "reset_password" && (
+          <>
+            <div className="w-12 h-12 rounded-2xl bg-[#eef7f2] border border-[#d8ebe0] flex items-center justify-center text-[#1b7a43] shadow-xs">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
+            </div>
+
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#dcfce7] border border-[#bbf7d0] text-[#15803d] text-xs font-bold mb-2">
+                <span>✓</span>
+                <span>OTP Verified Successfully</span>
+              </div>
+              <h2
+                style={{ fontFamily: "var(--font-display)" }}
+                className="text-[#173324] text-3xl sm:text-4xl font-normal tracking-tight mb-2"
+              >
+                Set New Password
+              </h2>
+              <p className="text-[#55695d] text-sm leading-relaxed">
+                Choose a strong new password for your account (<strong>{email}</strong>).
+              </p>
+            </div>
+
+            <form onSubmit={handleResetPassword} className="space-y-4">
               {/* New Password */}
               <div>
                 <label className="text-[11px] font-bold text-[#3d4f45] uppercase tracking-wider mb-1.5 block">
@@ -382,6 +540,7 @@ export function ForgotPasswordForm({
                   <input
                     type={showPassword ? "text" : "password"}
                     required
+                    autoFocus
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Enter your new password"
@@ -391,6 +550,8 @@ export function ForgotPasswordForm({
                       color: "#173324",
                       background: "#fcfaf7",
                     }}
+                    onFocus={(e) => (e.target.style.border = "1.5px solid #2d6a4f")}
+                    onBlur={(e) => (e.target.style.border = "1.5px solid #e2eae5")}
                   />
                   <button
                     type="button"
@@ -419,6 +580,8 @@ export function ForgotPasswordForm({
                     color: "#173324",
                     background: "#fcfaf7",
                   }}
+                  onFocus={(e) => (e.target.style.border = "1.5px solid #2d6a4f")}
+                  onBlur={(e) => (e.target.style.border = "1.5px solid #e2eae5")}
                 />
               </div>
 
@@ -449,8 +612,8 @@ export function ForgotPasswordForm({
 
               <button
                 type="submit"
-                disabled={loading || otp.length !== 6 || !isPasswordValid}
-                className="w-full py-3.5 px-6 rounded-xl font-semibold text-sm sm:text-base text-white transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-md hover:shadow-xl hover:scale-[1.01] disabled:opacity-70 disabled:cursor-not-allowed"
+                disabled={loading || !isPasswordValid}
+                className="w-full py-3.5 px-6 rounded-xl font-semibold text-sm sm:text-base text-white transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-md hover:shadow-xl hover:scale-[1.01] disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{
                   background: "linear-gradient(135deg, #1d553a 0%, #173324 100%)",
                   boxShadow: "0 8px 24px rgba(23,51,36,0.25)",
@@ -459,7 +622,7 @@ export function ForgotPasswordForm({
                 {loading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Resetting Password...</span>
+                    <span>Saving New Password...</span>
                   </>
                 ) : (
                   <>
@@ -469,16 +632,7 @@ export function ForgotPasswordForm({
                 )}
               </button>
 
-              <div className="flex items-center justify-between pt-1">
-                <button
-                  type="button"
-                  onClick={handleResendOtp}
-                  disabled={resendCooldown > 0 || loading}
-                  className="text-xs font-semibold text-[#1b7a43] hover:text-[#173324] disabled:text-[#88998f] cursor-pointer"
-                >
-                  {resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : "Resend OTP Code"}
-                </button>
-
+              <div className="text-center pt-1">
                 <Link
                   href="/login"
                   onClick={handleBackToLogin}
@@ -491,7 +645,9 @@ export function ForgotPasswordForm({
           </>
         )}
 
-        {/* STEP 3: COMPLETED */}
+        {/* ============================================================ */}
+        {/* STEP 4: COMPLETED (Success Screen) */}
+        {/* ============================================================ */}
         {step === "completed" && (
           <div className="text-center py-6 space-y-4 animate-fadeIn">
             <div className="w-16 h-16 rounded-full bg-[#dcfce7] text-[#15803d] flex items-center justify-center text-3xl mx-auto shadow-sm">
