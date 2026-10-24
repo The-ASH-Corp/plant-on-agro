@@ -549,7 +549,7 @@ export function Step7Confirmation({
         Your Tree Journey Has Begun!
       </h3>
       <p className="text-[#4a6557] mb-8">
-        Our plantation team will get to work. You'll receive updates, photos, and
+        Our plantation team will get to work. You&apos;ll receive updates, photos, and
         your certificate soon.
       </p>
 
