@@ -1,6 +1,7 @@
 import { IOrderRepository } from '../../core/interfaces/order.repository.interface';
 import { ITreeInstanceRepository } from '../../core/interfaces/tree-instance.repository.interface';
 import { ICertificateRepository } from '../../core/interfaces/certificate.repository.interface';
+import { IMailService } from '../../core/interfaces/mail-service.interface';
 import { Order } from '../../core/entities/order.entity';
 import { TreeInstance } from '../../core/entities/tree-instance.entity';
 import { Certificate } from '../../core/entities/certificate.entity';
@@ -15,7 +16,8 @@ export class OrderFulfillmentService {
   constructor(
     private readonly orderRepository: IOrderRepository,
     private readonly treeInstanceRepository: ITreeInstanceRepository,
-    private readonly certificateRepository: ICertificateRepository
+    private readonly certificateRepository: ICertificateRepository,
+    private readonly mailService?: IMailService
   ) {}
 
   public async fulfillOrder(order: Order, paymentId: string): Promise<FulfillmentResult> {
@@ -99,6 +101,27 @@ export class OrderFulfillmentService {
     });
 
     const savedCertificate = await this.certificateRepository.save(certificate);
+
+    // 4. Dispatch Payment Complete with Invoice & Certificate Details Email
+    if (this.mailService && order.adopterEmail) {
+      this.mailService
+        .sendPaymentReceiptWithInvoiceEmail({
+          to: order.adopterEmail,
+          customerName: order.adopterName,
+          orderNumber: order.orderNumber,
+          transactionRef: combinedRef,
+          date: order.createdAt || new Date(),
+          amount: order.totalAmount,
+          treeSpecies: order.treeSpecies,
+          planType: order.planType,
+          reserveName: order.reserveName,
+          quantity: order.quantity,
+          certificateNumber: certNumber,
+          treeTags: createdTreeInstances.map((t) => t.treeTag),
+          dedicationMessage: order.dedicationMessage,
+        })
+        .catch((err) => console.error('Failed to dispatch payment invoice email:', err));
+    }
 
     return {
       order,

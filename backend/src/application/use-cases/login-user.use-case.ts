@@ -1,6 +1,7 @@
 import { IUserRepository } from '../../core/interfaces/user.repository.interface';
 import { IPasswordHasher } from '../../core/interfaces/password-hasher.interface';
 import { IJwtService } from '../../core/interfaces/jwt-service.interface';
+import { IMailService } from '../../core/interfaces/mail-service.interface';
 import { UnauthorizedError, ForbiddenError } from '../../core/errors/app-error';
 import { Email } from '../../core/value-objects/email.vo';
 import { AuthResponseDto } from '../dto/auth-response.dto';
@@ -10,14 +11,23 @@ export interface LoginUserInputDto {
   password: string;
 }
 
+export interface LoginMetadata {
+  ip?: string;
+  userAgent?: string;
+}
+
 export class LoginUserUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly passwordHasher: IPasswordHasher,
-    private readonly jwtService: IJwtService
+    private readonly jwtService: IJwtService,
+    private readonly mailService?: IMailService
   ) {}
 
-  public async execute(input: LoginUserInputDto): Promise<AuthResponseDto> {
+  public async execute(
+    input: LoginUserInputDto,
+    metadata?: LoginMetadata
+  ): Promise<AuthResponseDto> {
     const emailVO = Email.create(input.email);
 
     // Fetch user with hashed password from database
@@ -55,6 +65,17 @@ export class LoginUserUseCase {
       email: userDto.email,
       role: userDto.role,
     });
+
+    // Send login security alert asynchronously
+    if (this.mailService) {
+      this.mailService
+        .sendLoginAlertEmail(userDto.email, userDto.name, {
+          ip: metadata?.ip,
+          userAgent: metadata?.userAgent,
+          time: new Date(),
+        })
+        .catch((err) => console.error('Failed to dispatch login alert email:', err));
+    }
 
     return {
       user: userDto,

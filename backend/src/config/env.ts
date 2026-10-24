@@ -13,6 +13,18 @@ const envSchema = z.object({
   RAZORPAY_KEY_ID: z.string().default('rzp_test_placeholder'),
   RAZORPAY_KEY_SECRET: z.string().default('rzp_secret_placeholder'),
   RAZORPAY_WEBHOOK_SECRET: z.string().default('plant_on_agro_webhook_secret_2026'),
+  // SMTP Mailing Configuration
+  SMTP_HOST: z.string().default(''),
+  SMTP_PORT: z.coerce.number().default(587),
+  SMTP_SECURE: z.preprocess((val) => {
+    if (typeof val === 'string') {
+      return val.toLowerCase() === 'true' || val === '1';
+    }
+    return Boolean(val);
+  }, z.boolean()).default(false),
+  SMTP_USER: z.string().default(''),
+  SMTP_PASS: z.string().default(''),
+  SMTP_FROM: z.string().default('PlantOnAgro <no-reply@plantonagro.com>'),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
