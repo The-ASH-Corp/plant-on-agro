@@ -1,4 +1,4 @@
-import { PasswordResetOtpModel } from '../../../infrastructure/database/models/password-reset-otp.model';
+import { IPasswordResetOtpRepository } from '../../../core/interfaces/password-reset-otp.repository.interface';
 import { BadRequestError, NotFoundError } from '../../../core/errors/app-error';
 
 export interface VerifyPasswordResetOtpDto {
@@ -7,31 +7,40 @@ export interface VerifyPasswordResetOtpDto {
 }
 
 export class VerifyPasswordResetOtpUseCase {
+  constructor(
+    private readonly otpRepository: IPasswordResetOtpRepository
+  ) {}
+
   public async execute(dto: VerifyPasswordResetOtpDto): Promise<{ valid: boolean; message: string }> {
     const email = dto.email.trim().toLowerCase();
     const otp = dto.otp.trim();
 
-    const record = await PasswordResetOtpModel.findOne({
-      email,
-      used: false,
-    }).sort({ createdAt: -1 });
+    const record = await this.otpRepository.findLatestActiveByEmail(email);
 
     if (!record) {
       throw new NotFoundError('No active verification code found for this email.');
     }
 
-    if (new Date() > record.expiresAt) {
+    if (record.isExpired()) {
       throw new BadRequestError('Verification code has expired. Please request a new one.');
     }
 
-    if (record.attempts >= 5) {
+    if (record.isMaxAttemptsExceeded()) {
       throw new BadRequestError('Too many invalid attempts. Please request a new verification code.');
     }
 
-    if (record.otp !== otp) {
-      record.attempts += 1;
-      await record.save();
-      throw new BadRequestError('Invalid verification code. Please check and try again.');
+    if (!record.matches(otp)) {
+      // Atomically increment attempt count in repository to prevent concurrent race-condition bypass
+      const currentAttempts = await this.otpRepository.incrementAttempts(record.id!);
+      const remaining = Math.max(0, 5 - currentAttempts);
+
+      if (currentAttempts >= 5) {
+        throw new BadRequestError('Too many invalid attempts. Please request a new verification code.');
+      }
+
+      throw new BadRequestError(
+        `Invalid verification code. Please check and try again (${remaining} attempt${remaining === 1 ? '' : 's'} remaining).`
+      );
     }
 
     return {

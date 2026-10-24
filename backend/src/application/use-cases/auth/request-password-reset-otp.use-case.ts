@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { IUserRepository } from '../../../core/interfaces/user.repository.interface';
+import { IPasswordResetOtpRepository } from '../../../core/interfaces/password-reset-otp.repository.interface';
 import { IMailService } from '../../../core/interfaces/mail-service.interface';
-import { PasswordResetOtpModel } from '../../../infrastructure/database/models/password-reset-otp.model';
 import { BadRequestError, NotFoundError } from '../../../core/errors/app-error';
 
 export interface RequestPasswordResetOtpDto {
@@ -11,6 +11,7 @@ export interface RequestPasswordResetOtpDto {
 export class RequestPasswordResetOtpUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
+    private readonly otpRepository: IPasswordResetOtpRepository,
     private readonly mailService: IMailService
   ) {}
 
@@ -30,21 +31,16 @@ export class RequestPasswordResetOtpUseCase {
     const expiresInMinutes = 10;
     const expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000);
 
-    // Invalidate any existing unused OTPs for this email and save new one
-    await PasswordResetOtpModel.deleteMany({ email });
-    const otpRecord = await PasswordResetOtpModel.create({
-      email,
-      otp,
-      expiresAt,
-      used: false,
-      attempts: 0,
-    });
+    // Create fresh OTP record in database via repository
+    const otpRecord = await this.otpRepository.createOtp(email, otp, expiresAt);
 
     // Dispatch email
     const dispatched = await this.mailService.sendOtpEmail(email, user.name, otp, expiresInMinutes);
     if (!dispatched) {
       // Rollback created OTP record so user is not stuck with an undelivered code
-      await PasswordResetOtpModel.deleteOne({ _id: otpRecord._id });
+      if (otpRecord.id) {
+        await this.otpRepository.deleteById(otpRecord.id);
+      }
       throw new BadRequestError('Failed to dispatch verification code email. Please check your email service or try again later.');
     }
 

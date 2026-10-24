@@ -1,7 +1,7 @@
 import { IUserRepository } from '../../../core/interfaces/user.repository.interface';
+import { IPasswordResetOtpRepository } from '../../../core/interfaces/password-reset-otp.repository.interface';
 import { IPasswordHasher } from '../../../core/interfaces/password-hasher.interface';
 import { IMailService } from '../../../core/interfaces/mail-service.interface';
-import { PasswordResetOtpModel } from '../../../infrastructure/database/models/password-reset-otp.model';
 import { Password, HashedPassword } from '../../../core/value-objects/password.vo';
 import { BadRequestError, NotFoundError } from '../../../core/errors/app-error';
 
@@ -14,6 +14,7 @@ export interface ResetPasswordWithOtpDto {
 export class ResetPasswordWithOtpUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
+    private readonly otpRepository: IPasswordResetOtpRepository,
     private readonly passwordHasher: IPasswordHasher,
     private readonly mailService: IMailService
   ) {}
@@ -23,27 +24,32 @@ export class ResetPasswordWithOtpUseCase {
     const otp = dto.otp.trim();
 
     // 1. Validate OTP
-    const record = await PasswordResetOtpModel.findOne({
-      email,
-      used: false,
-    }).sort({ createdAt: -1 });
+    const record = await this.otpRepository.findLatestActiveByEmail(email);
 
     if (!record) {
       throw new NotFoundError('No active verification code found for this email.');
     }
 
-    if (new Date() > record.expiresAt) {
+    if (record.isExpired()) {
       throw new BadRequestError('Verification code has expired. Please request a new one.');
     }
 
-    if (record.attempts >= 5) {
+    if (record.isMaxAttemptsExceeded()) {
       throw new BadRequestError('Too many invalid attempts. Please request a new verification code.');
     }
 
-    if (record.otp !== otp) {
-      record.attempts += 1;
-      await record.save();
-      throw new BadRequestError('Invalid verification code.');
+    if (!record.matches(otp)) {
+      // Atomically increment attempt count in repository to prevent concurrent race-condition bypass
+      const currentAttempts = await this.otpRepository.incrementAttempts(record.id!);
+      const remaining = Math.max(0, 5 - currentAttempts);
+
+      if (currentAttempts >= 5) {
+        throw new BadRequestError('Too many invalid attempts. Please request a new verification code.');
+      }
+
+      throw new BadRequestError(
+        `Invalid verification code. Please check and try again (${remaining} attempt${remaining === 1 ? '' : 's'} remaining).`
+      );
     }
 
     // 2. Validate user exists
@@ -61,9 +67,11 @@ export class ResetPasswordWithOtpUseCase {
     user.updatePassword(passwordHashVO);
     await this.userRepository.update(user);
 
-    // 5. Invalidate OTP
-    record.used = true;
-    await record.save();
+    // 5. Invalidate OTP atomically to prevent replay attacks
+    const invalidated = await this.otpRepository.markAsUsed(record.id!);
+    if (!invalidated) {
+      throw new BadRequestError('Verification code has already been used.');
+    }
 
     // 6. Send confirmation email
     await this.mailService.sendPasswordResetSuccessEmail(email, user.name);
