@@ -1,4 +1,5 @@
 import { IPasswordResetOtpRepository } from '../../../core/interfaces/password-reset-otp.repository.interface';
+import { IJwtService } from '../../../core/interfaces/jwt-service.interface';
 import { BadRequestError, NotFoundError } from '../../../core/errors/app-error';
 
 export interface VerifyPasswordResetOtpDto {
@@ -8,10 +9,13 @@ export interface VerifyPasswordResetOtpDto {
 
 export class VerifyPasswordResetOtpUseCase {
   constructor(
-    private readonly otpRepository: IPasswordResetOtpRepository
+    private readonly otpRepository: IPasswordResetOtpRepository,
+    private readonly jwtService: IJwtService
   ) {}
 
-  public async execute(dto: VerifyPasswordResetOtpDto): Promise<{ valid: boolean; message: string }> {
+  public async execute(
+    dto: VerifyPasswordResetOtpDto
+  ): Promise<{ valid: boolean; resetToken: string; message: string }> {
     const email = dto.email.trim().toLowerCase();
     const otp = dto.otp.trim();
 
@@ -43,8 +47,19 @@ export class VerifyPasswordResetOtpUseCase {
       );
     }
 
+    // Generate cryptographic reset binding token
+    const resetToken = this.jwtService.generateResetToken({
+      email: record.email,
+      otpId: record.id!,
+      purpose: 'password_reset',
+    });
+
+    // Bind resetToken to the OTP record
+    await this.otpRepository.saveResetToken(record.id!, resetToken);
+
     return {
       valid: true,
+      resetToken,
       message: 'Verification code confirmed successfully.',
     };
   }

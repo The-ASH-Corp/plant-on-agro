@@ -34,6 +34,31 @@ export class MongoPasswordResetOtpRepository implements IPasswordResetOtpReposit
     return PasswordResetOtpMapper.toDomain(doc);
   }
 
+  public async findById(id: string): Promise<Nullable<PasswordResetOtp>> {
+    const doc = await PasswordResetOtpModel.findById(id).exec();
+    if (!doc) return null;
+    return PasswordResetOtpMapper.toDomain(doc);
+  }
+
+  public async findByResetToken(resetToken: string): Promise<Nullable<PasswordResetOtp>> {
+    const doc = await PasswordResetOtpModel.findOne({
+      resetToken,
+      used: false,
+    }).exec();
+
+    if (!doc) return null;
+    return PasswordResetOtpMapper.toDomain(doc);
+  }
+
+  public async saveResetToken(id: string, resetToken: string): Promise<boolean> {
+    const result = await PasswordResetOtpModel.findByIdAndUpdate(
+      id,
+      { $set: { resetToken } }
+    ).exec();
+
+    return !!result;
+  }
+
   public async incrementAttempts(id: string): Promise<number> {
     const updated = await PasswordResetOtpModel.findByIdAndUpdate(
       id,

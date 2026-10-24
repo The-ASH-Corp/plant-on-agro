@@ -1,5 +1,9 @@
 import jwt from 'jsonwebtoken';
-import { IJwtService, UserPayload } from '../../core/interfaces/jwt-service.interface';
+import {
+  IJwtService,
+  UserPayload,
+  ResetPasswordTokenPayload,
+} from '../../core/interfaces/jwt-service.interface';
 import { env } from '../../config/env';
 import { UnauthorizedError } from '../../core/errors/app-error';
 
@@ -24,6 +28,24 @@ export class JsonWebTokenService implements IJwtService {
       return decoded;
     } catch {
       throw new UnauthorizedError('Invalid or expired authentication token');
+    }
+  }
+
+  public generateResetToken(payload: ResetPasswordTokenPayload, expiresIn = '15m'): string {
+    return jwt.sign(payload, this.secret, {
+      expiresIn: expiresIn as any,
+    });
+  }
+
+  public verifyResetToken(token: string): ResetPasswordTokenPayload {
+    try {
+      const decoded = jwt.verify(token, this.secret) as ResetPasswordTokenPayload;
+      if (decoded.purpose !== 'password_reset') {
+        throw new UnauthorizedError('Invalid token purpose');
+      }
+      return decoded;
+    } catch {
+      throw new UnauthorizedError('Invalid or expired password reset token');
     }
   }
 }

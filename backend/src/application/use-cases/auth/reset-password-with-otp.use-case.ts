@@ -2,12 +2,13 @@ import { IUserRepository } from '../../../core/interfaces/user.repository.interf
 import { IPasswordResetOtpRepository } from '../../../core/interfaces/password-reset-otp.repository.interface';
 import { IPasswordHasher } from '../../../core/interfaces/password-hasher.interface';
 import { IMailService } from '../../../core/interfaces/mail-service.interface';
+import { IJwtService, ResetPasswordTokenPayload } from '../../../core/interfaces/jwt-service.interface';
 import { Password, HashedPassword } from '../../../core/value-objects/password.vo';
-import { BadRequestError, NotFoundError } from '../../../core/errors/app-error';
+import { BadRequestError, NotFoundError, UnauthorizedError } from '../../../core/errors/app-error';
 
 export interface ResetPasswordWithOtpDto {
-  email: string;
-  otp: string;
+  email?: string;
+  resetToken: string;
   password: string;
 }
 
@@ -16,65 +17,64 @@ export class ResetPasswordWithOtpUseCase {
     private readonly userRepository: IUserRepository,
     private readonly otpRepository: IPasswordResetOtpRepository,
     private readonly passwordHasher: IPasswordHasher,
-    private readonly mailService: IMailService
+    private readonly mailService: IMailService,
+    private readonly jwtService: IJwtService
   ) {}
 
   public async execute(dto: ResetPasswordWithOtpDto): Promise<{ success: boolean; message: string }> {
-    const email = dto.email.trim().toLowerCase();
-    const otp = dto.otp.trim();
+    if (!dto.resetToken || typeof dto.resetToken !== 'string') {
+      throw new BadRequestError('Verification reset token is required to reset password.');
+    }
 
-    // 1. Validate OTP
-    const record = await this.otpRepository.findLatestActiveByEmail(email);
+    const resetToken = dto.resetToken.trim();
 
-    if (!record) {
-      throw new NotFoundError('No active verification code found for this email.');
+    // 1. Verify cryptographic reset token
+    let tokenPayload: ResetPasswordTokenPayload;
+    try {
+      tokenPayload = this.jwtService.verifyResetToken(resetToken);
+    } catch {
+      throw new UnauthorizedError('Invalid or expired password reset token.');
+    }
+
+    // 2. Cross-verify email binding if provided in request
+    const targetEmail = tokenPayload.email.trim().toLowerCase();
+    if (dto.email && dto.email.trim().toLowerCase() !== targetEmail) {
+      throw new UnauthorizedError('Token is not valid for the provided email address.');
+    }
+
+    // 3. Verify OTP record in database
+    const record = await this.otpRepository.findById(tokenPayload.otpId);
+    if (!record || record.isUsed() || record.resetToken !== resetToken) {
+      throw new BadRequestError('Password reset token is invalid or has already been used.');
     }
 
     if (record.isExpired()) {
-      throw new BadRequestError('Verification code has expired. Please request a new one.');
+      throw new BadRequestError('Password reset token has expired. Please request a new verification code.');
     }
 
-    if (record.isMaxAttemptsExceeded()) {
-      throw new BadRequestError('Too many invalid attempts. Please request a new verification code.');
-    }
-
-    if (!record.matches(otp)) {
-      // Atomically increment attempt count in repository to prevent concurrent race-condition bypass
-      const currentAttempts = await this.otpRepository.incrementAttempts(record.id!);
-      const remaining = Math.max(0, 5 - currentAttempts);
-
-      if (currentAttempts >= 5) {
-        throw new BadRequestError('Too many invalid attempts. Please request a new verification code.');
-      }
-
-      throw new BadRequestError(
-        `Invalid verification code. Please check and try again (${remaining} attempt${remaining === 1 ? '' : 's'} remaining).`
-      );
-    }
-
-    // 2. Validate user exists
-    const user = await this.userRepository.findByEmail(email);
+    // 4. Validate user exists
+    const user = await this.userRepository.findByEmail(targetEmail);
     if (!user) {
       throw new NotFoundError('Account not found.');
     }
 
-    // 3. Validate and hash new password
+    // 5. Validate and hash new password
     const passwordVO = Password.create(dto.password);
     const rawHashed = await this.passwordHasher.hash(passwordVO.getValue());
     const passwordHashVO = HashedPassword.create(rawHashed);
 
-    // 4. Update user
+    // 6. Update user
     user.updatePassword(passwordHashVO);
     await this.userRepository.update(user);
 
-    // 5. Invalidate OTP atomically to prevent replay attacks
+    // 7. Atomically consume token to prevent replay attacks
     const invalidated = await this.otpRepository.markAsUsed(record.id!);
     if (!invalidated) {
-      throw new BadRequestError('Verification code has already been used.');
+      throw new BadRequestError('Password reset token has already been used.');
     }
 
-    // 6. Send confirmation email
-    await this.mailService.sendPasswordResetSuccessEmail(email, user.name);
+    // 8. Send confirmation email
+    await this.mailService.sendPasswordResetSuccessEmail(targetEmail, user.name);
 
     return {
       success: true,

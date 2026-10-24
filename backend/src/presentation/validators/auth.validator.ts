@@ -99,15 +99,19 @@ export type VerifyPasswordResetOtpInput = z.infer<typeof verifyPasswordResetOtpS
 export const resetPasswordWithOtpSchema = z
   .object({
     email: z
-      .string({ error: 'Email is required' })
+      .string()
       .trim()
       .toLowerCase()
-      .email('Invalid email address format'),
-    otp: z
-      .string({ error: 'OTP is required' })
+      .email('Invalid email address format')
+      .optional(),
+    resetToken: z
+      .string({ error: 'Verification reset token is required' })
       .trim()
-      .length(6, 'Verification code must be exactly 6 digits')
-      .regex(/^\d{6}$/, 'Verification code must contain only numbers'),
+      .min(10, 'Valid verification reset token is required'),
+    otp: z
+      .string()
+      .trim()
+      .optional(),
     password: z
       .string({ error: 'Password is required' })
       .min(8, 'Password must be at least 8 characters long')

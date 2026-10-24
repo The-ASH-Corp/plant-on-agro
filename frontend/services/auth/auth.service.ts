@@ -30,16 +30,16 @@ export const authService = {
   async verifyPasswordResetOtp(
     email: string,
     otp: string
-  ): Promise<ApiResponse<{ valid: boolean; message: string }>> {
-    return apiClient.post<{ valid: boolean; message: string }>(
+  ): Promise<ApiResponse<{ valid: boolean; resetToken: string; message: string }>> {
+    return apiClient.post<{ valid: boolean; resetToken: string; message: string }>(
       API_ENDPOINTS.AUTH.FORGOT_PASSWORD_VERIFY_OTP,
       { email, otp }
     );
   },
 
   async resetPasswordWithOtp(payload: {
-    email: string;
-    otp: string;
+    email?: string;
+    resetToken: string;
     password: string;
   }): Promise<ApiResponse<{ success: boolean; message: string }>> {
     return apiClient.post<{ success: boolean; message: string }>(

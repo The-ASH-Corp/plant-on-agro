@@ -5,6 +5,7 @@ export interface PasswordResetOtpProps {
   expiresAt: Date;
   used: boolean;
   attempts: number;
+  resetToken?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -16,6 +17,7 @@ export class PasswordResetOtp {
   private readonly _expiresAt: Date;
   private _used: boolean;
   private _attempts: number;
+  private _resetToken?: string;
   private readonly _createdAt?: Date;
   private _updatedAt?: Date;
 
@@ -26,6 +28,7 @@ export class PasswordResetOtp {
     this._expiresAt = props.expiresAt;
     this._used = props.used ?? false;
     this._attempts = props.attempts ?? 0;
+    this._resetToken = props.resetToken;
     this._createdAt = props.createdAt;
     this._updatedAt = props.updatedAt;
   }
@@ -54,6 +57,10 @@ export class PasswordResetOtp {
     return this._attempts;
   }
 
+  public get resetToken(): string | undefined {
+    return this._resetToken;
+  }
+
   public get createdAt(): Date | undefined {
     return this._createdAt;
   }
@@ -64,6 +71,10 @@ export class PasswordResetOtp {
 
   public isExpired(): boolean {
     return new Date() > this._expiresAt;
+  }
+
+  public isUsed(): boolean {
+    return this._used;
   }
 
   public isMaxAttemptsExceeded(maxAllowed = 5): boolean {

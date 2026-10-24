@@ -10,6 +10,7 @@ export class PasswordResetOtpMapper {
       expiresAt: doc.expiresAt,
       used: doc.used,
       attempts: doc.attempts,
+      resetToken: doc.resetToken,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     });
@@ -22,6 +23,7 @@ export class PasswordResetOtpMapper {
       expiresAt: entity.expiresAt,
       used: entity.used,
       attempts: entity.attempts,
+      resetToken: entity.resetToken,
     };
   }
 }

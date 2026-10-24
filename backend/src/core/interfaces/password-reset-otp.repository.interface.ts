@@ -1,3 +1,4 @@
+
 import { PasswordResetOtp } from '../entities/password-reset-otp.entity';
 import { Nullable } from '../../shared/types';
 
@@ -11,6 +12,21 @@ export interface IPasswordResetOtpRepository {
    * Finds the latest active (unused) OTP record for a given email address.
    */
   findLatestActiveByEmail(email: string): Promise<Nullable<PasswordResetOtp>>;
+
+  /**
+   * Finds an OTP record by its unique database ID.
+   */
+  findById(id: string): Promise<Nullable<PasswordResetOtp>>;
+
+  /**
+   * Finds an active (unused) record associated with a specific verification binding resetToken.
+   */
+  findByResetToken(resetToken: string): Promise<Nullable<PasswordResetOtp>>;
+
+  /**
+   * Saves the generated verification resetToken against the OTP record.
+   */
+  saveResetToken(id: string, resetToken: string): Promise<boolean>;
 
   /**
    * Atomically increments the attempt counter for an OTP document.

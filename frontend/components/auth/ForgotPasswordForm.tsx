@@ -24,6 +24,7 @@ export function ForgotPasswordForm({
   const [step, setStep] = useState<Step>("request");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+  const [resetToken, setResetToken] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -82,6 +83,7 @@ export function ForgotPasswordForm({
     setLoading(true);
     setErrorMessage(null);
     setSuccessMessage(null);
+    setResetToken("");
 
     try {
       const res = await authService.requestPasswordResetOtp(email.trim().toLowerCase());
@@ -108,6 +110,7 @@ export function ForgotPasswordForm({
 
     setLoading(true);
     setErrorMessage(null);
+    setResetToken("");
 
     try {
       const res = await authService.requestPasswordResetOtp(email.trim().toLowerCase());
@@ -136,6 +139,10 @@ export function ForgotPasswordForm({
 
     try {
       const res = await authService.verifyPasswordResetOtp(email.trim().toLowerCase(), cleanOtp);
+      const token = res.data?.resetToken || (res as any)?.resetToken;
+      if (token) {
+        setResetToken(token);
+      }
       setSuccessMessage(res.message || "Code verified successfully! You can now choose a new password.");
       setStep("reset_password");
     } catch (err: unknown) {
@@ -146,10 +153,15 @@ export function ForgotPasswordForm({
     }
   };
 
-  // 4. Reset Password with OTP Handler (Step 3 -> Step 4)
+  // 4. Reset Password with Binding Token Handler (Step 3 -> Step 4)
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!otp.trim() || !isPasswordValid) return;
+    if (!resetToken || !isPasswordValid) {
+      if (!resetToken) {
+        setErrorMessage("Verification session missing or expired. Please re-verify your code.");
+      }
+      return;
+    }
 
     setLoading(true);
     setErrorMessage(null);
@@ -158,7 +170,7 @@ export function ForgotPasswordForm({
     try {
       const res = await authService.resetPasswordWithOtp({
         email: email.trim().toLowerCase(),
-        otp: otp.trim(),
+        resetToken,
         password: newPassword,
       });
 
@@ -166,7 +178,7 @@ export function ForgotPasswordForm({
       setStep("completed");
     } catch (err: unknown) {
       const apiErr = err as ApiError;
-      setErrorMessage(apiErr.message || "Verification code is invalid or has expired.");
+      setErrorMessage(apiErr.message || "Reset token is invalid or has expired. Please verify again.");
     } finally {
       setLoading(false);
     }

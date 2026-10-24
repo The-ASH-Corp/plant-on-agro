@@ -280,13 +280,15 @@ export class Container {
     Container.mailService
   );
   private static readonly verifyPasswordResetOtpUseCase = new VerifyPasswordResetOtpUseCase(
-    Container.passwordResetOtpRepository
+    Container.passwordResetOtpRepository,
+    Container.jwtService
   );
   private static readonly resetPasswordWithOtpUseCase = new ResetPasswordWithOtpUseCase(
     Container.userRepository,
     Container.passwordResetOtpRepository,
     Container.passwordHasher,
-    Container.mailService
+    Container.mailService,
+    Container.jwtService
   );
   
   private static readonly createUserUseCase = new CreateUserUseCase(Container.userRepository);
