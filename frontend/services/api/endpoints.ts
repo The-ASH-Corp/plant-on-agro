@@ -7,6 +7,9 @@ export const API_ENDPOINTS = {
     LOGIN: '/auth/login',
     ME: '/auth/me',
     CHECK_EMAIL: '/auth/check-email',
+    FORGOT_PASSWORD_REQUEST_OTP: '/auth/forgot-password/request-otp',
+    FORGOT_PASSWORD_VERIFY_OTP: '/auth/forgot-password/verify-otp',
+    FORGOT_PASSWORD_RESET: '/auth/forgot-password/reset-password',
   },
   USERS: {
     BASE: '/users',

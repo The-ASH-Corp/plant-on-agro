@@ -1,4 +1,5 @@
 import { IVisitBookingRepository } from '../../../core/interfaces/visit-booking.repository.interface';
+import { IMailService } from '../../../core/interfaces/mail-service.interface';
 import { VisitBooking } from '../../../core/entities/visit-booking.entity';
 
 export interface CreateVisitBookingDto {
@@ -16,7 +17,10 @@ export interface CreateVisitBookingDto {
 }
 
 export class CreateVisitBookingUseCase {
-  constructor(private readonly visitBookingRepository: IVisitBookingRepository) {}
+  constructor(
+    private readonly visitBookingRepository: IVisitBookingRepository,
+    private readonly mailService?: IMailService
+  ) {}
 
   public async execute(dto: CreateVisitBookingDto): Promise<VisitBooking> {
     const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -42,6 +46,24 @@ export class CreateVisitBookingUseCase {
       memories: [],
     });
 
-    return this.visitBookingRepository.save(booking);
+    const savedBooking = await this.visitBookingRepository.save(booking);
+
+    if (this.mailService && dto.adopterEmail) {
+      this.mailService
+        .sendVisitBookingConfirmationEmail({
+          to: dto.adopterEmail,
+          adopterName: dto.adopterName,
+          bookingReference,
+          visitDate: dto.visitDate,
+          timeSlot: dto.timeSlot,
+          reserveName: dto.reserveName,
+          numberOfGuests: dto.numberOfGuests ?? 1,
+          experienceTitle: dto.experienceTitle,
+          guestPassCode,
+        })
+        .catch((err) => console.error('Failed to dispatch visit booking confirmation email:', err));
+    }
+
+    return savedBooking;
   }
 }

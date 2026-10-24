@@ -5,6 +5,7 @@ import { MongoTreeInstanceRepository } from '../repositories/mongo-tree-instance
 import { MongoCertificateRepository } from '../repositories/mongo-certificate.repository';
 import { Argon2PasswordHasher } from '../services/argon2-password-hasher.service';
 import { JsonWebTokenService } from '../services/jwt.service';
+import { NodemailerMailService } from '../services/nodemailer-mail.service';
 
 import { CreateUserUseCase } from '../../application/use-cases/create-user.use-case';
 import { RegisterUserUseCase } from '../../application/use-cases/register-user.use-case';
@@ -14,6 +15,9 @@ import { GetCurrentUserUseCase } from '../../application/use-cases/get-current-u
 import { GetUsersUseCase } from '../../application/use-cases/get-users.use-case';
 import { UpdateUserUseCase } from '../../application/use-cases/update-user.use-case';
 import { DeleteUserUseCase } from '../../application/use-cases/delete-user.use-case';
+import { RequestPasswordResetOtpUseCase } from '../../application/use-cases/auth/request-password-reset-otp.use-case';
+import { VerifyPasswordResetOtpUseCase } from '../../application/use-cases/auth/verify-password-reset-otp.use-case';
+import { ResetPasswordWithOtpUseCase } from '../../application/use-cases/auth/reset-password-with-otp.use-case';
 
 
 import { CreateTreeVarietyUseCase } from '../../application/use-cases/tree-varieties/create-tree-variety.use-case';
@@ -105,6 +109,14 @@ export class Container {
   // Services & Adapters
   private static readonly passwordHasher = new Argon2PasswordHasher();
   public static readonly jwtService = new JsonWebTokenService();
+  public static readonly mailService = new NodemailerMailService(
+    env.SMTP_HOST,
+    env.SMTP_PORT,
+    env.SMTP_SECURE,
+    env.SMTP_USER,
+    env.SMTP_PASS,
+    env.SMTP_FROM
+  );
 
   // Repositories
   public static readonly userRepository = new MongoUserRepository();
@@ -137,7 +149,8 @@ export class Container {
 
   // Visit Booking Use Cases
   private static readonly createVisitBookingUseCase = new CreateVisitBookingUseCase(
-    Container.visitBookingRepository
+    Container.visitBookingRepository,
+    Container.mailService
   );
   private static readonly getVisitBookingsUseCase = new GetVisitBookingsUseCase(
     Container.visitBookingRepository
@@ -167,7 +180,8 @@ export class Container {
   private static readonly orderFulfillmentService = new OrderFulfillmentService(
     Container.orderRepository,
     Container.treeInstanceRepository,
-    Container.certificateRepository
+    Container.certificateRepository,
+    Container.mailService
   );
   private static readonly createRazorpayOrderUseCase = new CreateRazorpayOrderUseCase(
     Container.paymentGatewayService,
@@ -244,15 +258,29 @@ export class Container {
   private static readonly registerUserUseCase = new RegisterUserUseCase(
     Container.userRepository,
     Container.passwordHasher,
-    Container.jwtService
+    Container.jwtService,
+    Container.mailService
   );
   private static readonly loginUserUseCase = new LoginUserUseCase(
     Container.userRepository,
     Container.passwordHasher,
-    Container.jwtService
+    Container.jwtService,
+    Container.mailService
   );
   private static readonly getCurrentUserUseCase = new GetCurrentUserUseCase(
     Container.userRepository
+  );
+
+  // Password Reset OTP Use Cases
+  private static readonly requestPasswordResetOtpUseCase = new RequestPasswordResetOtpUseCase(
+    Container.userRepository,
+    Container.mailService
+  );
+  private static readonly verifyPasswordResetOtpUseCase = new VerifyPasswordResetOtpUseCase();
+  private static readonly resetPasswordWithOtpUseCase = new ResetPasswordWithOtpUseCase(
+    Container.userRepository,
+    Container.passwordHasher,
+    Container.mailService
   );
   
   private static readonly createUserUseCase = new CreateUserUseCase(Container.userRepository);
@@ -344,6 +372,9 @@ export class Container {
     Container.registerUserUseCase,
     Container.loginUserUseCase,
     Container.getCurrentUserUseCase,
+    Container.requestPasswordResetOtpUseCase,
+    Container.verifyPasswordResetOtpUseCase,
+    Container.resetPasswordWithOtpUseCase,
     Container.userRepository
   );
 

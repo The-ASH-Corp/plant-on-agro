@@ -1,6 +1,7 @@
 import { IUserRepository } from '../../core/interfaces/user.repository.interface';
 import { IPasswordHasher } from '../../core/interfaces/password-hasher.interface';
 import { IJwtService } from '../../core/interfaces/jwt-service.interface';
+import { IMailService } from '../../core/interfaces/mail-service.interface';
 import { User, UserRole } from '../../core/entities/user.entity';
 import { Email } from '../../core/value-objects/email.vo';
 import { Password, HashedPassword } from '../../core/value-objects/password.vo';
@@ -12,7 +13,8 @@ export class RegisterUserUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly passwordHasher: IPasswordHasher,
-    private readonly jwtService: IJwtService
+    private readonly jwtService: IJwtService,
+    private readonly mailService?: IMailService
   ) {}
 
   public async execute(input: RegisterUserInputDto): Promise<AuthResponseDto> {
@@ -58,6 +60,13 @@ export class RegisterUserUseCase {
       email: userDto.email,
       role: userDto.role,
     });
+
+    // Send welcome email asynchronously without blocking registration
+    if (this.mailService) {
+      this.mailService
+        .sendWelcomeEmail(userDto.email, userDto.name)
+        .catch((err) => console.error('Failed to dispatch welcome email:', err));
+    }
 
     return {
       user: userDto,
