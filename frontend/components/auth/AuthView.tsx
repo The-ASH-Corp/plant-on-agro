@@ -6,6 +6,7 @@ import { AuthVisualSide } from "./AuthVisualSide";
 import { AuthForm, AuthMode } from "./AuthForm";
 import { ForgotPasswordForm } from "./ForgotPasswordForm";
 import { useAuthStore } from "@/store/auth.store";
+import { useIsClient } from "@/store/hooks/use-hydrated-store";
 
 export type AuthViewMode = AuthMode | "forgot-password";
 
@@ -31,10 +32,9 @@ export function AuthView({
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
 
-  const [mounted, setMounted] = useState(false);
+  const mounted = useIsClient();
 
   useEffect(() => {
-    setMounted(true);
     if (!hasHydrated && useAuthStore.persist?.hasHydrated?.()) {
       useAuthStore.getState().setHasHydrated(true);
     }

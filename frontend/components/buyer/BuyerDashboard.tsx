@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
-import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
+import { useHydratedStore, useIsClient } from "@/store/hooks/use-hydrated-store";
 import { PlantFlow } from "@/components/plant-flow";
 import {
   treeInstanceService,
@@ -120,16 +120,15 @@ export function BuyerDashboard() {
   const logout = useAuthStore((s) => s.logout);
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
 
-  const [mounted, setMounted] = useState(false);
+  const isClient = useIsClient();
 
   useEffect(() => {
-    setMounted(true);
     if (!hasHydrated && useAuthStore.persist?.hasHydrated?.()) {
       useAuthStore.getState().setHasHydrated(true);
     }
   }, [hasHydrated]);
 
-  const isReady = mounted && (hasHydrated || (useAuthStore.persist?.hasHydrated?.() ?? false));
+  const isReady = isClient && (hasHydrated || (useAuthStore.persist?.hasHydrated?.() ?? false));
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<BuyerDashboardTab>("trees");
