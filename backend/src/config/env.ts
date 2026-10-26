@@ -25,6 +25,11 @@ const envSchema = z.object({
   SMTP_USER: z.string().default(''),
   SMTP_PASS: z.string().default(''),
   SMTP_FROM: z.string().default('PlantOnAgro <no-reply@plantonagro.com>'),
+  // Redis Configuration
+  REDIS_URL: z.string().default('redis://127.0.0.1:6379'),
+  REDIS_HOST: z.string().default('127.0.0.1'),
+  REDIS_PORT: z.coerce.number().default(6379),
+  REDIS_PASSWORD: z.string().default(''),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

@@ -3,7 +3,7 @@ import { MongoTreeVarietyRepository } from '../repositories/mongo-tree-variety.r
 import { MongoAdoptionPlanRepository } from '../repositories/mongo-adoption-plan.repository';
 import { MongoTreeInstanceRepository } from '../repositories/mongo-tree-instance.repository';
 import { MongoCertificateRepository } from '../repositories/mongo-certificate.repository';
-import { MongoPasswordResetOtpRepository } from '../repositories/mongo-password-reset-otp.repository';
+import { RedisPasswordResetOtpRepository } from '../repositories/redis-password-reset-otp.repository';
 import { Argon2PasswordHasher } from '../services/argon2-password-hasher.service';
 import { JsonWebTokenService } from '../services/jwt.service';
 import { NodemailerMailService } from '../services/nodemailer-mail.service';
@@ -130,7 +130,7 @@ export class Container {
   public static readonly locationRepository = new MongoLocationRepository();
   public static readonly experienceRepository = new MongoExperienceRepository();
   public static readonly visitBookingRepository = new MongoVisitBookingRepository();
-  public static readonly passwordResetOtpRepository = new MongoPasswordResetOtpRepository();
+  public static readonly passwordResetOtpRepository = new RedisPasswordResetOtpRepository();
 
   // Experience Use Cases
   private static readonly createExperienceUseCase = new CreateExperienceUseCase(

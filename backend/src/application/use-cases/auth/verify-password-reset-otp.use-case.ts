@@ -2,6 +2,7 @@ import { IPasswordResetOtpRepository } from '../../../core/interfaces/password-r
 import { IJwtService } from '../../../core/interfaces/jwt-service.interface';
 import { BadRequestError, NotFoundError } from '../../../core/errors/app-error';
 import { normalizeEmail } from '../../../shared/utils/string.util';
+import { env } from '../../../config/env';
 
 export interface VerifyPasswordResetOtpDto {
   email: string;
@@ -34,7 +35,7 @@ export class VerifyPasswordResetOtpUseCase {
       throw new BadRequestError('Too many invalid attempts. Please request a new verification code.');
     }
 
-    if (!record.matches(otp)) {
+    if (!record.matches(otp, env.JWT_SECRET)) {
       // Atomically increment attempt count in repository to prevent concurrent race-condition bypass
       const currentAttempts = await this.otpRepository.incrementAttempts(record.id!);
       const remaining = Math.max(0, 5 - currentAttempts);

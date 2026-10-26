@@ -1,7 +1,12 @@
 import { Router } from "express";
 import { Container } from "../../infrastructure/di/container";
 import { validateRequest } from "../middlewares/validate.middleware";
-import { authRateLimiter } from "../middlewares/rate-limiter.middleware";
+import {
+  authRateLimiter,
+  otpRequestRateLimiter,
+  otpVerifyRateLimiter,
+  passwordResetRateLimiter,
+} from "../middlewares/rate-limiter.middleware";
 import { authenticate } from "../middlewares/auth.middleware";
 import {
   registerSchema,
@@ -36,24 +41,24 @@ router.post(
 
 router.get("/me", authenticate, Container.authController.me);
 
-// Forgot Password OTP Endpoints
+// Forgot Password OTP Endpoints with Specialized Dual-Layer Redis Rate Limiting
 router.post(
   "/forgot-password/request-otp",
-  authRateLimiter,
+  ...otpRequestRateLimiter,
   validateRequest({ body: requestPasswordResetOtpSchema }),
   Container.authController.requestPasswordResetOtp
 );
 
 router.post(
   "/forgot-password/verify-otp",
-  authRateLimiter,
+  ...otpVerifyRateLimiter,
   validateRequest({ body: verifyPasswordResetOtpSchema }),
   Container.authController.verifyPasswordResetOtp
 );
 
 router.post(
   "/forgot-password/reset-password",
-  authRateLimiter,
+  passwordResetRateLimiter,
   validateRequest({ body: resetPasswordWithOtpSchema }),
   Container.authController.resetPasswordWithOtp
 );

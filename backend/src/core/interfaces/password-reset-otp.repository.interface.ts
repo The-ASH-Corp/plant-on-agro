@@ -48,4 +48,31 @@ export interface IPasswordResetOtpRepository {
    * Invalidate/remove all OTPs for a given email address.
    */
   deleteByEmail(email: string): Promise<number>;
+
+  /**
+   * Checks if an email is temporarily locked out due to exceeding maximum failed attempts.
+   */
+  isEmailLockedOut?(email: string): Promise<boolean>;
+
+  /**
+   * Retrieves remaining seconds before a new OTP can be requested for this email.
+   * Returns 0 if no active cooldown is present.
+   */
+  getCooldownRemainingSeconds?(email: string): Promise<number>;
+
+  /**
+   * Sets a resend cooldown window (e.g. 60 seconds) for an email address.
+   */
+  setCooldown?(email: string, seconds?: number): Promise<void>;
+
+  /**
+   * Clears any active resend cooldown for an email address (e.g. after dispatch failure).
+   */
+  clearCooldown?(email: string): Promise<void>;
+
+  /**
+   * Locks out an email from password reset attempts for a duration (e.g. 900 seconds).
+   */
+  lockoutEmail?(email: string, seconds?: number): Promise<void>;
 }
+

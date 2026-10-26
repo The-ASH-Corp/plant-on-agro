@@ -1,3 +1,6 @@
+import crypto from 'crypto';
+import { env } from '../../config/env';
+
 export interface PasswordResetOtpProps {
   id?: string;
   email: string;
@@ -81,7 +84,37 @@ export class PasswordResetOtp {
     return this._attempts >= maxAllowed;
   }
 
-  public matches(candidateOtp: string): boolean {
-    return this._otp === candidateOtp.trim();
+  public matches(candidateOtp: string, secret: string = env.JWT_SECRET): boolean {
+    const cleanCandidate = candidateOtp.trim();
+    if (this._otp.startsWith('sha256:')) {
+      const storedHash = this._otp.substring(7);
+      const computedHash = crypto
+        .createHmac('sha256', secret)
+        .update(`${this._email}:${cleanCandidate}`)
+        .digest('hex');
+
+      try {
+        const storedBuffer = Buffer.from(storedHash, 'hex');
+        const computedBuffer = Buffer.from(computedHash, 'hex');
+        if (storedBuffer.length !== computedBuffer.length) {
+          return false;
+        }
+        return crypto.timingSafeEqual(storedBuffer, computedBuffer);
+      } catch {
+        return false;
+      }
+    }
+
+    try {
+      const storedBuffer = Buffer.from(this._otp);
+      const candidateBuffer = Buffer.from(cleanCandidate);
+      if (storedBuffer.length !== candidateBuffer.length) {
+        return false;
+      }
+      return crypto.timingSafeEqual(storedBuffer, candidateBuffer);
+    } catch {
+      return false;
+    }
   }
 }
+

@@ -3,6 +3,7 @@ import { createApp } from './app';
 import { env } from './config/env';
 import { Database } from './infrastructure/database/connection';
 import { seedExperiencesIfEmpty } from './infrastructure/database/seeds/experience.seeder';
+import { redisService } from './infrastructure/redis/redis.client';
 
 const bootstrap = async (): Promise<void> => {
   try {
@@ -31,10 +32,11 @@ const bootstrap = async (): Promise<void> => {
         console.log('🔒 HTTP server closed');
         try {
           await Database.disconnect();
+          await redisService.disconnect();
           console.log('✅ Graceful shutdown completed');
           process.exit(0);
         } catch (error) {
-          console.error('❌ Error during database disconnect:', error);
+          console.error('❌ Error during shutdown disconnect:', error);
           process.exit(1);
         }
       });
