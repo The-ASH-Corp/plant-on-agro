@@ -8,6 +8,7 @@ import type { UserActions } from "./hooks/useUserActions";
 import type { OrderActions } from "./hooks/useOrderActions";
 import type { CertificateActions } from "./hooks/useCertificateActions";
 import { DELETE_ITEM_LABELS, type DeleteActions } from "./hooks/useDeleteActions";
+import { certificateService } from "@/services/certificates/certificate.service";
 
 import { AddTreeModal } from "./modals/AddTreeModal";
 import { EditTreeModal } from "./modals/EditTreeModal";
@@ -122,17 +123,11 @@ export function AdminModals({
         order={selectedOrder}
         onClose={() => setSelectedOrder(null)}
         onDownloadCertificate={(certId) => {
-          const foundCert = certificates.find(
-            (c) =>
-              c.certificateNumber === certId ||
-              c.orderRef === selectedOrder?.orderNumber ||
-              c.id === certId
-          );
-          if (foundCert) {
-            setSelectedCertForInspect(foundCert);
-          } else {
-            showToast(`Digital Certificate ${certId} downloaded!`);
+          const targetId = certId || selectedOrder?.certificateId || selectedOrder?.orderNumber;
+          if (targetId) {
+            window.open(certificateService.getDownloadUrl(targetId), '_blank');
           }
+          showToast(`Initiating download for Certificate ${targetId || ''}...`);
           setSelectedOrder(null);
         }}
         onUpdateStatus={orderActions.handleUpdateOrderStatus}

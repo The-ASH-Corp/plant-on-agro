@@ -47,6 +47,8 @@ import { GetCertificateByNumberUseCase } from '../../application/use-cases/certi
 import { VerifyCertificateUseCase } from '../../application/use-cases/certificates/verify-certificate.use-case';
 import { UpdateCertificateUseCase } from '../../application/use-cases/certificates/update-certificate.use-case';
 import { DeleteCertificateUseCase } from '../../application/use-cases/certificates/delete-certificate.use-case';
+import { DownloadCertificatePdfUseCase } from '../../application/use-cases/certificates/download-certificate-pdf.use-case';
+import { PdfKitCertificateGeneratorService } from '../services/pdfkit-certificate-generator.service';
 
 import { MongoLandingPageRepository } from '../repositories/mongo-landing-page.repository';
 import { GetLandingPageUseCase } from '../../application/use-cases/landing-page/get-landing-page.use-case';
@@ -118,6 +120,7 @@ export class Container {
     env.SMTP_PASS,
     env.SMTP_FROM
   );
+  public static readonly pdfGeneratorService = new PdfKitCertificateGeneratorService();
 
   // Repositories
   public static readonly userRepository = new MongoUserRepository();
@@ -374,6 +377,11 @@ export class Container {
   private static readonly deleteCertificateUseCase = new DeleteCertificateUseCase(
     Container.certificateRepository
   );
+  private static readonly downloadCertificatePdfUseCase = new DownloadCertificatePdfUseCase(
+    Container.certificateRepository,
+    Container.treeInstanceRepository,
+    Container.pdfGeneratorService
+  );
 
   // Controllers
   public static readonly authController = new AuthController(
@@ -427,7 +435,8 @@ export class Container {
     Container.getCertificateByNumberUseCase,
     Container.verifyCertificateUseCase,
     Container.updateCertificateUseCase,
-    Container.deleteCertificateUseCase
+    Container.deleteCertificateUseCase,
+    Container.downloadCertificatePdfUseCase
   );
 
   public static readonly landingPageController = new LandingPageController(

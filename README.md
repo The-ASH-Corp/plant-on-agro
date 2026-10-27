@@ -316,8 +316,8 @@ cd plant-on-agro
    JWT_EXPIRES_IN=7d
 
    # Razorpay Payment Gateway Keys (Live or Test)
-   RAZORPAY_KEY_ID=rzp_live_RKwBjL67NwW4h1
-   RAZORPAY_KEY_SECRET=Wq1GnY20iVUxdcet7Ner07IN
+   RAZORPAY_KEY_ID=
+   RAZORPAY_KEY_SECRET=
    ```
 
 4. **Seed the Administrator Account**:
@@ -351,7 +351,7 @@ cd plant-on-agro
    Create a `.env` file in the `frontend/` directory:
    ```env
    NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
-   NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_live_RKwBjL67NwW4h1
+   NEXT_PUBLIC_RAZORPAY_KEY_ID=
    ```
 
 4. **Start the Frontend Dev Server**:

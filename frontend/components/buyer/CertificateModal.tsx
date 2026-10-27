@@ -1,6 +1,7 @@
 "use client";
 
 import { BackendTreeInstance } from "@/services/tree-instances/tree-instance.service";
+import { certificateService } from "@/services/certificates/certificate.service";
 
 interface CertificateModalProps {
   tree: BackendTreeInstance | null;
@@ -28,11 +29,15 @@ export function CertificateModal({ tree, userName, onClose }: CertificateModalPr
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => window.print()}
-              className="text-xs font-bold px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 cursor-pointer flex items-center gap-1.5 transition-colors"
+              onClick={() => {
+                const certId = tree.treeTag || tree.orderRef;
+                const downloadUrl = certificateService.getDownloadUrl(certId);
+                window.open(downloadUrl, '_blank');
+              }}
+              className="text-xs font-bold px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#1b7a43] to-[#52b788] hover:scale-105 text-white border border-emerald-400/40 cursor-pointer flex items-center gap-1.5 transition-all shadow-sm"
             >
-              <span>🖨️</span>
-              <span>Print / PDF</span>
+              <span>📜</span>
+              <span>Download Official Deed PDF</span>
             </button>
             <button
               onClick={onClose}
