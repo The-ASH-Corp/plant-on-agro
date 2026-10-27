@@ -6,6 +6,7 @@ import { GetCertificateByNumberUseCase } from '../../application/use-cases/certi
 import { VerifyCertificateUseCase } from '../../application/use-cases/certificates/verify-certificate.use-case';
 import { UpdateCertificateUseCase } from '../../application/use-cases/certificates/update-certificate.use-case';
 import { DeleteCertificateUseCase } from '../../application/use-cases/certificates/delete-certificate.use-case';
+import { DownloadCertificatePdfUseCase } from '../../application/use-cases/certificates/download-certificate-pdf.use-case';
 import { ApiResponse } from '../../shared/utils/api-response';
 
 export class CertificateController {
@@ -16,7 +17,8 @@ export class CertificateController {
     private readonly getCertificateByNumberUseCase: GetCertificateByNumberUseCase,
     private readonly verifyCertificateUseCase: VerifyCertificateUseCase,
     private readonly updateCertificateUseCase: UpdateCertificateUseCase,
-    private readonly deleteCertificateUseCase: DeleteCertificateUseCase
+    private readonly deleteCertificateUseCase: DeleteCertificateUseCase,
+    private readonly downloadCertificatePdfUseCase: DownloadCertificatePdfUseCase
   ) {}
 
   public create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -82,6 +84,25 @@ export class CertificateController {
       const { id } = req.params;
       const result = await this.deleteCertificateUseCase.execute(id as string);
       ApiResponse.success(res, { deleted: result }, 'Certificate deleted successfully');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public downloadPdf = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const certificateNumber = (req.params.certificateNumber || req.params.number || req.params.id) as string;
+      const isAttachment = req.query.download === 'true';
+      const result = await this.downloadCertificatePdfUseCase.execute(certificateNumber);
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader(
+        'Content-Disposition',
+        `${isAttachment ? 'attachment' : 'inline'}; filename="${result.filename}"`
+      );
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+
+      result.stream.pipe(res);
     } catch (error) {
       next(error);
     }

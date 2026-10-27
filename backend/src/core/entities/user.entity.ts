@@ -48,6 +48,10 @@ export class User {
     return this._email;
   }
 
+  public hasEmail(candidateEmail: string | Email): boolean {
+    return this._email.equals(candidateEmail);
+  }
+
   public get passwordHash(): HashedPassword | undefined {
     return this._passwordHash;
   }

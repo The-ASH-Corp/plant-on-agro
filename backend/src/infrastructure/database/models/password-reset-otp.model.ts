@@ -50,6 +50,25 @@ const PasswordResetOtpSchema = new Schema<IPasswordResetOtpDocument>(
   }
 );
 
+// Ensure email is always trimmed and lowercase on save
+PasswordResetOtpSchema.pre('save', function () {
+  if (this.email) {
+    this.email = this.email.trim().toLowerCase();
+  }
+});
+
+// Ensure email is always trimmed and lowercase on findOneAndUpdate
+PasswordResetOtpSchema.pre('findOneAndUpdate', function () {
+  const update = this.getUpdate() as Record<string, any>;
+  if (!update) return;
+  if (typeof update.email === 'string') {
+    update.email = update.email.trim().toLowerCase();
+  }
+  if (update.$set && typeof update.$set.email === 'string') {
+    update.$set.email = update.$set.email.trim().toLowerCase();
+  }
+});
+
 // TTL Index: Automatically remove documents after expiresAt has passed
 PasswordResetOtpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 

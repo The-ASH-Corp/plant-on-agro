@@ -8,6 +8,7 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(5000),
   MONGO_URI: z.string().min(1, 'MONGO_URI is required').default('mongodb://localhost:27017/plant_on_agro'),
   CORS_ORIGIN: z.string().default('*'),
+  FRONTEND_URL: z.string().default('http://localhost:3000'),
   JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 characters').default('plant_on_agro_jwt_super_secret_key_2026_secure'),
   JWT_EXPIRES_IN: z.string().default('7d'),
   RAZORPAY_KEY_ID: z.string().default('rzp_test_placeholder'),
@@ -25,6 +26,11 @@ const envSchema = z.object({
   SMTP_USER: z.string().default(''),
   SMTP_PASS: z.string().default(''),
   SMTP_FROM: z.string().default('PlantOnAgro <no-reply@plantonagro.com>'),
+  // Redis Configuration
+  REDIS_URL: z.string().default('redis://127.0.0.1:6379'),
+  REDIS_HOST: z.string().default('127.0.0.1'),
+  REDIS_PORT: z.coerce.number().default(6379),
+  REDIS_PASSWORD: z.string().default(''),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

@@ -1,6 +1,7 @@
 "use client";
 
 import { BackendTreeInstance } from "@/services/tree-instances/tree-instance.service";
+import { certificateService } from "@/services/certificates/certificate.service";
 
 interface BuyerCertificatesTabProps {
   trees: BackendTreeInstance[];
@@ -131,12 +132,14 @@ export function BuyerCertificatesTab({
                   </button>
                   <button
                     onClick={() => {
-                      onOpenModal(tree);
-                      setTimeout(() => window.print(), 200);
+                      const certId = tree.treeTag || tree.orderRef;
+                      const downloadUrl = certificateService.getDownloadUrl(certId);
+                      window.open(downloadUrl, '_blank');
                     }}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1b7a43] to-[#52b788] text-white font-bold cursor-pointer hover:scale-105 transition-transform shadow-md"
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1b7a43] to-[#52b788] text-white font-bold cursor-pointer hover:scale-105 transition-transform shadow-md flex items-center gap-1.5"
                   >
-                    🖨️ Print / Download
+                    <span>📜</span>
+                    <span>Download Deed PDF</span>
                   </button>
                 </div>
               </div>

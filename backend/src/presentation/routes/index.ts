@@ -13,17 +13,24 @@ import { experienceRoutes } from './experience.routes';
 import { visitBookingRoutes } from './visit-booking.routes';
 import { paymentRoutes } from './payment.routes';
 import { ApiResponse } from '../../shared/utils/api-response';
+import { redisService } from '../../infrastructure/redis/redis.client';
 
 const apiRouter = Router();
 
 // Health check endpoint
-apiRouter.get('/health', (_req, res) => {
+apiRouter.get('/health', async (_req, res) => {
+  const isRedisConnected = await redisService.ping();
+
   ApiResponse.success(
     res,
     {
       status: 'UP',
       uptime: process.uptime(),
       timestamp: new Date().toISOString(),
+      services: {
+        database: 'CONNECTED',
+        redis: isRedisConnected ? 'CONNECTED' : 'DISCONNECTED',
+      },
     },
     'Server is healthy'
   );

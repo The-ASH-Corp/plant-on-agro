@@ -12,6 +12,9 @@ import morgan from 'morgan';
 export const createApp = (): Application => {
   const app = express();
 
+  // Enable trust proxy for accurate IP resolution behind reverse proxies (Nginx, Cloudflare, ALB)
+  app.set('trust proxy', 1);
+
   // Security & standard middlewares
   app.disable('x-powered-by');
   app.use(

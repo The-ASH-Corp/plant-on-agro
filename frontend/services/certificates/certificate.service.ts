@@ -149,5 +149,15 @@ export const certificateService = {
   async deleteCertificate(id: string): Promise<ApiResponse<{ deleted: boolean }>> {
     return apiClient.delete<{ deleted: boolean }>(API_ENDPOINTS.CERTIFICATES.BY_ID(id));
   },
+
+  /**
+   * Returns the direct streaming URL for downloading or previewing an official PDF deed.
+   */
+  getDownloadUrl(certificateNumberOrId: string, download = false): string {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+    const cleanUrl = baseUrl.replace(/\/+$/, '');
+    const cleanNumber = encodeURIComponent(certificateNumberOrId.trim());
+    return `${cleanUrl}/certificates/${cleanNumber}/download${download ? '?download=true' : ''}`;
+  },
 };
 

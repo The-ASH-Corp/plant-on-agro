@@ -3,6 +3,7 @@ import { User } from '../../core/entities/user.entity';
 import { UserModel } from '../database/models/user.model';
 import { UserMapper } from '../database/mappers/user.mapper';
 import { Nullable } from '../../shared/types';
+import { buildCaseInsensitiveEmailQuery } from '../../shared/utils/string.util';
 
 export class MongoUserRepository implements IUserRepository {
   public async findById(id: string): Promise<Nullable<User>> {
@@ -12,13 +13,13 @@ export class MongoUserRepository implements IUserRepository {
   }
 
   public async findByEmail(email: string): Promise<Nullable<User>> {
-    const doc = await UserModel.findOne({ email: email.toLowerCase() }).exec();
+    const doc = await UserModel.findOne(buildCaseInsensitiveEmailQuery(email)).exec();
     if (!doc) return null;
     return UserMapper.toDomain(doc);
   }
 
   public async findByEmailWithPassword(email: string): Promise<Nullable<User>> {
-    const doc = await UserModel.findOne({ email: email.toLowerCase() })
+    const doc = await UserModel.findOne(buildCaseInsensitiveEmailQuery(email))
       .select('+password')
       .exec();
     if (!doc) return null;
@@ -57,4 +58,3 @@ export class MongoUserRepository implements IUserRepository {
     return UserModel.countDocuments().exec();
   }
 }
-

@@ -15,7 +15,7 @@ npm install
 # 2. Configure environment
 # Copy or create .env:
 # NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
-# NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_live_RKwBjL67NwW4h1
+# NEXT_PUBLIC_RAZORPAY_KEY_ID=
 
 # 3. Start local development server
 npm run dev

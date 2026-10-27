@@ -37,6 +37,18 @@ router.get(
   Container.certificateController.getByNumber
 );
 
+// GET /api/v1/certificates/:certificateNumber/download - Streaming printable high-resolution PDF deed
+router.get(
+  '/:certificateNumber/download',
+  Container.certificateController.downloadPdf
+);
+
+// GET /api/v1/certificates/download/:certificateNumber - Alias for direct PDF download
+router.get(
+  '/download/:certificateNumber',
+  Container.certificateController.downloadPdf
+);
+
 // GET /api/v1/certificates/:id - Get single certificate by database ID
 router.get(
   '/:id',

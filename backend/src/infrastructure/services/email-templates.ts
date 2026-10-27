@@ -1,4 +1,5 @@
 import { SendPaymentReceiptOptions, SendVisitBookingConfirmationOptions } from '../../core/interfaces/mail-service.interface';
+import { env } from '../../config/env';
 
 /**
  * Base email layout wrapper providing unified brand styling for PlantOnAgro
@@ -112,8 +113,8 @@ function wrapInBaseLayout(title: string, content: string): string {
           PlantOnAgro Ecological Stewardship Initiative • Audited Field Agroforestry
         </p>
         <div class="footer-links">
-          <a href="http://localhost:3000">Marketplace</a> •
-          <a href="http://localhost:3000/buyer/dashboard">Buyer Dashboard</a> •
+          <a href="${env.FRONTEND_URL}">Marketplace</a> •
+          <a href="${env.FRONTEND_URL}/buyer/dashboard">Buyer Dashboard</a> •
           <a href="mailto:support@plantonagro.com">Support</a>
         </div>
         <p style="margin: 12px 0 0; font-size: 11px; color: #8fa397;">
@@ -185,7 +186,7 @@ export const EmailTemplates = {
       </p>
 
       <div style="text-align: center; margin: 30px 0;">
-        <a href="http://localhost:3000/login" class="button">
+        <a href="${env.FRONTEND_URL}/login" class="button">
           Sign In to Your Account →
         </a>
       </div>
@@ -203,7 +204,7 @@ export const EmailTemplates = {
    */
   welcome(name: string): { subject: string; html: string; text: string } {
     const subject = `🌱 Welcome to PlantOnAgro, ${name}! Your Green Journey Begins.`;
-    const text = `Hello ${name},\n\nWelcome to PlantOnAgro! Thank you for joining our community dedicated to verified agroforestry, digital tree adoption, and environmental regeneration.\n\nVisit your dashboard: http://localhost:3000/dashboard\n\n— The PlantOnAgro Team`;
+    const text = `Hello ${name},\n\nWelcome to PlantOnAgro! Thank you for joining our community dedicated to verified agroforestry, digital tree adoption, and environmental regeneration.\n\nVisit your dashboard: ${env.FRONTEND_URL}/buyer/dashboard\n\n— The PlantOnAgro Team`;
 
     const content = `
       <h2 style="margin: 0 0 12px; font-size: 24px; color: #173324;">Welcome to PlantOnAgro! 🌿</h2>
@@ -222,7 +223,7 @@ export const EmailTemplates = {
       </div>
 
       <div style="text-align: center; margin: 32px 0;">
-        <a href="http://localhost:3000" class="button">
+        <a href="${env.FRONTEND_URL}" class="button">
           Explore Tree Marketplace →
         </a>
       </div>
@@ -257,7 +258,7 @@ export const EmailTemplates = {
       </p>
 
       <div style="text-align: center;">
-        <a href="http://localhost:3000/forgot-password" style="display: inline-block; color: #b91c1c; font-size: 13px; font-weight: 600; text-decoration: underline;">
+        <a href="${env.FRONTEND_URL}/forgot-password" style="display: inline-block; color: #b91c1c; font-size: 13px; font-weight: 600; text-decoration: underline;">
           Not you? Secure your account here →
         </a>
       </div>
@@ -278,7 +279,7 @@ export const EmailTemplates = {
     });
 
     const subject = `🧾 Official Receipt & Invoice #${options.orderNumber} - PlantOnAgro`;
-    const text = `Dear ${options.customerName},\n\nThank you for adopting ${options.quantity} tree(s) with PlantOnAgro!\n\nOrder Number: ${options.orderNumber}\nAmount Paid: ${formattedAmount}\nSpecies: ${options.treeSpecies}\nPlan: ${options.planType}\nReserve: ${options.reserveName}\nCertificate Number: ${options.certificateNumber || 'Issued'}\n\nView your living ledger: http://localhost:3000/buyer/dashboard\n\n— PlantOnAgro`;
+    const text = `Dear ${options.customerName},\n\nThank you for adopting ${options.quantity} tree(s) with PlantOnAgro!\n\nOrder Number: ${options.orderNumber}\nAmount Paid: ${formattedAmount}\nSpecies: ${options.treeSpecies}\nPlan: ${options.planType}\nReserve: ${options.reserveName}\nCertificate Number: ${options.certificateNumber || 'Issued'}\n\nView your living ledger: ${env.FRONTEND_URL}/buyer/dashboard\n\n— PlantOnAgro`;
 
     const treeTagsList = (options.treeTags && options.treeTags.length > 0)
       ? options.treeTags.map((tag) => `<span style="display: inline-block; background-color: #eef7f2; border: 1px solid #c9e3d3; color: #173324; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-family: monospace; margin: 2px 4px 2px 0;">${tag}</span>`).join('')
@@ -367,7 +368,7 @@ export const EmailTemplates = {
       </div>
 
       <div style="text-align: center; margin: 32px 0;">
-        <a href="http://localhost:3000/buyer/dashboard" class="button">
+        <a href="${env.FRONTEND_URL}/buyer/dashboard" class="button">
           View in Buyer Dashboard & Download Certificate →
         </a>
       </div>
@@ -430,7 +431,7 @@ export const EmailTemplates = {
       </div>
 
       <div style="text-align: center; margin: 30px 0;">
-        <a href="http://localhost:3000/buyer/dashboard" class="button">
+        <a href="${env.FRONTEND_URL}/buyer/dashboard" class="button">
           View Visit Details in Dashboard →
         </a>
       </div>

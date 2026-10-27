@@ -32,6 +32,7 @@ export const API_ENDPOINTS = {
     BASE: '/certificates',
     BY_ID: (id: string) => `/certificates/${id}`,
     BY_NUMBER: (number: string) => `/certificates/number/${number}`,
+    DOWNLOAD: (number: string) => `/certificates/${number}/download`,
     VERIFY: (tokenOrNumber: string) => `/certificates/verify/${tokenOrNumber}`,
   },
   LANDING_PAGE: {
