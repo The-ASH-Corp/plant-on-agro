@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IPasswordResetOtpDocument extends Document {
+  otpId?: string;
   email: string;
   otp: string;
   expiresAt: Date;
@@ -13,6 +14,13 @@ export interface IPasswordResetOtpDocument extends Document {
 
 const PasswordResetOtpSchema = new Schema<IPasswordResetOtpDocument>(
   {
+    otpId: {
+      type: String,
+      required: false,
+      trim: true,
+      index: true,
+      sparse: true,
+    },
     email: {
       type: String,
       required: true,
@@ -76,3 +84,13 @@ export const PasswordResetOtpModel = mongoose.model<IPasswordResetOtpDocument>(
   'PasswordResetOtp',
   PasswordResetOtpSchema
 );
+
+export function buildOtpIdQuery(id: string): Record<string, any> {
+  const cleanId = (id || '').trim();
+  if (mongoose.isValidObjectId(cleanId)) {
+    return {
+      $or: [{ otpId: cleanId }, { _id: cleanId }],
+    };
+  }
+  return { otpId: cleanId };
+}
