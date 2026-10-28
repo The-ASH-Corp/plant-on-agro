@@ -1,5 +1,6 @@
 import Redis, { RedisOptions } from 'ioredis';
 import { env } from '../../config/env';
+import { ensureRedisContainerSync } from './redis-docker.helper';
 
 export class RedisClientService {
   private static instance: RedisClientService | null = null;
@@ -18,6 +19,13 @@ export class RedisClientService {
   }
 
   private initClient(): void {
+    // Automatically ensure the Redis Docker container is running if connecting locally
+    try {
+      ensureRedisContainerSync();
+    } catch (err: any) {
+      console.warn('⚠️ [REDIS] Auto-start check failed:', err.message);
+    }
+
     const options: RedisOptions = {
       host: env.REDIS_HOST,
       port: env.REDIS_PORT,
@@ -26,6 +34,10 @@ export class RedisClientService {
       maxRetriesPerRequest: 3,
       enableOfflineQueue: true,
       retryStrategy: (times: number) => {
+        if (times > 20) {
+          console.error('❌ [REDIS] Max reconnection attempts (20) reached. Verify that Redis / Docker is active.');
+          return null;
+        }
         // Exponential backoff with a cap of 3 seconds
         const delay = Math.min(times * 150, 3000);
         console.warn(`🔄 [REDIS] Reconnecting attempt #${times} in ${delay}ms...`);
