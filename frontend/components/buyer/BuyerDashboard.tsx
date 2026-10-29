@@ -374,64 +374,7 @@ export function BuyerDashboard() {
             {/* Primary Module Stage (8 Cols on Desktop) */}
             <div className="lg:col-span-8 space-y-4">
               {/* Tab Switcher Pills */}
-              <div className="flex flex-wrap items-center gap-2 border-b border-[#dce6df] pb-3">
-                {[
-                  {
-                    id: "trees" as const,
-                    label: "🌲 My Forest",
-                    count: totalTrees,
-                    desc: "Living specimens",
-                  },
-                  {
-                    id: "certificates" as const,
-                    label: "📜 Official Deeds",
-                    count: totalTrees,
-                    desc: "Certified ownership",
-                  },
-                  {
-                    id: "impact" as const,
-                    label: "📊 Carbon & Impact",
-                    desc: "Scientific telemetry",
-                  },
-                  {
-                    id: "orders" as const,
-                    label: "📦 Orders & Invoices",
-                    count: orders.length,
-                    desc: "Receipts & ledger",
-                  },
-                  {
-                    id: "visits" as const,
-                    label: "🗺️ My Visits & Tours",
-                    desc: "Plantation passes & experiences",
-                  },
-                ].map((tab) => {
-                  const isActive = activeTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
-                        isActive
-                          ? "bg-[#173324] text-white shadow-sm shadow-emerald-950/20"
-                          : "bg-white text-[#52796f] hover:bg-emerald-50 hover:text-[#173324] border border-[#e2eae5]"
-                      }`}
-                    >
-                      <span>{tab.label}</span>
-                      {typeof tab.count === "number" && (
-                        <span
-                          className={`text-[10px] px-2 py-0.5 rounded-full font-bold font-mono ${
-                            isActive
-                              ? "bg-white/20 text-white"
-                              : "bg-emerald-100 text-emerald-800"
-                          }`}
-                        >
-                          {tab.count}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+             
 
               {/* Active Tab View */}
               {activeTab === "trees" && (
