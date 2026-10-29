@@ -307,9 +307,6 @@ export function UsersTab({
                             <span className="text-[11px] text-[#73877b] block truncate">
                               {user.email}
                             </span>
-                            <span className="text-[9px] font-mono text-[#8a9990] block truncate">
-                              ID: {user.id}
-                            </span>
                           </div>
                         </div>
                       </td>
