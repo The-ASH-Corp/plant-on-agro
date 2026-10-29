@@ -4,3 +4,4 @@ export { Badge } from "./Badge";
 export { PencilIcon } from "./PencilIcon";
 export { ErrorPopup } from "./ErrorPopup";
 export { Select } from "./Select";
+export { SignOutConfirmationModal } from "./SignOutConfirmationModal";

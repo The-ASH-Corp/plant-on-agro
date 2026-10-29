@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
 import { useHydratedStore, useIsClient } from "@/store/hooks/use-hydrated-store";
 import { PlantFlow } from "@/components/plant-flow";
+import { SignOutConfirmationModal } from "@/components/ui";
 import {
   treeInstanceService,
   BackendTreeInstance,
@@ -131,6 +132,7 @@ export function BuyerDashboard() {
   const isReady = isClient && (hasHydrated || (useAuthStore.persist?.hasHydrated?.() ?? false));
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
   const [activeTab, setActiveTab] = useState<BuyerDashboardTab>("trees");
   const [plantFlowOpen, setPlantFlowOpen] = useState(false);
   const [selectedCertificateTree, setSelectedCertificateTree] = useState<BackendTreeInstance | null>(null);
@@ -338,7 +340,7 @@ export function BuyerDashboard() {
         certificatesCount={totalTrees}
         ordersCount={orders.length}
         user={user}
-        onLogout={logout}
+        onLogout={() => setShowSignOutModal(true)}
         onOpenPlantFlow={() => setPlantFlowOpen(true)}
       />
 
@@ -473,8 +475,6 @@ export function BuyerDashboard() {
               )}
             </div>
 
-
-
             {/* Right Telemetry Column (4 Cols on Desktop) */}
             <div className="lg:col-span-4">
               <BuyerSidebarWidgets
@@ -510,6 +510,16 @@ export function BuyerDashboard() {
 
       {/* Plant Tree Adoption Flow Wizard */}
       {plantFlowOpen && <PlantFlow onClose={() => setPlantFlowOpen(false)} />}
+
+      {/* Sign Out Confirmation Modal */}
+      <SignOutConfirmationModal
+        isOpen={showSignOutModal}
+        onClose={() => setShowSignOutModal(false)}
+        onConfirm={logout}
+        userName={user?.name}
+        userEmail={user?.email}
+        userRole={user?.role}
+      />
     </div>
   );
 }
