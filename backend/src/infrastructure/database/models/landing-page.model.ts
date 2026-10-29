@@ -21,8 +21,8 @@ export interface ILandingPageDocument extends Document {
 
 const HeroStatSchema = new Schema(
   {
-    target: { type: Number, required: true },
-    suffix: { type: String, required: true, default: '+' },
+    target: { type: Number, required: true, default: 0 },
+    suffix: { type: String, default: '' },
     label: { type: String, required: true },
   },
   { _id: false }
@@ -40,9 +40,9 @@ const HowItWorksStepSchema = new Schema(
 
 const ImpactStatSchema = new Schema(
   {
-    icon: { type: String, required: true },
-    value: { type: Number, required: true },
-    suffix: { type: String, required: true },
+    icon: { type: String, required: true, default: '🌱' },
+    value: { type: Number, required: true, default: 0 },
+    suffix: { type: String, default: '' },
     label: { type: String, required: true },
     color: { type: String, required: true, default: '#52b788' },
   },
