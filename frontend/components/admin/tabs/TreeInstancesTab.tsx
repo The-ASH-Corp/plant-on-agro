@@ -405,9 +405,7 @@ export function TreeInstancesTab({
                           <span>📍</span>
                           <span>{item.formattedGps}</span>
                         </a>
-                        <span className="text-[10px] text-[#8b9c92] block">
-                          Lat: {item.gpsCoordinates.latitude.toFixed(4)}, Lng: {item.gpsCoordinates.longitude.toFixed(4)}
-                        </span>
+                       
                       </td>
 
                       {/* Date Planted */}
