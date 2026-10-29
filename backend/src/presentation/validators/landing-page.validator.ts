@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const heroStatSchema = z.object({
   target: z.coerce.number().min(0, 'Target must be positive'),
-  suffix: z.string().trim().default(''),
+  suffix: z.string().default(''),
   label: z.string().trim().min(1, 'Label cannot be empty'),
 });
 
@@ -35,7 +35,7 @@ const howItWorksSectionSchema = z.object({
 const impactStatSchema = z.object({
   icon: z.string().trim(),
   value: z.coerce.number().min(0),
-  suffix: z.string().trim().default(''),
+  suffix: z.string().default(''),
   label: z.string().trim().min(1, 'Stat label cannot be empty'),
   color: z.string().trim().default('#52b788'),
 });

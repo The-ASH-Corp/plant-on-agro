@@ -36,19 +36,20 @@ export function Hero({ openPlant, goImpact, content, liveStats }: HeroProps) {
   const bgImg =
     content?.bgImageUrl ||
     "https://images.unsplash.com/photo-1568241640298-1adf2974314c?w=1920&h=1080&fit=crop&auto=format";
-  const stats = liveStats
-    ? [
-        { target: liveStats.totalTrees, suffix: liveStats.totalTrees > 0 ? "+" : "", label: "Trees Planted & Geotagged" },
-        { target: liveStats.totalVarieties, suffix: "", label: "Native Tree Varieties" },
-        { target: liveStats.totalReserves, suffix: liveStats.totalReserves > 0 ? "+" : "", label: "Protected Bio-Reserves" },
-      ]
-    : content?.stats && content.stats.length > 0
-    ? content.stats
-    : [
-        { target: 0, suffix: "", label: "Trees Planted & Geotagged" },
-        { target: 0, suffix: "", label: "Native Tree Varieties" },
-        { target: 0, suffix: "", label: "Protected Bio-Reserves" },
-      ];
+  const stats =
+    content?.stats && content.stats.length > 0
+      ? content.stats
+      : liveStats
+      ? [
+          { target: liveStats.totalTrees, suffix: liveStats.totalTrees > 0 ? "+" : "", label: "Trees Planted & Geotagged" },
+          { target: liveStats.totalVarieties, suffix: "", label: "Native Tree Varieties" },
+          { target: liveStats.totalReserves, suffix: liveStats.totalReserves > 0 ? "+" : "", label: "Protected Bio-Reserves" },
+        ]
+      : [
+          { target: 0, suffix: "", label: "Trees Planted & Geotagged" },
+          { target: 0, suffix: "", label: "Native Tree Varieties" },
+          { target: 0, suffix: "", label: "Protected Bio-Reserves" },
+        ];
 
   const bgY = useTransform(scrollY, [0, 1000], [0, 300]);
   const textY = useTransform(scrollY, [0, 1000], [0, 100]);
@@ -143,8 +144,8 @@ export function Hero({ openPlant, goImpact, content, liveStats }: HeroProps) {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3 sm:gap-6 max-w-2xl mx-auto mb-14 sm:mb-16 md:mb-20">
-          {stats.map((s) => (
-            <div key={s.label} className="text-center">
+          {stats.map((s, idx) => (
+            <div key={`${s.label}-${idx}`} className="text-center">
               <div
                 style={{ fontFamily: "var(--font-display)", color: "#95d5b2" }}
                 className="text-2xl sm:text-3xl md:text-4xl mb-1"
