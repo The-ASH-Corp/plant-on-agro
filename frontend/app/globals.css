@@ -98,6 +98,10 @@ select option:checked {
   color: #ffffff;
 }
 
+input[type="checkbox"] {
+  accent-color: #1b7a43;
+}
+
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #52b78866; border-radius: 3px; }
