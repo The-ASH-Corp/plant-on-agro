@@ -101,17 +101,22 @@ export function Select({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const maxOptionLength = useMemo(
+    () => options.reduce((max, o) => Math.max(max, o.textLabel.length), 0),
+    [options]
+  );
+
   const [menuStyle, setMenuStyle] = useState<{
     top?: number;
     bottom?: number;
     left: number;
-    width: number;
+    minWidth: number;
     maxHeight: number;
     openUpward: boolean;
   }>({
     top: 0,
     left: 0,
-    width: 180,
+    minWidth: 160,
     maxHeight: 260,
     openUpward: false,
   });
@@ -136,14 +141,15 @@ export function Select({
       Math.min(desiredMaxHeight, openUpward ? spaceAbove - 8 : spaceBelow - 8)
     );
 
-    const width = Math.max(rect.width, 96);
-    const left = Math.min(Math.max(8, rect.left), viewportWidth - width - 8);
+    const estimatedMinWidth = maxOptionLength <= 4 ? 80 : 175;
+    const minWidth = Math.max(rect.width, estimatedMinWidth);
+    const left = Math.min(Math.max(8, rect.left), Math.max(8, viewportWidth - minWidth - 12));
 
     if (openUpward) {
       setMenuStyle({
         bottom: viewportHeight - rect.top + 6,
         left,
-        width,
+        minWidth,
         maxHeight,
         openUpward: true,
       });
@@ -151,12 +157,12 @@ export function Select({
       setMenuStyle({
         top: rect.bottom + 6,
         left,
-        width,
+        minWidth,
         maxHeight,
         openUpward: false,
       });
     }
-  }, []);
+  }, [maxOptionLength]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -252,13 +258,14 @@ export function Select({
         disabled={disabled}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        onClick={() => {
+        onClick={(e) => {
+          e.stopPropagation();
           if (!disabled) {
             if (!isOpen) updatePosition();
             setIsOpen((prev) => !prev);
           }
         }}
-        className={`group relative inline-flex items-center justify-between gap-2 text-left transition-all duration-150 select-none ${
+        className={`group relative inline-flex items-center justify-between gap-2 text-left whitespace-nowrap transition-all duration-150 select-none ${
           disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
         } ${
           isOpen
@@ -301,7 +308,9 @@ export function Select({
               top: menuStyle.top,
               bottom: menuStyle.bottom,
               left: menuStyle.left,
-              width: menuStyle.width,
+              minWidth: menuStyle.minWidth,
+              width: "max-content",
+              maxWidth: "min(92vw, 380px)",
               maxHeight: menuStyle.maxHeight,
               boxShadow:
                 "0 20px 40px -12px rgba(23, 51, 36, 0.28), 0 0 0 1px rgba(82, 183, 136, 0.18)",
@@ -317,8 +326,11 @@ export function Select({
                   role="option"
                   aria-selected={isSelected}
                   disabled={opt.disabled}
-                  onClick={() => handleSelectOption(opt.value)}
-                  className={`w-full px-3 py-2 rounded-xl text-xs text-left flex items-center justify-between gap-2 transition-all duration-150 ${
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelectOption(opt.value);
+                  }}
+                  className={`w-full px-3 py-2 rounded-xl text-xs text-left whitespace-nowrap flex items-center justify-between gap-3 transition-all duration-150 ${
                     opt.disabled
                       ? "opacity-40 cursor-not-allowed"
                       : "cursor-pointer"
@@ -343,4 +355,3 @@ export function Select({
     </>
   );
 }
-

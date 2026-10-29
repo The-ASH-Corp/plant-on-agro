@@ -124,9 +124,16 @@ export function OrdersTab({
         });
 
         if (isMounted && res.data) {
-          const uiItems = res.data.items.map(orderService.mapToUiItem);
-          setServerOrders(uiItems);
-          setServerTotal(res.data.total);
+          const hasFilter = Boolean(debouncedSearch.trim()) || selectedStatusFilter !== "all";
+          if (res.data.total > 0 || orders.length === 0 || hasFilter) {
+            const uiItems = res.data.items.map(orderService.mapToUiItem);
+            setServerOrders(uiItems);
+            setServerTotal(res.data.total);
+          } else {
+            // Fallback to derived/local orders when DB collection is empty
+            setServerOrders(null);
+            setServerTotal(null);
+          }
         }
       } catch (err) {
         console.warn("Backend orders pagination notice:", err);
@@ -139,7 +146,7 @@ export function OrdersTab({
     return () => {
       isMounted = false;
     };
-  }, [currentPage, pageSize, debouncedSearch, selectedStatusFilter, orders]);
+  }, [currentPage, pageSize, debouncedSearch, selectedStatusFilter, orders.length]);
 
   // Total records and pagination calculations
   const totalCount = serverTotal !== null ? serverTotal : filteredOrders.length;
@@ -159,9 +166,18 @@ export function OrdersTab({
   // Optimistic status change
   const handleStatusChange = (orderNumber: string, newStatus: AdoptionOrderStatus) => {
     if (serverOrders) {
-      setServerOrders((prev) =>
-        prev ? prev.map((o) => (o.orderNumber === orderNumber ? { ...o, status: newStatus } : o)) : prev
-      );
+      setServerOrders((prev) => {
+        if (!prev) return prev;
+        const updated = prev.map((o) =>
+          o.orderNumber === orderNumber || o.id === orderNumber
+            ? { ...o, status: newStatus, isRead: true }
+            : o
+        );
+        if (selectedStatusFilter !== "all") {
+          return updated.filter((o) => o.status === selectedStatusFilter);
+        }
+        return updated;
+      });
     }
     if (onUpdateStatus) {
       onUpdateStatus(orderNumber, newStatus);
@@ -294,7 +310,7 @@ export function OrdersTab({
                 <th className="py-4 px-4">Species & Plan</th>
                 <th className="py-4 px-4">Reserve Geotag</th>
                 <th className="py-4 px-4">Total Amount</th>
-                <th className="py-4 px-4">Status Workflow (Changeable)</th>
+                <th className="py-4 px-4">Status Workflow</th>
                 <th className="py-4 px-4 text-right">Inspect</th>
               </tr>
             </thead>
@@ -356,7 +372,7 @@ export function OrdersTab({
                       </td>
 
                       {/* Status changing dropdown selector */}
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
                         <div className="relative inline-flex items-center">
                           <Select
                             id={`status-select-${order.orderNumber}`}
@@ -365,10 +381,10 @@ export function OrdersTab({
                               const newSt = e.target.value as AdoptionOrderStatus;
                               handleStatusChange(order.orderNumber, newSt);
                             }}
-                            className={`text-[11px] font-bold py-1.5 pl-3 pr-2.5 rounded-full border cursor-pointer appearance-none outline-none transition-all ${config.badgeClass}`}
+                            className={`text-[11px] font-bold py-1.5 pl-3 pr-2.5 rounded-full border cursor-pointer outline-none transition-all ${config.badgeClass}`}
                           >
                             {ALL_STATUSES.map((st) => (
-                              <option key={st} value={st} className="bg-white text-gray-900 font-normal">
+                              <option key={st} value={st}>
                                 {st}
                               </option>
                             ))}
@@ -472,4 +488,3 @@ export function OrdersTab({
     </div>
   );
 }
-
