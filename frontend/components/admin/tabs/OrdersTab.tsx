@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
+import { Select } from "@/components/ui";
 import { AdoptionOrder, AdoptionOrderStatus } from "../types";
 import { orderService } from "@/services/orders/order.service";
 
@@ -357,24 +358,21 @@ export function OrdersTab({
                       {/* Status changing dropdown selector */}
                       <td className="py-3.5 px-4">
                         <div className="relative inline-flex items-center">
-                          <select
+                          <Select
                             id={`status-select-${order.orderNumber}`}
                             value={order.status}
                             onChange={(e) => {
                               const newSt = e.target.value as AdoptionOrderStatus;
                               handleStatusChange(order.orderNumber, newSt);
                             }}
-                            className={`text-[11px] font-bold py-1.5 pl-3 pr-7 rounded-full border cursor-pointer appearance-none outline-none transition-all ${config.badgeClass}`}
+                            className={`text-[11px] font-bold py-1.5 pl-3 pr-2.5 rounded-full border cursor-pointer appearance-none outline-none transition-all ${config.badgeClass}`}
                           >
                             {ALL_STATUSES.map((st) => (
                               <option key={st} value={st} className="bg-white text-gray-900 font-normal">
                                 {st}
                               </option>
                             ))}
-                          </select>
-                          <span className="absolute right-2.5 pointer-events-none text-[9px] text-[#55695d]">
-                            ▼
-                          </span>
+                          </Select>
                         </div>
                       </td>
 
@@ -457,7 +455,7 @@ export function OrdersTab({
           {/* Page size dropdown */}
           <div className="flex items-center gap-2 text-xs text-[#73877b]">
             <span>Show</span>
-            <select
+            <Select
               value={pageSize}
               onChange={(e) => setPageSize(Number(e.target.value))}
               className="px-2.5 py-1.5 rounded-xl border border-[#e2eae5] bg-[#fcfaf7] text-xs font-semibold text-[#173324] focus:border-[#173324] outline-none cursor-pointer"
@@ -466,7 +464,7 @@ export function OrdersTab({
               <option value={10}>10</option>
               <option value={20}>20</option>
               <option value={50}>50</option>
-            </select>
+            </Select>
             <span>per page</span>
           </div>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Select } from "@/components/ui";
 import { AdoptionOrder, AdoptionOrderStatus } from "../types";
 
 interface OrderDetailsModalProps {
@@ -124,7 +125,7 @@ export function OrderDetailsModal({
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="flex-1">
-              <select
+              <Select
                 id="select-order-modal-status"
                 value={currentStatus}
                 onChange={(e) => handleStatusChange(e.target.value as AdoptionOrderStatus)}
@@ -135,7 +136,7 @@ export function OrderDetailsModal({
                     Status: {st.label}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             {nextStatus && (

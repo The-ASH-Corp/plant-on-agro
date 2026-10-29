@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { Select } from "@/components/ui";
 import { TreeInstanceItem, TreeHealthStatus, TreeGrowthUpdateItem } from "../types";
 import { treeInstanceService } from "@/services/tree-instances/tree-instance.service";
 
@@ -472,7 +473,7 @@ export function EditTreeInstanceModal({
                   <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">
                     Current Health Status *
                   </label>
-                  <select
+                  <Select
                     name="healthStatus"
                     required
                     value={formData.healthStatus}
@@ -484,7 +485,7 @@ export function EditTreeInstanceModal({
                         {opt.icon} {opt.label}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
               </div>
 
@@ -650,7 +651,7 @@ export function EditTreeInstanceModal({
                     <label className="font-bold text-[#44574c] text-[10px] uppercase block mb-1">
                       Growth Stage
                     </label>
-                    <select
+                    <Select
                       value={newUpdate.stageName}
                       onChange={(e) => setNewUpdate((prev) => ({ ...prev, stageName: e.target.value }))}
                       className="w-full px-3 py-2 rounded-xl border border-[#d2ded7] bg-white outline-none text-[#173324] font-medium cursor-pointer"
@@ -660,7 +661,7 @@ export function EditTreeInstanceModal({
                           {s}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </div>
                 </div>
 
@@ -783,7 +784,7 @@ export function EditTreeInstanceModal({
                                   <label className="text-[10px] font-bold text-[#55695d] uppercase block mb-0.5">
                                     Stage Name
                                   </label>
-                                  <select
+                                  <Select
                                     value={update.stageName || "Vegetative Growth"}
                                     onChange={(e) => {
                                       const val = e.target.value;
@@ -798,7 +799,7 @@ export function EditTreeInstanceModal({
                                         {s}
                                       </option>
                                     ))}
-                                  </select>
+                                  </Select>
                                 </div>
                               </div>
 

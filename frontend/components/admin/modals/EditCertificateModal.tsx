@@ -2,6 +2,7 @@
 
 import { Certificate } from "@/services/certificates/certificate.service";
 
+import { Select } from "@/components/ui";
 interface EditCertificateModalProps {
   isOpen: boolean;
   certificate: Certificate | null;
@@ -164,7 +165,7 @@ export function EditCertificateModal({
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">
                 Deed Status
               </label>
-              <select
+              <Select
                 name="status"
                 defaultValue={certificate.status}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7] focus:border-[#173324] cursor-pointer"
@@ -172,7 +173,7 @@ export function EditCertificateModal({
                 <option value="Issued">Issued (Active & Verified)</option>
                 <option value="Pending Generation">Pending Generation</option>
                 <option value="Revoked">Revoked (Void / Canceled)</option>
-              </select>
+              </Select>
             </div>
           </div>
 

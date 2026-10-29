@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Select } from "@/components/ui";
 import { User } from "@/types/auth";
 import { AdoptionOrder } from "../types";
 
@@ -133,7 +134,7 @@ export function UsersTab({
             </button>
           )}
 
-          <select
+          <Select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
             className="px-3 py-2 text-xs rounded-xl border border-[#e2eae5] bg-[#f9faf8] text-[#173324] outline-none font-medium cursor-pointer"
@@ -142,7 +143,7 @@ export function UsersTab({
             <option value="oldest">Oldest Registered</option>
             <option value="name_asc">Name (A-Z)</option>
             <option value="name_desc">Name (Z-A)</option>
-          </select>
+          </Select>
         </div>
       </div>
 

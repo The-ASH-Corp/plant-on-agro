@@ -63,6 +63,41 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Global Project Theme Styling for Native Dropdown Selects */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23173324'%3E%3Cpath fill-rule='evenodd' d='M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z' clip-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  background-size: 1rem 1rem;
+  padding-right: 2.15rem !important;
+  color: #173324;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+select:hover {
+  border-color: #52b788;
+}
+
+select:focus {
+  border-color: #2d6a4f;
+  box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.2);
+}
+
+select option {
+  background-color: #fcfdfb;
+  color: #173324;
+  font-weight: 500;
+  padding: 8px 12px;
+}
+
+select option:checked {
+  background-color: #173324;
+  color: #ffffff;
+}
+
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #52b78866; border-radius: 3px; }

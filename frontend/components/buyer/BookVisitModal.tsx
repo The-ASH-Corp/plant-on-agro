@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Select } from "@/components/ui";
 import { BackendTreeInstance } from "@/services/tree-instances/tree-instance.service";
 import { ExperienceItem } from "@/services/experiences/experience.service";
 import { visitService, CreateVisitBookingPayload } from "@/services/visits/visit.service";
@@ -173,7 +174,7 @@ export function BookVisitModal({
               <label className="block text-xs font-semibold text-[#173324] uppercase tracking-wider mb-1.5">
                 Plantation Destination
               </label>
-              <select
+              <Select
                 value={reserveName}
                 onChange={(e) => setReserveName(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-[#2d6a4f] focus:ring-1 focus:ring-[#2d6a4f] bg-white"
@@ -181,7 +182,7 @@ export function BookVisitModal({
                 <option value="Flagship Living Forest — Wayanad, Kerala">Flagship Living Forest — Wayanad, Kerala (30 Acres)</option>
                 <option value="Western Ghats Ecological Reserve, Maharashtra">Western Ghats Reserve, Maharashtra</option>
                 <option value="Satara Agroforestry Belt, Maharashtra">Satara Agroforestry Belt, Maharashtra</option>
-              </select>
+              </Select>
             </div>
 
             <div>
@@ -205,7 +206,7 @@ export function BookVisitModal({
               <label className="block text-xs font-semibold text-[#173324] uppercase tracking-wider mb-1.5">
                 Time Slot
               </label>
-              <select
+              <Select
                 value={timeSlot}
                 onChange={(e) => setTimeSlot(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-[#2d6a4f] focus:ring-1 focus:ring-[#2d6a4f] bg-white"
@@ -215,7 +216,7 @@ export function BookVisitModal({
                     {slot}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             <div>
