@@ -93,12 +93,15 @@ export function useOrderActions({ data, showToast }: Params) {
       if (!alreadyHasCert) {
         try {
           const autoCert = await certificateService.createCertificate({
+            certificateNumber: targetOrder.certificateId || `CERT-${orderNum}`,
             orderRef: orderNum,
             recipientName: targetOrder.adopterName,
             adopterName: targetOrder.adopterName,
             treeSpecies: targetOrder.treeSpecies,
             reserveName: targetOrder.reserveName,
-            dedicatedMessage: `PlantOn Agro certified green deed honoring ${targetOrder.adopterName} for sustainable environmental stewardship.`,
+            dedicatedMessage:
+              targetOrder.dedicationMessage ||
+              `PlantOn Agro certified green deed honoring ${targetOrder.adopterName} for sustainable environmental stewardship.`,
             status: "Issued",
           });
           if (autoCert.data) {

@@ -38,7 +38,7 @@ const ALL_STATUSES: { value: AdoptionOrderStatus; label: string; desc: string; c
   },
   {
     value: "Completed",
-    label: "Completed & Archived",
+    label: "Completed",
     desc: "Fully mature record entered into permanent registry",
     color: "bg-teal-50 text-teal-800 border-teal-300",
   },

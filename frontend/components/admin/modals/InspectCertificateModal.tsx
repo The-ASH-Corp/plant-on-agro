@@ -99,11 +99,16 @@ export function InspectCertificateModal({
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => window.print()}
+              onClick={() =>
+                window.open(
+                  certificateService.getDownloadUrl(certificate.certificateNumber, true),
+                  "_blank"
+                )
+              }
               className="text-xs font-bold px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 cursor-pointer flex items-center gap-1.5 transition-colors"
             >
               <span>🖨️</span>
-              <span>Print / PDF</span>
+              <span>Download PDF</span>
             </button>
             <button
               onClick={onClose}
