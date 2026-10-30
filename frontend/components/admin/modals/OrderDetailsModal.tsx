@@ -55,6 +55,8 @@ export function OrderDetailsModal({
   if (!order) return null;
 
   const currentStatus = selectedStatus || order.status;
+  const isCertificateAvailable =
+    currentStatus === "Certificate Issued" || currentStatus === "Completed";
 
   const handleStatusChange = (newStatus: AdoptionOrderStatus) => {
     setSelectedStatus(newStatus);
@@ -194,7 +196,7 @@ export function OrderDetailsModal({
           <div className="flex justify-between">
             <span className="text-[#7a8a80]">Quantity & Total:</span>
             <span className="font-bold text-[#173324]">
-              {order.quantity}x • ₹{order.totalAmount.toLocaleString()}
+              {order.quantity}x ₹{order.totalAmount.toLocaleString()}
             </span>
           </div>
           {order.paymentMethod && (
@@ -225,16 +227,20 @@ export function OrderDetailsModal({
           )}
         </div>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => onDownloadCertificate(order.certificateId)}
-            className="flex-1 py-3 px-4 rounded-xl bg-[#173324] text-white font-semibold text-xs hover:bg-[#1e4433] transition-all cursor-pointer shadow-sm text-center"
-          >
-            Download Certificate
-          </button>
+        <div className="flex items-center justify-end gap-3">
+          {isCertificateAvailable && (
+            <button
+              onClick={() => onDownloadCertificate(order.certificateId)}
+              className="flex-1 py-3 px-4 rounded-xl bg-[#173324] text-white font-semibold text-xs hover:bg-[#1e4433] transition-all cursor-pointer shadow-sm text-center"
+            >
+              Download Certificate
+            </button>
+          )}
           <button
             onClick={onClose}
-            className="py-3 px-5 rounded-xl border border-[#e2eae5] text-[#55695d] hover:bg-[#f4f7f5] font-semibold text-xs transition-all cursor-pointer"
+            className={`${
+              isCertificateAvailable ? "py-3 px-5" : "w-full py-3 px-5"
+            } rounded-xl border border-[#e2eae5] text-[#55695d] hover:bg-[#f4f7f5] font-semibold text-xs transition-all cursor-pointer`}
           >
             Close
           </button>
@@ -243,4 +249,3 @@ export function OrderDetailsModal({
     </div>
   );
 }
-
