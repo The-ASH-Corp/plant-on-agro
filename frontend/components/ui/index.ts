@@ -5,3 +5,4 @@ export { PencilIcon } from "./PencilIcon";
 export { ErrorPopup } from "./ErrorPopup";
 export { Select } from "./Select";
 export { SignOutConfirmationModal } from "./SignOutConfirmationModal";
+export { PhoneInput, validatePhoneNumber } from "./PhoneInput";

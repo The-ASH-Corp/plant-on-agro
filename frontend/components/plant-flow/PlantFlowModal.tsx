@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { PlantStep, Tree, Plan } from "@/types";
+import { validatePhoneNumber } from "@/components/ui";
 import { treeVarietyService, BackendTreeVariety } from "@/services/tree-varieties/tree-variety.service";
 import { adoptionPlanService, BackendAdoptionPlan } from "@/services/adoption-plans/adoption-plan.service";
 import { treeInstanceService } from "@/services/tree-instances/tree-instance.service";
@@ -184,12 +185,14 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
     : 0;
   const total = pricePerTree * qty;
 
+  const isPhoneValid = validatePhoneNumber(phone, false).isValid;
+
   const canNext =
     (step === 1 && selectedTree) ||
     (step === 2 && selectedPlan) ||
     (step === 3 && qty >= 1) ||
     (step === 4 && location) ||
-    (step === 5 && name && email) ||
+    (step === 5 && name.trim() && email.trim() && isPhoneValid) ||
     step === 6 ||
     step === 7;
 
@@ -223,50 +226,74 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
     } else {
       for (let i = 0; i < qty; i++) {
         const serialNum = Math.floor(1000 + Math.random() * 9000);
-      const treeTag = `POA-${speciesShort}-${serialNum}`;
-      const jitterLat = Number(
-        (chosenCoords.lat + (Math.random() - 0.5) * 0.004).toFixed(4)
-      );
-      const jitterLng = Number(
-        (chosenCoords.lng + (Math.random() - 0.5) * 0.004).toFixed(4)
-      );
+        const treeTag = `POA-${speciesShort}-${serialNum}`;
+        const jitterLat = Number(
+          (chosenCoords.lat + (Math.random() - 0.5) * 0.004).toFixed(4)
+        );
+        const jitterLng = Number(
+          (chosenCoords.lng + (Math.random() - 0.5) * 0.004).toFixed(4)
+        );
 
-      const noteText =
-        qty > 1
-          ? `Tree #${i + 1} of ${qty} adopted under "${selectedPlanData?.label || 'Individual'}" lifetime package. Physical nursery tagging and geotagging completed.`
-          : `Adopted under "${selectedPlanData?.label || 'Individual'}" lifetime package. Physical nursery tagging and geotagging completed.`;
+        const noteText =
+          qty > 1
+            ? `Tree #${i + 1} of ${qty} adopted under "${selectedPlanData?.label || "Individual"}" lifetime package. Physical nursery tagging and geotagging completed.`
+            : `Adopted under "${selectedPlanData?.label || "Individual"}" lifetime package. Physical nursery tagging and geotagging completed.`;
 
-      // Persist to MongoDB through backend API
-      try {
-        const createdTreeRes = await treeInstanceService.create({
-          treeTag,
-          orderRef: orderId,
-          assignedReserve: location || "Flagship Living Forest — Wayanad, Kerala",
-          gpsCoordinates: { latitude: jitterLat, longitude: jitterLng },
-          datePlanted: new Date().toISOString(),
-          healthStatus: "Sapling Growing",
-          treeVarietyName: selectedTree?.name || "Indigenous Sapling",
-          adopterName: name || user?.name || "Verified Adopter",
-          adopterEmail: email || user?.email || "adopter@example.com",
-          notes: noteText,
-          imageUrl:
-            selectedTree?.img ||
-            "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
-        });
+        // Persist to MongoDB through backend API
+        try {
+          const createdTreeRes = await treeInstanceService.create({
+            treeTag,
+            orderRef: orderId,
+            assignedReserve: location || "Flagship Living Forest — Wayanad, Kerala",
+            gpsCoordinates: { latitude: jitterLat, longitude: jitterLng },
+            datePlanted: new Date().toISOString(),
+            healthStatus: "Sapling Growing",
+            treeVarietyName: selectedTree?.name || "Indigenous Sapling",
+            adopterName: name || user?.name || "Verified Adopter",
+            adopterEmail: email || user?.email || "adopter@example.com",
+            notes: noteText,
+            imageUrl:
+              selectedTree?.img ||
+              "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
+          });
 
-        if (createdTreeRes.data) {
+          if (createdTreeRes.data) {
+            newInstances.push({
+              id: createdTreeRes.data.id,
+              treeTag: createdTreeRes.data.treeTag,
+              orderRef: createdTreeRes.data.orderRef,
+              assignedReserve: createdTreeRes.data.assignedReserve,
+              gpsCoordinates: createdTreeRes.data.gpsCoordinates,
+              formattedGps: `${jitterLat}° N, ${jitterLng}° E`,
+              datePlanted: formattedDate,
+              healthStatus: "Sapling Growing" as const,
+              treeVarietyName: selectedTree?.name || "Indigenous Sapling",
+              adopterName: name || user?.name || "Verified Adopter",
+              adopterEmail: email || user?.email || "adopter@example.com",
+              notes: noteText,
+              imageUrl:
+                selectedTree?.img ||
+                "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
+              lastInspectedAt: dateStr,
+              isActive: true,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            });
+          }
+        } catch (saveErr) {
+          console.warn("Could not save instance via API, fallback to memory record:", saveErr);
           newInstances.push({
-            id: createdTreeRes.data.id,
-            treeTag: createdTreeRes.data.treeTag,
-            orderRef: createdTreeRes.data.orderRef,
-            assignedReserve: createdTreeRes.data.assignedReserve,
-            gpsCoordinates: createdTreeRes.data.gpsCoordinates,
+            id: `inst-${Date.now()}-${i}`,
+            treeTag: treeTag,
+            orderRef: orderId,
+            assignedReserve: location || "Flagship Living Forest — Wayanad, Kerala",
+            gpsCoordinates: { latitude: jitterLat, longitude: jitterLng },
             formattedGps: `${jitterLat}° N, ${jitterLng}° E`,
             datePlanted: formattedDate,
             healthStatus: "Sapling Growing" as const,
             treeVarietyName: selectedTree?.name || "Indigenous Sapling",
-            adopterName: name || user?.name || "Verified Adopter",
-            adopterEmail: email || user?.email || "adopter@example.com",
+            adopterName: name || "Verified Adopter",
+            adopterEmail: email || "adopter@example.com",
             notes: noteText,
             imageUrl:
               selectedTree?.img ||
@@ -277,32 +304,8 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
             updatedAt: new Date().toISOString(),
           });
         }
-      } catch (saveErr) {
-        console.warn("Could not save instance via API, fallback to memory record:", saveErr);
-        newInstances.push({
-          id: `inst-${Date.now()}-${i}`,
-          treeTag: treeTag,
-          orderRef: orderId,
-          assignedReserve: location || "Flagship Living Forest — Wayanad, Kerala",
-          gpsCoordinates: { latitude: jitterLat, longitude: jitterLng },
-          formattedGps: `${jitterLat}° N, ${jitterLng}° E`,
-          datePlanted: formattedDate,
-          healthStatus: "Sapling Growing" as const,
-          treeVarietyName: selectedTree?.name || "Indigenous Sapling",
-          adopterName: name || "Verified Adopter",
-          adopterEmail: email || "adopter@example.com",
-          notes: noteText,
-          imageUrl:
-            selectedTree?.img ||
-            "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
-          lastInspectedAt: dateStr,
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
       }
     }
-  }
 
     // 2. Order Record - Use server-verified order directly
     const invNumber = `INV-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -313,82 +316,82 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
     if (!finalOrderRecord) {
       try {
         const orderRes = await orderService.create({
-        orderNumber: orderId,
-        invoiceNumber: invNumber,
-        adopterName: name || user?.name || "Verified Adopter",
-        adopterEmail: email || user?.email || "adopter@example.com",
-        adopterPhone: phone || "",
-        items: [
-          {
-            treeVarietyId: selectedTree?.id ? String(selectedTree.id) : undefined,
-            treeSpecies: selectedTree?.name || "Indigenous Tree",
-            scientificName: selectedTree?.sci || "Botanical Tree",
-            category: selectedTree?.category || "Fruit Trees",
-            planType: selectedPlanData?.label || "Individual",
-            reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
-            gpsCoords: chosenCoords.formatted,
-            quantity: qty,
-            unitPrice: pricePerTree,
-            subtotal: total,
-          },
-        ],
-        treeSpecies: selectedTree?.name || "Indigenous Tree",
-        scientificName: selectedTree?.sci || "Botanical Tree",
-        category: selectedTree?.category || "Fruit Trees",
-        reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
-        gpsCoords: chosenCoords.formatted,
-        planType: selectedPlanData?.label || "Individual",
-        dedicationMessage: "",
-        quantity: qty,
-        totalAmount: total,
-        paymentMethod: methodUsed,
-        paymentStatus: "Paid",
-        transactionRef: txRef,
-        status: "New Request",
-        certificateId: certNumber,
-        ndviScore: 0.91,
-        isRead: false,
-        notes: orderNotes,
-        datePlanted: dateStr,
-      });
+          orderNumber: orderId,
+          invoiceNumber: invNumber,
+          adopterName: name || user?.name || "Verified Adopter",
+          adopterEmail: email || user?.email || "adopter@example.com",
+          adopterPhone: phone || "",
+          items: [
+            {
+              treeVarietyId: selectedTree?.id ? String(selectedTree.id) : undefined,
+              treeSpecies: selectedTree?.name || "Indigenous Tree",
+              scientificName: selectedTree?.sci || "Botanical Tree",
+              category: selectedTree?.category || "Fruit Trees",
+              planType: selectedPlanData?.label || "Individual",
+              reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
+              gpsCoords: chosenCoords.formatted,
+              quantity: qty,
+              unitPrice: pricePerTree,
+              subtotal: total,
+            },
+          ],
+          treeSpecies: selectedTree?.name || "Indigenous Tree",
+          scientificName: selectedTree?.sci || "Botanical Tree",
+          category: selectedTree?.category || "Fruit Trees",
+          reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
+          gpsCoords: chosenCoords.formatted,
+          planType: selectedPlanData?.label || "Individual",
+          dedicationMessage: "",
+          quantity: qty,
+          totalAmount: total,
+          paymentMethod: methodUsed,
+          paymentStatus: "Paid",
+          transactionRef: txRef,
+          status: "New Request",
+          certificateId: certNumber,
+          ndviScore: 0.91,
+          isRead: false,
+          notes: orderNotes,
+          datePlanted: dateStr,
+        });
 
-      if (orderRes.data) {
-        finalOrderRecord = orderService.mapToUiItem(orderRes.data);
+        if (orderRes.data) {
+          finalOrderRecord = orderService.mapToUiItem(orderRes.data);
+        }
+      } catch (orderApiErr) {
+        console.warn("Could not save order directly to backend API, using local fallback:", orderApiErr);
       }
-    } catch (orderApiErr) {
-      console.warn("Could not save order directly to backend API, using local fallback:", orderApiErr);
-    }
 
-    if (!finalOrderRecord) {
-      finalOrderRecord = {
-        id: "ord-" + Date.now(),
-        orderNumber: orderId,
-        invoiceNumber: invNumber,
-        adopterName: name || user?.name || "Verified Adopter",
-        adopterEmail: email || user?.email || "adopter@example.com",
-        adopterPhone: phone || "",
-        treeSpecies: selectedTree?.name || "Indigenous Tree",
-        scientificName: selectedTree?.sci || "Botanical Tree",
-        category: selectedTree?.category || "Fruit Trees",
-        reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
-        gpsCoords: chosenCoords.formatted,
-        planType: selectedPlanData?.label || "Individual",
-        dedicationMessage: "",
-        quantity: qty,
-        totalAmount: total,
-        paymentMethod: methodUsed,
-        paymentStatus: "Paid" as const,
-        transactionRef: txRef,
-        datePlanted: dateStr,
-        status: "New Request" as const,
-        certificateId: certNumber,
-        ndviScore: 0.91,
-        isRead: false,
-        notes: orderNotes,
-        createdAt: new Date().toISOString(),
-      };
+      if (!finalOrderRecord) {
+        finalOrderRecord = {
+          id: "ord-" + Date.now(),
+          orderNumber: orderId,
+          invoiceNumber: invNumber,
+          adopterName: name || user?.name || "Verified Adopter",
+          adopterEmail: email || user?.email || "adopter@example.com",
+          adopterPhone: phone || "",
+          treeSpecies: selectedTree?.name || "Indigenous Tree",
+          scientificName: selectedTree?.sci || "Botanical Tree",
+          category: selectedTree?.category || "Fruit Trees",
+          reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
+          gpsCoords: chosenCoords.formatted,
+          planType: selectedPlanData?.label || "Individual",
+          dedicationMessage: "",
+          quantity: qty,
+          totalAmount: total,
+          paymentMethod: methodUsed,
+          paymentStatus: "Paid" as const,
+          transactionRef: txRef,
+          datePlanted: dateStr,
+          status: "New Request" as const,
+          certificateId: certNumber,
+          ndviScore: 0.91,
+          isRead: false,
+          notes: orderNotes,
+          createdAt: new Date().toISOString(),
+        };
+      }
     }
-  }
 
     try {
       // Update orders ledger in localStorage for instant fast UI responsiveness

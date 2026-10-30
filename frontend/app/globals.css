@@ -102,6 +102,29 @@ input[type="checkbox"] {
   accent-color: #1b7a43;
 }
 
+/* Theme overrides for react-phone-number-input */
+.poa-phone-input .PhoneInput {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.poa-phone-input .PhoneInputCountry {
+  margin-right: 0.25rem;
+  padding-right: 0.5rem;
+  border-right: 1px solid #d2ded7;
+}
+
+.poa-phone-input .PhoneInputInput {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  color: #173324;
+  font-size: 0.875rem;
+  width: 100%;
+}
+
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #52b78866; border-radius: 3px; }
