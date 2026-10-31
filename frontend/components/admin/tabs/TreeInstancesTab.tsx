@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { TreeInstanceItem, TreeHealthStatus } from "../types";
-import { TrashIcon, PencilIcon } from "@/components/ui";
+import { TrashIcon, PencilIcon, Select } from "@/components/ui";
 import { treeInstanceService } from "@/services/tree-instances/tree-instance.service";
 
 interface TreeInstancesTabProps {
@@ -405,9 +405,7 @@ export function TreeInstancesTab({
                           <span>📍</span>
                           <span>{item.formattedGps}</span>
                         </a>
-                        <span className="text-[10px] text-[#8b9c92] block">
-                          Lat: {item.gpsCoordinates.latitude.toFixed(4)}, Lng: {item.gpsCoordinates.longitude.toFixed(4)}
-                        </span>
+                       
                       </td>
 
                       {/* Date Planted */}
@@ -418,7 +416,7 @@ export function TreeInstancesTab({
                       {/* Health Status */}
                       <td className="py-3.5 px-4">
                         {onUpdateHealth ? (
-                          <select
+                          <Select
                             value={item.healthStatus}
                             onChange={(e) => handleHealthChange(item.id, e.target.value as TreeHealthStatus)}
                             className={`px-2.5 py-1 rounded-lg border text-xs font-semibold outline-none cursor-pointer ${badge.bg} ${badge.text} ${badge.border}`}
@@ -428,7 +426,7 @@ export function TreeInstancesTab({
                             <option value="Thriving">🌳 Thriving</option>
                             <option value="Needs Attention">⚠️ Needs Attention</option>
                             <option value="Critical">🚨 Critical</option>
-                          </select>
+                          </Select>
                         ) : (
                           <span
                             className={`px-2.5 py-1 rounded-lg border text-xs font-semibold inline-flex items-center gap-1 ${badge.bg} ${badge.text} ${badge.border}`}
@@ -555,7 +553,7 @@ export function TreeInstancesTab({
 
                 <div className="mt-4 pt-3 border-t border-[#f4f7f5] flex items-center justify-between">
                   {onUpdateHealth && (
-                    <select
+                    <Select
                       value={item.healthStatus}
                       onChange={(e) => handleHealthChange(item.id, e.target.value as TreeHealthStatus)}
                       className="text-xs font-semibold px-2 py-1 rounded-lg border border-[#e2eae5] bg-[#f7faf8] text-[#173324] outline-none cursor-pointer"
@@ -565,7 +563,7 @@ export function TreeInstancesTab({
                       <option value="Thriving">🌳 Thriving</option>
                       <option value="Needs Attention">⚠️ Needs Attention</option>
                       <option value="Critical">🚨 Critical</option>
-                    </select>
+                    </Select>
                   )}
 
                   <div className="flex items-center gap-1.5">
@@ -661,7 +659,7 @@ export function TreeInstancesTab({
           {/* Page size dropdown */}
           <div className="flex items-center gap-2 text-xs text-[#73877b]">
             <span>Show</span>
-            <select
+            <Select
               value={pageSize}
               onChange={(e) => setPageSize(Number(e.target.value))}
               className="px-2.5 py-1.5 rounded-xl border border-[#e2eae5] bg-[#fcfaf7] text-xs font-semibold text-[#173324] focus:border-[#173324] outline-none cursor-pointer"
@@ -670,7 +668,7 @@ export function TreeInstancesTab({
               <option value={10}>10</option>
               <option value={20}>20</option>
               <option value={50}>50</option>
-            </select>
+            </Select>
             <span>per page</span>
           </div>
         </div>

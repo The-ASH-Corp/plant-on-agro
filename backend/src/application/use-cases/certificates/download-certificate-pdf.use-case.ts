@@ -1,6 +1,8 @@
 import { ICertificateRepository } from '../../../core/interfaces/certificate.repository.interface';
 import { ITreeInstanceRepository } from '../../../core/interfaces/tree-instance.repository.interface';
+import { IOrderRepository } from '../../../core/interfaces/order.repository.interface';
 import { IPdfGeneratorService } from '../../../core/interfaces/pdf-generator.interface';
+import { Certificate } from '../../../core/entities/certificate.entity';
 import { NotFoundError } from '../../../core/errors/app-error';
 import { env } from '../../../config/env';
 
@@ -17,7 +19,8 @@ export class DownloadCertificatePdfUseCase {
   constructor(
     private readonly certificateRepository: ICertificateRepository,
     private readonly treeInstanceRepository: ITreeInstanceRepository,
-    private readonly pdfGeneratorService: IPdfGeneratorService
+    private readonly pdfGeneratorService: IPdfGeneratorService,
+    private readonly orderRepository?: IOrderRepository
   ) {}
 
   public async execute(certificateIdentifier: string): Promise<DownloadCertificatePdfResult> {
@@ -26,7 +29,9 @@ export class DownloadCertificatePdfUseCase {
       throw new NotFoundError('Certificate identifier is required');
     }
 
-    // 1. Locate certificate by number, database ID, order reference, or cryptographic hash
+    const strippedOrderRef = cleanId.replace(/^CERT-/i, '').trim();
+
+    // 1. Locate certificate by number, database ID, order reference (including stripped CERT- prefix), or cryptographic hash
     let certificate = await this.certificateRepository.findByCertificateNumber(cleanId);
 
     if (!certificate && isValidObjectId(cleanId)) {
@@ -40,8 +45,47 @@ export class DownloadCertificatePdfUseCase {
       }
     }
 
+    if (!certificate && strippedOrderRef && strippedOrderRef !== cleanId) {
+      const byStrippedOrder = await this.certificateRepository.findByOrderRef(strippedOrderRef);
+      if (byStrippedOrder.length > 0) {
+        certificate = byStrippedOrder[0];
+      }
+    }
+
     if (!certificate) {
       certificate = await this.certificateRepository.findByCertificateHash(cleanId);
+    }
+
+    // Fallback: if no certificate record exists yet in the certificates collection, check if a matching Order exists and auto-issue it
+    if (!certificate && this.orderRepository) {
+      let order = await this.orderRepository.findByOrderNumber(strippedOrderRef);
+      if (!order && strippedOrderRef !== cleanId) {
+        order = await this.orderRepository.findByOrderNumber(cleanId);
+      }
+      if (!order && isValidObjectId(cleanId)) {
+        order = await this.orderRepository.findById(cleanId);
+      }
+
+      if (order) {
+        const matchingInstances = await this.treeInstanceRepository.findByOrderRef(order.orderNumber);
+        const firstInstance = matchingInstances[0];
+        const certEntity = new Certificate({
+          certificateNumber: order.certificateId || `CERT-${order.orderNumber}`,
+          orderRef: order.orderNumber,
+          recipientName: order.adopterName,
+          adopterName: order.adopterName,
+          dedicatedMessage:
+            order.dedicationMessage ||
+            `PlantOn Agro certified green deed honoring ${order.adopterName} for sustainable environmental stewardship.`,
+          issueDate: new Date(),
+          treeTag: firstInstance?.treeTag,
+          treeSpecies: order.treeSpecies,
+          reserveName: order.reserveName,
+          status: 'Issued',
+          isActive: true,
+        });
+        certificate = await this.certificateRepository.save(certEntity);
+      }
     }
 
     if (!certificate) {

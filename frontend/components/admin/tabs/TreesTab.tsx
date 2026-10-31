@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { TreeVarietyItem } from "../types";
-import { TrashIcon, PencilIcon } from "@/components/ui";
+import { TrashIcon, PencilIcon, Select } from "@/components/ui";
 
 interface TreesTabProps {
   trees: TreeVarietyItem[];
@@ -450,7 +450,7 @@ export function TreesTab({
           {/* Page size dropdown */}
           <div className="flex items-center gap-2 text-xs text-[#73877b]">
             <span>Show</span>
-            <select
+            <Select
               value={pageSize}
               onChange={(e) => setPageSize(Number(e.target.value))}
               className="px-2.5 py-1.5 rounded-xl border border-[#e2eae5] bg-[#fcfaf7] text-xs font-semibold text-[#173324] focus:border-[#173324] outline-none cursor-pointer"
@@ -459,7 +459,7 @@ export function TreesTab({
               <option value={9}>9</option>
               <option value={18}>18</option>
               <option value={27}>27</option>
-            </select>
+            </Select>
             <span>per page</span>
           </div>
         </div>

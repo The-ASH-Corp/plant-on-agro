@@ -125,9 +125,9 @@ export function AdminModals({
         onDownloadCertificate={(certId) => {
           const targetId = certId || selectedOrder?.certificateId || selectedOrder?.orderNumber;
           if (targetId) {
-            window.open(certificateService.getDownloadUrl(targetId), '_blank');
+            window.open(certificateService.getDownloadUrl(targetId, true), "_blank");
           }
-          showToast(`Initiating download for Certificate ${targetId || ''}...`);
+          showToast(`Initiating download for Certificate ${targetId || ""}...`);
           setSelectedOrder(null);
         }}
         onUpdateStatus={orderActions.handleUpdateOrderStatus}

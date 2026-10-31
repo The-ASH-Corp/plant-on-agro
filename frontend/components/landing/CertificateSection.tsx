@@ -31,11 +31,11 @@ export function CertificateSection({ content, sampleTree }: CertificateSectionPr
           "Shareable on LinkedIn & social",
         ];
 
-  const recipient = sampleTree?.recipientName || content?.sampleRecipientName || "Verified Tree Adopter";
-  const treeName = sampleTree?.treeName || content?.sampleTreeName || "Botanical Species";
-  const treeId = sampleTree?.treeId || content?.sampleTreeId || "POA-TR-0000";
-  const location = sampleTree?.location || content?.sampleLocation || "Verified Bio-Reserve";
-  const date = sampleTree?.date || content?.sampleDate || "Plantation Date";
+  const recipient = content?.sampleRecipientName || sampleTree?.recipientName || "Verified Tree Adopter";
+  const treeName = content?.sampleTreeName || sampleTree?.treeName || "Botanical Species";
+  const treeId = content?.sampleTreeId || sampleTree?.treeId || "POA-TR-0000";
+  const location = content?.sampleLocation || sampleTree?.location || "Verified Bio-Reserve";
+  const date = content?.sampleDate || sampleTree?.date || "Plantation Date";
   const quote =
     content?.sampleQuote ||
     `has planted a ${treeName} tree through PlantOn agro, contributing to a greener, healthier planet.`;

@@ -9,6 +9,7 @@ export interface TreeVarietyFilter {
 
 export interface ITreeVarietyRepository {
   findById(id: string): Promise<Nullable<TreeVariety>>;
+  findByCommonName(commonName: string): Promise<Nullable<TreeVariety>>;
   findAll(filter?: TreeVarietyFilter, limit?: number, skip?: number): Promise<TreeVariety[]>;
   count(filter?: TreeVarietyFilter): Promise<number>;
   save(tree: TreeVariety): Promise<TreeVariety>;

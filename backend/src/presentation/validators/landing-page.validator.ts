@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 const heroStatSchema = z.object({
-  target: z.number().min(0, 'Target must be positive'),
-  suffix: z.string().trim(),
+  target: z.coerce.number().min(0, 'Target must be positive'),
+  suffix: z.string().default(''),
   label: z.string().trim().min(1, 'Label cannot be empty'),
 });
 
@@ -14,7 +14,7 @@ const heroSectionSchema = z.object({
   description: z.string().trim().min(1, 'Description cannot be empty').optional(),
   primaryCtaText: z.string().trim().min(1, 'Primary CTA cannot be empty').optional(),
   secondaryCtaText: z.string().trim().min(1, 'Secondary CTA cannot be empty').optional(),
-  bgImageUrl: z.string().trim().url('Background image must be a valid URL').optional(),
+  bgImageUrl: z.string().trim().min(1, 'Background image URL cannot be empty').optional(),
   stats: z.array(heroStatSchema).optional(),
 });
 
@@ -34,14 +34,14 @@ const howItWorksSectionSchema = z.object({
 
 const impactStatSchema = z.object({
   icon: z.string().trim(),
-  value: z.number().min(0),
-  suffix: z.string().trim(),
+  value: z.coerce.number().min(0),
+  suffix: z.string().default(''),
   label: z.string().trim().min(1, 'Stat label cannot be empty'),
   color: z.string().trim().default('#52b788'),
 });
 
 const impactProjectSchema = z.object({
-  img: z.string().trim().url('Project image must be a valid URL'),
+  img: z.string().trim().min(1, 'Project image URL cannot be empty'),
   title: z.string().trim().min(1, 'Project title cannot be empty'),
   trees: z.string().trim().min(1, 'Trees count cannot be empty'),
   region: z.string().trim().min(1, 'Region cannot be empty'),

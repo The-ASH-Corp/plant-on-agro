@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Select, PhoneInput, validatePhoneNumber } from "@/components/ui";
 import { BackendTreeInstance } from "@/services/tree-instances/tree-instance.service";
 import { ExperienceItem } from "@/services/experiences/experience.service";
 import { visitService, CreateVisitBookingPayload } from "@/services/visits/visit.service";
@@ -61,6 +62,12 @@ export function BookVisitModal({
     e.preventDefault();
     if (!adopterName.trim() || !adopterEmail.trim() || !visitDate) {
       setError("Please fill in your name, email, and preferred visit date.");
+      return;
+    }
+
+    const phoneValidation = validatePhoneNumber(adopterPhone, false);
+    if (!phoneValidation.isValid) {
+      setError(phoneValidation.error || "Please enter a valid mobile number.");
       return;
     }
 
@@ -173,7 +180,7 @@ export function BookVisitModal({
               <label className="block text-xs font-semibold text-[#173324] uppercase tracking-wider mb-1.5">
                 Plantation Destination
               </label>
-              <select
+              <Select
                 value={reserveName}
                 onChange={(e) => setReserveName(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-[#2d6a4f] focus:ring-1 focus:ring-[#2d6a4f] bg-white"
@@ -181,7 +188,7 @@ export function BookVisitModal({
                 <option value="Flagship Living Forest — Wayanad, Kerala">Flagship Living Forest — Wayanad, Kerala (30 Acres)</option>
                 <option value="Western Ghats Ecological Reserve, Maharashtra">Western Ghats Reserve, Maharashtra</option>
                 <option value="Satara Agroforestry Belt, Maharashtra">Satara Agroforestry Belt, Maharashtra</option>
-              </select>
+              </Select>
             </div>
 
             <div>
@@ -205,7 +212,7 @@ export function BookVisitModal({
               <label className="block text-xs font-semibold text-[#173324] uppercase tracking-wider mb-1.5">
                 Time Slot
               </label>
-              <select
+              <Select
                 value={timeSlot}
                 onChange={(e) => setTimeSlot(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-[#2d6a4f] focus:ring-1 focus:ring-[#2d6a4f] bg-white"
@@ -215,7 +222,7 @@ export function BookVisitModal({
                     {slot}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             <div>
@@ -266,7 +273,7 @@ export function BookVisitModal({
                       <input
                         type="checkbox"
                         checked={isChecked}
-                        onChange={() => {}} // handled by parent div
+                        onChange={() => {}}
                         className="rounded text-[#2d6a4f] focus:ring-[#2d6a4f]"
                       />
                       <div className="text-xs truncate">
@@ -281,7 +288,7 @@ export function BookVisitModal({
           )}
 
           {/* Contact Details */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-[#173324] uppercase tracking-wider mb-1">
                 Adopter Name
@@ -308,16 +315,15 @@ export function BookVisitModal({
                 className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-[#2d6a4f]"
               />
             </div>
-            <div>
+            <div className="sm:col-span-2">
               <label className="block text-xs font-semibold text-[#173324] uppercase tracking-wider mb-1">
                 Mobile Number
               </label>
-              <input
-                type="tel"
+              <PhoneInput
+                id="visit-mobile-phone"
                 value={adopterPhone}
-                onChange={(e) => setAdopterPhone(e.target.value)}
-                placeholder="+91 98765 43210"
-                className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-[#2d6a4f]"
+                onChange={setAdopterPhone}
+                size="sm"
               />
             </div>
           </div>

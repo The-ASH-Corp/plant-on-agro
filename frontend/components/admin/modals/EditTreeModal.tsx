@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Select } from "@/components/ui";
 import { TreeVarietyItem } from "../types";
 
 interface EditTreeModalProps {
@@ -143,7 +144,7 @@ export function EditTreeModal({
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">
                 Category *
               </label>
-              <select
+              <Select
                 name="category"
                 required
                 value={formData.category}
@@ -156,7 +157,7 @@ export function EditTreeModal({
                 <option value="Medicinal">Medicinal</option>
                 <option value="Shade Trees">Shade Trees</option>
                 <option value="Occasion">Occasion</option>
-              </select>
+              </Select>
             </div>
             <div>
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">

@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import {
   IOrderRepository,
   OrderFilter,
@@ -53,6 +54,7 @@ export class MongoOrderRepository implements IOrderRepository {
   }
 
   public async findById(id: string): Promise<Nullable<Order>> {
+    if (!Types.ObjectId.isValid(id)) return null;
     const doc = await OrderModel.findById(id).exec();
     if (!doc) return null;
     return OrderMapper.toDomain(doc);
@@ -121,6 +123,7 @@ export class MongoOrderRepository implements IOrderRepository {
   }
 
   public async delete(id: string): Promise<boolean> {
+    if (!Types.ObjectId.isValid(id)) return false;
     const result = await OrderModel.findByIdAndDelete(id).exec();
     return !!result;
   }

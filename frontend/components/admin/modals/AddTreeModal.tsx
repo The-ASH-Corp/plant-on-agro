@@ -2,6 +2,7 @@
 
 import { TreeVarietyItem } from "../types";
 
+import { Select } from "@/components/ui";
 interface AddTreeModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -53,7 +54,7 @@ export function AddTreeModal({ isOpen, onClose, onSubmit }: AddTreeModalProps) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">Category</label>
-              <select
+              <Select
                 name="category"
                 required
                 className="w-full px-3 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7]"
@@ -64,7 +65,7 @@ export function AddTreeModal({ isOpen, onClose, onSubmit }: AddTreeModalProps) {
                 <option value="Medicinal">Medicinal</option>
                 <option value="Shade Trees">Shade Trees</option>
                 <option value="Occasion">Occasion</option>
-              </select>
+              </Select>
             </div>
             <div>
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">Price (₹)</label>

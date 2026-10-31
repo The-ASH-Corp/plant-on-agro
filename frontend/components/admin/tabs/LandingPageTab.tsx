@@ -72,7 +72,11 @@ export function LandingPageTab({ showToast }: LandingPageTabProps) {
       }
     } catch (err) {
       console.error("Save error:", err);
-      showToast("Failed to save changes. Please try again.");
+      const message =
+        err instanceof Error && err.message
+          ? err.message
+          : "Failed to save changes. Please try again.";
+      showToast(message);
     } finally {
       setSaving(false);
     }
