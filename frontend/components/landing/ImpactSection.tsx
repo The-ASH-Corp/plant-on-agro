@@ -31,29 +31,30 @@ export function ImpactSection({ content, liveStats, liveProjects }: ImpactSectio
     content?.description ||
     "Every tree planted creates a ripple — cleaner air, cooler ground, and a living legacy.";
 
-  const stats = liveStats
-    ? [
-        { icon: "🌳", value: liveStats.totalTrees, suffix: liveStats.totalTrees > 0 ? "+" : "", label: "Trees Planted & Geotagged", color: "#52b788" },
-        { icon: "🌍", value: liveStats.totalCo2Mt, suffix: " MT", label: "CO₂ Impact Offset / yr", color: "#95d5b2" },
-        { icon: "🌱", value: liveStats.canopyAcres, suffix: " acres", label: "Canopy Area Conserved", color: "#52b788" },
-        { icon: "👥", value: liveStats.peopleCount, suffix: liveStats.peopleCount > 0 ? "+" : "", label: "Verified Adopters", color: "#95d5b2" },
-        { icon: "🌿", value: liveStats.varietiesCount, suffix: " Species", label: "Botanical Varieties", color: "#52b788" },
-      ]
-    : content?.stats && content.stats.length > 0
-    ? content.stats
-    : [
-        { icon: "🌳", value: 0, suffix: "", label: "Trees Planted & Geotagged", color: "#52b788" },
-        { icon: "🌍", value: 0, suffix: " MT", label: "CO₂ Impact Offset / yr", color: "#95d5b2" },
-        { icon: "🌱", value: 0, suffix: " acres", label: "Canopy Area Conserved", color: "#52b788" },
-        { icon: "👥", value: 0, suffix: "", label: "Verified Adopters", color: "#95d5b2" },
-        { icon: "🌿", value: 0, suffix: " Species", label: "Botanical Varieties", color: "#52b788" },
-      ];
+  const stats =
+    content?.stats && content.stats.length > 0
+      ? content.stats
+      : liveStats
+      ? [
+          { icon: "🌳", value: liveStats.totalTrees, suffix: liveStats.totalTrees > 0 ? "+" : "", label: "Trees Planted & Geotagged", color: "#52b788" },
+          { icon: "🌍", value: liveStats.totalCo2Mt, suffix: " MT", label: "CO₂ Impact Offset / yr", color: "#95d5b2" },
+          { icon: "🌱", value: liveStats.canopyAcres, suffix: " acres", label: "Canopy Area Conserved", color: "#52b788" },
+          { icon: "👥", value: liveStats.peopleCount, suffix: liveStats.peopleCount > 0 ? "+" : "", label: "Verified Adopters", color: "#95d5b2" },
+          { icon: "🌿", value: liveStats.varietiesCount, suffix: " Species", label: "Botanical Varieties", color: "#52b788" },
+        ]
+      : [
+          { icon: "🌳", value: 0, suffix: "", label: "Trees Planted & Geotagged", color: "#52b788" },
+          { icon: "🌍", value: 0, suffix: " MT", label: "CO₂ Impact Offset / yr", color: "#95d5b2" },
+          { icon: "🌱", value: 0, suffix: " acres", label: "Canopy Area Conserved", color: "#52b788" },
+          { icon: "👥", value: 0, suffix: "", label: "Verified Adopters", color: "#95d5b2" },
+          { icon: "🌿", value: 0, suffix: " Species", label: "Botanical Varieties", color: "#52b788" },
+        ];
 
   const projects =
-    liveProjects && liveProjects.length > 0
-      ? liveProjects
-      : content?.projects && content.projects.length > 0
+    content?.projects && content.projects.length > 0
       ? content.projects
+      : liveProjects && liveProjects.length > 0
+      ? liveProjects
       : [];
 
   return (
@@ -95,9 +96,9 @@ export function ImpactSection({ content, liveStats, liveProjects }: ImpactSectio
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-6 mb-20">
-          {stats.map((s) => (
+          {stats.map((s, idx) => (
             <div
-              key={s.label}
+              key={`${s.label}-${idx}`}
               className="text-center p-6 rounded-2xl transition-transform duration-300 hover:-translate-y-1"
               style={{
                 background: "rgba(255,255,255,0.05)",
@@ -127,9 +128,9 @@ export function ImpactSection({ content, liveStats, liveProjects }: ImpactSectio
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {projects.map((p) => (
+            {projects.map((p, idx) => (
               <div
-                key={p.title}
+                key={`${p.title}-${idx}`}
                 className="rounded-2xl overflow-hidden group"
                 style={{
                   background: "rgba(255,255,255,0.05)",

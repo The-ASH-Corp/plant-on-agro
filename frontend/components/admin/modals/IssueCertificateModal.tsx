@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Select } from "@/components/ui";
 import { AdoptionOrder, TreeInstanceItem } from "../types";
 
 interface IssueCertificateModalProps {
@@ -99,7 +100,7 @@ export function IssueCertificateModal({
             <label className="text-[11px] font-bold text-[#173324] block mb-1">
               ⚡ Quick Import from Adoption Order:
             </label>
-            <select
+            <Select
               value={selectedOrderRef}
               onChange={(e) => handleOrderSelect(e.target.value)}
               className="w-full text-xs py-2 px-3 rounded-xl border border-[#b2ddc4] bg-white text-[#173324] outline-none cursor-pointer"
@@ -110,7 +111,7 @@ export function IssueCertificateModal({
                   {o.orderNumber} • {o.adopterName} ({o.treeSpecies} - {o.reserveName})
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         )}
 
@@ -232,14 +233,14 @@ export function IssueCertificateModal({
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">
                 Initial Deed Status
               </label>
-              <select
+              <Select
                 name="status"
                 defaultValue="Issued"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7] focus:border-[#173324] cursor-pointer"
               >
                 <option value="Issued">Issued (Cryptographically Active)</option>
                 <option value="Pending Generation">Pending Generation</option>
-              </select>
+              </Select>
             </div>
 
             <div>

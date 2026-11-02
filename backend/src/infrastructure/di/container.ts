@@ -386,7 +386,8 @@ export class Container {
   private static readonly downloadCertificatePdfUseCase = new DownloadCertificatePdfUseCase(
     Container.certificateRepository,
     Container.treeInstanceRepository,
-    Container.pdfGeneratorService
+    Container.pdfGeneratorService,
+    Container.orderRepository
   );
 
   // Controllers
@@ -495,5 +496,3 @@ export class Container {
     Container.processRazorpayWebhookUseCase
   );
 }
-
-

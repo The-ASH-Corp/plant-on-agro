@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { PlantStep, Tree, Plan } from "@/types";
+import { validatePhoneNumber } from "@/components/ui";
 import { treeVarietyService, BackendTreeVariety } from "@/services/tree-varieties/tree-variety.service";
 import { adoptionPlanService, BackendAdoptionPlan } from "@/services/adoption-plans/adoption-plan.service";
 import { treeInstanceService } from "@/services/tree-instances/tree-instance.service";
@@ -59,14 +60,15 @@ const LOCATION_COORDINATES: Record<
 
 export interface PlantFlowProps {
   onClose: () => void;
+  initialPlanId?: string | null;
 }
 
-export function PlantFlowModal({ onClose }: PlantFlowProps) {
+export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
   const user = useHydratedStore(useAuthStore, (s) => s.user);
 
   const [step, setStep] = useState<PlantStep>(1);
   const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(initialPlanId ?? null);
   const [qty, setQty] = useState(1);
   const [location, setLocation] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -191,11 +193,13 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
   const pricePerTree = universalPrice + (selectedPlanData?.price ?? 0);
   const total = pricePerTree * qty;
 
+  const isPhoneValid = validatePhoneNumber(phone, false).isValid;
+
   const canNext =
     (step === 1 && selectedPlan) ||
     (step === 2 && qty >= 1) ||
     (step === 3 && location) ||
-    (step === 4 && name && email) ||
+    (step === 4 && name.trim() && email.trim() && isPhoneValid) ||
     step === 5 ||
     step === 6;
 
@@ -250,8 +254,8 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
 
         const noteText =
           qty > 1
-            ? `Tree #${i + 1} of ${qty} adopted under "${selectedPlanData?.label || 'Individual'}" lifetime package. Physical nursery tagging and geotagging completed.`
-            : `Adopted under "${selectedPlanData?.label || 'Individual'}" lifetime package. Physical nursery tagging and geotagging completed.`;
+            ? `Tree #${i + 1} of ${qty} adopted under "${selectedPlanData?.label || "Individual"}" lifetime package. Physical nursery tagging and geotagging completed.`
+            : `Adopted under "${selectedPlanData?.label || "Individual"}" lifetime package. Physical nursery tagging and geotagging completed.`;
 
         // Persist to MongoDB through backend API
         try {
@@ -313,7 +317,7 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
           });
         }
       }
-  }
+    }
 
     // 2. Order Record - Use server-verified order directly
     const invNumber = `INV-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -324,82 +328,82 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
     if (!finalOrderRecord) {
       try {
         const orderRes = await orderService.create({
-        orderNumber: orderId,
-        invoiceNumber: invNumber,
-        adopterName: name || user?.name || "Verified Adopter",
-        adopterEmail: email || user?.email || "adopter@example.com",
-        adopterPhone: phone || "",
-        items: [
-          {
-            treeVarietyId: selectedTree?.id ? String(selectedTree.id) : undefined,
-            treeSpecies: selectedTree?.name || "Indigenous Tree",
-            scientificName: selectedTree?.sci || "Botanical Tree",
-            category: selectedTree?.category || "Fruit Trees",
-            planType: selectedPlanData?.label || "Individual",
-            reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
-            gpsCoords: chosenCoords.formatted,
-            quantity: qty,
-            unitPrice: pricePerTree,
-            subtotal: total,
-          },
-        ],
-        treeSpecies: selectedTree?.name || "Indigenous Tree",
-        scientificName: selectedTree?.sci || "Botanical Tree",
-        category: selectedTree?.category || "Fruit Trees",
-        reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
-        gpsCoords: chosenCoords.formatted,
-        planType: selectedPlanData?.label || "Individual",
-        dedicationMessage: "",
-        quantity: qty,
-        totalAmount: total,
-        paymentMethod: methodUsed,
-        paymentStatus: "Paid",
-        transactionRef: txRef,
-        status: "New Request",
-        certificateId: certNumber,
-        ndviScore: 0.91,
-        isRead: false,
-        notes: orderNotes,
-        datePlanted: dateStr,
-      });
+          orderNumber: orderId,
+          invoiceNumber: invNumber,
+          adopterName: name || user?.name || "Verified Adopter",
+          adopterEmail: email || user?.email || "adopter@example.com",
+          adopterPhone: phone || "",
+          items: [
+            {
+              treeVarietyId: selectedTree?.id ? String(selectedTree.id) : undefined,
+              treeSpecies: selectedTree?.name || "Indigenous Tree",
+              scientificName: selectedTree?.sci || "Botanical Tree",
+              category: selectedTree?.category || "Fruit Trees",
+              planType: selectedPlanData?.label || "Individual",
+              reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
+              gpsCoords: chosenCoords.formatted,
+              quantity: qty,
+              unitPrice: pricePerTree,
+              subtotal: total,
+            },
+          ],
+          treeSpecies: selectedTree?.name || "Indigenous Tree",
+          scientificName: selectedTree?.sci || "Botanical Tree",
+          category: selectedTree?.category || "Fruit Trees",
+          reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
+          gpsCoords: chosenCoords.formatted,
+          planType: selectedPlanData?.label || "Individual",
+          dedicationMessage: "",
+          quantity: qty,
+          totalAmount: total,
+          paymentMethod: methodUsed,
+          paymentStatus: "Paid",
+          transactionRef: txRef,
+          status: "New Request",
+          certificateId: certNumber,
+          ndviScore: 0.91,
+          isRead: false,
+          notes: orderNotes,
+          datePlanted: dateStr,
+        });
 
-      if (orderRes.data) {
-        finalOrderRecord = orderService.mapToUiItem(orderRes.data);
+        if (orderRes.data) {
+          finalOrderRecord = orderService.mapToUiItem(orderRes.data);
+        }
+      } catch (orderApiErr) {
+        console.warn("Could not save order directly to backend API, using local fallback:", orderApiErr);
       }
-    } catch (orderApiErr) {
-      console.warn("Could not save order directly to backend API, using local fallback:", orderApiErr);
-    }
 
-    if (!finalOrderRecord) {
-      finalOrderRecord = {
-        id: "ord-" + Date.now(),
-        orderNumber: orderId,
-        invoiceNumber: invNumber,
-        adopterName: name || user?.name || "Verified Adopter",
-        adopterEmail: email || user?.email || "adopter@example.com",
-        adopterPhone: phone || "",
-        treeSpecies: selectedTree?.name || "Indigenous Tree",
-        scientificName: selectedTree?.sci || "Botanical Tree",
-        category: selectedTree?.category || "Fruit Trees",
-        reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
-        gpsCoords: chosenCoords.formatted,
-        planType: selectedPlanData?.label || "Individual",
-        dedicationMessage: "",
-        quantity: qty,
-        totalAmount: total,
-        paymentMethod: methodUsed,
-        paymentStatus: "Paid" as const,
-        transactionRef: txRef,
-        datePlanted: dateStr,
-        status: "New Request" as const,
-        certificateId: certNumber,
-        ndviScore: 0.91,
-        isRead: false,
-        notes: orderNotes,
-        createdAt: new Date().toISOString(),
-      };
+      if (!finalOrderRecord) {
+        finalOrderRecord = {
+          id: "ord-" + Date.now(),
+          orderNumber: orderId,
+          invoiceNumber: invNumber,
+          adopterName: name || user?.name || "Verified Adopter",
+          adopterEmail: email || user?.email || "adopter@example.com",
+          adopterPhone: phone || "",
+          treeSpecies: selectedTree?.name || "Indigenous Tree",
+          scientificName: selectedTree?.sci || "Botanical Tree",
+          category: selectedTree?.category || "Fruit Trees",
+          reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
+          gpsCoords: chosenCoords.formatted,
+          planType: selectedPlanData?.label || "Individual",
+          dedicationMessage: "",
+          quantity: qty,
+          totalAmount: total,
+          paymentMethod: methodUsed,
+          paymentStatus: "Paid" as const,
+          transactionRef: txRef,
+          datePlanted: dateStr,
+          status: "New Request" as const,
+          certificateId: certNumber,
+          ndviScore: 0.91,
+          isRead: false,
+          notes: orderNotes,
+          createdAt: new Date().toISOString(),
+        };
+      }
     }
-  }
 
     try {
       // Update orders ledger in localStorage for instant fast UI responsiveness

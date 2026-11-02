@@ -2,6 +2,9 @@
 
 import { LivePreviewModalProps } from "./types";
 
+const formatStatSuffix = (suffix?: string) =>
+  suffix ? (/^[a-zA-Z]/.test(suffix) ? ` ${suffix}` : suffix) : "";
+
 export function LivePreviewModal({
   isOpen,
   content,
@@ -70,7 +73,7 @@ export function LivePreviewModal({
                 {content.hero.stats.map((s, i) => (
                   <div key={i}>
                     <div className="text-xl font-serif text-[#95d5b2] font-bold">
-                      {s.target.toLocaleString()}{s.suffix}
+                      {s.target.toLocaleString()}{formatStatSuffix(s.suffix)}
                     </div>
                     <div className="text-[11px] text-white/70">{s.label}</div>
                   </div>
@@ -119,7 +122,7 @@ export function LivePreviewModal({
                 {content.impact.stats.map((s, i) => (
                   <div key={i} className="text-center p-3 rounded-xl bg-white/5 border border-white/10">
                     <div className="text-xl mb-1">{s.icon}</div>
-                    <div className="text-lg font-bold" style={{ color: s.color }}>{s.value}{s.suffix}</div>
+                    <div className="text-lg font-bold" style={{ color: s.color }}>{s.value}{formatStatSuffix(s.suffix)}</div>
                     <div className="text-[10px] text-white/60">{s.label}</div>
                   </div>
                 ))}

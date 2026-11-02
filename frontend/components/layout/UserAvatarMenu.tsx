@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/auth";
+import { SignOutConfirmationModal } from "@/components/ui";
 
 export interface UserAvatarMenuProps {
   user: User;
@@ -12,6 +13,7 @@ export interface UserAvatarMenuProps {
 
 export function UserAvatarMenu({ user, onLogout, openPlant }: UserAvatarMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -62,6 +64,10 @@ export function UserAvatarMenu({ user, onLogout, openPlant }: UserAvatarMenuProp
 
   const handleLogoutClick = () => {
     setIsOpen(false);
+    setShowSignOutModal(true);
+  };
+
+  const handleConfirmLogout = () => {
     onLogout();
     router.push("/");
   };
@@ -197,6 +203,15 @@ export function UserAvatarMenu({ user, onLogout, openPlant }: UserAvatarMenuProp
           </div>
         </div>
       )}
+ 
+      <SignOutConfirmationModal
+        isOpen={showSignOutModal}
+        onClose={() => setShowSignOutModal(false)}
+        onConfirm={handleConfirmLogout}
+        userName={user.name}
+        userEmail={user.email}
+        userRole={user.role}
+      />
     </div>
   );
 }

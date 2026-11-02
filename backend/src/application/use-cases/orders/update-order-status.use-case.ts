@@ -13,7 +13,8 @@ export class UpdateOrderStatusUseCase {
   ): Promise<OrderDto> {
     let order = await this.orderRepository.findById(idOrNumber);
     if (!order) {
-      order = await this.orderRepository.findByOrderNumber(idOrNumber);
+      const cleanNumber = idOrNumber.replace(/^ord-/i, '');
+      order = await this.orderRepository.findByOrderNumber(cleanNumber);
     }
 
     if (!order) {

@@ -197,7 +197,15 @@ export const landingPageService = {
 
   // PUT update landing page content
   async update(payload: Partial<LandingPageContent>): Promise<ApiResponse<LandingPageContent>> {
-    return apiClient.put<LandingPageContent>(API_ENDPOINTS.LANDING_PAGE.BASE, payload);
+    const cleanPayload: Partial<LandingPageContent> = {
+      hero: payload.hero,
+      howItWorks: payload.howItWorks,
+      impact: payload.impact,
+      certificate: payload.certificate,
+      footer: payload.footer,
+      ...(payload.isActive !== undefined ? { isActive: payload.isActive } : {}),
+    };
+    return apiClient.put<LandingPageContent>(API_ENDPOINTS.LANDING_PAGE.BASE, cleanPayload);
   },
 
   // POST reset landing page content

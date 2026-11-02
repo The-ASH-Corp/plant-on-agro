@@ -253,16 +253,7 @@ export function PlansTab({
                     <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#f0f5f2] text-[#1b7a43]">
                       {(plan.activeCount ?? 0).toLocaleString()} Adopters
                     </span>
-                    {onEditPlan && (
-                      <button
-                        type="button"
-                        onClick={() => onEditPlan(plan)}
-                        className="px-2.5 py-1 rounded-lg bg-[#173324] hover:bg-[#1f4230] text-white text-[11px] font-semibold flex items-center gap-1 transition-all cursor-pointer shadow-xs"
-                      >
-                        <PencilIcon className="w-3 h-3 text-emerald-300" />
-                        <span>Edit</span>
-                      </button>
-                    )}
+                    
                   </div>
                 </div>
               </div>

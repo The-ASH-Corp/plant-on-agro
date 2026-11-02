@@ -162,10 +162,9 @@ export function AdminTabContent({
       );
 
     case "visits":
-      return <VisitsTab />;
+      return <VisitsTab showToast={showToast} />;
 
     default:
       return null;
   }
 }
-

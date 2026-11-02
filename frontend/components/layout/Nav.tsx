@@ -9,6 +9,7 @@ import Logo from "../../public/Screenshot_From_2026-09-17_15-39-39-removebg-prev
 import { useAuthStore } from "@/store/auth.store";
 import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
 import { UserAvatarMenu } from "./UserAvatarMenu";
+import { SignOutConfirmationModal } from "@/components/ui";
 
 export interface NavProps {
   active?: Section;
@@ -19,6 +20,7 @@ export interface NavProps {
 export function Nav({ active = "home", setActive, openPlant }: NavProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
   const user = useHydratedStore(useAuthStore, (s) => s.user);
   const isAuthenticated = useHydratedStore(useAuthStore, (s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
@@ -41,7 +43,6 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
     { label: "Experiences", id: "experiences", href: "/#experiences" },
     { label: "Impact", id: "impact", href: "/#impact" },
   ];
-
 
   const handleLinkClick = (l: (typeof links)[0]) => {
     if (isHome && setActive) {
@@ -218,8 +219,8 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
                   </div>
                   <button
                     onClick={() => {
-                      logout();
                       setMenuOpen(false);
+                      setShowSignOutModal(true);
                     }}
                     className="text-xs text-red-300 hover:text-red-200 font-semibold px-2 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors cursor-pointer"
                   >
@@ -273,6 +274,16 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
           </div>
         </div>
       )}
+
+      {/* Sign Out Confirmation Modal (Mobile Menu) */}
+      <SignOutConfirmationModal
+        isOpen={showSignOutModal}
+        onClose={() => setShowSignOutModal(false)}
+        onConfirm={logout}
+        userName={user?.name}
+        userEmail={user?.email}
+        userRole={user?.role}
+      />
     </nav>
   );
 }

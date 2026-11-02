@@ -34,6 +34,31 @@ export function useOrderActions({ data, showToast }: Params) {
       (o) => o.orderNumber === orderIdentifier || o.id === orderIdentifier
     );
 
+    if (
+      selectedOrder &&
+      (selectedOrder.orderNumber === orderIdentifier || selectedOrder.id === orderIdentifier)
+    ) {
+      setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus, isRead: true } : null));
+    }
+
+    // 1. Persist status change directly to MongoDB backend order entity first
+    const lookupId = targetOrder?.id || orderIdentifier;
+    try {
+      await orderService.updateStatus(lookupId, newStatus);
+    } catch (orderApiErr) {
+      // Fallback: try updating by orderIdentifier (orderNumber) if targetOrder.id was a derived ID
+      if (lookupId !== orderIdentifier) {
+        try {
+          await orderService.updateStatus(orderIdentifier, newStatus);
+        } catch (retryErr) {
+          console.warn("Failed to persist order status to backend API:", retryErr);
+        }
+      } else {
+        console.warn("Failed to persist order status to backend API:", orderApiErr);
+      }
+    }
+
+    // 2. Update local state after backend update so any re-fetch reads updated status
     setOrders((prev) => {
       const updated = prev.map((o) =>
         o.orderNumber === orderIdentifier || o.id === orderIdentifier
@@ -44,23 +69,7 @@ export function useOrderActions({ data, showToast }: Params) {
       return updated;
     });
 
-    if (
-      selectedOrder &&
-      (selectedOrder.orderNumber === orderIdentifier || selectedOrder.id === orderIdentifier)
-    ) {
-      setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus, isRead: true } : null));
-    }
-
-    // Persist status change directly to MongoDB backend order entity
-    if (targetOrder?.id) {
-      try {
-        await orderService.updateStatus(targetOrder.id, newStatus);
-      } catch (orderApiErr) {
-        console.warn("Failed to persist order status to backend API:", orderApiErr);
-      }
-    }
-
-    // Persist status change to matching tree instances in database
+    // 3. Persist status change to matching tree instances in database
     const matchingInsts = instances.filter(
       (i) => i.orderRef === orderIdentifier || i.treeTag === orderIdentifier
     );
@@ -75,7 +84,7 @@ export function useOrderActions({ data, showToast }: Params) {
       }
     }
 
-    // If order was moved to "Certificate Issued", ensure a certificate deed exists
+    // 4. If order was moved to "Certificate Issued", ensure a certificate deed exists
     if (newStatus === "Certificate Issued" && targetOrder) {
       const orderNum = targetOrder.orderNumber;
       const alreadyHasCert = certificates.some(
@@ -84,12 +93,15 @@ export function useOrderActions({ data, showToast }: Params) {
       if (!alreadyHasCert) {
         try {
           const autoCert = await certificateService.createCertificate({
+            certificateNumber: targetOrder.certificateId || `CERT-${orderNum}`,
             orderRef: orderNum,
             recipientName: targetOrder.adopterName,
             adopterName: targetOrder.adopterName,
             treeSpecies: targetOrder.treeSpecies,
             reserveName: targetOrder.reserveName,
-            dedicatedMessage: `PlantOn Agro certified green deed honoring ${targetOrder.adopterName} for sustainable environmental stewardship.`,
+            dedicatedMessage:
+              targetOrder.dedicationMessage ||
+              `PlantOn Agro certified green deed honoring ${targetOrder.adopterName} for sustainable environmental stewardship.`,
             status: "Issued",
           });
           if (autoCert.data) {
@@ -124,12 +136,6 @@ export function useOrderActions({ data, showToast }: Params) {
   const handleSelectOrder = async (order: AdoptionOrder) => {
     setSelectedOrder(order);
     if (order.isRead === false) {
-      setOrders((prev) => {
-        const updated = prev.map((o) => (o.id === order.id ? { ...o, isRead: true } : o));
-        persistOrders(updated);
-        return updated;
-      });
-
       if (order.id) {
         try {
           await orderService.updateStatus(order.id, order.status);
@@ -137,6 +143,12 @@ export function useOrderActions({ data, showToast }: Params) {
           console.warn("Could not mark order read on backend:", err);
         }
       }
+
+      setOrders((prev) => {
+        const updated = prev.map((o) => (o.id === order.id ? { ...o, isRead: true } : o));
+        persistOrders(updated);
+        return updated;
+      });
     }
   };
 

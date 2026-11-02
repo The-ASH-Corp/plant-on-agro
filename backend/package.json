@@ -4,11 +4,15 @@
   "description": "",
   "main": "dist/server.js",
   "scripts": {
+    "predev": "tsx src/scripts/ensure-redis.ts",
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node -r tsconfig-paths/register dist/server.js",
     "typecheck": "tsc --noEmit",
-    "seed:admin": "tsx src/scripts/seed-admin.ts"
+    "seed:admin": "tsx src/scripts/seed-admin.ts",
+    "redis:up": "docker compose up -d redis",
+    "redis:down": "docker compose stop redis",
+    "redis:logs": "docker compose logs -f redis"
   },
   "keywords": [],
   "author": "",

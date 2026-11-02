@@ -40,6 +40,15 @@ export class MongoTreeVarietyRepository implements ITreeVarietyRepository {
     return TreeVarietyMapper.toDomain(doc);
   }
 
+  public async findByCommonName(commonName: string): Promise<Nullable<TreeVariety>> {
+    const escaped = commonName.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const doc = await TreeVarietyModel.findOne({
+      commonName: { $regex: new RegExp(`^${escaped}$`, 'i') },
+    }).exec();
+    if (!doc) return null;
+    return TreeVarietyMapper.toDomain(doc);
+  }
+
   public async findAll(
     filter?: TreeVarietyFilter,
     limit = 50,

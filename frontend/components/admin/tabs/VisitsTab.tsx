@@ -4,8 +4,14 @@ import { useState, useEffect } from "react";
 import { VisitBookingRecord, visitService } from "@/services/visits/visit.service";
 import { ExperienceItem, experienceService } from "@/services/experiences/experience.service";
 import { AddExperienceModal } from "../modals/AddExperienceModal";
+import { DeleteConfirmationModal } from "../modals/DeleteConfirmationModal";
+import type { ShowToast } from "../hooks/useAdminToast";
 
-export function VisitsTab() {
+interface VisitsTabProps {
+  showToast?: ShowToast;
+}
+
+export function VisitsTab({ showToast }: VisitsTabProps) {
   const [subTab, setSubTab] = useState<"bookings" | "experiences">("bookings");
 
   // Bookings state
@@ -19,6 +25,8 @@ export function VisitsTab() {
   const [loadingExperiences, setLoadingExperiences] = useState(true);
   const [experienceModalOpen, setExperienceModalOpen] = useState(false);
   const [editingExperience, setEditingExperience] = useState<ExperienceItem | null>(null);
+  const [experienceToDelete, setExperienceToDelete] = useState<ExperienceItem | null>(null);
+  const [isDeletingExperience, setIsDeletingExperience] = useState(false);
 
   // Guide assignment state
   const [assigningGuideBookingId, setAssigningGuideBookingId] = useState<string | null>(null);
@@ -93,13 +101,23 @@ export function VisitsTab() {
     }
   };
 
-  const handleDeleteExperience = async (id: string) => {
-    if (!confirm("Are you sure you want to remove this experience?")) return;
+  const handleConfirmDeleteExperience = async () => {
+    if (!experienceToDelete) return;
+    setIsDeletingExperience(true);
     try {
-      await experienceService.delete(id);
+      await experienceService.delete(experienceToDelete.id);
+      if (showToast) {
+        showToast(`Experience "${experienceToDelete.title}" removed from catalog.`);
+      }
+      setExperienceToDelete(null);
       loadExperiences();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error deleting experience:", err);
+      if (showToast) {
+        showToast(err?.message || "Failed to delete experience");
+      }
+    } finally {
+      setIsDeletingExperience(false);
     }
   };
 
@@ -433,7 +451,7 @@ export function VisitsTab() {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDeleteExperience(exp.id)}
+                        onClick={() => setExperienceToDelete(exp)}
                         className="px-2.5 py-1 rounded text-xs font-semibold text-red-600 hover:bg-red-50 cursor-pointer"
                       >
                         Delete
@@ -458,6 +476,19 @@ export function VisitsTab() {
           experienceToEdit={editingExperience}
         />
       )}
+
+      {/* Delete Experience Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={Boolean(experienceToDelete)}
+        itemType="Experience"
+        itemName={experienceToDelete?.title}
+        description="Are you sure you want to remove this experience from the catalog? Visitors will no longer be able to book it."
+        isDeleting={isDeletingExperience}
+        onClose={() => {
+          if (!isDeletingExperience) setExperienceToDelete(null);
+        }}
+        onConfirm={handleConfirmDeleteExperience}
+      />
     </div>
   );
 }

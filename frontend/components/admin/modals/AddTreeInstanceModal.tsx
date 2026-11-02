@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Select } from "@/components/ui";
 import { TreeHealthStatus } from "../types";
 
 interface AddTreeInstanceModalProps {
@@ -197,7 +198,7 @@ export function AddTreeInstanceModal({
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">
                 Current Health Status *
               </label>
-              <select
+              <Select
                 name="healthStatus"
                 required
                 defaultValue="Sapling Growing"
@@ -208,7 +209,7 @@ export function AddTreeInstanceModal({
                     {opt.icon} {opt.label}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
 

@@ -37,6 +37,14 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
       (fd.get("desc") as string).trim() ||
       "Newly catalogued botanical variety for agroforestry.";
 
+    const duplicateExists = trees.some(
+      (t) => t.name.trim().toLowerCase() === commonName.toLowerCase()
+    );
+    if (duplicateExists) {
+      showToast(`Tree name "${commonName}" already exists`);
+      return;
+    }
+
     const buildLocalTree = (): TreeVarietyItem => ({
       id: "tree-" + (trees.length + 1),
       name: commonName,
@@ -71,13 +79,14 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
       } else {
         setTrees((prev) => [buildLocalTree(), ...prev]);
       }
-    } catch (err) {
+
+      setShowAddTreeModal(false);
+      showToast(`Added "${commonName}" to tree catalog at universal price ₹${price}!`);
+      setActiveTab("trees");
+    } catch (err: any) {
       console.warn("Tree creation notice:", err);
-      setTrees((prev) => [buildLocalTree(), ...prev]);
+      showToast(err?.message || `Tree name "${commonName}" already exists`);
     }
-    setShowAddTreeModal(false);
-    showToast(`Added "${commonName}" to tree catalog at universal price ₹${price}!`);
-    setActiveTab("trees");
   };
 
   const handleUpdateTree = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -101,6 +110,14 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
     const img = (fd.get("img") as string)?.trim() || selectedTreeForEdit.img;
     const desc = (fd.get("desc") as string)?.trim() || selectedTreeForEdit.desc;
     const isActive = fd.get("isActive") !== null;
+
+    const duplicateExists = trees.some(
+      (t) => t.id !== id && t.name.trim().toLowerCase() === commonName.toLowerCase()
+    );
+    if (duplicateExists) {
+      showToast(`Tree name "${commonName}" already exists`);
+      return;
+    }
 
     const applyLocalUpdate = () =>
       setTrees((prev) =>
@@ -163,11 +180,9 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
       }
       setSelectedTreeForEdit(null);
       showToast(`Updated "${commonName}" & synced all trees to ₹${price}!`);
-    } catch (err) {
+    } catch (err: any) {
       console.warn("Tree update notice:", err);
-      applyLocalUpdate();
-      setSelectedTreeForEdit(null);
-      showToast(`Updated "${commonName}" locally.`);
+      showToast(err?.message || "Failed to update tree variety");
     } finally {
       setIsUpdatingTree(false);
     }

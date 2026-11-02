@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Select } from "@/components/ui";
 import { PlantationLocationItem } from "../types";
 
 interface EditLocationModalProps {
@@ -197,7 +198,7 @@ export function EditLocationModal({
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">
                 Operational Status
               </label>
-              <select
+              <Select
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
@@ -206,7 +207,7 @@ export function EditLocationModal({
                 <option value="Active">Active (Accepting New Plantings)</option>
                 <option value="Expanding">Expanding (Parcel Acquisition)</option>
                 <option value="Full">Full (At Maximum Capacity)</option>
-              </select>
+              </Select>
             </div>
           </div>
 

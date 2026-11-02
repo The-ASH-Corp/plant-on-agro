@@ -20,6 +20,7 @@ import { AdminToast } from "./AdminToast";
 import { AdminTabContent } from "./AdminTabContent";
 import { AdminModals } from "./AdminModals";
 import { AdminLoadingScreen, AdminUnauthorizedScreen } from "./AdminGuardScreens";
+import { SignOutConfirmationModal } from "@/components/ui";
 
 // Hooks
 import { useAdminToast } from "./hooks/useAdminToast";
@@ -49,6 +50,7 @@ export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<AdminTabType>("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
 
   const { toastMessage, showToast } = useAdminToast();
   const { user, logout, isReady, isAdmin } = useAdminAuthGuard();
@@ -95,7 +97,7 @@ export function AdminDashboard() {
         certificatesCount={data.certificates.length}
         usersCount={data.users.filter((u) => u.role !== "admin").length}
         userName={user?.name}
-        onLogout={logout}
+        onLogout={() => setShowSignOutModal(true)}
         onOpenAddTree={() => treeActions.setShowAddTreeModal(true)}
         onOpenAddPlan={() => planActions.setShowAddPlanModal(true)}
         onOpenAddLocation={() => locationActions.setShowAddLocationModal(true)}
@@ -136,6 +138,16 @@ export function AdminDashboard() {
 
       {/* 3. Action & Confirmation Modals */}
       <AdminModals data={data} showToast={showToast} {...actions} />
+
+      {/* 4. Sign Out Confirmation Modal */}
+      <SignOutConfirmationModal
+        isOpen={showSignOutModal}
+        onClose={() => setShowSignOutModal(false)}
+        onConfirm={logout}
+        userName={user?.name}
+        userEmail={user?.email}
+        userRole="admin"
+      />
     </div>
   );
 }

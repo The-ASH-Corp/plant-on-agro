@@ -4,9 +4,13 @@ import { env } from './config/env';
 import { Database } from './infrastructure/database/connection';
 import { seedExperiencesIfEmpty } from './infrastructure/database/seeds/experience.seeder';
 import { redisService } from './infrastructure/redis/redis.client';
+import { ensureRedisContainerAsync } from './infrastructure/redis/redis-docker.helper';
 
 const bootstrap = async (): Promise<void> => {
   try {
+    // 0. Ensure Redis container is running in local environments
+    await ensureRedisContainerAsync();
+
     // 1. Initialize Database connection
     await Database.connect();
 

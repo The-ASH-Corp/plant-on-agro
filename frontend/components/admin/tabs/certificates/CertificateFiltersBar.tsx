@@ -115,7 +115,7 @@ export function CertificateFiltersBar({
 
       {/* Bottom Row: Status Filter Tabs and Results Count */}
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-[#f0f4f1]">
-        <div className="flex flex-wrap items-center gap-1.5">
+        {/* <div className="flex flex-wrap items-center gap-1.5">
           {STATUS_FILTERS.map((tab) => {
             const active = selectedStatus === tab.value;
             return (
@@ -133,7 +133,7 @@ export function CertificateFiltersBar({
               </button>
             );
           })}
-        </div>
+        </div> */}
 
         <div className="flex items-center gap-2 text-xs text-[#55695d]">
           <span>

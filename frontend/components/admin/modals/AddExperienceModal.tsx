@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Select } from "@/components/ui";
 import { CreateExperiencePayload, experienceService, ExperienceItem } from "@/services/experiences/experience.service";
 import { uploadService } from "@/services/upload/upload.service";
 
@@ -181,7 +182,7 @@ export function AddExperienceModal({
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
                 Category *
               </label>
-              <select
+              <Select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as any)}
                 className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#2d6a4f] bg-white"
@@ -192,7 +193,7 @@ export function AddExperienceModal({
                     {cat}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
 

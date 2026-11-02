@@ -2,6 +2,7 @@
 
 import { CertificatePaginationProps } from "./types";
 
+import { Select } from "@/components/ui";
 export function CertificatePagination({
   currentPage,
   totalPages,
@@ -51,7 +52,7 @@ export function CertificatePagination({
 
         <div className="flex items-center gap-1.5 pl-2 border-l border-[#e2eae5]">
           <span className="text-[11px] text-[#7a8c80]">Per page:</span>
-          <select
+          <Select
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
             className="py-1 px-2 rounded-lg border border-[#d8e3dc] bg-[#f8faf8] text-[#173324] font-semibold text-xs outline-none cursor-pointer"
@@ -60,7 +61,7 @@ export function CertificatePagination({
             <option value={10}>10</option>
             <option value={25}>25</option>
             <option value={50}>50</option>
-          </select>
+          </Select>
         </div>
       </div>
 

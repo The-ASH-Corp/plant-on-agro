@@ -95,7 +95,7 @@ export function CertificateTableRow({
       </td>
 
       {/* 6. Status */}
-      <td className="py-3.5 px-4">
+      <td className="py-3.5 px-4 whitespace-nowrap">
         <CertificateStatusBadge status={cert.status} size="sm" />
       </td>
 

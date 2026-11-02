@@ -296,15 +296,7 @@ export function UserDetailsModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="mt-6 pt-4 border-t border-[#e2eae5] flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => handleCopy(JSON.stringify(user, null, 2), "json")}
-            className="text-xs text-[#73877b] hover:text-[#173324] font-medium flex items-center gap-1.5 cursor-pointer py-1.5 px-2.5 rounded-lg hover:bg-black/5"
-          >
-            <span>{copiedField === "json" ? "✓ Copied JSON" : "📋 Copy User JSON"}</span>
-          </button>
-
+        <div className="mt-6 pt-4 border-t border-[#e2eae5] flex items-center justify-end">
           <button
             type="button"
             onClick={onClose}

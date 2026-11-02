@@ -1,5 +1,7 @@
 "use client";
 
+import { PhoneInput } from "@/components/ui";
+
 interface Step5UserDetailsProps {
   name: string;
   setName: (name: string) => void;
@@ -17,63 +19,62 @@ export function Step5UserDetails({
   phone,
   setPhone,
 }: Step5UserDetailsProps) {
-  const fields = [
-    {
-      label: "Full Name",
-      id: "input-full-name",
-      val: name,
-      set: setName,
-      type: "text",
-      placeholder: "e.g. Priya Sharma",
-      required: true,
-    },
-    {
-      label: "Email Address",
-      id: "input-email",
-      val: email,
-      set: setEmail,
-      type: "email",
-      placeholder: "your@email.com",
-      required: true,
-    },
-    {
-      label: "Phone Number",
-      id: "input-phone",
-      val: phone,
-      set: setPhone,
-      type: "tel",
-      placeholder: "+91 98765 43210",
-      required: false,
-    },
-  ];
-
   return (
     <div>
       <p className="text-[#4a6557] mb-5">
         Your digital adoption certificate will be issued in this name.
       </p>
       <div className="space-y-4">
-        {fields.map(({ label, id, val, set, type, placeholder }) => (
-          <div key={label}>
-            <label
-              htmlFor={id}
-              className="text-xs font-semibold text-[#4a6557] uppercase tracking-wider mb-1.5 block"
-            >
-              {label}
-            </label>
-            <input
-              id={id}
-              type={type}
-              value={val}
-              onChange={(e) => set(e.target.value)}
-              placeholder={placeholder}
-              className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
-              style={{ border: "2px solid #eaf2ec", color: "#173324" }}
-              onFocus={(e) => (e.target.style.border = "2px solid #52b788")}
-              onBlur={(e) => (e.target.style.border = "2px solid #eaf2ec")}
-            />
-          </div>
-        ))}
+        <div>
+          <label
+            htmlFor="input-full-name"
+            className="text-xs font-semibold text-[#4a6557] uppercase tracking-wider mb-1.5 block"
+          >
+            Full Name
+          </label>
+          <input
+            id="input-full-name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. Priya Sharma"
+            required
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all border-2 border-[#eaf2ec] focus:border-[#52b788] text-[#173324]"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="input-email"
+            className="text-xs font-semibold text-[#4a6557] uppercase tracking-wider mb-1.5 block"
+          >
+            Email Address
+          </label>
+          <input
+            id="input-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="your@email.com"
+            required
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all border-2 border-[#eaf2ec] focus:border-[#52b788] text-[#173324]"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="input-phone"
+            className="text-xs font-semibold text-[#4a6557] uppercase tracking-wider mb-1.5 block"
+          >
+            Phone Number
+          </label>
+          <PhoneInput
+            id="input-phone"
+            value={phone}
+            onChange={setPhone}
+            size="md"
+          />
+        </div>
       </div>
     </div>
   );
