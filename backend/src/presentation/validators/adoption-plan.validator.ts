@@ -2,10 +2,13 @@ import { z } from 'zod';
 
 const occasionDedicationEnum = z.enum([
   'birthday',
+  'student',
+  'marriage',
   'memorial',
   'anniversary',
   'corporate',
   'general',
+  'other',
 ]);
 
 export const createAdoptionPlanSchema = z.object({

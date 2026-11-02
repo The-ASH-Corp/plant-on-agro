@@ -5,6 +5,8 @@ import { Tree, Plan } from "@/types";
 interface Step6PaymentProps {
   selectedTree: Tree | null;
   selectedPlanData: Plan | undefined;
+  dedicationPackageLabel?: string;
+  dedicationMessage?: string;
   qty: number;
   location: string | null;
   total: number;
@@ -15,10 +17,14 @@ interface Step6PaymentProps {
 export function Step6Payment({
   selectedTree,
   selectedPlanData,
+  dedicationPackageLabel,
+  dedicationMessage,
   qty,
   location,
   total,
 }: Step6PaymentProps) {
+  const displayPackage = dedicationPackageLabel || selectedPlanData?.label || "General Dedication";
+
   return (
     <div className="space-y-3.5">
       {/* Order Summary Card */}
@@ -35,14 +41,20 @@ export function Step6Payment({
 
         <div className="space-y-1.5 text-xs">
           <div className="flex justify-between text-[#4a6557]">
-            <span>Tree Species</span>
-            <span className="text-[#173324] font-medium">{selectedTree?.name}</span>
+            <span>Dedication Plan</span>
+            <span className="text-[#173324] font-medium">{displayPackage}</span>
           </div>
+          {dedicationMessage ? (
+            <div className="flex justify-between text-[#4a6557]">
+              <span>Dedication Note</span>
+              <span className="text-[#173324] font-medium text-right max-w-[60%] truncate">
+                "{dedicationMessage}"
+              </span>
+            </div>
+          ) : null}
           <div className="flex justify-between text-[#4a6557]">
-            <span>Dedication Package</span>
-            <span className="text-[#173324] font-medium">
-              {selectedPlanData?.label || "General Dedication"}
-            </span>
+            <span>Allocated Tree Species</span>
+            <span className="text-[#173324] font-medium">{selectedTree?.name}</span>
           </div>
           <div className="flex justify-between text-[#4a6557]">
             <span>Quantity</span>
