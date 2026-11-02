@@ -1,6 +1,9 @@
 import { IVisitBookingRepository } from '../../../core/interfaces/visit-booking.repository.interface';
+import { ITreeInstanceRepository } from '../../../core/interfaces/tree-instance.repository.interface';
+import { IOrderRepository } from '../../../core/interfaces/order.repository.interface';
 import { IMailService } from '../../../core/interfaces/mail-service.interface';
 import { VisitBooking } from '../../../core/entities/visit-booking.entity';
+import { BadRequestError } from '../../../core/errors/app-error';
 
 export interface CreateVisitBookingDto {
   adopterName: string;
@@ -19,10 +22,40 @@ export interface CreateVisitBookingDto {
 export class CreateVisitBookingUseCase {
   constructor(
     private readonly visitBookingRepository: IVisitBookingRepository,
+    private readonly treeInstanceRepository?: ITreeInstanceRepository,
+    private readonly orderRepository?: IOrderRepository,
     private readonly mailService?: IMailService
   ) {}
 
   public async execute(dto: CreateVisitBookingDto): Promise<VisitBooking> {
+    const email = (dto.adopterEmail || '').trim().toLowerCase();
+    if (!email) {
+      throw new BadRequestError('An adopter email is required to schedule a plantation visit.');
+    }
+
+    // Verify client has completed at least one tree adoption / purchase
+    if (this.treeInstanceRepository && this.orderRepository) {
+      const instances = await this.treeInstanceRepository.findAll({ search: email });
+      const hasAdoptedTree = instances.some(
+        (t) => t.adopterEmail && t.adopterEmail.trim().toLowerCase() === email
+      );
+
+      if (!hasAdoptedTree) {
+        const orders = await this.orderRepository.findAll({ search: email });
+        const hasPaidOrder = orders.some(
+          (o) =>
+            o.adopterEmail &&
+            o.adopterEmail.trim().toLowerCase() === email &&
+            o.paymentStatus === 'Paid'
+        );
+
+        if (!hasPaidOrder) {
+          throw new BadRequestError(
+            'Plantation visits are an exclusive benefit reserved for patrons who have already adopted a tree. Please adopt a tree first to unlock complimentary visits.'
+          );
+        }
+      }
+    }
     const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
     const dateCode = dto.visitDate.replace(/-/g, '').slice(2);
     const bookingReference = `VB-${dateCode}-${randomSuffix}`;

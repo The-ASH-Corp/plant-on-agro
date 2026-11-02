@@ -75,6 +75,8 @@ export function AdminTabContent({
         <TreesTab
           trees={trees}
           searchQuery={searchQuery}
+          universalPrice={treeActions.universalPrice}
+          onUpdateUniversalPrice={treeActions.handleSetUniversalPrice}
           onOpenAddTree={() => treeActions.setShowAddTreeModal(true)}
           onEditTree={(tree) => treeActions.setSelectedTreeForEdit(tree)}
           onDeleteTree={deleteActions.handleDeleteTree}

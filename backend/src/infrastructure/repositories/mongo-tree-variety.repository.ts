@@ -84,6 +84,11 @@ export class MongoTreeVarietyRepository implements ITreeVarietyRepository {
     return TreeVarietyMapper.toDomain(doc);
   }
 
+  public async updateAllPrices(price: number): Promise<number> {
+    const result = await TreeVarietyModel.updateMany({}, { $set: { price } }).exec();
+    return result.modifiedCount;
+  }
+
   public async delete(id: string): Promise<boolean> {
     const result = await TreeVarietyModel.findByIdAndDelete(id).exec();
     return !!result;

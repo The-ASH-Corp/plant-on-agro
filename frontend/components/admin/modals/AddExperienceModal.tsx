@@ -237,15 +237,19 @@ export function AddExperienceModal({
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                Price (₹) (0 = Free)
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Admission Cost
+                </label>
+                <span className="text-[10px] text-emerald-800 bg-emerald-100 font-semibold px-2 py-0.5 rounded">
+                  Free
+                </span>
+              </div>
               <input
-                type="number"
-                min="0"
-                value={price}
-                onChange={(e) => setPrice(Number(e.target.value))}
-                className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#2d6a4f]"
+                type="text"
+                readOnly
+                value="Complimentary (₹0)"
+                className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs bg-gray-50 text-gray-700 cursor-not-allowed font-medium"
               />
             </div>
           </div>

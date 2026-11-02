@@ -8,13 +8,23 @@ import {
 
 export class CreateTreeVarietyUseCase {
   constructor(private readonly treeVarietyRepository: ITreeVarietyRepository) {}
-
   public async execute(input: CreateTreeVarietyDto): Promise<TreeVarietyResponseDto> {
+    let effectivePrice = input.price;
+    const existing = await this.treeVarietyRepository.findAll({}, 1, 0);
+    if (existing.length > 0 && typeof existing[0].price === 'number') {
+      if (input.price && input.price !== existing[0].price) {
+        effectivePrice = input.price;
+        await this.treeVarietyRepository.updateAllPrices(effectivePrice);
+      } else {
+        effectivePrice = existing[0].price;
+      }
+    }
+
     const treeVariety = new TreeVariety({
       commonName: input.commonName,
       scientificName: input.scientificName,
       category: input.category,
-      price: input.price,
+      price: effectivePrice,
       co2AbsorptionRateKgYear: input.co2AbsorptionRateKgYear,
       growthTimeline: input.growthTimeline,
       careRequirements: input.careRequirements,

@@ -4,11 +4,17 @@ import { TreeVarietyItem } from "../types";
 
 interface AddTreeModalProps {
   isOpen: boolean;
+  universalPrice?: number;
   onClose: () => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
-export function AddTreeModal({ isOpen, onClose, onSubmit }: AddTreeModalProps) {
+export function AddTreeModal({
+  isOpen,
+  universalPrice = 349,
+  onClose,
+  onSubmit,
+}: AddTreeModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -67,14 +73,19 @@ export function AddTreeModal({ isOpen, onClose, onSubmit }: AddTreeModalProps) {
               </select>
             </div>
             <div>
-              <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">Price (₹)</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="font-bold text-[#3d4f45] uppercase tracking-wider block">Price (₹)</label>
+                <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded">Universal Price</span>
+              </div>
               <input
                 name="price"
                 type="number"
                 required
-                defaultValue={349}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7]"
+                readOnly
+                value={universalPrice}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#f0f4f1] cursor-not-allowed font-semibold"
               />
+              <span className="text-[10px] text-[#73877b] mt-0.5 block">Locked: all trees share this identical price</span>
             </div>
             <div>
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">CO2 (kg/yr)</label>

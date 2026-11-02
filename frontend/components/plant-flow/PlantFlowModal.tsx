@@ -13,7 +13,6 @@ import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
 import { PlantFlowHeader } from "./PlantFlowHeader";
 import { PlantFlowFooter } from "./PlantFlowFooter";
 import {
-  Step1TreeSelection,
   Step2Dedication,
   Step3Quantity,
   Step4Location,
@@ -134,6 +133,12 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
             }));
             setTrees(mappedTrees);
 
+            // Randomly allocate a tree from the database for the user who is purchasing
+            if (mappedTrees.length > 0) {
+              const randomTree = mappedTrees[Math.floor(Math.random() * mappedTrees.length)];
+              setSelectedTree(randomTree);
+            }
+
             // Extract unique active bio-reserves from database trees
             const treeLocations = mappedTrees
               .map((t) => t.location)
@@ -178,20 +183,21 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
     };
   }, []);
 
+  const universalPrice =
+    trees.length > 0 && typeof trees[0].price === "number"
+      ? trees[0].price
+      : selectedTree?.price ?? 349;
   const selectedPlanData = plans.find((p) => p.id === selectedPlan);
-  const pricePerTree = selectedTree
-    ? selectedTree.price + (selectedPlanData?.price ?? 0)
-    : 0;
+  const pricePerTree = universalPrice + (selectedPlanData?.price ?? 0);
   const total = pricePerTree * qty;
 
   const canNext =
-    (step === 1 && selectedTree) ||
-    (step === 2 && selectedPlan) ||
-    (step === 3 && qty >= 1) ||
-    (step === 4 && location) ||
-    (step === 5 && name && email) ||
-    step === 6 ||
-    step === 7;
+    (step === 1 && selectedPlan) ||
+    (step === 2 && qty >= 1) ||
+    (step === 3 && location) ||
+    (step === 4 && name && email) ||
+    step === 5 ||
+    step === 6;
 
   const completeOrderAndAdoption = async (
     txRef: string,
@@ -223,85 +229,90 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
     } else {
       for (let i = 0; i < qty; i++) {
         const serialNum = Math.floor(1000 + Math.random() * 9000);
-      const treeTag = `POA-${speciesShort}-${serialNum}`;
-      const jitterLat = Number(
-        (chosenCoords.lat + (Math.random() - 0.5) * 0.004).toFixed(4)
-      );
-      const jitterLng = Number(
-        (chosenCoords.lng + (Math.random() - 0.5) * 0.004).toFixed(4)
-      );
+        // Randomly allocate tree variety from DB for this adoption instance
+        const allocatedTree =
+          trees.length > 0
+            ? trees[Math.floor(Math.random() * trees.length)]
+            : selectedTree;
+        const currentSpecies = allocatedTree?.name || selectedTree?.name || "Indigenous Sapling";
+        const currentImg =
+          allocatedTree?.img ||
+          selectedTree?.img ||
+          "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format";
+        const speciesShort = currentSpecies.substring(0, 2).toUpperCase();
+        const treeTag = `POA-${speciesShort}-${serialNum}`;
+        const jitterLat = Number(
+          (chosenCoords.lat + (Math.random() - 0.5) * 0.004).toFixed(4)
+        );
+        const jitterLng = Number(
+          (chosenCoords.lng + (Math.random() - 0.5) * 0.004).toFixed(4)
+        );
 
-      const noteText =
-        qty > 1
-          ? `Tree #${i + 1} of ${qty} adopted under "${selectedPlanData?.label || 'Individual'}" lifetime package. Physical nursery tagging and geotagging completed.`
-          : `Adopted under "${selectedPlanData?.label || 'Individual'}" lifetime package. Physical nursery tagging and geotagging completed.`;
+        const noteText =
+          qty > 1
+            ? `Tree #${i + 1} of ${qty} adopted under "${selectedPlanData?.label || 'Individual'}" lifetime package. Physical nursery tagging and geotagging completed.`
+            : `Adopted under "${selectedPlanData?.label || 'Individual'}" lifetime package. Physical nursery tagging and geotagging completed.`;
 
-      // Persist to MongoDB through backend API
-      try {
-        const createdTreeRes = await treeInstanceService.create({
-          treeTag,
-          orderRef: orderId,
-          assignedReserve: location || "Flagship Living Forest — Wayanad, Kerala",
-          gpsCoordinates: { latitude: jitterLat, longitude: jitterLng },
-          datePlanted: new Date().toISOString(),
-          healthStatus: "Sapling Growing",
-          treeVarietyName: selectedTree?.name || "Indigenous Sapling",
-          adopterName: name || user?.name || "Verified Adopter",
-          adopterEmail: email || user?.email || "adopter@example.com",
-          notes: noteText,
-          imageUrl:
-            selectedTree?.img ||
-            "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
-        });
-
-        if (createdTreeRes.data) {
-          newInstances.push({
-            id: createdTreeRes.data.id,
-            treeTag: createdTreeRes.data.treeTag,
-            orderRef: createdTreeRes.data.orderRef,
-            assignedReserve: createdTreeRes.data.assignedReserve,
-            gpsCoordinates: createdTreeRes.data.gpsCoordinates,
-            formattedGps: `${jitterLat}° N, ${jitterLng}° E`,
-            datePlanted: formattedDate,
-            healthStatus: "Sapling Growing" as const,
-            treeVarietyName: selectedTree?.name || "Indigenous Sapling",
+        // Persist to MongoDB through backend API
+        try {
+          const createdTreeRes = await treeInstanceService.create({
+            treeTag,
+            orderRef: orderId,
+            assignedReserve: location || "Flagship Living Forest — Wayanad, Kerala",
+            gpsCoordinates: { latitude: jitterLat, longitude: jitterLng },
+            datePlanted: new Date().toISOString(),
+            healthStatus: "Sapling Growing",
+            treeVarietyName: currentSpecies,
             adopterName: name || user?.name || "Verified Adopter",
             adopterEmail: email || user?.email || "adopter@example.com",
             notes: noteText,
-            imageUrl:
-              selectedTree?.img ||
-              "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
+            imageUrl: currentImg,
+          });
+
+          if (createdTreeRes.data) {
+            newInstances.push({
+              id: createdTreeRes.data.id,
+              treeTag: createdTreeRes.data.treeTag,
+              orderRef: createdTreeRes.data.orderRef,
+              assignedReserve: createdTreeRes.data.assignedReserve,
+              gpsCoordinates: createdTreeRes.data.gpsCoordinates,
+              formattedGps: `${jitterLat}° N, ${jitterLng}° E`,
+              datePlanted: formattedDate,
+              healthStatus: "Sapling Growing" as const,
+              treeVarietyName: currentSpecies,
+              adopterName: name || user?.name || "Verified Adopter",
+              adopterEmail: email || user?.email || "adopter@example.com",
+              notes: noteText,
+              imageUrl: currentImg,
+              lastInspectedAt: dateStr,
+              isActive: true,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            });
+          }
+        } catch (saveErr) {
+          console.warn("Could not save instance via API, fallback to memory record:", saveErr);
+          newInstances.push({
+            id: `inst-${Date.now()}-${i}`,
+            treeTag: treeTag,
+            orderRef: orderId,
+            assignedReserve: location || "Flagship Living Forest — Wayanad, Kerala",
+            gpsCoordinates: { latitude: jitterLat, longitude: jitterLng },
+            formattedGps: `${jitterLat}° N, ${jitterLng}° E`,
+            datePlanted: formattedDate,
+            healthStatus: "Sapling Growing" as const,
+            treeVarietyName: currentSpecies,
+            adopterName: name || "Verified Adopter",
+            adopterEmail: email || "adopter@example.com",
+            notes: noteText,
+            imageUrl: currentImg,
             lastInspectedAt: dateStr,
             isActive: true,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           });
         }
-      } catch (saveErr) {
-        console.warn("Could not save instance via API, fallback to memory record:", saveErr);
-        newInstances.push({
-          id: `inst-${Date.now()}-${i}`,
-          treeTag: treeTag,
-          orderRef: orderId,
-          assignedReserve: location || "Flagship Living Forest — Wayanad, Kerala",
-          gpsCoordinates: { latitude: jitterLat, longitude: jitterLng },
-          formattedGps: `${jitterLat}° N, ${jitterLng}° E`,
-          datePlanted: formattedDate,
-          healthStatus: "Sapling Growing" as const,
-          treeVarietyName: selectedTree?.name || "Indigenous Sapling",
-          adopterName: name || "Verified Adopter",
-          adopterEmail: email || "adopter@example.com",
-          notes: noteText,
-          imageUrl:
-            selectedTree?.img ||
-            "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
-          lastInspectedAt: dateStr,
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
       }
-    }
   }
 
     // 2. Order Record - Use server-verified order directly
@@ -433,11 +444,11 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
     }
 
     setIsProcessing(false);
-    setStep(7);
+    setStep(6);
   };
 
   const handleNext = async () => {
-    if (step < 6) {
+    if (step < 5) {
       setStep((s) => (s + 1) as PlantStep);
       return;
     }
@@ -567,15 +578,6 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
         {/* Modal Content Body */}
         <div className="p-6">
           {step === 1 && (
-            <Step1TreeSelection
-              selectedTree={selectedTree}
-              onSelectTree={(t) => setSelectedTree(t)}
-              trees={trees}
-              loading={loadingCatalog}
-            />
-          )}
-
-          {step === 2 && (
             <Step2Dedication
               selectedPlan={selectedPlan}
               onSelectPlan={(id) => setSelectedPlan(id)}
@@ -584,7 +586,7 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
             />
           )}
 
-          {step === 3 && (
+          {step === 2 && (
             <Step3Quantity
               qty={qty}
               onSetQty={(q) => setQty(q)}
@@ -593,7 +595,7 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
             />
           )}
 
-          {step === 4 && (
+          {step === 3 && (
             <Step4Location
               location={location}
               onSelectLocation={(loc) => setLocation(loc)}
@@ -601,7 +603,7 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
             />
           )}
 
-          {step === 5 && (
+          {step === 4 && (
             <Step5UserDetails
               name={name}
               setName={setName}
@@ -612,7 +614,7 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
             />
           )}
 
-          {step === 6 && (
+          {step === 5 && (
             <>
               {paymentError && (
                 <div className="mb-4 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center justify-between shadow-2xs">
@@ -638,7 +640,7 @@ export function PlantFlowModal({ onClose }: PlantFlowProps) {
             </>
           )}
 
-          {step === 7 && (
+          {step === 6 && (
             <Step7Confirmation
               selectedTree={selectedTree}
               location={location}

@@ -416,9 +416,9 @@ export function VisitsTab() {
                   {/* Footer Actions */}
                   <div className="p-4 pt-2 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
                     <div>
-                      <span className="text-[10px] text-gray-400 block uppercase">Price</span>
-                      <span className="text-xs font-bold text-gray-900">
-                        {exp.price === 0 ? "Complimentary" : `₹${exp.price.toLocaleString("en-IN")}`}
+                      <span className="text-[10px] text-gray-400 block uppercase">Admission</span>
+                      <span className="text-xs font-bold text-emerald-700">
+                        Complimentary (Free)
                       </span>
                     </div>
 

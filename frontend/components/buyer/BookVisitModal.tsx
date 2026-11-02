@@ -8,6 +8,7 @@ import { visitService, CreateVisitBookingPayload } from "@/services/visits/visit
 interface BookVisitModalProps {
   onClose: () => void;
   onSuccess: () => void;
+  onAdoptTree?: () => void;
   userTrees: BackendTreeInstance[];
   experiences: ExperienceItem[];
   userEmail?: string;
@@ -24,6 +25,7 @@ const TIME_SLOTS = [
 export function BookVisitModal({
   onClose,
   onSuccess,
+  onAdoptTree,
   userTrees,
   experiences,
   userEmail = "",
@@ -114,13 +116,65 @@ export function BookVisitModal({
           </button>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl">
-              ⚠️ {error}
+        {/* Adopter Gate: If client has not completed a tree adoption */}
+        {userTrees.length === 0 ? (
+          <div className="p-8 text-center space-y-6">
+            <div className="w-16 h-16 mx-auto rounded-3xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center text-3xl shadow-sm">
+              🌳
             </div>
-          )}
+            <div className="max-w-md mx-auto space-y-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-200">
+                🔒 Adopter Exclusive Benefit
+              </span>
+              <h3 className="text-2xl font-bold text-[#173324]" style={{ fontFamily: "var(--font-display)" }}>
+                Visits are Reserved for Tree Adopters
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                As per PlantOn Agro guidelines (<em>01 We Plant → 02 We Grow → 03 They Track → 04 They Visit</em>), plantation visits and guided forest walks are complimentary perks unlocked only after completing a tree adoption.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 max-w-md mx-auto text-left space-y-2.5 text-xs text-[#173324]">
+              <div className="font-bold flex items-center gap-1.5 text-emerald-900 text-sm">
+                <span>🌱</span> Why adopt first?
+              </div>
+              <ul className="space-y-1.5 text-gray-600 pl-4 list-disc">
+                <li>Your dedicated GPS-tagged tree is mapped directly to your personal walking trail</li>
+                <li>Complimentary lifetime guided plantation tours for you and your family</li>
+                <li>Digital certificate, live photo monitoring, and arborist escort included</li>
+              </ul>
+            </div>
+
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-all cursor-pointer"
+              >
+                Close
+              </button>
+              {onAdoptTree && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onAdoptTree();
+                  }}
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#2d6a4f] to-[#1b4332] shadow-md hover:shadow-lg transition-all cursor-pointer"
+                >
+                  Adopt a Tree to Unlock Visits 🌱
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* Form Body */
+          <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl">
+                ⚠️ {error}
+              </div>
+            )}
 
           {/* Experience Picker */}
           <div>
@@ -158,7 +212,7 @@ export function BookVisitModal({
                   <div className="text-sm font-semibold flex items-center justify-between">
                     <span className="truncate pr-2">{exp.title}</span>
                     <span className="text-xs text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full font-bold whitespace-nowrap">
-                      {exp.price === 0 ? "Free" : `₹${exp.price.toLocaleString("en-IN")}`}
+                      Free
                     </span>
                   </div>
                   <div className="text-xs text-gray-500 mt-1 line-clamp-1">{exp.tagline || exp.duration}</div>
@@ -336,25 +390,26 @@ export function BookVisitModal({
             />
           </div>
 
-          {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-all cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#2d6a4f] to-[#1b4332] shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50"
-            >
-              {isSubmitting ? "Generating Visitor Pass..." : "Confirm & Generate Pass 🎫"}
-            </button>
-          </div>
-        </form>
+            {/* Footer Actions */}
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSubmitting}
+                className="px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#2d6a4f] to-[#1b4332] shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isSubmitting ? "Generating Visitor Pass..." : "Confirm & Generate Pass 🎫"}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

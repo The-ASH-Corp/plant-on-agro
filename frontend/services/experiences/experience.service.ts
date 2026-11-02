@@ -56,7 +56,7 @@ function normalizeExperience(raw: any): ExperienceItem {
     description: raw.description || raw._description || '',
     location: raw.location || raw._location || 'Kerala Flagship Reserve',
     duration: raw.duration || raw._duration || '3 Hours',
-    price: Number(raw.price ?? raw._price ?? 0),
+    price: 0, // All plantation visits and experiences are complimentary
     included: Array.isArray(raw.included || raw._included) ? (raw.included || raw._included) : [],
     galleryImages: Array.isArray(raw.galleryImages || raw._galleryImages) ? (raw.galleryImages || raw._galleryImages) : [],
     featuredImage: raw.featuredImage || raw._featuredImage || (raw.galleryImages?.[0] || raw._galleryImages?.[0] || ''),

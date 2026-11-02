@@ -19,7 +19,7 @@ export function PlantFlowFooter({
   onBack,
   onNext,
 }: PlantFlowFooterProps) {
-  if (step >= 7) return null;
+  if (step >= 6) return null;
 
   return (
     <div
@@ -39,7 +39,7 @@ export function PlantFlowFooter({
       )}
       <button
         onClick={onNext}
-        id={step === 6 ? "btn-complete-order" : "btn-continue-step"}
+        id={step === 5 ? "btn-complete-order" : "btn-continue-step"}
         disabled={!canNext || isProcessing}
         className="flex-1 py-3 rounded-xl font-semibold text-sm text-white transition-all disabled:opacity-40 cursor-pointer flex items-center justify-center gap-2 shadow-sm"
         style={{
@@ -70,10 +70,10 @@ export function PlantFlowFooter({
               ></path>
             </svg>
             <span>
-              {step === 6 ? "Connecting to Razorpay..." : "Processing..."}
+              {step === 5 ? "Connecting to Razorpay..." : "Processing..."}
             </span>
           </>
-        ) : step === 6 ? (
+        ) : step === 5 ? (
           total !== undefined ? (
             `Proceed to Pay ₹${total.toLocaleString("en-IN")} with Razorpay 💳`
           ) : (

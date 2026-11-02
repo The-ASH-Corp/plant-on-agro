@@ -26,6 +26,7 @@ import { GetTreeVarietiesUseCase } from '../../application/use-cases/tree-variet
 import { GetTreeVarietyByIdUseCase } from '../../application/use-cases/tree-varieties/get-tree-variety-by-id.use-case';
 import { UpdateTreeVarietyUseCase } from '../../application/use-cases/tree-varieties/update-tree-variety.use-case';
 import { DeleteTreeVarietyUseCase } from '../../application/use-cases/tree-varieties/delete-tree-variety.use-case';
+import { UpdateUniversalTreePriceUseCase } from '../../application/use-cases/tree-varieties/update-universal-tree-price.use-case';
 
 import { CreateAdoptionPlanUseCase } from '../../application/use-cases/adoption-plans/create-adoption-plan.use-case';
 import { GetAdoptionPlansUseCase } from '../../application/use-cases/adoption-plans/get-adoption-plans.use-case';
@@ -155,6 +156,8 @@ export class Container {
   // Visit Booking Use Cases
   private static readonly createVisitBookingUseCase = new CreateVisitBookingUseCase(
     Container.visitBookingRepository,
+    Container.treeInstanceRepository,
+    Container.orderRepository,
     Container.mailService
   );
   private static readonly getVisitBookingsUseCase = new GetVisitBookingsUseCase(
@@ -317,6 +320,9 @@ export class Container {
   private static readonly deleteTreeVarietyUseCase = new DeleteTreeVarietyUseCase(
     Container.treeVarietyRepository
   );
+  private static readonly updateUniversalTreePriceUseCase = new UpdateUniversalTreePriceUseCase(
+    Container.treeVarietyRepository
+  );
 
   // Adoption Plan Use Cases
   private static readonly createAdoptionPlanUseCase = new CreateAdoptionPlanUseCase(
@@ -408,7 +414,8 @@ export class Container {
     Container.getTreeVarietiesUseCase,
     Container.getTreeVarietyByIdUseCase,
     Container.updateTreeVarietyUseCase,
-    Container.deleteTreeVarietyUseCase
+    Container.deleteTreeVarietyUseCase,
+    Container.updateUniversalTreePriceUseCase
   );
 
   public static readonly adoptionPlanController = new AdoptionPlanController(

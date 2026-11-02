@@ -65,12 +65,14 @@ export function AdminModals({
       {/* Tree Varieties */}
       <AddTreeModal
         isOpen={treeActions.showAddTreeModal}
+        universalPrice={treeActions.universalPrice}
         onClose={() => treeActions.setShowAddTreeModal(false)}
         onSubmit={treeActions.handleCreateTree}
       />
       <EditTreeModal
         isOpen={Boolean(treeActions.selectedTreeForEdit)}
         tree={treeActions.selectedTreeForEdit}
+        universalPrice={treeActions.universalPrice}
         onClose={() => treeActions.setSelectedTreeForEdit(null)}
         onSubmit={treeActions.handleUpdateTree}
         isSubmitting={treeActions.isUpdatingTree}

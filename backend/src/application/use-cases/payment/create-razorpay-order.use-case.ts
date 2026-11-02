@@ -43,38 +43,27 @@ export class CreateRazorpayOrderUseCase {
       throw new BadRequestError('Adopter email is required to initiate an adoption payment order.');
     }
 
-    // 1. Resolve Tree Variety Price from Server Database
-    let unitTreePrice = 0;
-    let selectedVarietyName = dto.treeSpecies?.trim() || 'Indigenous Tree';
-    let scientificName = 'Botanical Specimen';
-    let category = 'Timber Trees';
+    // 1. Resolve Authoritative Universal Tree Price and Randomly Allocate Tree from Server Database (All trees are same price)
+    let unitTreePrice = 349;
+    let selectedVarietyName = 'Native Agroforestry Tree';
+    let scientificName = 'Indigenous Botanical Specimen';
+    let category = 'Native Trees';
 
-    if (dto.treeVarietyId && dto.treeVarietyId.trim().length > 0) {
-      const variety = await this.treeVarietyRepository.findById(dto.treeVarietyId.trim());
-      if (variety) {
-        unitTreePrice = variety.price;
-        selectedVarietyName = variety.commonName;
-        scientificName = variety.scientificName;
-        category = variety.category;
+    const allVarieties = await this.treeVarietyRepository.findAll({}, 50, 0);
+    if (allVarieties.length > 0) {
+      const activeVarieties = allVarieties.filter((v) => v.isActive !== false);
+      const pool = activeVarieties.length > 0 ? activeVarieties : allVarieties;
+
+      const firstWithPrice = pool.find((v) => typeof v.price === 'number' && v.price > 0);
+      if (firstWithPrice) {
+        unitTreePrice = firstWithPrice.price;
       }
-    }
 
-    if (unitTreePrice === 0 && dto.treeSpecies && dto.treeSpecies.trim().length > 0) {
-      const allVarieties = await this.treeVarietyRepository.findAll({ search: dto.treeSpecies.trim() });
-      const matched = allVarieties.find(
-        (v) => v.commonName.toLowerCase() === dto.treeSpecies!.trim().toLowerCase()
-      );
-      if (matched) {
-        unitTreePrice = matched.price;
-        selectedVarietyName = matched.commonName;
-        scientificName = matched.scientificName;
-        category = matched.category;
-      }
-    }
-
-    // Default standard retail pricing (₹2,500/tree) if variety is unpriced or custom
-    if (unitTreePrice <= 0) {
-      unitTreePrice = 2500;
+      // Randomly allocate a tree from the database for the user who is purchasing
+      const randomVariety = pool[Math.floor(Math.random() * pool.length)];
+      selectedVarietyName = randomVariety.commonName;
+      scientificName = randomVariety.scientificName;
+      category = randomVariety.category;
     }
 
     // 2. Resolve Plan Price Modifier from Server Database

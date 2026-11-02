@@ -21,6 +21,11 @@ export class UpdateTreeVarietyUseCase {
     existingTree.update(input);
 
     const updatedTree = await this.treeVarietyRepository.update(existingTree);
+
+    if (input.price !== undefined && typeof input.price === 'number') {
+      await this.treeVarietyRepository.updateAllPrices(input.price);
+    }
+
     return TreeVarietyResponseMapper.toDto(updatedTree);
   }
 }

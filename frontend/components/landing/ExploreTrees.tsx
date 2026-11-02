@@ -66,16 +66,16 @@ export function ExploreTrees({ openPlant }: ExploreTreesProps) {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-14">
           <p className="text-[#2d6a4f] text-sm font-semibold tracking-widest uppercase mb-3">
-            Choose Your Tree
+            Botanical Species We Plant
           </p>
           <h2
             style={{ fontFamily: "var(--font-display)" }}
             className="text-[#173324] text-4xl md:text-5xl mb-4"
           >
-            Our Tree Marketplace
+            Our Agroforestry Catalog
           </h2>
           <p className="text-[#4a6557] max-w-lg mx-auto">
-            Every tree tells a different story. Direct from certified organic nurseries.
+            Explore the diverse native species nurtured in our regional reserves. Every adoption plants certified bio-diverse trees.
           </p>
         </div>
 

@@ -6,6 +6,7 @@ import { TreeVarietyItem } from "../types";
 interface EditTreeModalProps {
   isOpen: boolean;
   tree: TreeVarietyItem | null;
+  universalPrice?: number;
   onClose: () => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void> | void;
   isSubmitting?: boolean;
@@ -14,6 +15,7 @@ interface EditTreeModalProps {
 export function EditTreeModal({
   isOpen,
   tree,
+  universalPrice,
   onClose,
   onSubmit,
   isSubmitting = false,
@@ -159,9 +161,14 @@ export function EditTreeModal({
               </select>
             </div>
             <div>
-              <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">
-                Price (₹) *
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="font-bold text-[#3d4f45] uppercase tracking-wider block">
+                  Price (₹) *
+                </label>
+                <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded">
+                  All Trees
+                </span>
+              </div>
               <input
                 name="price"
                 type="number"
@@ -171,6 +178,9 @@ export function EditTreeModal({
                 onChange={handleChange}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7] focus:border-[#2d6a4f] transition-colors"
               />
+              <span className="text-[10px] text-emerald-700 mt-0.5 block leading-tight">
+                All trees share the same price. Saving here syncs all catalog species.
+              </span>
             </div>
             <div>
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">

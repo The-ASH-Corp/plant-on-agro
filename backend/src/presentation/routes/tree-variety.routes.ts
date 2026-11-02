@@ -7,9 +7,19 @@ import {
   updateTreeVarietySchema,
   getTreeVarietyByIdSchema,
   queryTreeVarietiesSchema,
+  updateUniversalPriceSchema,
 } from '../validators/tree-variety.validator';
 
 const router = Router();
+
+// PUT /api/v1/tree-varieties/universal-price - Update price for all trees (Admin)
+router.put(
+  '/universal-price',
+  authenticate,
+  authorize('admin'),
+  validateRequest({ body: updateUniversalPriceSchema }),
+  Container.treeVarietyController.updateUniversalPrice
+);
 
 // GET /api/v1/tree-varieties - List trees with filtering and pagination
 router.get(

@@ -14,8 +14,8 @@ export function HowItWorks({ content }: HowItWorksProps) {
           {
             num: "01",
             icon: "🌱",
-            title: "Choose Your Tree",
-            desc: "Select native fruit, timber, or medicinal species suited to regional agroforestry reserves.",
+            title: "Choose Your Package",
+            desc: "Select an adoption package and forest reserve. Our certified agroforestry team allocates native species optimal for the biome.",
           },
           {
             num: "02",
