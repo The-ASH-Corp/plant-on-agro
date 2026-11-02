@@ -58,37 +58,6 @@ const LOCATION_COORDINATES: Record<
   },
 };
 
-const DEFAULT_ADOPTION_PLANS: Plan[] = [
-  {
-    id: "plan-birthday",
-    label: "Birthday Plan",
-    icon: "🎂",
-    desc: "Celebrate a special birthday with a living legacy tree that grows year after year.",
-    price: 0,
-  },
-  {
-    id: "plan-student",
-    label: "Student Plan",
-    icon: "🎓",
-    desc: "Empower students and schools with youth eco-adoption and green learning badges.",
-    price: 0,
-  },
-  {
-    id: "plan-marriage",
-    label: "Marriage Plan",
-    icon: "💍",
-    desc: "Commemorate a wedding, engagement, or marriage anniversary with rooted, enduring love.",
-    price: 0,
-  },
-  {
-    id: "plan-other",
-    label: "Other Occasion",
-    icon: "🌱",
-    desc: "Dedicate a tree in honor of a memorial, retirement, newborn baby, festival, or custom milestone.",
-    price: 0,
-  },
-];
-
 export interface PlantFlowProps {
   onClose: () => void;
   initialPlanId?: string | null;
@@ -100,7 +69,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
   const [step, setStep] = useState<PlantStep>(1);
   const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(
-    () => initialPlanId ?? DEFAULT_ADOPTION_PLANS[0].id
+    () => initialPlanId ?? null
   );
   const [customOccasion, setCustomOccasion] = useState("");
   const [dedicationMessage, setDedicationMessage] = useState("");
@@ -115,9 +84,9 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
     () => "POA-" + Math.random().toString(36).substring(2, 8).toUpperCase()
   );
 
-  // Live Database Catalog State
+  // Live Database Catalog State (purely managed from Admin side)
   const [trees, setTrees] = useState<Tree[]>([]);
-  const [plans, setPlans] = useState<Plan[]>(DEFAULT_ADOPTION_PLANS);
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [locations, setLocations] = useState<string[]>(() => {
     if (typeof window !== "undefined") {
       try {
@@ -196,8 +165,11 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
             }
           }
 
-          if (plansRes.data?.items && plansRes.data.items.length > 0) {
-            const mappedPlans: Plan[] = plansRes.data.items.map((p: BackendAdoptionPlan) => ({
+          if (plansRes.data?.items) {
+            const activePlans = plansRes.data.items.filter(
+              (p: BackendAdoptionPlan) => p.isActive !== false
+            );
+            const mappedPlans: Plan[] = activePlans.map((p: BackendAdoptionPlan) => ({
               id: p.id,
               label: p.planLabel,
               icon: p.icon || "🌱",
@@ -206,22 +178,26 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
             }));
             setPlans(mappedPlans);
 
-            setSelectedPlan((prev) => {
-              if (initialPlanId && mappedPlans.some((mp) => mp.id === initialPlanId)) {
-                return initialPlanId;
-              }
-              if (prev && mappedPlans.some((mp) => mp.id === prev)) {
-                return prev;
-              }
-              if (prev) {
-                const clean = prev.replace("plan-", "").toLowerCase();
-                const matched = mappedPlans.find((mp) =>
-                  mp.label.toLowerCase().includes(clean)
-                );
-                if (matched) return matched.id;
-              }
-              return mappedPlans[0].id;
-            });
+            if (mappedPlans.length > 0) {
+              setSelectedPlan((prev) => {
+                if (initialPlanId && mappedPlans.some((mp) => mp.id === initialPlanId)) {
+                  return initialPlanId;
+                }
+                if (prev && mappedPlans.some((mp) => mp.id === prev)) {
+                  return prev;
+                }
+                if (prev) {
+                  const clean = prev.replace("plan-", "").toLowerCase();
+                  const matched = mappedPlans.find((mp) =>
+                    mp.label.toLowerCase().includes(clean)
+                  );
+                  if (matched) return matched.id;
+                }
+                return mappedPlans[0].id;
+              });
+            } else {
+              setSelectedPlan(null);
+            }
           }
         }
       } catch (err) {

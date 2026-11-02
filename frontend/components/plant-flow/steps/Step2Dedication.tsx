@@ -58,15 +58,18 @@ export function Step2Dedication({
           Choose an Adoption Plan
         </h3>
         <p className="text-xs text-[#55695d]">
-          Select an occasion package (Birthday, Student, Marriage, or Other Occasion). All packages are a single-time lifetime payment with zero renewal fees.
+          Select an occasion adoption package. All packages are a single-time lifetime payment with zero renewal fees.
         </p>
       </div>
 
       {plans.length === 0 ? (
         <div className="text-center py-10 bg-[#f9fbf9] rounded-2xl border border-[#d4e9dd]">
-          <span className="text-3xl">🕊️</span>
+          <span className="text-3xl">🌱</span>
           <p className="text-sm font-semibold text-[#173324] mt-2">
-            No adoption plans available
+            No adoption plans available yet
+          </p>
+          <p className="text-xs text-[#4a6557] mt-1 max-w-sm mx-auto">
+            Plans are configured and added manually from the Admin Dashboard.
           </p>
         </div>
       ) : (

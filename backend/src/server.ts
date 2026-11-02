@@ -3,7 +3,6 @@ import { createApp } from './app';
 import { env } from './config/env';
 import { Database } from './infrastructure/database/connection';
 import { seedExperiencesIfEmpty } from './infrastructure/database/seeds/experience.seeder';
-import { seedAdoptionPlansIfEmpty } from './infrastructure/database/seeds/adoption-plan.seeder';
 import { redisService } from './infrastructure/redis/redis.client';
 import { ensureRedisContainerAsync } from './infrastructure/redis/redis-docker.helper';
 
@@ -17,9 +16,6 @@ const bootstrap = async (): Promise<void> => {
 
     // 1.1 Seed initial Flagship Experiences if none exist
     await seedExperiencesIfEmpty();
-
-    // 1.2 Seed standard Adoption Plans (Birthday, Student, Marriage, Other Occasion)
-    await seedAdoptionPlansIfEmpty();
 
     // 2. Initialize Express application
     const app = createApp();
