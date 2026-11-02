@@ -279,7 +279,14 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
         </div>
 
         {/* Experience Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {filteredExperiences.length === 0 ? (
+          <div className="p-8 text-center bg-gray-50 rounded-2xl border border-gray-200 text-gray-500">
+            <span className="text-3xl">🌿</span>
+            <p className="mt-2 text-sm font-semibold text-gray-700">No plantation experiences available yet</p>
+            <p className="text-xs text-gray-400 mt-1">Experiences will appear here once added by our forestry administrators.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredExperiences.map((exp) => (
             <div
               key={exp.id}
@@ -381,6 +388,7 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
             </div>
           ))}
         </div>
+        )}
       </div>
 
       {/* Section 3: Visit Memories Gallery (Photos recorded from visits) */}

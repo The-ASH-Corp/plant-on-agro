@@ -46,7 +46,16 @@ const AdoptionPlanSchema = new Schema<IAdoptionPlanDocument>(
     },
     occasionDedications: {
       type: [String],
-      enum: ['birthday', 'memorial', 'anniversary', 'corporate', 'general'],
+      enum: [
+        'birthday',
+        'student',
+        'marriage',
+        'memorial',
+        'anniversary',
+        'corporate',
+        'general',
+        'other',
+      ],
       default: ['general'],
       index: true,
     },

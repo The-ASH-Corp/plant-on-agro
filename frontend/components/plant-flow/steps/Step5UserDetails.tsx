@@ -9,6 +9,8 @@ interface Step5UserDetailsProps {
   setEmail: (email: string) => void;
   phone: string;
   setPhone: (phone: string) => void;
+  dedicationMessage?: string;
+  setDedicationMessage?: (val: string) => void;
 }
 
 export function Step5UserDetails({
@@ -18,11 +20,13 @@ export function Step5UserDetails({
   setEmail,
   phone,
   setPhone,
+  dedicationMessage = "",
+  setDedicationMessage,
 }: Step5UserDetailsProps) {
   return (
     <div>
-      <p className="text-[#4a6557] mb-5">
-        Your digital adoption certificate will be issued in this name.
+      <p className="text-[#4a6557] mb-5 text-sm">
+        Your digital adoption certificate and lifetime geotagged deed will be issued with these details.
       </p>
       <div className="space-y-4">
         <div>
@@ -75,6 +79,29 @@ export function Step5UserDetails({
             size="md"
           />
         </div>
+
+        {setDedicationMessage && (
+          <div>
+            <label
+              htmlFor="input-dedication"
+              className="text-xs font-semibold text-[#4a6557] uppercase tracking-wider mb-1.5 flex items-center justify-between"
+            >
+              <span>Dedication Note / Message</span>
+              <span className="text-[#8a9b90] font-normal lowercase text-[11px]">
+                optional
+              </span>
+            </label>
+            <textarea
+              id="input-dedication"
+              rows={2}
+              value={dedicationMessage}
+              onChange={(e) => setDedicationMessage(e.target.value)}
+              placeholder="e.g. Wishing you a lifetime of joy and happiness! Planted with love."
+              maxLength={250}
+              className="w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all border-2 border-[#eaf2ec] focus:border-[#52b788] text-[#173324] resize-none placeholder:text-[#8a9b90]"
+            />
+          </div>
+        )}
       </div>
     </div>
   );

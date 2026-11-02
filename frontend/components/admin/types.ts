@@ -116,10 +116,13 @@ export interface TreeVarietyItem {
 
 export type OccasionDedicationType =
   | "birthday"
+  | "student"
+  | "marriage"
   | "memorial"
   | "anniversary"
   | "corporate"
-  | "general";
+  | "general"
+  | "other";
 
 export interface AdoptionPlanItem {
   id: string;

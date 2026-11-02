@@ -12,6 +12,9 @@ interface AddPlanModalProps {
 
 const OCCASIONS: { value: OccasionDedicationType; label: string; icon: string }[] = [
   { value: "birthday", label: "Birthday", icon: "🎂" },
+  { value: "student", label: "Student", icon: "🎓" },
+  { value: "marriage", label: "Marriage", icon: "💍" },
+  { value: "other", label: "Other Occasion", icon: "🌱" },
   { value: "memorial", label: "Memorial", icon: "🕯️" },
   { value: "anniversary", label: "Anniversary", icon: "💍" },
   { value: "corporate", label: "Corporate CSR", icon: "🏢" },

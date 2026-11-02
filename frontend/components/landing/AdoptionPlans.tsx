@@ -13,11 +13,14 @@ export interface AdoptionPlansProps {
 
 const OCCASION_FILTERS: { value: "all" | OccasionDedicationType; label: string; icon: string }[] = [
   { value: "all", label: "All Plans", icon: "🌿" },
-  { value: "general", label: "General", icon: "🌱" },
   { value: "birthday", label: "Birthday", icon: "🎂" },
+  { value: "student", label: "Student", icon: "🎓" },
+  { value: "marriage", label: "Marriage", icon: "💍" },
+  { value: "other", label: "Other Occasion", icon: "🌱" },
   { value: "anniversary", label: "Anniversary", icon: "💍" },
   { value: "memorial", label: "Memorial", icon: "🕯️" },
   { value: "corporate", label: "Corporate CSR", icon: "🏢" },
+  { value: "general", label: "General", icon: "🌱" },
 ];
 
 const OCCASION_TAGS: Record<
@@ -29,6 +32,16 @@ const OCCASION_TAGS: Record<
     icon: "🎂",
     color: "bg-amber-50 text-amber-800 border-amber-200",
   },
+  student: {
+    label: "Student",
+    icon: "🎓",
+    color: "bg-cyan-50 text-cyan-800 border-cyan-200",
+  },
+  marriage: {
+    label: "Marriage",
+    icon: "💍",
+    color: "bg-rose-50 text-rose-800 border-rose-200",
+  },
   memorial: {
     label: "Memorial",
     icon: "🕯️",
@@ -37,7 +50,7 @@ const OCCASION_TAGS: Record<
   anniversary: {
     label: "Anniversary",
     icon: "💍",
-    color: "bg-rose-50 text-rose-800 border-rose-200",
+    color: "bg-pink-50 text-pink-800 border-pink-200",
   },
   corporate: {
     label: "Corporate",
@@ -48,6 +61,11 @@ const OCCASION_TAGS: Record<
     label: "General",
     icon: "🌱",
     color: "bg-emerald-50 text-emerald-800 border-emerald-200",
+  },
+  other: {
+    label: "Other Occasion",
+    icon: "🌱",
+    color: "bg-teal-50 text-teal-800 border-teal-200",
   },
 };
 

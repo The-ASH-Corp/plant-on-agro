@@ -8,8 +8,8 @@ interface PlantFlowHeaderProps {
 }
 
 const STEP_LABELS = [
-  "Dedication",
-  "Qty",
+  "Plan",
+  "Quantity",
   "Location",
   "Details",
   "Payment",

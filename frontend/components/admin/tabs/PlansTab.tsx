@@ -15,6 +15,9 @@ interface PlansTabProps {
 const OCCASION_FILTERS: { value: string; label: string; icon: string }[] = [
   { value: "all", label: "All Packages", icon: "🌐" },
   { value: "birthday", label: "Birthday", icon: "🎂" },
+  { value: "student", label: "Student", icon: "🎓" },
+  { value: "marriage", label: "Marriage", icon: "💍" },
+  { value: "other", label: "Other Occasion", icon: "🌱" },
   { value: "memorial", label: "Memorial", icon: "🕯️" },
   { value: "anniversary", label: "Anniversary", icon: "💍" },
   { value: "corporate", label: "Corporate CSR", icon: "🏢" },
@@ -23,10 +26,13 @@ const OCCASION_FILTERS: { value: string; label: string; icon: string }[] = [
 
 const OCCASION_TAGS: Record<OccasionDedicationType, { label: string; icon: string; color: string }> = {
   birthday: { label: "Birthday", icon: "🎂", color: "bg-amber-50 text-amber-800 border-amber-200" },
+  student: { label: "Student", icon: "🎓", color: "bg-cyan-50 text-cyan-800 border-cyan-200" },
+  marriage: { label: "Marriage", icon: "💍", color: "bg-rose-50 text-rose-800 border-rose-200" },
   memorial: { label: "Memorial", icon: "🕯️", color: "bg-indigo-50 text-indigo-800 border-indigo-200" },
-  anniversary: { label: "Anniversary", icon: "💍", color: "bg-rose-50 text-rose-800 border-rose-200" },
+  anniversary: { label: "Anniversary", icon: "💍", color: "bg-pink-50 text-pink-800 border-pink-200" },
   corporate: { label: "Corporate", icon: "🏢", color: "bg-blue-50 text-blue-800 border-blue-200" },
   general: { label: "General", icon: "🌱", color: "bg-emerald-50 text-emerald-800 border-emerald-200" },
+  other: { label: "Other Occasion", icon: "🌱", color: "bg-teal-50 text-teal-800 border-teal-200" },
 };
 
 export function PlansTab({

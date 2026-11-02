@@ -2,7 +2,6 @@ import http from 'http';
 import { createApp } from './app';
 import { env } from './config/env';
 import { Database } from './infrastructure/database/connection';
-import { seedExperiencesIfEmpty } from './infrastructure/database/seeds/experience.seeder';
 import { redisService } from './infrastructure/redis/redis.client';
 import { ensureRedisContainerAsync } from './infrastructure/redis/redis-docker.helper';
 
@@ -13,9 +12,6 @@ const bootstrap = async (): Promise<void> => {
 
     // 1. Initialize Database connection
     await Database.connect();
-
-    // 1.1 Seed initial Flagship Experiences if none exist
-    await seedExperiencesIfEmpty();
 
     // 2. Initialize Express application
     const app = createApp();

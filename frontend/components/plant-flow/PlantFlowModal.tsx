@@ -68,7 +68,11 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
 
   const [step, setStep] = useState<PlantStep>(1);
   const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(initialPlanId ?? null);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(
+    () => initialPlanId ?? null
+  );
+  const [customOccasion, setCustomOccasion] = useState("");
+  const [dedicationMessage, setDedicationMessage] = useState("");
   const [qty, setQty] = useState(1);
   const [location, setLocation] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -80,7 +84,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
     () => "POA-" + Math.random().toString(36).substring(2, 8).toUpperCase()
   );
 
-  // Live Database Catalog State
+  // Live Database Catalog State (purely managed from Admin side)
   const [trees, setTrees] = useState<Tree[]>([]);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [locations, setLocations] = useState<string[]>(() => {
@@ -162,7 +166,10 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
           }
 
           if (plansRes.data?.items) {
-            const mappedPlans: Plan[] = plansRes.data.items.map((p: BackendAdoptionPlan) => ({
+            const activePlans = plansRes.data.items.filter(
+              (p: BackendAdoptionPlan) => p.isActive !== false
+            );
+            const mappedPlans: Plan[] = activePlans.map((p: BackendAdoptionPlan) => ({
               id: p.id,
               label: p.planLabel,
               icon: p.icon || "🌱",
@@ -170,6 +177,27 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
               price: p.priceModifier,
             }));
             setPlans(mappedPlans);
+
+            if (mappedPlans.length > 0) {
+              setSelectedPlan((prev) => {
+                if (initialPlanId && mappedPlans.some((mp) => mp.id === initialPlanId)) {
+                  return initialPlanId;
+                }
+                if (prev && mappedPlans.some((mp) => mp.id === prev)) {
+                  return prev;
+                }
+                if (prev) {
+                  const clean = prev.replace("plan-", "").toLowerCase();
+                  const matched = mappedPlans.find((mp) =>
+                    mp.label.toLowerCase().includes(clean)
+                  );
+                  if (matched) return matched.id;
+                }
+                return mappedPlans[0].id;
+              });
+            } else {
+              setSelectedPlan(null);
+            }
           }
         }
       } catch (err) {
@@ -183,7 +211,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [initialPlanId]);
 
   const universalPrice =
     trees.length > 0 && typeof trees[0].price === "number"
@@ -192,6 +220,17 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
   const selectedPlanData = plans.find((p) => p.id === selectedPlan);
   const pricePerTree = universalPrice + (selectedPlanData?.price ?? 0);
   const total = pricePerTree * qty;
+
+  const isOtherPlan = Boolean(
+    selectedPlanData &&
+      (selectedPlanData.label.toLowerCase().includes("other") ||
+        selectedPlanData.id.toLowerCase().includes("other"))
+  );
+
+  const effectivePlanLabel =
+    isOtherPlan && customOccasion.trim()
+      ? `Other Occasion (${customOccasion.trim()})`
+      : selectedPlanData?.label || "Birthday Plan";
 
   const isPhoneValid = validatePhoneNumber(phone, false).isValid;
 
@@ -254,8 +293,8 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
 
         const noteText =
           qty > 1
-            ? `Tree #${i + 1} of ${qty} adopted under "${selectedPlanData?.label || "Individual"}" lifetime package. Physical nursery tagging and geotagging completed.`
-            : `Adopted under "${selectedPlanData?.label || "Individual"}" lifetime package. Physical nursery tagging and geotagging completed.`;
+            ? `Tree #${i + 1} of ${qty} adopted under "${effectivePlanLabel}" lifetime package. Physical nursery tagging and geotagging completed.`
+            : `Adopted under "${effectivePlanLabel}" lifetime package. Physical nursery tagging and geotagging completed.`;
 
         // Persist to MongoDB through backend API
         try {
@@ -321,7 +360,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
 
     // 2. Order Record - Use server-verified order directly
     const invNumber = `INV-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
-    const orderNotes = `Adoption contract for ${qty}x ${selectedTree?.name || "tree"} planted at ${location || "Flagship Living Forest — Wayanad, Kerala"}. Geotagged and physically nurtured. Paid via ${methodUsed}.`;
+    const orderNotes = `Adoption contract for ${qty}x ${selectedTree?.name || "tree"} planted at ${location || "Flagship Living Forest — Wayanad, Kerala"} under "${effectivePlanLabel}". Geotagged and physically nurtured. Paid via ${methodUsed}.`;
 
     let finalOrderRecord: any = serverData?.order ? orderService.mapToUiItem(serverData.order) : null;
 
@@ -339,7 +378,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
               treeSpecies: selectedTree?.name || "Indigenous Tree",
               scientificName: selectedTree?.sci || "Botanical Tree",
               category: selectedTree?.category || "Fruit Trees",
-              planType: selectedPlanData?.label || "Individual",
+              planType: effectivePlanLabel,
               reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
               gpsCoords: chosenCoords.formatted,
               quantity: qty,
@@ -352,8 +391,8 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
           category: selectedTree?.category || "Fruit Trees",
           reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
           gpsCoords: chosenCoords.formatted,
-          planType: selectedPlanData?.label || "Individual",
-          dedicationMessage: "",
+          planType: effectivePlanLabel,
+          dedicationMessage: dedicationMessage.trim(),
           quantity: qty,
           totalAmount: total,
           paymentMethod: methodUsed,
@@ -387,8 +426,8 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
           category: selectedTree?.category || "Fruit Trees",
           reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
           gpsCoords: chosenCoords.formatted,
-          planType: selectedPlanData?.label || "Individual",
-          dedicationMessage: "",
+          planType: effectivePlanLabel,
+          dedicationMessage: dedicationMessage.trim(),
           quantity: qty,
           totalAmount: total,
           paymentMethod: methodUsed,
@@ -466,13 +505,14 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
         treeVarietyId: selectedTree?.id ? String(selectedTree.id) : undefined,
         treeSpecies: selectedTree?.name,
         planId: selectedPlan || undefined,
-        planLabel: selectedPlanData?.label,
+        planLabel: effectivePlanLabel,
         quantity: qty,
         reserveLocation: location || undefined,
         receipt: orderId,
         adopterName: name || user?.name || "Verified Adopter",
         adopterEmail: email || user?.email || "adopter@example.com",
         adopterPhone: phone || undefined,
+        dedicationMessage: dedicationMessage.trim() || undefined,
       });
 
       if (!orderRes.data) {
@@ -502,7 +542,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
         amount: orderRes.data.amount,
         currency: orderRes.data.currency || "INR",
         name: "PlantOn Agro",
-        description: `${qty}x ${selectedTree?.name || "Tree"} Adoption (${selectedPlanData?.label || "Lifetime"})`,
+        description: `${qty}x ${selectedTree?.name || "Tree"} Adoption (${effectivePlanLabel})`,
         image:
           selectedTree?.img ||
           "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=200&h=200&fit=crop",
@@ -587,6 +627,8 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
               onSelectPlan={(id) => setSelectedPlan(id)}
               plans={plans}
               loading={loadingCatalog}
+              customOccasion={customOccasion}
+              setCustomOccasion={setCustomOccasion}
             />
           )}
 
@@ -615,6 +657,8 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
               setEmail={setEmail}
               phone={phone}
               setPhone={setPhone}
+              dedicationMessage={dedicationMessage}
+              setDedicationMessage={setDedicationMessage}
             />
           )}
 
@@ -637,6 +681,8 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
               <Step6Payment
                 selectedTree={selectedTree}
                 selectedPlanData={selectedPlanData}
+                dedicationPackageLabel={effectivePlanLabel}
+                dedicationMessage={dedicationMessage.trim() || undefined}
                 qty={qty}
                 location={location}
                 total={total}

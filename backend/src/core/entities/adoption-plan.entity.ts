@@ -1,9 +1,12 @@
 export type OccasionDedication =
   | 'birthday'
+  | 'student'
+  | 'marriage'
   | 'memorial'
   | 'anniversary'
   | 'corporate'
-  | 'general';
+  | 'general'
+  | 'other';
 
 export interface AdoptionPlanProps {
   id?: string;
