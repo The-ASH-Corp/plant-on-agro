@@ -74,6 +74,16 @@ export function ExperienceSection({ onScheduleVisit }: ExperienceSectionProps) {
               <div key={i} className="h-96 rounded-2xl bg-white border border-gray-100 shadow-xs animate-pulse" />
             ))}
           </div>
+        ) : experiences.length === 0 ? (
+          <div className="text-center py-16 bg-white/70 backdrop-blur-xs rounded-3xl border border-[#d4e9dd] max-w-md mx-auto px-6">
+            <span className="text-4xl">🌲</span>
+            <h3 className="text-lg font-bold text-[#173324] mt-3">
+              No Experiences Available Yet
+            </h3>
+            <p className="text-xs text-[#4a6557] mt-1 leading-relaxed">
+              Plantation experiences will appear here once added manually by administrators in the Admin Dashboard.
+            </p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {experiences.map((exp) => {
