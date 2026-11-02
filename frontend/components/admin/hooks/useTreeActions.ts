@@ -22,7 +22,8 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
     const commonName = (fd.get("name") as string).trim();
     const scientificName = (fd.get("sci") as string).trim();
     const category = fd.get("category") as TreeVarietyItem["category"];
-    const price = Number(fd.get("price")) || 299;
+    const currentUniversalPrice = trees.length > 0 && typeof trees[0].price === "number" ? trees[0].price : 349;
+    const price = currentUniversalPrice;
     const co2 = Number(fd.get("co2")) || 25;
     const location = (fd.get("location") as string).trim() || "Western Ghats, Maharashtra";
     const growth = (fd.get("growth") as string).trim() || "10–12 m in 5 years";
@@ -80,7 +81,7 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
       }
 
       setShowAddTreeModal(false);
-      showToast(`Added "${commonName}" to tree catalog!`);
+      showToast(`Added "${commonName}" to tree catalog at universal price ₹${price}!`);
       setActiveTab("trees");
     } catch (err: any) {
       console.warn("Tree creation notice:", err);
@@ -97,7 +98,8 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
     const commonName = (fd.get("name") as string)?.trim() || selectedTreeForEdit.name;
     const scientificName = (fd.get("sci") as string)?.trim() || selectedTreeForEdit.sci;
     const category = (fd.get("category") as TreeVarietyItem["category"]) || selectedTreeForEdit.category;
-    const price = Number(fd.get("price")) || selectedTreeForEdit.price;
+    const inputPrice = Number(fd.get("price"));
+    const price = !isNaN(inputPrice) && inputPrice >= 0 ? inputPrice : selectedTreeForEdit.price;
     const co2 = Number(fd.get("co2")) || selectedTreeForEdit.co2PerYearKg || 25;
     const location = (fd.get("location") as string)?.trim() || selectedTreeForEdit.location;
     const growth = (fd.get("growth") as string)?.trim() || selectedTreeForEdit.growth;
@@ -141,7 +143,10 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
                 careRequirements,
                 isActive,
               }
-            : t
+            : {
+                ...t,
+                price, // Synchronize all trees to the same price
+              }
         )
       );
 
@@ -162,13 +167,19 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
       });
 
       if (res.data) {
-        const updatedUiTree = treeVarietyService.mapToUiItem(res.data);
-        setTrees((prev) => prev.map((t) => (t.id === id ? updatedUiTree : t)));
+        // Also ensure all trees in state have this updated universal price
+        setTrees((prev) =>
+          prev.map((t) =>
+            t.id === id
+              ? treeVarietyService.mapToUiItem(res.data!)
+              : { ...t, price }
+          )
+        );
       } else {
         applyLocalUpdate();
       }
       setSelectedTreeForEdit(null);
-      showToast(`Updated tree variety "${commonName}"!`);
+      showToast(`Updated "${commonName}" & synced all trees to ₹${price}!`);
     } catch (err: any) {
       console.warn("Tree update notice:", err);
       showToast(err?.message || "Failed to update tree variety");
@@ -177,14 +188,30 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
     }
   };
 
+  const handleSetUniversalPrice = async (newPrice: number) => {
+    if (isNaN(newPrice) || newPrice < 0) return;
+    try {
+      await treeVarietyService.updateUniversalPrice(newPrice);
+    } catch (err) {
+      console.warn("Failed to update universal price on backend:", err);
+    }
+    // Update all trees in state
+    setTrees((prev) => prev.map((t) => ({ ...t, price: newPrice })));
+    showToast(`Universal adoption price set to ₹${newPrice} for all trees!`);
+  };
+
+  const universalPrice = trees.length > 0 && typeof trees[0].price === "number" ? trees[0].price : 349;
+
   return {
     showAddTreeModal,
     setShowAddTreeModal,
     selectedTreeForEdit,
     setSelectedTreeForEdit,
     isUpdatingTree,
+    universalPrice,
     handleCreateTree,
     handleUpdateTree,
+    handleSetUniversalPrice,
   };
 }
 

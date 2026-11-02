@@ -5,7 +5,7 @@ import { ExperienceItem, experienceService } from "@/services/experiences/experi
 import { ExperienceDetailModal } from "../buyer/ExperienceDetailModal";
 
 interface ExperienceSectionProps {
-  onScheduleVisit: () => void;
+  onScheduleVisit: (exp?: ExperienceItem) => void;
 }
 
 export function ExperienceSection({ onScheduleVisit }: ExperienceSectionProps) {
@@ -153,13 +153,9 @@ export function ExperienceSection({ onScheduleVisit }: ExperienceSectionProps) {
                   {/* Card Footer */}
                   <div className="p-5 pt-3 border-t border-gray-100 flex items-center justify-between bg-[#fafdfa]">
                     <div>
-                      <span className="text-[10px] text-gray-400 uppercase tracking-wider block">Adopter Pass</span>
-                      <span className="text-sm font-bold text-[#173324]">
-                        {exp.price === 0 ? (
-                          <span className="text-emerald-700 font-extrabold">Complimentary</span>
-                        ) : (
-                          `₹${exp.price.toLocaleString("en-IN")}`
-                        )}
+                      <span className="text-[10px] text-gray-400 uppercase tracking-wider block">Visitor Pass</span>
+                      <span className="text-sm font-bold text-emerald-700">
+                        Complimentary
                       </span>
                     </div>
 
@@ -171,7 +167,7 @@ export function ExperienceSection({ onScheduleVisit }: ExperienceSectionProps) {
                         View Gallery
                       </button>
                       <button
-                        onClick={onScheduleVisit}
+                        onClick={() => onScheduleVisit(exp)}
                         className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#2d6a4f] to-[#1b4332] shadow-sm hover:shadow-md transition-all cursor-pointer"
                       >
                         Book Visit 🎫
@@ -199,7 +195,7 @@ export function ExperienceSection({ onScheduleVisit }: ExperienceSectionProps) {
           </div>
 
           <button
-            onClick={onScheduleVisit}
+            onClick={() => onScheduleVisit()}
             className="px-6 py-3 rounded-2xl text-sm font-bold text-[#173324] bg-white hover:bg-emerald-50 transition-all shadow-lg shrink-0 cursor-pointer"
           >
             Plan Your Plantation Experience 🗺️
@@ -213,8 +209,9 @@ export function ExperienceSection({ onScheduleVisit }: ExperienceSectionProps) {
           experience={selectedExp}
           onClose={() => setSelectedExp(null)}
           onBook={() => {
+            const chosen = selectedExp;
             setSelectedExp(null);
-            onScheduleVisit();
+            onScheduleVisit(chosen || undefined);
           }}
         />
       )}

@@ -59,30 +59,32 @@ export class ResetPasswordWithOtpUseCase {
       throw new NotFoundError('Account not found.');
     }
 
-    // 5. Prevent setting new password to existing password
+    // 5. Validate new password format and complexity first (before mutating or consuming token)
+    const passwordVO = Password.create(dto.password);
+
+    // 6. Prevent setting new password to existing password
     if (user.passwordHash) {
-      const isSamePassword = await this.passwordHasher.verify(user.passwordHash.getValue(), dto.password);
+      const isSamePassword = await this.passwordHasher.verify(user.passwordHash.getValue(), passwordVO.getValue());
       if (isSamePassword) {
         throw new BadRequestError('New password cannot be the same as your current password.');
       }
     }
 
-    // 6. Atomically consume token FIRST as mutex lock to prevent concurrent replay race conditions
+    // 7. Compute password hash ahead of token consumption
+    const rawHashed = await this.passwordHasher.hash(passwordVO.getValue());
+    const passwordHashVO = HashedPassword.create(rawHashed);
+
+    // 8. Atomically consume token as mutex lock right before applying changes (prevents replay & concurrent races)
     const invalidated = await this.otpRepository.markAsUsed(record.id!);
     if (!invalidated) {
       throw new BadRequestError('Password reset token has already been used.');
     }
 
-    // 7. Validate and hash new password
-    const passwordVO = Password.create(dto.password);
-    const rawHashed = await this.passwordHasher.hash(passwordVO.getValue());
-    const passwordHashVO = HashedPassword.create(rawHashed);
-
-    // 8. Update user
+    // 9. Update user
     user.updatePassword(passwordHashVO);
     await this.userRepository.update(user);
 
-    // 9. Send confirmation email
+    // 10. Send confirmation email
     await this.mailService.sendPasswordResetSuccessEmail(targetEmail, user.name);
 
     return {

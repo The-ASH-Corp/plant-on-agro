@@ -12,9 +12,10 @@ import { User } from "@/types/auth";
 interface BuyerVisitsTabProps {
   user: User | null;
   instances: BackendTreeInstance[];
+  onOpenPlantFlow?: () => void;
 }
 
-export function BuyerVisitsTab({ user, instances }: BuyerVisitsTabProps) {
+export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisitsTabProps) {
   const [visits, setVisits] = useState<VisitBookingRecord[]>([]);
   const [experiences, setExperiences] = useState<ExperienceItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -418,6 +419,10 @@ export function BuyerVisitsTab({ user, instances }: BuyerVisitsTabProps) {
           onSuccess={() => {
             setBookModalOpen(false);
             loadData();
+          }}
+          onAdoptTree={() => {
+            setBookModalOpen(false);
+            if (onOpenPlantFlow) onOpenPlantFlow();
           }}
           userTrees={instances}
           experiences={experiences}

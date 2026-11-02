@@ -40,7 +40,7 @@ const SEED_EXPERIENCES = [
       'Discover the productive agroforestry layer of PlantOn Agro. Pick seasonal organic mangoes, jackfruits, and black pepper directly from living branches. Learn sapling grafting techniques in the master nursery, and savor a 5-course farm-to-table organic lunch cooked over traditional hearths.',
     location: 'PlantOn Agro Plantation — Wayanad, Kerala',
     duration: '5 Hours',
-    price: 1200,
+    price: 0,
     included: [
       'Handcrafted Woven Harvest Basket',
       'Seasonal Fruit & Pepper Picking',
@@ -70,7 +70,7 @@ const SEED_EXPERIENCES = [
       'In partnership with RAC Realty’s adjoining 10-acre wellness destination, experience authentic Ayurveda rooted in forest herbs. Enjoy a 60-minute rejuvenating Abhyanga oil massage, open-air pavilion yoga, cedarwood steam sauna, and guided contrast ice bath therapy for deep vitality.',
     location: 'RAC Realty Wellness Destination — Kerala',
     duration: '4 Hours',
-    price: 2500,
+    price: 0,
     included: [
       '60-Min Traditional Abhyanga Massage',
       'Open-Air Forest Yoga & Pranayama',
@@ -100,7 +100,7 @@ const SEED_EXPERIENCES = [
       'Escape to RAC Realty’s heritage farm retreat bordering the PlantOn forest. Sleep in authentic Kerala wooden architecture with verandas overlooking lotus ponds. Get your hands muddy in artisanal wheel pottery, interact with friendly native farm animals, and unwind under starlit canopies.',
     location: 'RAC Realty Heritage Estate — Wayanad, Kerala',
     duration: '2 Days / 1 Night',
-    price: 6500,
+    price: 0,
     included: [
       'Overnight Heritage Villa Suite Stay',
       'Artisanal Clay Pottery Masterclass',
@@ -130,7 +130,7 @@ const SEED_EXPERIENCES = [
       'Power through scenic plantation tracks, water splashes, and rugged forest perimeter ridges on all-terrain quads. Guided by safety marshals, you will navigate winding curves, cross bamboo bridges, and witness panoramic views of the Western Ghats mountain backdrop.',
     location: 'RAC Adventure Park — Wayanad, Kerala',
     duration: '2 Hours',
-    price: 1800,
+    price: 0,
     included: [
       'High-Performance Polaris ATV Vehicle',
       'Full Certified Safety Gear & Helmet',

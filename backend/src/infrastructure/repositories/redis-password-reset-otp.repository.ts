@@ -5,7 +5,7 @@ import { Nullable } from '../../shared/types';
 import { normalizeEmail } from '../../shared/utils/string.util';
 import { redisService } from '../redis/redis.client';
 import { env } from '../../config/env';
-import { PasswordResetOtpModel } from '../database/models/password-reset-otp.model';
+import { PasswordResetOtpModel, buildOtpIdQuery } from '../database/models/password-reset-otp.model';
 
 interface RedisOtpPayload {
   id: string;
@@ -104,6 +104,7 @@ export class RedisPasswordResetOtpRepository implements IPasswordResetOtpReposit
     PasswordResetOtpModel.deleteMany({ email: normalizedEmail })
       .then(() =>
         PasswordResetOtpModel.create({
+          otpId: id,
           email: normalizedEmail,
           otp: otpHash,
           expiresAt,
@@ -161,10 +162,10 @@ export class RedisPasswordResetOtpRepository implements IPasswordResetOtpReposit
     const email = await this.client.get(this.idKey(id));
     if (!email) {
       // Check MongoDB as fallback
-      const mongoDoc = await PasswordResetOtpModel.findById(id).exec().catch(() => null);
+      const mongoDoc = await PasswordResetOtpModel.findOne(buildOtpIdQuery(id)).exec().catch(() => null);
       if (mongoDoc) {
         return new PasswordResetOtp({
-          id: mongoDoc._id.toString(),
+          id: mongoDoc.otpId || mongoDoc._id.toString(),
           email: mongoDoc.email,
           otp: mongoDoc.otp,
           expiresAt: mongoDoc.expiresAt,
@@ -258,7 +259,7 @@ export class RedisPasswordResetOtpRepository implements IPasswordResetOtpReposit
 
     // Async MongoDB update
     PasswordResetOtpModel.findOneAndUpdate(
-      { email },
+      buildOtpIdQuery(id),
       { $set: { resetToken, expiresAt, used: false } }
     ).catch(() => {});
 
@@ -302,7 +303,7 @@ export class RedisPasswordResetOtpRepository implements IPasswordResetOtpReposit
     }
 
     // Async MongoDB update
-    PasswordResetOtpModel.findByIdAndUpdate(id, { $inc: { attempts: 1 } }).catch(() => {});
+    PasswordResetOtpModel.findOneAndUpdate(buildOtpIdQuery(id), { $inc: { attempts: 1 } }).catch(() => {});
 
     return payload.attempts;
   }
@@ -337,7 +338,7 @@ export class RedisPasswordResetOtpRepository implements IPasswordResetOtpReposit
     await pipeline.exec();
 
     // Async MongoDB audit update
-    PasswordResetOtpModel.findByIdAndUpdate(id, { $set: { used: true } }).catch(() => {});
+    PasswordResetOtpModel.findOneAndUpdate(buildOtpIdQuery(id), { $set: { used: true } }).catch(() => {});
 
     return true;
   }
@@ -354,7 +355,7 @@ export class RedisPasswordResetOtpRepository implements IPasswordResetOtpReposit
     await pipeline.exec();
 
     // Async MongoDB cleanup
-    PasswordResetOtpModel.findByIdAndDelete(id).catch(() => {});
+    PasswordResetOtpModel.findOneAndDelete(buildOtpIdQuery(id)).catch(() => {});
 
     return true;
   }

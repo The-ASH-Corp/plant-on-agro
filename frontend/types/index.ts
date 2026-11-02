@@ -10,7 +10,7 @@ export type TreeCategory =
   | "Shade Trees"
   | "Occasion";
 
-export type PlantStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+export type PlantStep = 1 | 2 | 3 | 4 | 5 | 6;
 
 export interface Tree {
   id: string | number;

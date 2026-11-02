@@ -8,7 +8,6 @@ interface PlantFlowHeaderProps {
 }
 
 const STEP_LABELS = [
-  "Tree",
   "Dedication",
   "Qty",
   "Location",
@@ -28,7 +27,7 @@ export function PlantFlowHeader({ step, onClose }: PlantFlowHeaderProps) {
           style={{ fontFamily: "var(--font-display)" }}
           className="text-[#173324] text-2xl"
         >
-          {step === 7 ? "Your Journey Has Begun 🌱" : "Plant a Tree"}
+          {step === 6 ? "Your Journey Has Begun 🌱" : "Plant a Tree"}
         </h2>
         <button
           onClick={onClose}
@@ -40,9 +39,9 @@ export function PlantFlowHeader({ step, onClose }: PlantFlowHeaderProps) {
       </div>
 
       {/* Progress Bar */}
-      {step < 7 && (
+      {step < 6 && (
         <div className="flex items-center gap-1">
-          {STEP_LABELS.slice(0, 6).map((label, i) => (
+          {STEP_LABELS.slice(0, 5).map((label, i) => (
             <div key={label} className="flex items-center gap-1 flex-1">
               <div className="flex flex-col items-center">
                 <div
@@ -63,7 +62,7 @@ export function PlantFlowHeader({ step, onClose }: PlantFlowHeaderProps) {
                   {label}
                 </span>
               </div>
-              {i < 5 && (
+              {i < 4 && (
                 <div
                   className="flex-1 h-px mx-1"
                   style={{ background: i + 1 < step ? "#52b788" : "#e2ede7" }}

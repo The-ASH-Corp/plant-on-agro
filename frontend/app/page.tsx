@@ -16,6 +16,8 @@ import { HeroLiveStats } from "@/components/landing/Hero";
 import { ImpactLiveStats, ImpactProjectItem } from "@/components/landing/ImpactSection";
 import { SampleTreeCertificate } from "@/components/landing/CertificateSection";
 import { PlantFlow } from "@/components/plant-flow";
+import { BookVisitModal } from "@/components/buyer/BookVisitModal";
+import { ExperienceItem, experienceService } from "@/services/experiences/experience.service";
 import {
   landingPageService,
   LandingPageContent,
@@ -62,6 +64,9 @@ export default function App() {
   const user = useHydratedStore(useAuthStore, (s) => s.user);
   const [activeSection, setActiveSection] = useState<Section>("home");
   const [plantOpen, setPlantOpen] = useState(false);
+  const [visitOpen, setVisitOpen] = useState(false);
+  const [selectedExpForVisit, setSelectedExpForVisit] = useState<ExperienceItem | null>(null);
+  const [experiences, setExperiences] = useState<ExperienceItem[]>([]);
   const [initialPlanId, setInitialPlanId] = useState<string | null>(null);
   const [cmsContent, setCmsContent] = useState<LandingPageContent>(DEFAULT_LANDING_PAGE_CONTENT);
 
@@ -71,23 +76,34 @@ export default function App() {
   const [liveProjects, setLiveProjects] = useState<ImpactProjectItem[]>([]);
   const [sampleCertificate, setSampleCertificate] = useState<SampleTreeCertificate | undefined>();
 
+  const [userTrees, setUserTrees] = useState<BackendTreeInstance[]>([]);
+
+  const handleScheduleVisit = (exp?: ExperienceItem) => {
+    setSelectedExpForVisit(exp || null);
+    setVisitOpen(true);
+  };
+
   useEffect(() => {
     let isMounted = true;
 
     async function loadAllData() {
       try {
-        const [cmsRes, instancesRes, varietiesRes, plansRes] = await Promise.allSettled([
+        const [cmsRes, instancesRes, varietiesRes, plansRes, expRes] = await Promise.allSettled([
           landingPageService.get(),
           treeInstanceService.getAll({ limit: 100 }),
           treeVarietyService.getAll({ limit: 50 }),
           adoptionPlanService.getAll({ limit: 50 }),
+          experienceService.getAll(),
         ]);
 
         if (!isMounted) return;
 
-        // 1. CMS Content
+        // 1. CMS Content & Experiences
         if (cmsRes.status === "fulfilled" && cmsRes.value.data) {
           setCmsContent(cmsRes.value.data);
+        }
+        if (expRes.status === "fulfilled" && expRes.value.data?.items) {
+          setExperiences(expRes.value.data.items);
         }
 
         // 2. Instances, Varieties & Plans
@@ -99,6 +115,16 @@ export default function App() {
           instancesRes.status === "fulfilled" && typeof instancesRes.value.data?.total === "number"
             ? instancesRes.value.data.total
             : instances.length;
+
+        // Filter trees owned by current logged in user
+        if (user?.email) {
+          const matching = instances.filter(
+            (i) => i.adopterEmail?.toLowerCase() === user.email.toLowerCase()
+          );
+          setUserTrees(matching);
+        } else {
+          setUserTrees([]);
+        }
 
         const varieties: BackendTreeVariety[] =
           varietiesRes.status === "fulfilled" && varietiesRes.value.data?.items
@@ -256,7 +282,7 @@ export default function App() {
 
         <AdoptionPlans openPlant={(planId) => handleOpenPlant(planId)} />
 
-        <ExperienceSection onScheduleVisit={() => handleOpenPlant()} />
+        <ExperienceSection onScheduleVisit={handleScheduleVisit} />
 
         {cmsContent.impact?.isEnabled !== false && (
           <ImpactSection
@@ -286,6 +312,21 @@ export default function App() {
             setPlantOpen(false);
             setInitialPlanId(null);
           }}
+        />
+      )}
+      {visitOpen && (
+        <BookVisitModal
+          onClose={() => setVisitOpen(false)}
+          onSuccess={() => setVisitOpen(false)}
+          onAdoptTree={() => {
+            setVisitOpen(false);
+            setPlantOpen(true);
+          }}
+          userTrees={userTrees}
+          experiences={experiences}
+          userEmail={user?.email || ""}
+          userName={user?.name || ""}
+          preselectedExperience={selectedExpForVisit}
         />
       )}
     </div>

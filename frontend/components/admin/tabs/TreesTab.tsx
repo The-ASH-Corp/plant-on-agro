@@ -7,6 +7,8 @@ import { TrashIcon, PencilIcon, Select } from "@/components/ui";
 interface TreesTabProps {
   trees: TreeVarietyItem[];
   searchQuery: string;
+  universalPrice?: number;
+  onUpdateUniversalPrice?: (newPrice: number) => Promise<void> | void;
   onOpenAddTree: () => void;
   onEditTree: (tree: TreeVarietyItem) => void;
   onDeleteTree: (id: string, name?: string) => void;
@@ -25,6 +27,8 @@ const CATEGORIES = [
 export function TreesTab({
   trees,
   searchQuery,
+  universalPrice,
+  onUpdateUniversalPrice,
   onOpenAddTree,
   onEditTree,
   onDeleteTree,
@@ -33,6 +37,33 @@ export function TreesTab({
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(9);
+
+  const currentUniversalPrice =
+    universalPrice ??
+    (trees.length > 0 && typeof trees[0].price === "number"
+      ? trees[0].price
+      : 349);
+  const [editingPrice, setEditingPrice] = useState<number | string>(
+    currentUniversalPrice
+  );
+  const [isUpdatingPrice, setIsUpdatingPrice] = useState(false);
+
+  useEffect(() => {
+    setEditingPrice(currentUniversalPrice);
+  }, [currentUniversalPrice]);
+
+  const handleSaveUniversalPrice = async () => {
+    const numeric = Number(editingPrice);
+    if (isNaN(numeric) || numeric < 0) return;
+    setIsUpdatingPrice(true);
+    try {
+      if (onUpdateUniversalPrice) {
+        await onUpdateUniversalPrice(numeric);
+      }
+    } finally {
+      setIsUpdatingPrice(false);
+    }
+  };
 
   // Filter trees based on search and category
   const filteredTrees = useMemo(() => {
@@ -88,6 +119,63 @@ export function TreesTab({
 
   return (
     <div className="space-y-6 animate-fadeIn">
+      {/* Universal Price Hero Card */}
+      <div className="p-6 rounded-3xl bg-gradient-to-br from-[#173324] via-[#1e4431] to-[#2d6a4f] text-white shadow-md border border-[#2b5a40] relative overflow-hidden">
+        <div className="absolute -right-8 -bottom-8 w-48 h-48 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none" />
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+          <div className="space-y-2 max-w-xl">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                Universal Tree Pricing
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-white/10 text-white/80">
+                All Trees Synced to Same Price
+              </span>
+            </div>
+            <div className="flex items-baseline gap-3">
+              <h2
+                style={{ fontFamily: "var(--font-display)" }}
+                className="text-3xl font-bold tracking-tight text-white"
+              >
+                ₹{currentUniversalPrice}
+              </h2>
+              <span className="text-emerald-300 text-sm font-medium">/ tree adoption</span>
+            </div>
+            <p className="text-xs text-white/85 leading-relaxed">
+              Every tree variety on PlantOn Agro has the exact same adoption price. When clients purchase, a species from the database is randomly allocated. Modifying the universal price here immediately synchronizes all {trees.length} species across the platform and checkout.
+            </p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/15 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-white/90">₹</span>
+              <input
+                type="number"
+                min={0}
+                value={editingPrice}
+                onChange={(e) => setEditingPrice(e.target.value)}
+                placeholder="Set new price"
+                className="w-28 px-3 py-2 rounded-xl bg-white text-[#173324] font-bold text-sm outline-none focus:ring-2 focus:ring-emerald-400"
+              />
+            </div>
+            <button
+              onClick={handleSaveUniversalPrice}
+              disabled={isUpdatingPrice || Number(editingPrice) === currentUniversalPrice}
+              className="px-4 py-2 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-[#173324] font-bold text-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs whitespace-nowrap flex items-center justify-center gap-1.5"
+            >
+              {isUpdatingPrice ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-[#173324] border-t-transparent rounded-full animate-spin" />
+                  <span>Syncing...</span>
+                </>
+              ) : (
+                <span>Update All Trees</span>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Top Controls Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-[#e2eae5] shadow-xs">
         <div>

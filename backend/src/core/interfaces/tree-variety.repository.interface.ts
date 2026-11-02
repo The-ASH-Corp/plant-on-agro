@@ -14,5 +14,6 @@ export interface ITreeVarietyRepository {
   count(filter?: TreeVarietyFilter): Promise<number>;
   save(tree: TreeVariety): Promise<TreeVariety>;
   update(tree: TreeVariety): Promise<TreeVariety>;
+  updateAllPrices(price: number): Promise<number>;
   delete(id: string): Promise<boolean>;
 }

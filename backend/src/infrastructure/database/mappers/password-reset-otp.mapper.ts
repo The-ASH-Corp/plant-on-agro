@@ -4,7 +4,7 @@ import { IPasswordResetOtpDocument } from '../models/password-reset-otp.model';
 export class PasswordResetOtpMapper {
   public static toDomain(doc: IPasswordResetOtpDocument): PasswordResetOtp {
     return new PasswordResetOtp({
-      id: doc._id ? String(doc._id) : undefined,
+      id: doc.otpId || (doc._id ? String(doc._id) : undefined),
       email: doc.email,
       otp: doc.otp,
       expiresAt: doc.expiresAt,
@@ -18,6 +18,7 @@ export class PasswordResetOtpMapper {
 
   public static toPersistence(entity: PasswordResetOtp): Partial<IPasswordResetOtpDocument> {
     return {
+      otpId: entity.id,
       email: entity.email,
       otp: entity.otp,
       expiresAt: entity.expiresAt,

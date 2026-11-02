@@ -42,7 +42,7 @@ export function TreeCard({ tree, onPlant }: TreeCardProps) {
           className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:shadow-lg cursor-pointer"
           style={{ background: "linear-gradient(135deg,#2d6a4f,#173324)", color: "#fff" }}
         >
-          Plant This Tree
+          Adopt a Tree
         </button>
       </div>
     </div>

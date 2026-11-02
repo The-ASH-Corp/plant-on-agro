@@ -113,9 +113,9 @@ export function ExperienceDetailModal({
               <div className="text-sm font-bold text-[#173324] mt-0.5">{experience.maxGroupSize} Guests</div>
             </div>
             <div>
-              <div className="text-[11px] uppercase tracking-wider text-gray-500">Adopter Pass</div>
+              <div className="text-[11px] uppercase tracking-wider text-gray-500">Visitor Pass</div>
               <div className="text-sm font-bold text-[#2d6a4f] mt-0.5">
-                {experience.price === 0 ? "Complimentary" : `₹${experience.price.toLocaleString("en-IN")}`}
+                Complimentary
               </div>
             </div>
           </div>
@@ -155,13 +155,9 @@ export function ExperienceDetailModal({
           {/* Footer CTA */}
           <div className="flex items-center justify-between pt-4 border-t border-gray-100">
             <div>
-              <div className="text-xs text-gray-500">Booking Rate</div>
-              <div className="text-lg font-bold text-[#173324]">
-                {experience.price === 0 ? (
-                  <span className="text-emerald-700">Free for Adopters</span>
-                ) : (
-                  <span>₹{experience.price.toLocaleString("en-IN")} <span className="text-xs text-gray-500 font-normal">/ person</span></span>
-                )}
+              <div className="text-xs text-gray-500">Visitor Access</div>
+              <div className="text-lg font-bold text-emerald-700">
+                Complimentary Pass
               </div>
             </div>
             <div className="flex items-center gap-3">

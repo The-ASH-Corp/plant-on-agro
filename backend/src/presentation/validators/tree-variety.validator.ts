@@ -67,3 +67,8 @@ export const queryTreeVarietiesSchema = z.object({
   limit: z.coerce.number().min(1).max(100).optional().default(50),
   skip: z.coerce.number().min(0).optional().default(0),
 });
+
+export const updateUniversalPriceSchema = z.object({
+  price: z.number().min(0, 'Price must be 0 or greater'),
+});
+

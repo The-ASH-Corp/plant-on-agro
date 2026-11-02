@@ -87,6 +87,14 @@ export const treeVarietyService = {
     return apiClient.put<BackendTreeVariety>(API_ENDPOINTS.TREE_VARIETIES.BY_ID(id), payload);
   },
 
+  // PUT update universal price for all trees
+  async updateUniversalPrice(price: number): Promise<ApiResponse<{ updatedCount: number; universalPrice: number }>> {
+    return apiClient.put<{ updatedCount: number; universalPrice: number }>(
+      `${API_ENDPOINTS.TREE_VARIETIES.BASE}/universal-price`,
+      { price }
+    );
+  },
+
   // DELETE tree variety
   async delete(id: string): Promise<ApiResponse<{ deleted: boolean }>> {
     return apiClient.delete<{ deleted: boolean }>(API_ENDPOINTS.TREE_VARIETIES.BY_ID(id));

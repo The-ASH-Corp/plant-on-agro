@@ -14,7 +14,6 @@ import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
 import { PlantFlowHeader } from "./PlantFlowHeader";
 import { PlantFlowFooter } from "./PlantFlowFooter";
 import {
-  Step1TreeSelection,
   Step2Dedication,
   Step3Quantity,
   Step4Location,
@@ -136,6 +135,12 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
             }));
             setTrees(mappedTrees);
 
+            // Randomly allocate a tree from the database for the user who is purchasing
+            if (mappedTrees.length > 0) {
+              const randomTree = mappedTrees[Math.floor(Math.random() * mappedTrees.length)];
+              setSelectedTree(randomTree);
+            }
+
             // Extract unique active bio-reserves from database trees
             const treeLocations = mappedTrees
               .map((t) => t.location)
@@ -180,22 +185,23 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
     };
   }, []);
 
+  const universalPrice =
+    trees.length > 0 && typeof trees[0].price === "number"
+      ? trees[0].price
+      : selectedTree?.price ?? 349;
   const selectedPlanData = plans.find((p) => p.id === selectedPlan);
-  const pricePerTree = selectedTree
-    ? selectedTree.price + (selectedPlanData?.price ?? 0)
-    : 0;
+  const pricePerTree = universalPrice + (selectedPlanData?.price ?? 0);
   const total = pricePerTree * qty;
 
   const isPhoneValid = validatePhoneNumber(phone, false).isValid;
 
   const canNext =
-    (step === 1 && selectedTree) ||
-    (step === 2 && selectedPlan) ||
-    (step === 3 && qty >= 1) ||
-    (step === 4 && location) ||
-    (step === 5 && name.trim() && email.trim() && isPhoneValid) ||
-    step === 6 ||
-    step === 7;
+    (step === 1 && selectedPlan) ||
+    (step === 2 && qty >= 1) ||
+    (step === 3 && location) ||
+    (step === 4 && name.trim() && email.trim() && isPhoneValid) ||
+    step === 5 ||
+    step === 6;
 
   const completeOrderAndAdoption = async (
     txRef: string,
@@ -227,6 +233,17 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
     } else {
       for (let i = 0; i < qty; i++) {
         const serialNum = Math.floor(1000 + Math.random() * 9000);
+        // Randomly allocate tree variety from DB for this adoption instance
+        const allocatedTree =
+          trees.length > 0
+            ? trees[Math.floor(Math.random() * trees.length)]
+            : selectedTree;
+        const currentSpecies = allocatedTree?.name || selectedTree?.name || "Indigenous Sapling";
+        const currentImg =
+          allocatedTree?.img ||
+          selectedTree?.img ||
+          "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format";
+        const speciesShort = currentSpecies.substring(0, 2).toUpperCase();
         const treeTag = `POA-${speciesShort}-${serialNum}`;
         const jitterLat = Number(
           (chosenCoords.lat + (Math.random() - 0.5) * 0.004).toFixed(4)
@@ -249,13 +266,11 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
             gpsCoordinates: { latitude: jitterLat, longitude: jitterLng },
             datePlanted: new Date().toISOString(),
             healthStatus: "Sapling Growing",
-            treeVarietyName: selectedTree?.name || "Indigenous Sapling",
+            treeVarietyName: currentSpecies,
             adopterName: name || user?.name || "Verified Adopter",
             adopterEmail: email || user?.email || "adopter@example.com",
             notes: noteText,
-            imageUrl:
-              selectedTree?.img ||
-              "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
+            imageUrl: currentImg,
           });
 
           if (createdTreeRes.data) {
@@ -268,13 +283,11 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
               formattedGps: `${jitterLat}° N, ${jitterLng}° E`,
               datePlanted: formattedDate,
               healthStatus: "Sapling Growing" as const,
-              treeVarietyName: selectedTree?.name || "Indigenous Sapling",
+              treeVarietyName: currentSpecies,
               adopterName: name || user?.name || "Verified Adopter",
               adopterEmail: email || user?.email || "adopter@example.com",
               notes: noteText,
-              imageUrl:
-                selectedTree?.img ||
-                "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
+              imageUrl: currentImg,
               lastInspectedAt: dateStr,
               isActive: true,
               createdAt: new Date().toISOString(),
@@ -292,13 +305,11 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
             formattedGps: `${jitterLat}° N, ${jitterLng}° E`,
             datePlanted: formattedDate,
             healthStatus: "Sapling Growing" as const,
-            treeVarietyName: selectedTree?.name || "Indigenous Sapling",
+            treeVarietyName: currentSpecies,
             adopterName: name || "Verified Adopter",
             adopterEmail: email || "adopter@example.com",
             notes: noteText,
-            imageUrl:
-              selectedTree?.img ||
-              "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
+            imageUrl: currentImg,
             lastInspectedAt: dateStr,
             isActive: true,
             createdAt: new Date().toISOString(),
@@ -437,11 +448,11 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
     }
 
     setIsProcessing(false);
-    setStep(7);
+    setStep(6);
   };
 
   const handleNext = async () => {
-    if (step < 6) {
+    if (step < 5) {
       setStep((s) => (s + 1) as PlantStep);
       return;
     }
@@ -571,15 +582,6 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
         {/* Modal Content Body */}
         <div className="p-6">
           {step === 1 && (
-            <Step1TreeSelection
-              selectedTree={selectedTree}
-              onSelectTree={(t) => setSelectedTree(t)}
-              trees={trees}
-              loading={loadingCatalog}
-            />
-          )}
-
-          {step === 2 && (
             <Step2Dedication
               selectedPlan={selectedPlan}
               onSelectPlan={(id) => setSelectedPlan(id)}
@@ -588,7 +590,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
             />
           )}
 
-          {step === 3 && (
+          {step === 2 && (
             <Step3Quantity
               qty={qty}
               onSetQty={(q) => setQty(q)}
@@ -597,7 +599,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
             />
           )}
 
-          {step === 4 && (
+          {step === 3 && (
             <Step4Location
               location={location}
               onSelectLocation={(loc) => setLocation(loc)}
@@ -605,7 +607,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
             />
           )}
 
-          {step === 5 && (
+          {step === 4 && (
             <Step5UserDetails
               name={name}
               setName={setName}
@@ -616,7 +618,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
             />
           )}
 
-          {step === 6 && (
+          {step === 5 && (
             <>
               {paymentError && (
                 <div className="mb-4 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center justify-between shadow-2xs">
@@ -642,7 +644,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
             </>
           )}
 
-          {step === 7 && (
+          {step === 6 && (
             <Step7Confirmation
               selectedTree={selectedTree}
               location={location}

@@ -4,6 +4,7 @@ import { GetTreeVarietiesUseCase } from '../../application/use-cases/tree-variet
 import { GetTreeVarietyByIdUseCase } from '../../application/use-cases/tree-varieties/get-tree-variety-by-id.use-case';
 import { UpdateTreeVarietyUseCase } from '../../application/use-cases/tree-varieties/update-tree-variety.use-case';
 import { DeleteTreeVarietyUseCase } from '../../application/use-cases/tree-varieties/delete-tree-variety.use-case';
+import { UpdateUniversalTreePriceUseCase } from '../../application/use-cases/tree-varieties/update-universal-tree-price.use-case';
 import { ApiResponse } from '../../shared/utils/api-response';
 
 export class TreeVarietyController {
@@ -12,7 +13,8 @@ export class TreeVarietyController {
     private readonly getTreeVarietiesUseCase: GetTreeVarietiesUseCase,
     private readonly getTreeVarietyByIdUseCase: GetTreeVarietyByIdUseCase,
     private readonly updateTreeVarietyUseCase: UpdateTreeVarietyUseCase,
-    private readonly deleteTreeVarietyUseCase: DeleteTreeVarietyUseCase
+    private readonly deleteTreeVarietyUseCase: DeleteTreeVarietyUseCase,
+    private readonly updateUniversalTreePriceUseCase: UpdateUniversalTreePriceUseCase
   ) {}
 
   public create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -48,6 +50,16 @@ export class TreeVarietyController {
       const { id } = req.params;
       const result = await this.updateTreeVarietyUseCase.execute(id as string, req.body);
       ApiResponse.success(res, result, 'Tree variety updated successfully');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public updateUniversalPrice = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const price = Number(req.body.price);
+      const result = await this.updateUniversalTreePriceUseCase.execute(price);
+      ApiResponse.success(res, result, 'Universal tree price updated for all trees successfully');
     } catch (error) {
       next(error);
     }

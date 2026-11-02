@@ -1,6 +1,7 @@
+import crypto from 'crypto';
 import { IPasswordResetOtpRepository } from '../../core/interfaces/password-reset-otp.repository.interface';
 import { PasswordResetOtp } from '../../core/entities/password-reset-otp.entity';
-import { PasswordResetOtpModel } from '../database/models/password-reset-otp.model';
+import { PasswordResetOtpModel, buildOtpIdQuery } from '../database/models/password-reset-otp.model';
 import { PasswordResetOtpMapper } from '../database/mappers/password-reset-otp.mapper';
 import { Nullable } from '../../shared/types';
 import { buildCaseInsensitiveEmailQuery, normalizeEmail } from '../../shared/utils/string.util';
@@ -8,11 +9,13 @@ import { buildCaseInsensitiveEmailQuery, normalizeEmail } from '../../shared/uti
 export class MongoPasswordResetOtpRepository implements IPasswordResetOtpRepository {
   public async createOtp(email: string, otp: string, expiresAt: Date): Promise<PasswordResetOtp> {
     const normalizedEmail = normalizeEmail(email);
+    const id = `otp_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
 
     // Invalidate any existing unused OTPs for this email address (case-insensitively)
     await PasswordResetOtpModel.deleteMany(buildCaseInsensitiveEmailQuery(email)).exec();
 
     const doc = await PasswordResetOtpModel.create({
+      otpId: id,
       email: normalizedEmail,
       otp: otp.trim(),
       expiresAt,
@@ -36,7 +39,7 @@ export class MongoPasswordResetOtpRepository implements IPasswordResetOtpReposit
   }
 
   public async findById(id: string): Promise<Nullable<PasswordResetOtp>> {
-    const doc = await PasswordResetOtpModel.findById(id).exec();
+    const doc = await PasswordResetOtpModel.findOne(buildOtpIdQuery(id)).exec();
     if (!doc) return null;
     return PasswordResetOtpMapper.toDomain(doc);
   }
@@ -57,8 +60,8 @@ export class MongoPasswordResetOtpRepository implements IPasswordResetOtpReposit
       updatePayload.expiresAt = newExpiresAt;
     }
 
-    const result = await PasswordResetOtpModel.findByIdAndUpdate(
-      id,
+    const result = await PasswordResetOtpModel.findOneAndUpdate(
+      buildOtpIdQuery(id),
       { $set: updatePayload }
     ).exec();
 
@@ -66,8 +69,8 @@ export class MongoPasswordResetOtpRepository implements IPasswordResetOtpReposit
   }
 
   public async incrementAttempts(id: string): Promise<number> {
-    const updated = await PasswordResetOtpModel.findByIdAndUpdate(
-      id,
+    const updated = await PasswordResetOtpModel.findOneAndUpdate(
+      buildOtpIdQuery(id),
       { $inc: { attempts: 1 } },
       { returnDocument: 'after' }
     ).exec();
@@ -77,7 +80,7 @@ export class MongoPasswordResetOtpRepository implements IPasswordResetOtpReposit
 
   public async markAsUsed(id: string): Promise<boolean> {
     const result = await PasswordResetOtpModel.findOneAndUpdate(
-      { _id: id, used: false },
+      { ...buildOtpIdQuery(id), used: false },
       { $set: { used: true } }
     ).exec();
 
@@ -85,7 +88,7 @@ export class MongoPasswordResetOtpRepository implements IPasswordResetOtpReposit
   }
 
   public async deleteById(id: string): Promise<boolean> {
-    const result = await PasswordResetOtpModel.findByIdAndDelete(id).exec();
+    const result = await PasswordResetOtpModel.findOneAndDelete(buildOtpIdQuery(id)).exec();
     return !!result;
   }
 
