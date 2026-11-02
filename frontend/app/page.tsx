@@ -6,7 +6,7 @@ import { Nav, Footer } from "@/components/layout";
 import {
   Hero,
   HowItWorks,
-  ExploreTrees,
+  AdoptionPlans,
   ExperienceSection,
   ImpactSection,
   CertificateSection,
@@ -62,6 +62,7 @@ export default function App() {
   const user = useHydratedStore(useAuthStore, (s) => s.user);
   const [activeSection, setActiveSection] = useState<Section>("home");
   const [plantOpen, setPlantOpen] = useState(false);
+  const [initialPlanId, setInitialPlanId] = useState<string | null>(null);
   const [cmsContent, setCmsContent] = useState<LandingPageContent>(DEFAULT_LANDING_PAGE_CONTENT);
 
   // Live DB states
@@ -207,15 +208,20 @@ export default function App() {
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
+  const handleOpenPlant = (planId?: string) => {
+    setInitialPlanId(planId ?? null);
+    setPlantOpen(true);
+  };
+
   const handleNav = (s: Section) => {
     setActiveSection(s);
     if (s === "plant") {
-      setPlantOpen(true);
+      handleOpenPlant();
       return;
     }
     const map: Partial<Record<Section, string>> = {
       "how-it-works": "how-it-works",
-      trees: "trees",
+      trees: "plans",
       experiences: "experiences",
       impact: "impact",
       home: "home",
@@ -229,14 +235,14 @@ export default function App() {
       <Nav
         active={activeSection}
         setActive={handleNav}
-        openPlant={() => setPlantOpen(true)}
+        openPlant={() => handleOpenPlant()}
       />
 
       <main>
         {cmsContent.hero?.isEnabled !== false && (
           <div id="home">
             <Hero
-              openPlant={() => setPlantOpen(true)}
+              openPlant={() => handleOpenPlant()}
               goImpact={() => scrollTo("impact")}
               content={cmsContent.hero}
               liveStats={heroLiveStats}
@@ -248,9 +254,9 @@ export default function App() {
           <HowItWorks content={cmsContent.howItWorks} />
         )}
 
-        <ExploreTrees openPlant={() => setPlantOpen(true)} />
+        <AdoptionPlans openPlant={(planId) => handleOpenPlant(planId)} />
 
-        <ExperienceSection onScheduleVisit={() => setPlantOpen(true)} />
+        <ExperienceSection onScheduleVisit={() => handleOpenPlant()} />
 
         {cmsContent.impact?.isEnabled !== false && (
           <ImpactSection
@@ -259,7 +265,6 @@ export default function App() {
             liveProjects={liveProjects}
           />
         )}
-
 
         {cmsContent.certificate?.isEnabled !== false && (
           <CertificateSection
@@ -270,11 +275,19 @@ export default function App() {
       </main>
 
       <Footer
-        openPlant={() => setPlantOpen(true)}
+        openPlant={() => handleOpenPlant()}
         content={cmsContent.footer}
       />
 
-      {plantOpen && <PlantFlow onClose={() => setPlantOpen(false)} />}
+      {plantOpen && (
+        <PlantFlow
+          initialPlanId={initialPlanId}
+          onClose={() => {
+            setPlantOpen(false);
+            setInitialPlanId(null);
+          }}
+        />
+      )}
     </div>
   );
 }

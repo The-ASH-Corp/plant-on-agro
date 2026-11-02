@@ -61,14 +61,15 @@ const LOCATION_COORDINATES: Record<
 
 export interface PlantFlowProps {
   onClose: () => void;
+  initialPlanId?: string | null;
 }
 
-export function PlantFlowModal({ onClose }: PlantFlowProps) {
+export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
   const user = useHydratedStore(useAuthStore, (s) => s.user);
 
   const [step, setStep] = useState<PlantStep>(1);
   const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(initialPlanId ?? null);
   const [qty, setQty] = useState(1);
   const [location, setLocation] = useState<string | null>(null);
   const [name, setName] = useState("");
