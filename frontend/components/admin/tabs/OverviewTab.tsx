@@ -113,16 +113,16 @@ export function OverviewTab({
         </div>
       )}
       {/* Executive Welcome Hero Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#173324] via-[#1c402d] to-[#0f241a] text-white p-6 sm:p-8 shadow-lg border border-emerald-900/30">
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold mb-3 border border-emerald-400/30">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#173324] via-[#1c402d] to-[#0f241a] text-white p-5 sm:p-8 3xl:p-10 4k:p-12 shadow-lg border border-emerald-900/30">
+        <div className="relative z-10 max-w-2xl 3xl:max-w-4xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs 3xl:text-sm font-semibold mb-3 border border-emerald-400/30">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span>Plantation Operations Active</span>
           </div>
-          <h1 style={{ fontFamily: "var(--font-display)" }} className="text-2xl sm:text-4xl font-normal leading-tight">
+          <h1 style={{ fontFamily: "var(--font-display)" }} className="text-2xl sm:text-4xl 3xl:text-5xl 4k:text-6xl font-normal leading-tight">
             Plantation Operations Matrix
           </h1>
-          <p className="text-xs sm:text-sm text-emerald-100/80 mt-2 leading-relaxed">
+          <p className="text-xs sm:text-sm 3xl:text-base text-emerald-100/80 mt-2 leading-relaxed">
             Real-time tree adoption audits, certified carbon offset verification, reserve monitoring, and botanical nursery stock.
           </p>
         </div>
@@ -133,25 +133,25 @@ export function OverviewTab({
       </div>
 
       {/* 4 Primary KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        <div className="p-5 rounded-2xl bg-white border border-[#e2eae5] shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 4k:grid-cols-4 gap-4 sm:gap-5 3xl:gap-7">
+        <div className="p-5 3xl:p-7 4k:p-8 rounded-2xl bg-white border border-[#e2eae5] shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="flex items-start justify-between">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#7a8a80]">
+              <span className="text-[11px] 3xl:text-xs font-bold uppercase tracking-wider text-[#7a8a80]">
                 Total Trees Planted
               </span>
-              <h3 className="text-3xl font-extrabold text-[#173324] mt-1 tracking-tight">
+              <h3 className="text-3xl 3xl:text-4xl 4k:text-5xl font-extrabold text-[#173324] mt-1 tracking-tight">
                 {totalTreesCount.toLocaleString()}
               </h3>
             </div>
-            <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-[#1b7a43] flex items-center justify-center text-xl border border-emerald-100">
+            <div className="w-11 h-11 3xl:w-14 3xl:h-14 rounded-2xl bg-emerald-50 text-[#1b7a43] flex items-center justify-center text-xl 3xl:text-2xl border border-emerald-100">
               🌳
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-[#f0f4f1] flex items-center justify-between text-xs">
+          <div className="mt-4 pt-3 border-t border-[#f0f4f1] flex items-center justify-between text-xs 3xl:text-sm">
             <span className="text-emerald-600 font-semibold flex items-center gap-1">
               <span>● Live Synced</span>
-              <span className="text-[#7a8a80] font-normal">from DB instances</span>
+              <span className="text-[#7a8a80] font-normal">from DB</span>
             </span>
             <button onClick={() => setActiveTab("instances")} className="text-[#1b7a43] font-semibold hover:underline cursor-pointer">
               Trees →
@@ -159,21 +159,21 @@ export function OverviewTab({
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-[#e2eae5] shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div className="p-5 3xl:p-7 4k:p-8 rounded-2xl bg-white border border-[#e2eae5] shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="flex items-start justify-between">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#7a8a80]">
+              <span className="text-[11px] 3xl:text-xs font-bold uppercase tracking-wider text-[#7a8a80]">
                 Active Bio-Reserves
               </span>
-              <h3 className="text-3xl font-extrabold text-[#173324] mt-1 tracking-tight">
+              <h3 className="text-3xl 3xl:text-4xl 4k:text-5xl font-extrabold text-[#173324] mt-1 tracking-tight">
                 {locations.length} <span className="text-base font-medium text-[#7a8a80]">Zones</span>
               </h3>
             </div>
-            <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-[#1b7a43] flex items-center justify-center text-xl border border-emerald-100">
+            <div className="w-11 h-11 3xl:w-14 3xl:h-14 rounded-2xl bg-emerald-50 text-[#1b7a43] flex items-center justify-center text-xl 3xl:text-2xl border border-emerald-100">
               📍
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-[#f0f4f1] flex items-center justify-between text-xs">
+          <div className="mt-4 pt-3 border-t border-[#f0f4f1] flex items-center justify-between text-xs 3xl:text-sm">
             <span className="text-emerald-600 font-semibold">{totalHectares} Hectares Active</span>
             <button onClick={() => setActiveTab("locations")} className="text-[#1b7a43] font-semibold hover:underline cursor-pointer">
               Reserves →
@@ -181,21 +181,21 @@ export function OverviewTab({
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-[#e2eae5] shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div className="p-5 3xl:p-7 4k:p-8 rounded-2xl bg-white border border-[#e2eae5] shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="flex items-start justify-between">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#7a8a80]">
+              <span className="text-[11px] 3xl:text-xs font-bold uppercase tracking-wider text-[#7a8a80]">
                 CO2 Offset Ledger
               </span>
-              <h3 className="text-3xl font-extrabold text-[#173324] mt-1 tracking-tight">
+              <h3 className="text-3xl 3xl:text-4xl 4k:text-5xl font-extrabold text-[#173324] mt-1 tracking-tight">
                 {totalCo2Tons} <span className="text-base font-medium text-[#7a8a80]">Tons</span>
               </h3>
             </div>
-            <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-[#1b7a43] flex items-center justify-center text-xl border border-emerald-100">
+            <div className="w-11 h-11 3xl:w-14 3xl:h-14 rounded-2xl bg-emerald-50 text-[#1b7a43] flex items-center justify-center text-xl 3xl:text-2xl border border-emerald-100">
               ☁️
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-[#f0f4f1] flex items-center justify-between text-xs">
+          <div className="mt-4 pt-3 border-t border-[#f0f4f1] flex items-center justify-between text-xs 3xl:text-sm">
             <span className="text-emerald-600 font-semibold">Polygon Verified</span>
             <button onClick={() => setActiveTab("orders")} className="text-[#1b7a43] font-semibold hover:underline cursor-pointer">
               Orders →
@@ -203,21 +203,21 @@ export function OverviewTab({
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-[#e2eae5] shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div className="p-5 3xl:p-7 4k:p-8 rounded-2xl bg-white border border-[#e2eae5] shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="flex items-start justify-between">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#7a8a80]">
+              <span className="text-[11px] 3xl:text-xs font-bold uppercase tracking-wider text-[#7a8a80]">
                 Gross Adoptions
               </span>
-              <h3 className="text-3xl font-extrabold text-[#173324] mt-1 tracking-tight">
+              <h3 className="text-3xl 3xl:text-4xl 4k:text-5xl font-extrabold text-[#173324] mt-1 tracking-tight">
                 {formattedGrossRevenue}
               </h3>
             </div>
-            <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-[#1b7a43] flex items-center justify-center text-xl border border-emerald-100">
+            <div className="w-11 h-11 3xl:w-14 3xl:h-14 rounded-2xl bg-emerald-50 text-[#1b7a43] flex items-center justify-center text-xl 3xl:text-2xl border border-emerald-100">
               💼
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-[#f0f4f1] flex items-center justify-between text-xs">
+          <div className="mt-4 pt-3 border-t border-[#f0f4f1] flex items-center justify-between text-xs 3xl:text-sm">
             <span className="text-emerald-600 font-semibold">{survivalRate} Survival</span>
             <button onClick={() => setActiveTab("orders")} className="text-[#1b7a43] font-semibold hover:underline cursor-pointer">
               Orders →
@@ -227,60 +227,60 @@ export function OverviewTab({
       </div>
 
       {/* Real-time Environmental Telemetry Grid */}
-      <div className="p-6 rounded-3xl bg-white border border-[#e2eae5] shadow-xs space-y-4">
-        <div className="flex items-center justify-between">
+      <div className="p-5 sm:p-6 3xl:p-8 rounded-3xl bg-white border border-[#e2eae5] shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h2 style={{ fontFamily: "var(--font-display)" }} className="text-lg font-semibold text-[#173324]">
+            <h2 style={{ fontFamily: "var(--font-display)" }} className="text-lg 3xl:text-xl font-semibold text-[#173324]">
               Living Bio-Reserve Environmental Health
             </h2>
-            <p className="text-xs text-[#73877b]">Automated multispectral reserve canopy and soil metrics</p>
+            <p className="text-xs 3xl:text-sm text-[#73877b]">Automated multispectral reserve canopy and soil metrics</p>
           </div>
-          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 w-fit">
             🟢 Optimal Growing Conditions
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
-          <div className="p-4 rounded-2xl bg-[#f7faf8] border border-[#e5ebe7]">
-            <span className="text-[11px] text-[#73877b] font-bold uppercase tracking-wider block">NDVI Canopy Index</span>
-            <span className="text-2xl font-bold text-[#1b7a43] mt-1 block">{avgNdvi} / 1.0</span>
-            <span className="text-[10px] text-emerald-600 font-semibold">Dense Chlorophyll Canopy</span>
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 3xl:gap-6 pt-2">
+          <div className="p-4 3xl:p-5 rounded-2xl bg-[#f7faf8] border border-[#e5ebe7]">
+            <span className="text-[11px] 3xl:text-xs text-[#73877b] font-bold uppercase tracking-wider block">NDVI Canopy Index</span>
+            <span className="text-2xl 3xl:text-3xl font-bold text-[#1b7a43] mt-1 block">{avgNdvi} / 1.0</span>
+            <span className="text-[10px] 3xl:text-[11px] text-emerald-600 font-semibold">Dense Chlorophyll Canopy</span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#f7faf8] border border-[#e5ebe7]">
-            <span className="text-[11px] text-[#73877b] font-bold uppercase tracking-wider block">Soil Moisture Avg</span>
-            <span className="text-2xl font-bold text-[#1b7a43] mt-1 block">{soilMoisture}</span>
-            <span className="text-[10px] text-emerald-600 font-semibold">Ideal Root Hydration</span>
+          <div className="p-4 3xl:p-5 rounded-2xl bg-[#f7faf8] border border-[#e5ebe7]">
+            <span className="text-[11px] 3xl:text-xs text-[#73877b] font-bold uppercase tracking-wider block">Soil Moisture Avg</span>
+            <span className="text-2xl 3xl:text-3xl font-bold text-[#1b7a43] mt-1 block">{soilMoisture}</span>
+            <span className="text-[10px] 3xl:text-[11px] text-emerald-600 font-semibold">Ideal Root Hydration</span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#f7faf8] border border-[#e5ebe7]">
-            <span className="text-[11px] text-[#73877b] font-bold uppercase tracking-wider block">Mean Soil pH</span>
-            <span className="text-2xl font-bold text-[#1b7a43] mt-1 block">6.8</span>
-            <span className="text-[10px] text-emerald-600 font-semibold">Neutral Volcanic Loam</span>
+          <div className="p-4 3xl:p-5 rounded-2xl bg-[#f7faf8] border border-[#e5ebe7]">
+            <span className="text-[11px] 3xl:text-xs text-[#73877b] font-bold uppercase tracking-wider block">Mean Soil pH</span>
+            <span className="text-2xl 3xl:text-3xl font-bold text-[#1b7a43] mt-1 block">6.8</span>
+            <span className="text-[10px] 3xl:text-[11px] text-emerald-600 font-semibold">Neutral Volcanic Loam</span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#f7faf8] border border-[#e5ebe7]">
-            <span className="text-[11px] text-[#73877b] font-bold uppercase tracking-wider block">Sunlight Exposure</span>
-            <span className="text-2xl font-bold text-[#1b7a43] mt-1 block">{sunlightHours}</span>
-            <span className="text-[10px] text-emerald-600 font-semibold">Healthy Photoperiod</span>
+          <div className="p-4 3xl:p-5 rounded-2xl bg-[#f7faf8] border border-[#e5ebe7]">
+            <span className="text-[11px] 3xl:text-xs text-[#73877b] font-bold uppercase tracking-wider block">Sunlight Exposure</span>
+            <span className="text-2xl 3xl:text-3xl font-bold text-[#1b7a43] mt-1 block">{sunlightHours}</span>
+            <span className="text-[10px] 3xl:text-[11px] text-emerald-600 font-semibold">Healthy Photoperiod</span>
           </div>
         </div>
       </div>
 
       {/* Split Content: Recent Verified Orders & Reserve Allocation */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* 2 Cols: Recent Orders */}
-        <div className="lg:col-span-2 p-6 rounded-3xl bg-white border border-[#e2eae5] shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
+      <div className="grid grid-cols-1 lg:grid-cols-3 3xl:grid-cols-4 gap-6 3xl:gap-8">
+        {/* 2 Cols (or 3 on 4k): Recent Orders */}
+        <div className="lg:col-span-2 3xl:col-span-3 p-5 sm:p-6 3xl:p-8 rounded-3xl bg-white border border-[#e2eae5] shadow-xs space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h3 style={{ fontFamily: "var(--font-display)" }} className="text-base font-semibold text-[#173324]">
+              <h3 style={{ fontFamily: "var(--font-display)" }} className="text-base 3xl:text-lg font-semibold text-[#173324]">
                 Recent Adoption Audits
               </h3>
-              <p className="text-xs text-[#73877b]">Live buyer orders tagged with coordinates</p>
+              <p className="text-xs 3xl:text-sm text-[#73877b]">Live buyer orders tagged with coordinates</p>
             </div>
             <button
               onClick={() => setActiveTab("orders")}
-              className="text-xs font-semibold text-[#1b7a43] hover:underline cursor-pointer"
+              className="text-xs 3xl:text-sm font-semibold text-[#1b7a43] hover:underline cursor-pointer w-fit"
             >
               View All Orders ({orders.length}) →
             </button>
@@ -291,34 +291,34 @@ export function OverviewTab({
               <div
                 key={order.id}
                 onClick={() => onSelectOrder(order)}
-                className="p-3.5 rounded-2xl bg-[#f8faf8] border border-[#e5ebe7] flex items-center justify-between hover:bg-[#f0f5f2] transition-colors cursor-pointer"
+                className="p-3.5 3xl:p-4 rounded-2xl bg-[#f8faf8] border border-[#e5ebe7] flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#f0f5f2] transition-colors cursor-pointer"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100/60 text-[#1b7a43] flex items-center justify-center font-bold text-base">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 3xl:w-12 3xl:h-12 rounded-xl bg-emerald-100/60 text-[#1b7a43] flex items-center justify-center font-bold text-base 3xl:text-lg shrink-0">
                     🌳
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-[#173324]">{order.treeSpecies}</span>
-                      <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs 3xl:text-sm font-bold text-[#173324]">{order.treeSpecies}</span>
+                      <span className="text-[10px] 3xl:text-xs font-mono font-semibold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
                         {order.orderNumber}
                       </span>
                       {(order.isRead === false || order.status === "New Request") && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-500 text-white animate-pulse">
+                        <span className="text-[9px] 3xl:text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-500 text-white animate-pulse">
                           NEW
                         </span>
                       )}
                     </div>
-                    <span className="text-[11px] text-[#73877b]">
+                    <span className="text-[11px] 3xl:text-xs text-[#73877b] truncate block mt-0.5">
                       Adopted by {order.adopterName} • {order.reserveName}
                     </span>
                   </div>
                 </div>
 
-                <div className="text-right">
-                  <span className="text-xs font-bold text-[#173324] block">₹{order.totalAmount}</span>
+                <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-1 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100">
+                  <span className="text-xs 3xl:text-sm font-bold text-[#173324] block">₹{order.totalAmount}</span>
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mt-0.5 ${
+                    className={`text-[10px] 3xl:text-xs font-bold px-2 py-0.5 rounded-full inline-block ${
                       order.status === "New Request"
                         ? "bg-amber-100 text-amber-800 border border-amber-300"
                         : order.status === "Verified & Tagged"
@@ -337,12 +337,12 @@ export function OverviewTab({
         </div>
 
         {/* 1 Col: Reserve Capacity Allocation */}
-        <div className="p-6 rounded-3xl bg-white border border-[#e2eae5] shadow-xs space-y-4">
+        <div className="p-5 sm:p-6 3xl:p-8 rounded-3xl bg-white border border-[#e2eae5] shadow-xs space-y-4">
           <div>
-            <h3 style={{ fontFamily: "var(--font-display)" }} className="text-base font-semibold text-[#173324]">
+            <h3 style={{ fontFamily: "var(--font-display)" }} className="text-base 3xl:text-lg font-semibold text-[#173324]">
               Sanctuary Fill Status
             </h3>
-            <p className="text-xs text-[#73877b]">Trees planted vs capacity</p>
+            <p className="text-xs 3xl:text-sm text-[#73877b]">Trees planted vs capacity</p>
           </div>
 
           <div className="space-y-4">
@@ -350,9 +350,9 @@ export function OverviewTab({
               const pct = Math.round((loc.treesPlanted / loc.capacity) * 100);
               return (
                 <div key={loc.id} className="space-y-1.5">
-                  <div className="flex justify-between text-xs">
+                  <div className="flex justify-between text-xs 3xl:text-sm">
                     <span className="font-semibold text-[#173324] truncate max-w-[150px]">{loc.name}</span>
-                    <span className="text-[#73877b] font-mono text-[11px]">
+                    <span className="text-[#73877b] font-mono text-[11px] 3xl:text-xs">
                       {loc.treesPlanted.toLocaleString()} / {loc.capacity.toLocaleString()} ({pct}%)
                     </span>
                   </div>
@@ -369,7 +369,7 @@ export function OverviewTab({
 
           <button
             onClick={() => setActiveTab("locations")}
-            className="w-full mt-2 py-2 rounded-xl border border-emerald-200 text-xs font-semibold text-[#1b7a43] bg-emerald-50 hover:bg-emerald-100 transition-colors cursor-pointer text-center block"
+            className="w-full mt-2 py-2 3xl:py-2.5 rounded-xl border border-emerald-200 text-xs 3xl:text-sm font-semibold text-[#1b7a43] bg-emerald-50 hover:bg-emerald-100 transition-colors cursor-pointer text-center block"
           >
             Manage All {locations.length} Reserves →
           </button>

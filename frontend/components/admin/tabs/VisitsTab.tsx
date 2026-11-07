@@ -196,17 +196,17 @@ export function VisitsTab({ showToast }: VisitsTabProps) {
             </div>
 
             {/* Search Input */}
-            <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
+            <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 w-full sm:w-auto">
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by adopter, ref, reserve..."
-                className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs focus:outline-none focus:border-[#2d6a4f] w-64"
+                className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs focus:outline-none focus:border-[#2d6a4f] flex-1 sm:w-64 3xl:w-80"
               />
               <button
                 type="submit"
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 cursor-pointer"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 cursor-pointer shrink-0"
               >
                 Search
               </button>

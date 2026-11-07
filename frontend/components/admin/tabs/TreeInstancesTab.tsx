@@ -245,36 +245,36 @@ export function TreeInstancesTab({
       </div>
 
       {/* Quick Status KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-        <div className="p-4 rounded-2xl bg-white border border-[#e2eae5] shadow-xs">
-          <span className="text-[10px] text-[#73877b] font-bold uppercase tracking-wider block">
+      <div className="grid grid-cols-2 lg:grid-cols-4 4k:grid-cols-4 gap-3.5 3xl:gap-5">
+        <div className="p-4 3xl:p-6 rounded-2xl bg-white border border-[#e2eae5] shadow-xs">
+          <span className="text-[10px] 3xl:text-xs text-[#73877b] font-bold uppercase tracking-wider block">
             Total Tagged Trees
           </span>
-          <span className="text-2xl font-bold text-[#173324] mt-1 block">
+          <span className="text-2xl 3xl:text-3xl font-bold text-[#173324] mt-1 block">
             {stats.total.toLocaleString()}
           </span>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-[#e2eae5] shadow-xs">
-          <span className="text-[10px] text-emerald-700 font-bold uppercase tracking-wider block">
+        <div className="p-4 3xl:p-6 rounded-2xl bg-white border border-[#e2eae5] shadow-xs">
+          <span className="text-[10px] 3xl:text-xs text-emerald-700 font-bold uppercase tracking-wider block">
             Thriving & Healthy
           </span>
-          <span className="text-2xl font-bold text-emerald-800 mt-1 block">
+          <span className="text-2xl 3xl:text-3xl font-bold text-emerald-800 mt-1 block">
             {stats.thrivingOrHealthy.toLocaleString()}
           </span>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-[#e2eae5] shadow-xs">
-          <span className="text-[10px] text-teal-700 font-bold uppercase tracking-wider block">
+        <div className="p-4 3xl:p-6 rounded-2xl bg-white border border-[#e2eae5] shadow-xs">
+          <span className="text-[10px] 3xl:text-xs text-teal-700 font-bold uppercase tracking-wider block">
             Saplings Growing
           </span>
-          <span className="text-2xl font-bold text-teal-800 mt-1 block">
+          <span className="text-2xl 3xl:text-3xl font-bold text-teal-800 mt-1 block">
             {stats.saplings.toLocaleString()}
           </span>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-[#e2eae5] shadow-xs">
-          <span className="text-[10px] text-amber-700 font-bold uppercase tracking-wider block">
+        <div className="p-4 3xl:p-6 rounded-2xl bg-white border border-[#e2eae5] shadow-xs">
+          <span className="text-[10px] 3xl:text-xs text-amber-700 font-bold uppercase tracking-wider block">
             Attention Needed
           </span>
-          <span className="text-2xl font-bold text-amber-800 mt-1 block">
+          <span className="text-2xl 3xl:text-3xl font-bold text-amber-800 mt-1 block">
             {stats.attentionNeeded.toLocaleString()}
           </span>
         </div>
@@ -471,7 +471,7 @@ export function TreeInstancesTab({
         </div>
       ) : (
         /* Card View */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-4 4k:grid-cols-5 gap-5 3xl:gap-7">
           {displayInstances.map((item) => {
             const badge = HEALTH_BADGES[item.healthStatus] || {
               label: item.healthStatus,

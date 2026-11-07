@@ -79,13 +79,13 @@ export function AdminSidebar({
   return (
     <>
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-b from-[#0a1c12] via-[#0f291a] to-[#07140c] text-white flex flex-col justify-between border-r border-emerald-900/40 shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 3xl:w-80 4k:w-96 max-w-[85vw] bg-gradient-to-b from-[#0a1c12] via-[#0f291a] to-[#07140c] text-white flex flex-col justify-between border-r border-emerald-900/40 shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full overflow-y-auto">
           {/* Brand Header */}
-          <div className="p-5 border-b border-white/10 flex items-center justify-between">
+          <div className="p-4 sm:p-5 3xl:p-6 border-b border-white/10 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2.5 group">
               <Image
                 src={Logo}
@@ -93,9 +93,9 @@ export function AdminSidebar({
                 width={200}
                 height={200}
                 priority
-                className="w-auto h-10 sm:h-12 object-contain"
+                className="w-auto h-10 sm:h-12 3xl:h-14 4k:h-16 object-contain"
               />
-              <span className="text-[10px] px-2 py-0.5 rounded font-mono uppercase font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+              <span className="text-[10px] 3xl:text-xs px-2 py-0.5 rounded font-mono uppercase font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
                 Admin
               </span>
             </Link>
@@ -110,12 +110,12 @@ export function AdminSidebar({
           </div>
 
           {/* Navigation Section */}
-          <div className="px-3 py-4 flex-1 space-y-6">
+          <div className="px-3 3xl:px-4 py-4 3xl:py-6 flex-1 space-y-6 3xl:space-y-8">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400/60 px-3 block mb-2">
+              <span className="text-[10px] 3xl:text-xs font-bold uppercase tracking-wider text-emerald-400/60 px-3 block mb-2">
                 Operations Management
               </span>
-              <nav className="space-y-1">
+              <nav className="space-y-1 3xl:space-y-1.5">
                 {navItems.map((item) => {
                   const isActive = activeTab === item.id;
                   return (
@@ -125,19 +125,19 @@ export function AdminSidebar({
                         setActiveTab(item.id);
                         setSidebarOpen(false);
                       }}
-                      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer text-left ${
+                      className={`w-full flex items-center justify-between px-3.5 3xl:px-4 py-2.5 3xl:py-3.5 4k:py-4 rounded-xl text-xs 3xl:text-sm 4k:text-base font-semibold transition-all duration-150 cursor-pointer text-left ${
                         isActive
                           ? "bg-gradient-to-r from-[#1b7a43] to-[#2d6a4f] text-white shadow-lg shadow-emerald-900/50 border border-emerald-400/40 font-bold"
                           : "text-white/75 hover:text-white hover:bg-white/5"
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-base">{item.icon}</span>
+                        <span className="text-base 3xl:text-lg 4k:text-xl">{item.icon}</span>
                         <span>{item.label}</span>
                       </div>
                       {typeof item.count === "number" && (
                         <span
-                          className={`text-[11px] px-2 py-0.5 rounded-full font-mono ${
+                          className={`text-[11px] 3xl:text-xs px-2 py-0.5 rounded-full font-mono ${
                             isActive ? "bg-white/20 text-white font-bold" : "bg-white/10 text-white/70"
                           }`}
                         >
@@ -145,7 +145,7 @@ export function AdminSidebar({
                         </span>
                       )}
                       {item.badge && (
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                        <span className="text-[9px] 3xl:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
                           {item.badge}
                         </span>
                       )}
@@ -157,32 +157,32 @@ export function AdminSidebar({
 
             {/* Quick Actions in Sidebar */}
             <div className="pt-2 border-t border-white/10">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400/60 px-3 block mb-2">
+              <span className="text-[10px] 3xl:text-xs font-bold uppercase tracking-wider text-emerald-400/60 px-3 block mb-2">
                 Fast Configuration
               </span>
               <div className="space-y-1 px-1">
                 <button
                   onClick={onOpenAddTree}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 3xl:py-2.5 rounded-xl text-xs 3xl:text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
                 >
                   <span className="text-emerald-400">+</span> Add Tree Species
                 </button>
                 <button
                   onClick={onOpenAddPlan}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 3xl:py-2.5 rounded-xl text-xs 3xl:text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
                 >
                   <span className="text-emerald-400">+</span> Add Adoption Plan
                 </button>
                 <button
                   onClick={onOpenAddLocation}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 3xl:py-2.5 rounded-xl text-xs 3xl:text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
                 >
                   <span className="text-emerald-400">+</span> Geotag Reserve
                 </button>
                 {onOpenAddInstance && (
                   <button
                     onClick={onOpenAddInstance}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 3xl:py-2.5 rounded-xl text-xs 3xl:text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
                   >
                     <span className="text-emerald-400">+</span> Tag & Plant Sapling
                   </button>
@@ -190,7 +190,7 @@ export function AdminSidebar({
                 {onOpenIssueCertificate && (
                   <button
                     onClick={onOpenIssueCertificate}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 3xl:py-2.5 rounded-xl text-xs 3xl:text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
                   >
                     <span className="text-emerald-400">+</span> Issue Certificate Deed
                   </button>
@@ -200,15 +200,15 @@ export function AdminSidebar({
           </div>
 
           {/* User Profile Footer Card */}
-          <div className="p-4 border-t border-white/10 bg-black/20">
+          <div className="p-4 3xl:p-5 border-t border-white/10 bg-black/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#1b7a43] to-[#52b788] text-white flex items-center justify-center font-bold text-xs shadow-inner border border-emerald-300/40">
+                <div className="w-9 h-9 3xl:w-11 3xl:h-11 rounded-xl bg-gradient-to-tr from-[#1b7a43] to-[#52b788] text-white flex items-center justify-center font-bold text-xs 3xl:text-sm shadow-inner border border-emerald-300/40">
                   AD
                 </div>
                 <div className="flex flex-col text-left">
-                  <span className="text-xs font-bold text-white truncate max-w-[120px]">{userName}</span>
-                  <span className="text-[10px] text-emerald-300/80 uppercase font-semibold">Super Administrator</span>
+                  <span className="text-xs 3xl:text-sm font-bold text-white truncate max-w-[120px] 3xl:max-w-[150px]">{userName}</span>
+                  <span className="text-[10px] 3xl:text-[11px] text-emerald-300/80 uppercase font-semibold">Super Administrator</span>
                 </div>
               </div>
 
@@ -216,14 +216,14 @@ export function AdminSidebar({
                 <Link
                   href="/"
                   title="View Storefront"
-                  className="p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors text-xs"
+                  className="p-1.5 3xl:p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors text-xs 3xl:text-sm"
                 >
                   🏪
                 </Link>
                 <button
                   onClick={onLogout}
                   title="Sign out"
-                  className="p-1.5 rounded-lg text-red-300 hover:text-red-200 hover:bg-white/10 transition-colors text-xs cursor-pointer"
+                  className="p-1.5 3xl:p-2 rounded-lg text-red-300 hover:text-red-200 hover:bg-white/10 transition-colors text-xs 3xl:text-sm cursor-pointer"
                 >
                   ⎋
                 </button>

@@ -1,21 +1,25 @@
 import { z } from 'zod';
 
-export const createUserSchema = z.object({
-  name: z.string().trim().min(2, 'Name must have at least 2 characters').max(50),
-  email: z.string().trim().email('Invalid email address format'),
-  role: z.enum(['admin', 'buyer']).optional(),
-});
+export const createUserSchema = z
+  .object({
+    name: z.string().trim().min(2, 'Name must have at least 2 characters').max(50),
+    email: z.string().trim().toLowerCase().email('Invalid email address format'),
+    role: z.enum(['admin', 'buyer']).optional(),
+  })
+  .strict();
 
 export const getUserByIdSchema = z.object({
   id: z.string().min(1, 'User ID is required'),
 });
 
-export const updateUserSchema = z.object({
-  name: z.string().trim().min(2, 'Name must have at least 2 characters').max(50).optional(),
-  email: z.string().trim().email('Invalid email address format').optional(),
-  role: z.enum(['admin', 'buyer']).optional(),
-  isActive: z.boolean().optional(),
-});
+export const updateUserSchema = z
+  .object({
+    name: z.string().trim().min(2, 'Name must have at least 2 characters').max(50).optional(),
+    email: z.string().trim().toLowerCase().email('Invalid email address format').optional(),
+    role: z.enum(['admin', 'buyer']).optional(),
+    isActive: z.boolean().optional(),
+  })
+  .strict();
 
 export const queryUsersSchema = z.object({
   limit: z.coerce.number().min(1).max(100).optional().default(10),

@@ -20,7 +20,7 @@ router.get(
   Container.userController.getAll
 );
 
-// GET /api/v1/users/:id - Get user by ID (Authenticated)
+// GET /api/v1/users/:id - Get user by ID (Authenticated: Admin or account owner)
 router.get(
   '/:id',
   authenticate,
@@ -28,14 +28,16 @@ router.get(
   Container.userController.getById
 );
 
-// POST /api/v1/users - Create user
+// POST /api/v1/users - Create user (Admin only)
 router.post(
   '/',
+  authenticate,
+  authorize('admin'),
   validateRequest({ body: createUserSchema }),
   Container.userController.create
 );
 
-// PUT /api/v1/users/:id - Update user (Authenticated)
+// PUT /api/v1/users/:id - Update user (Authenticated: Admin or account owner)
 router.put(
   '/:id',
   authenticate,
