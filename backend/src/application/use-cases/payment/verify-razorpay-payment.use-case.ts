@@ -52,7 +52,7 @@ export class VerifyRazorpayPaymentUseCase {
 
     // If order was already paid, return idempotently
     if (order.paymentStatus === 'Paid') {
-      const existingInstances = await this.treeInstanceRepository.findAll({ search: order.orderNumber });
+      const existingInstances = await this.treeInstanceRepository.findByOrderRef(order.orderNumber);
       const existingCert = await this.certificateRepository.findByOrderRef(order.orderNumber);
       return {
         verified: true,
@@ -60,7 +60,7 @@ export class VerifyRazorpayPaymentUseCase {
         orderId: dto.razorpayOrderId,
         order: OrderResponseMapper.toDto(order),
         treeInstances: existingInstances,
-        certificate: existingCert,
+        certificate: existingCert.length > 0 ? existingCert[0] : null,
       };
     }
 
