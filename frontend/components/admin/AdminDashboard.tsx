@@ -106,7 +106,7 @@ export function AdminDashboard() {
       />
 
       {/* 2. Main Application Content Area */}
-      <div className="flex-1 lg:pl-72 flex flex-col min-h-screen">
+      <div className="flex-1 lg:pl-72 3xl:pl-80 4k:pl-96 flex flex-col min-h-screen transition-all duration-300">
         {/* Top Command Bar */}
         <AdminHeader
           onOpenSidebar={() => setSidebarOpen(true)}
@@ -124,7 +124,7 @@ export function AdminDashboard() {
         <AdminToast message={toastMessage} />
 
         {/* Main Body Content by Tab */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 3xl:p-10 4k:p-12 w-full max-w-7xl 2xl:max-w-[1720px] 3xl:max-w-[2200px] 4k:max-w-[2900px] mx-auto space-y-6 3xl:space-y-8">
           <AdminTabContent
             activeTab={activeTab}
             setActiveTab={setActiveTab}

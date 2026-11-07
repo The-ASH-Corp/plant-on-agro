@@ -210,14 +210,14 @@ export function OrdersTab({
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-[#e2eae5] shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 3xl:p-6 rounded-3xl border border-[#e2eae5] shadow-xs">
         <div>
-          <div className="flex items-center gap-3">
-            <h2 style={{ fontFamily: "var(--font-display)" }} className="text-xl font-bold text-[#173324]">
+          <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
+            <h2 style={{ fontFamily: "var(--font-display)" }} className="text-lg sm:text-xl 3xl:text-2xl font-bold text-[#173324]">
               Adoption Orders & Certificate Register ({totalCount})
             </h2>
             {totalPages > 1 && (
-              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#1b7a43] border border-emerald-200">
+              <span className="text-[11px] 3xl:text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#1b7a43] border border-emerald-200">
                 Page {safeCurrentPage} of {totalPages}
               </span>
             )}
@@ -230,23 +230,23 @@ export function OrdersTab({
               </span>
             )}
           </div>
-          <p className="text-xs text-[#73877b] mt-1">
+          <p className="text-xs 3xl:text-sm text-[#73877b] mt-1">
             Real-time verified adoption requests, status workflow management, and digital certificates
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {unreadCount > 0 && onMarkAllAsRead && (
             <button
               onClick={onMarkAllAsRead}
-              className="px-3.5 py-2 rounded-xl border border-amber-300 text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 transition-colors cursor-pointer"
+              className="px-3.5 py-2 3xl:py-2.5 rounded-xl border border-amber-300 text-xs 3xl:text-sm font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 transition-colors cursor-pointer"
             >
               ✓ Mark All Reviewed
             </button>
           )}
           <button
             onClick={onExportCSV}
-            className="px-3.5 py-2 rounded-xl border border-emerald-200 text-xs font-semibold text-[#1b7a43] bg-emerald-50 hover:bg-emerald-100 transition-colors cursor-pointer"
+            className="px-3.5 py-2 3xl:py-2.5 rounded-xl border border-emerald-200 text-xs 3xl:text-sm font-semibold text-[#1b7a43] bg-emerald-50 hover:bg-emerald-100 transition-colors cursor-pointer"
           >
             Export CSV
           </button>
@@ -254,10 +254,10 @@ export function OrdersTab({
       </div>
 
       {/* Status Filter Tabs */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
         <button
           onClick={() => setSelectedStatusFilter("all")}
-          className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+          className={`px-3 py-1.5 rounded-xl text-xs 3xl:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
             selectedStatusFilter === "all"
               ? "bg-[#173324] text-white shadow-xs"
               : "bg-white text-[#55695d] hover:bg-[#f2f7f4] border border-[#e2eae5]"
@@ -302,16 +302,16 @@ export function OrdersTab({
 
       {/* Orders Data Table */}
       <div className="bg-white rounded-3xl border border-[#e2eae5] overflow-hidden shadow-xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+        <div className="overflow-x-auto scrollbar-thin">
+          <table className="w-full text-left text-xs 3xl:text-sm min-w-[760px] 4k:min-w-[900px]">
             <thead className="bg-[#f7faf8] border-b border-[#e2eae5] text-[#7a8a80] uppercase tracking-wider font-bold">
               <tr>
-                <th className="py-4 px-4">Order / Adopter</th>
-                <th className="py-4 px-4">Species & Plan</th>
-                <th className="py-4 px-4">Reserve Geotag</th>
-                <th className="py-4 px-4">Total Amount</th>
-                <th className="py-4 px-4">Status Workflow</th>
-                <th className="py-4 px-4 text-right">Inspect</th>
+                <th className="py-4 px-4 3xl:px-6">Order / Adopter</th>
+                <th className="py-4 px-4 3xl:px-6">Species & Plan</th>
+                <th className="py-4 px-4 3xl:px-6">Reserve Geotag</th>
+                <th className="py-4 px-4 3xl:px-6">Total Amount</th>
+                <th className="py-4 px-4 3xl:px-6">Status Workflow</th>
+                <th className="py-4 px-4 3xl:px-6 text-right">Inspect</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#f0f4f1]">
