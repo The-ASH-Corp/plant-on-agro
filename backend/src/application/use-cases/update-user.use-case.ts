@@ -1,15 +1,40 @@
 import { IUserRepository } from '../../core/interfaces/user.repository.interface';
-import { NotFoundError, ConflictError } from '../../core/errors/app-error';
+import { NotFoundError, ConflictError, ForbiddenError } from '../../core/errors/app-error';
 import { Email } from '../../core/value-objects/email.vo';
 import { UpdateUserDto, UserDto } from '../dto/user.dto';
+import { UserPayload } from '../../core/interfaces/jwt-service.interface';
 
 export class UpdateUserUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
 
-  public async execute(id: string, dto: UpdateUserDto): Promise<UserDto> {
+  public async execute(id: string, dto: UpdateUserDto, requester?: UserPayload): Promise<UserDto> {
     const user = await this.userRepository.findById(id);
     if (!user) {
       throw new NotFoundError('User', id);
+    }
+
+    if (requester) {
+      // Non-admin users can only update their own profile
+      if (requester.role !== 'admin' && requester.id !== id) {
+        throw new ForbiddenError('Access denied: You can only update your own profile');
+      }
+
+      // Non-admin users cannot alter roles or activation status
+      if (requester.role !== 'admin') {
+        if (dto.role !== undefined || dto.isActive !== undefined) {
+          throw new ForbiddenError('Access denied: Only administrators can modify user roles or activation status');
+        }
+      }
+
+      // Admin self-protection: Admin cannot deactivate or demote their own account
+      if (requester.id === id && requester.role === 'admin') {
+        if (dto.isActive === false) {
+          throw new ForbiddenError('Administrators cannot deactivate their own account');
+        }
+        if (dto.role !== undefined && dto.role !== 'admin') {
+          throw new ForbiddenError('Administrators cannot demote their own account');
+        }
+      }
     }
 
     if (dto.name !== undefined) {

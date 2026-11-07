@@ -5,6 +5,7 @@ import { GetUsersUseCase } from '../../application/use-cases/get-users.use-case'
 import { UpdateUserUseCase } from '../../application/use-cases/update-user.use-case';
 import { DeleteUserUseCase } from '../../application/use-cases/delete-user.use-case';
 import { ApiResponse } from '../../shared/utils/api-response';
+import { ForbiddenError, UnauthorizedError } from '../../core/errors/app-error';
 
 export class UserController {
   constructor(
@@ -27,6 +28,16 @@ export class UserController {
   public getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
+      const currentUser = req.user;
+
+      if (!currentUser) {
+        throw new UnauthorizedError('Authentication required');
+      }
+
+      if (currentUser.role !== 'admin' && currentUser.id !== id) {
+        throw new ForbiddenError('Access denied: You can only view your own profile');
+      }
+
       const result = await this.getUserByIdUseCase.execute(id as string);
       ApiResponse.success(res, result, 'User retrieved successfully');
     } catch (error) {
@@ -48,7 +59,35 @@ export class UserController {
   public update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
-      const result = await this.updateUserUseCase.execute(id as string, req.body);
+      const currentUser = req.user;
+
+      if (!currentUser) {
+        throw new UnauthorizedError('Authentication required');
+      }
+
+      // Check IDOR: Non-admin users cannot update other users' accounts
+      if (currentUser.role !== 'admin' && currentUser.id !== id) {
+        throw new ForbiddenError('Access denied: You can only update your own profile');
+      }
+
+      // Check privilege escalation: Non-admins cannot alter role or isActive
+      if (currentUser.role !== 'admin') {
+        if (req.body.role !== undefined || req.body.isActive !== undefined) {
+          throw new ForbiddenError('Access denied: Only administrators can modify user roles or activation status');
+        }
+      }
+
+      // Admin self-protection: Cannot deactivate or demote oneself
+      if (currentUser.id === id && currentUser.role === 'admin') {
+        if (req.body.isActive === false) {
+          throw new ForbiddenError('Administrators cannot deactivate their own account');
+        }
+        if (req.body.role !== undefined && req.body.role !== 'admin') {
+          throw new ForbiddenError('Administrators cannot demote their own account');
+        }
+      }
+
+      const result = await this.updateUserUseCase.execute(id as string, req.body, currentUser);
       ApiResponse.success(res, result, 'User updated successfully');
     } catch (error) {
       next(error);
@@ -58,6 +97,17 @@ export class UserController {
   public delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
+      const currentUser = req.user;
+
+      if (!currentUser) {
+        throw new UnauthorizedError('Authentication required');
+      }
+
+      // Prevent admin from deleting their own account
+      if (currentUser.id === id) {
+        throw new ForbiddenError('Administrators cannot delete their own account');
+      }
+
       const result = await this.deleteUserUseCase.execute(id as string);
       ApiResponse.success(res, { deleted: result }, 'User deleted successfully');
     } catch (error) {
