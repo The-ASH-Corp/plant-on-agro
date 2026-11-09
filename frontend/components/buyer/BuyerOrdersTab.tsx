@@ -20,16 +20,22 @@ export function BuyerOrdersTab({
   const totalSpent = orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
   const totalTreesSeeded = orders.reduce((sum, o) => sum + (o.quantity || 1), 0);
 
-  const filteredOrders = orders.filter((o) => {
-    const term = searchTerm.toLowerCase();
-    const matchesSearch =
-      o.orderNumber.toLowerCase().includes(term) ||
-      o.invoiceNumber.toLowerCase().includes(term) ||
-      o.treeSpecies.toLowerCase().includes(term) ||
-      o.reserveName.toLowerCase().includes(term);
+  const filteredOrders = orders.filter((o: any) => {
+    const term = (searchTerm || "").toLowerCase();
+    const orderNumber = (o.orderNumber || o._orderNumber || o.id || "").toLowerCase();
+    const invoiceNumber = (o.invoiceNumber || o._invoiceNumber || "").toLowerCase();
+    const treeSpecies = (o.treeSpecies || o._treeSpecies || "").toLowerCase();
+    const reserveName = (o.reserveName || o._reserveName || "").toLowerCase();
 
+    const matchesSearch =
+      orderNumber.includes(term) ||
+      invoiceNumber.includes(term) ||
+      treeSpecies.includes(term) ||
+      reserveName.includes(term);
+
+    const status = (o.status || o._status || "Planted").toLowerCase();
     const matchesStatus =
-      statusFilter === "All" || o.status.toLowerCase() === statusFilter.toLowerCase();
+      statusFilter === "All" || status === (statusFilter || "").toLowerCase();
 
     return matchesSearch && matchesStatus;
   });

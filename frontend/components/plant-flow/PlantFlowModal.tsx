@@ -268,7 +268,24 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
     // 1. Physical Tree Instance Records for Database
     const newInstances: any[] = [];
     if (serverData?.treeInstances && Array.isArray(serverData.treeInstances) && serverData.treeInstances.length > 0) {
-      newInstances.push(...serverData.treeInstances);
+      const normalized = serverData.treeInstances.map((t: any) => ({
+        id: t.id || t._id || `inst-${Date.now()}`,
+        treeTag: t.treeTag || t._treeTag || "POA-TR-001",
+        orderRef: t.orderRef || t._orderRef || orderId,
+        assignedReserve: t.assignedReserve || t._assignedReserve || location || "Western Ghats, Maharashtra",
+        gpsCoordinates: t.gpsCoordinates || t._gpsCoordinates || { latitude: chosenCoords.lat, longitude: chosenCoords.lng },
+        formattedGps: t.formattedGps || (t.gpsCoordinates ? `${t.gpsCoordinates.latitude}° N, ${t.gpsCoordinates.longitude}° E` : chosenCoords.formatted),
+        datePlanted: t.datePlanted || t._datePlanted || formattedDate,
+        healthStatus: t.healthStatus || t._healthStatus || "Sapling Growing",
+        treeVarietyName: t.treeVarietyName || t._treeVarietyName || selectedTree?.name || "Indigenous Sapling",
+        adopterName: t.adopterName || t._adopterName || name || user?.name || "Verified Adopter",
+        adopterEmail: t.adopterEmail || t._adopterEmail || email || user?.email || "adopter@example.com",
+        notes: t.notes || t._notes || "",
+        imageUrl: t.imageUrl || t._imageUrl || selectedTree?.img || "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
+        lastInspectedAt: t.lastInspectedAt || t._lastInspectedAt || dateStr,
+        isActive: true,
+      }));
+      newInstances.push(...normalized);
     } else {
       for (let i = 0; i < qty; i++) {
         const serialNum = Math.floor(1000 + Math.random() * 9000);
