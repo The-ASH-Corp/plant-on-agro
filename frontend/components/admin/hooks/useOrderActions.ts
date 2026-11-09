@@ -192,6 +192,10 @@ export function useOrderActions({ data, showToast }: Params) {
   };
 
   const handleOpenAssignTree = (order: AdoptionOrder) => {
+    if (order.treeTag) {
+      showToast(`Tree (${order.treeTag}) is already assigned to ${order.adopterName} and locked from editing.`);
+      return;
+    }
     setOrderToMarkPlanted(order);
   };
 

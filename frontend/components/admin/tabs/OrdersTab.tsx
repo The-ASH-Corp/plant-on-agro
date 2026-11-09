@@ -382,16 +382,6 @@ export function OrdersTab({
                             <span className="text-[11px] font-semibold text-[#173324]">
                               {order.treeSpecies}
                             </span>
-                            {onOpenAssignTree && (
-                              <button
-                                type="button"
-                                onClick={() => onOpenAssignTree(order)}
-                                title="Change or update tree planting details"
-                                className="text-[10px] text-emerald-700 hover:text-emerald-950 underline font-semibold cursor-pointer"
-                              >
-                                Edit
-                              </button>
-                            )}
                           </div>
                         ) : (
                           <button

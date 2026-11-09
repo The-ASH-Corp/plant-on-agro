@@ -220,18 +220,6 @@ export function OrderDetailsModal({
                   </span>
                 )}
               </div>
-              {onOpenAssignTree && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClose();
-                    onOpenAssignTree(order);
-                  }}
-                  className="px-3 py-1.5 rounded-lg bg-[#173324] hover:bg-[#1f4530] text-white font-bold text-xs transition-all cursor-pointer shadow-2xs flex items-center gap-1"
-                >
-                  <span>Edit Tree Details ↺</span>
-                </button>
-              )}
             </div>
           ) : (
             <div className="space-y-2 pt-1 border-t border-amber-200">
