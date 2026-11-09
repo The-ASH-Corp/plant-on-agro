@@ -67,7 +67,17 @@ export class OrderController {
   public updateStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
-      const { status, notes, gpsCoords, reserveName, treeTags, assignedTreeInstanceIds } = req.body;
+      const {
+        status,
+        notes,
+        gpsCoords,
+        reserveName,
+        treeTags,
+        assignedTreeInstanceIds,
+        treeSpecies,
+        scientificName,
+        category,
+      } = req.body;
       const result = await this.updateOrderStatusUseCase.execute(
         id as string,
         status,
@@ -75,7 +85,10 @@ export class OrderController {
         gpsCoords,
         reserveName,
         treeTags,
-        assignedTreeInstanceIds
+        assignedTreeInstanceIds,
+        treeSpecies,
+        scientificName,
+        category
       );
       ApiResponse.success(res, result, `Order status updated to "${status}" successfully`);
     } catch (error) {

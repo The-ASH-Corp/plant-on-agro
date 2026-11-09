@@ -37,7 +37,10 @@ export function useOrderActions({ data, showToast }: Params) {
     reserveName?: string,
     notes?: string,
     treeTags?: string[],
-    assignedTreeInstanceIds?: string[]
+    assignedTreeInstanceIds?: string[],
+    treeSpecies?: string,
+    scientificName?: string,
+    category?: string
   ) => {
     const targetOrder = orders.find(
       (o) => o.orderNumber === orderIdentifier || o.id === orderIdentifier
@@ -61,6 +64,9 @@ export function useOrderActions({ data, showToast }: Params) {
               isRead: true,
               gpsCoords: gpsCoords || prev.gpsCoords,
               reserveName: reserveName || prev.reserveName,
+              treeSpecies: treeSpecies || prev.treeSpecies,
+              scientificName: scientificName || prev.scientificName,
+              category: category || prev.category,
             }
           : null
       );
@@ -69,12 +75,34 @@ export function useOrderActions({ data, showToast }: Params) {
     // 1. Persist status change directly to MongoDB backend order entity first
     const lookupId = targetOrder?.id || orderIdentifier;
     try {
-      await orderService.updateStatus(lookupId, newStatus, notes, gpsCoords, reserveName, treeTags, assignedTreeInstanceIds);
+      await orderService.updateStatus(
+        lookupId,
+        newStatus,
+        notes,
+        gpsCoords,
+        reserveName,
+        treeTags,
+        assignedTreeInstanceIds,
+        treeSpecies,
+        scientificName,
+        category
+      );
     } catch (orderApiErr: any) {
       // Fallback: try updating by orderIdentifier (orderNumber) if targetOrder.id was a derived ID
       if (lookupId !== orderIdentifier) {
         try {
-          await orderService.updateStatus(orderIdentifier, newStatus, notes, gpsCoords, reserveName, treeTags, assignedTreeInstanceIds);
+          await orderService.updateStatus(
+            orderIdentifier,
+            newStatus,
+            notes,
+            gpsCoords,
+            reserveName,
+            treeTags,
+            assignedTreeInstanceIds,
+            treeSpecies,
+            scientificName,
+            category
+          );
         } catch (retryErr: any) {
           const msg = retryErr?.response?.data?.message || retryErr?.message || "Failed to update order status";
           showToast(`❌ ${msg}`);
@@ -97,6 +125,9 @@ export function useOrderActions({ data, showToast }: Params) {
               isRead: true,
               gpsCoords: gpsCoords || o.gpsCoords,
               reserveName: reserveName || o.reserveName,
+              treeSpecies: treeSpecies || o.treeSpecies,
+              scientificName: scientificName || o.scientificName,
+              category: category || o.category,
             }
           : o
       );

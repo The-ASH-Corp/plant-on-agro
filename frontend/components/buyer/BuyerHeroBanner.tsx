@@ -38,10 +38,7 @@ export function BuyerHeroBanner({
         {/* Left Column: Greeting & Title */}
         <div className="space-y-3 max-w-2xl">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 backdrop-blur-md">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-              <span>Verified Tree Adopter</span>
-            </span>
+          
 
             {ordersCount > 0 && (
               <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-300 border border-blue-400/30">
@@ -73,12 +70,6 @@ export function BuyerHeroBanner({
                 </span>
               </div>
             </div>
-            <button
-              onClick={() => onSelectTab("trees")}
-              className="text-xs text-emerald-300 hover:text-emerald-200 font-semibold cursor-pointer underline"
-            >
-              View Trees →
-            </button>
           </div>
         </div>
 

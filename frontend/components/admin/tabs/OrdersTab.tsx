@@ -379,14 +379,17 @@ export function OrdersTab({
                             <span className="font-mono text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-300">
                               🏷️ {assignedTag}
                             </span>
+                            <span className="text-[11px] font-semibold text-[#173324]">
+                              {order.treeSpecies}
+                            </span>
                             {onOpenAssignTree && (
                               <button
                                 type="button"
                                 onClick={() => onOpenAssignTree(order)}
-                                title="Change or reassign tree to user"
+                                title="Change or update tree planting details"
                                 className="text-[10px] text-emerald-700 hover:text-emerald-950 underline font-semibold cursor-pointer"
                               >
-                                Change
+                                Edit
                               </button>
                             )}
                           </div>
@@ -403,7 +406,7 @@ export function OrdersTab({
                             className="px-2.5 py-1 text-[11px] font-bold text-white bg-gradient-to-r from-[#173324] to-[#1b7a43] hover:brightness-110 rounded-lg shadow-2xs transition-all cursor-pointer inline-flex items-center gap-1"
                           >
                             <span>🌱</span>
-                            <span>Assign Tree</span>
+                            <span>Enter Tree to Plant</span>
                           </button>
                         )}
                       </td>

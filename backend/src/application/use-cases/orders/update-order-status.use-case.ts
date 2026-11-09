@@ -31,7 +31,10 @@ export class UpdateOrderStatusUseCase {
     gpsCoords?: string,
     reserveName?: string,
     treeTags?: string[],
-    assignedTreeInstanceIds?: string[]
+    assignedTreeInstanceIds?: string[],
+    treeSpecies?: string,
+    scientificName?: string,
+    category?: string
   ): Promise<OrderDto> {
     const cleanId = (idOrNumber || '').trim();
     if (!cleanId) {
@@ -49,10 +52,11 @@ export class UpdateOrderStatusUseCase {
     }
 
     const currentStatus = order.status;
+    const effectiveStatus = newStatus || currentStatus;
 
     // 1. Strictly Sequential, Monotonic Validation Rule:
     // Only one step forward at a time, never jump from 1st to 3rd step, and never move backwards.
-    if (newStatus !== currentStatus) {
+    if (effectiveStatus !== currentStatus) {
       const allowedNextStatuses: AdoptionOrderStatus[] = [];
       if (currentStatus === 'New Request') {
         allowedNextStatuses.push('Verified & Tagged');
@@ -68,7 +72,7 @@ export class UpdateOrderStatusUseCase {
         );
       }
 
-      if (!allowedNextStatuses.includes(newStatus)) {
+      if (!allowedNextStatuses.includes(effectiveStatus)) {
         throw new BadRequestError(
           `Invalid purchase status transition: Order "${order.orderNumber}" is currently in "${currentStatus}". ` +
             `Status must be updated sequentially one step at a time (${currentStatus} -> ${allowedNextStatuses.join(' or ')}). ` +
@@ -77,12 +81,15 @@ export class UpdateOrderStatusUseCase {
       }
     }
 
-    // 2. Update Notes & Reserve Name if provided
+    // 2. Update Notes, Reserve Name & Tree Details if provided
     if (notes) {
       order.updateNotes(notes);
     }
     if (reserveName && reserveName.trim().length > 0) {
       order.updateReserveName(reserveName.trim());
+    }
+    if (treeSpecies && treeSpecies.trim().length > 0) {
+      order.updateTreeSpecies(treeSpecies.trim(), scientificName, category);
     }
 
     // 3. Handle Transition to "Planted" (Geographical Location & Official Certificate Minting)
@@ -148,6 +155,7 @@ export class UpdateOrderStatusUseCase {
                   adopterEmail: order.adopterEmail,
                   assignedReserve: order.reserveName,
                   healthStatus: 'Healthy',
+                  treeVarietyName: order.treeSpecies,
                   datePlanted: new Date(),
                   notes:
                     notes ||
@@ -174,6 +182,7 @@ export class UpdateOrderStatusUseCase {
                   adopterEmail: order.adopterEmail,
                   assignedReserve: order.reserveName,
                   healthStatus: 'Healthy',
+                  treeVarietyName: order.treeSpecies,
                   datePlanted: new Date(),
                   notes:
                     notes ||
@@ -214,6 +223,7 @@ export class UpdateOrderStatusUseCase {
               inst.update({
                 assignedReserve: order.reserveName,
                 healthStatus: 'Healthy',
+                treeVarietyName: order.treeSpecies,
                 notes: notes || `Planted at verified coordinates (${effectiveGps}). Geotagged by admin.`,
               });
               await this.treeInstanceRepository.update(inst);
@@ -258,6 +268,7 @@ export class UpdateOrderStatusUseCase {
             status: 'Issued',
             treeTag: primaryTag,
             reserveName: order.reserveName,
+            treeSpecies: order.treeSpecies,
             issueDate: new Date(),
           });
           await this.certificateRepository.update(cert);
@@ -285,7 +296,9 @@ export class UpdateOrderStatusUseCase {
     }
 
     // 4. Update the Order Status
-    order.updateStatus(newStatus);
+    if (newStatus && newStatus !== currentStatus) {
+      order.updateStatus(newStatus);
+    }
     const updated = await this.orderRepository.update(order);
     return OrderResponseMapper.toDto(updated);
   }

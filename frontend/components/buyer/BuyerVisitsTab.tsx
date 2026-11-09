@@ -111,15 +111,6 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
             </h2>
             <p className="text-xs text-gray-500">Show your digital visitor pass at the plantation reception gate</p>
           </div>
-          <button
-            onClick={() => {
-              setSelectedExpForBooking(null);
-              setBookModalOpen(true);
-            }}
-            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-[#2d6a4f] bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all cursor-pointer flex items-center gap-1.5"
-          >
-            <span>+ Book New Date</span>
-          </button>
         </div>
 
         {loading ? (

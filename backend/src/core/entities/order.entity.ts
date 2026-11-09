@@ -303,4 +303,17 @@ export class Order {
     this._reserveName = reserve;
     this._updatedAt = new Date();
   }
+
+  public updateTreeSpecies(species: string, scientificName?: string, category?: string): void {
+    if (species && species.trim().length > 0) {
+      this._treeSpecies = species.trim();
+    }
+    if (scientificName !== undefined) {
+      this._scientificName = scientificName.trim();
+    }
+    if (category && category.trim().length > 0) {
+      this._category = category.trim();
+    }
+    this._updatedAt = new Date();
+  }
 }

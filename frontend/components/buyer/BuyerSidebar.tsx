@@ -138,12 +138,7 @@ export function BuyerSidebar({
                 <p className="text-[10px] text-emerald-400/90 font-mono truncate">
                   {user?.email || "verified@plantonagro.com"}
                 </p>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-300">
-                    Eco Guardian
-                  </span>
-                </div>
+                
               </div>
             </div>
           </div>

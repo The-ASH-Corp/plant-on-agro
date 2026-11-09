@@ -185,12 +185,12 @@ export function OrderDetailsModal({
               <span className="text-xl">🌲</span>
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-[#173324] block">
-                  Tree Assignment to Buyer
+                  Tree Planting & Certificate Details
                 </span>
                 <span className="text-[11px] text-[#55695d]">
                   {assignedTreeTags
-                    ? "Sapling officially linked to buyer's dashboard"
-                    : "Action Required: No tree specimen or RFID tag assigned yet"}
+                    ? "Tree species & physical RFID tag officially linked to buyer deed"
+                    : "Action Required: Enter tree species & planting details for this purchase"}
                 </span>
               </div>
             </div>
@@ -201,19 +201,24 @@ export function OrderDetailsModal({
                   : "bg-amber-200 text-amber-900 border-amber-300 animate-pulse"
               }`}
             >
-              {assignedTreeTags ? "✓ Assigned" : "Not Assigned"}
+              {assignedTreeTags ? "✓ Assigned & Planted" : "Needs Tree Details"}
             </span>
           </div>
 
           {assignedTreeTags ? (
             <div className="flex items-center justify-between pt-2 border-t border-[#c6e6d3] flex-wrap gap-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-mono font-bold text-xs bg-white text-emerald-800 px-2.5 py-1 rounded-lg border border-emerald-300 shadow-2xs">
                   🏷️ {assignedTreeTags}
                 </span>
-                <span className="text-xs text-emerald-900 font-semibold">
+                <span className="text-xs text-emerald-900 font-bold">
                   {order.treeSpecies}
                 </span>
+                {order.scientificName && (
+                  <span className="text-[11px] text-emerald-700 italic">
+                    ({order.scientificName})
+                  </span>
+                )}
               </div>
               {onOpenAssignTree && (
                 <button
@@ -224,14 +229,14 @@ export function OrderDetailsModal({
                   }}
                   className="px-3 py-1.5 rounded-lg bg-[#173324] hover:bg-[#1f4530] text-white font-bold text-xs transition-all cursor-pointer shadow-2xs flex items-center gap-1"
                 >
-                  <span>Reassign Tree ↺</span>
+                  <span>Edit Tree Details ↺</span>
                 </button>
               )}
             </div>
           ) : (
             <div className="space-y-2 pt-1 border-t border-amber-200">
               <p className="text-[11px] text-amber-900 leading-snug">
-                As Admin, you can assign an unassigned sapling from our nursery inventory or assign a custom physical RFID tag to <strong>{order.adopterName}</strong>.
+                As Admin, specify the tree species (e.g. Sandalwood, Teak, Neem), botanical details, RFID tag, and exact ground GPS to be planted for <strong>{order.adopterName}</strong> and stamped on their certificate.
               </p>
               <button
                 type="button"
@@ -246,7 +251,7 @@ export function OrderDetailsModal({
                 className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#173324] to-[#1b7a43] hover:brightness-110 text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>🌱</span>
-                <span>Assign Tree to User (Choose from Nursery / Enter Tag) →</span>
+                <span>Enter Tree Details to Plant (Species, Tag, GPS) →</span>
               </button>
             </div>
           )}

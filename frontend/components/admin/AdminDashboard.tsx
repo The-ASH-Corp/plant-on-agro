@@ -98,7 +98,6 @@ export function AdminDashboard() {
         usersCount={data.users.filter((u) => u.role !== "admin").length}
         userName={user?.name}
         onLogout={() => setShowSignOutModal(true)}
-        onOpenAddTree={() => treeActions.setShowAddTreeModal(true)}
         onOpenAddPlan={() => planActions.setShowAddPlanModal(true)}
         onOpenAddLocation={() => locationActions.setShowAddLocationModal(true)}
         onOpenAddInstance={() => instanceActions.setShowAddInstanceModal(true)}

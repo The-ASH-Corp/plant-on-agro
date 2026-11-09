@@ -8,8 +8,8 @@ import { AdoptionOrder } from "../types";
 interface UsersTabProps {
   users: User[];
   searchQuery: string;
-  onToggleBlockUser: (user: User) => Promise<void>;
-  onRefreshUsers?: () => Promise<void>;
+  onToggleBlockUser: (user: User) => Promise<void> | void;
+  onRefreshUsers?: () => Promise<void> | void;
   isRefreshing?: boolean;
   orders?: AdoptionOrder[];
   onViewUserDetails: (user: User) => void;
