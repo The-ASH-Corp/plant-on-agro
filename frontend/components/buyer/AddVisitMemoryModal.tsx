@@ -22,6 +22,10 @@ export function AddVisitMemoryModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  if (booking.status === "Cancelled") {
+    return null;
+  }
+
   // Handle uploading multiple image files at once
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;

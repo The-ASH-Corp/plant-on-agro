@@ -118,7 +118,7 @@ export const DEFAULT_LANDING_PAGE_CONTENT: LandingPageContent = {
   howItWorks: {
     isEnabled: true,
     tagline: 'Simple Process',
-    title: 'How PlantOn agro Works',
+    title: 'How PlantOnAgro Works',
     steps: [
       {
         num: '01',

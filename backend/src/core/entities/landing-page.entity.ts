@@ -116,7 +116,7 @@ export const DEFAULT_LANDING_PAGE_DATA: Omit<LandingPageProps, 'id' | 'createdAt
   howItWorks: {
     isEnabled: true,
     tagline: 'Simple Process',
-    title: 'How PlantOn agro Works',
+    title: 'How PlantOAgro Works',
     steps: [
       {
         num: '01',

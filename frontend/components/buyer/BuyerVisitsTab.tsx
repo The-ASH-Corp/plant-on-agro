@@ -155,6 +155,8 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
                           ? "bg-emerald-100 text-emerald-800"
                           : booking.status === "Completed"
                           ? "bg-blue-100 text-blue-800"
+                          : booking.status === "Cancelled"
+                          ? "bg-rose-100 text-rose-800"
                           : "bg-amber-100 text-amber-800"
                       }`}>
                         {booking.status}
@@ -226,12 +228,18 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
                   <span className="text-[11px] text-gray-500">
                     {booking.memories?.length || 0} Photos Recorded
                   </span>
-                  <button
-                    onClick={() => setMemoryBooking(booking)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#2d6a4f] bg-emerald-50 hover:bg-emerald-100 transition-all cursor-pointer flex items-center gap-1.5"
-                  >
-                    <span>📸 Add Visit Photos</span>
-                  </button>
+                  {booking.status !== "Cancelled" ? (
+                    <button
+                      onClick={() => setMemoryBooking(booking)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#2d6a4f] bg-emerald-50 hover:bg-emerald-100 transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>📸 Add Visit Photos</span>
+                    </button>
+                  ) : (
+                    <span className="text-[11px] font-semibold text-rose-600 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-lg">
+                      Cancelled Visit
+                    </span>
+                  )}
                 </div>
               </div>
             ))}
