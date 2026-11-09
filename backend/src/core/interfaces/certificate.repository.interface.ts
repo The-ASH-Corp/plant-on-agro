@@ -13,6 +13,7 @@ export interface ICertificateRepository {
   findByCertificateNumber(certificateNumber: string): Promise<Nullable<Certificate>>;
   findByCertificateHash(certificateHash: string): Promise<Nullable<Certificate>>;
   findByOrderRef(orderRef: string): Promise<Certificate[]>;
+  findByTreeTag(treeTag: string): Promise<Nullable<Certificate>>;
   findAll(filter?: CertificateFilter, limit?: number, skip?: number): Promise<Certificate[]>;
   count(filter?: CertificateFilter): Promise<number>;
   save(certificate: Certificate): Promise<Certificate>;

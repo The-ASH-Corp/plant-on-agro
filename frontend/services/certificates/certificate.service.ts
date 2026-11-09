@@ -159,5 +159,35 @@ export const certificateService = {
     const cleanNumber = encodeURIComponent(certificateNumberOrId.trim());
     return `${cleanUrl}/certificates/${cleanNumber}/download${download ? '?download=true' : ''}`;
   },
+
+  /**
+   * Triggers a reliable client-side file download of the PDF deed with fallback.
+   */
+  async triggerPdfDownload(certificateNumberOrId: string, customFilename?: string): Promise<void> {
+    const downloadUrl = this.getDownloadUrl(certificateNumberOrId, true);
+    try {
+      const response = await fetch(downloadUrl);
+      if (!response.ok) {
+        let msg = 'Failed to download certificate deed.';
+        try {
+          const json = await response.json();
+          if (json?.message) msg = json.message;
+        } catch {}
+        throw new Error(msg);
+      }
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = customFilename || `PlantOnAgro-Deed-${certificateNumberOrId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.warn('Direct blob download failed, falling back to window.open:', err);
+      window.open(downloadUrl, '_blank');
+    }
+  },
 };
 

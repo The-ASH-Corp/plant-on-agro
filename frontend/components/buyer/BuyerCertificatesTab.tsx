@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { BackendTreeInstance } from "@/services/tree-instances/tree-instance.service";
 import { certificateService } from "@/services/certificates/certificate.service";
 
@@ -16,6 +17,23 @@ export function BuyerCertificatesTab({
   userName,
   onOpenModal,
 }: BuyerCertificatesTabProps) {
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const handleDownload = async (tree: BackendTreeInstance) => {
+    const certId = tree.orderRef || tree.treeTag;
+    if (!certId || downloadingId) return;
+    try {
+      setDownloadingId(tree.id || certId);
+      await certificateService.triggerPdfDownload(
+        certId,
+        `PlantOnAgro-Certificate-${tree.treeTag || certId}.pdf`
+      );
+    } catch (err) {
+      console.error("Certificate download error:", err);
+    } finally {
+      setDownloadingId(null);
+    }
+  };
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-xl p-3 sm:p-3.5 border border-[#e2eae5] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -149,15 +167,21 @@ export function BuyerCertificatesTab({
                     🔍 Inspect Full Deed
                   </button>
                   <button
-                    onClick={() => {
-                      const certId = tree.treeTag || tree.orderRef;
-                      const downloadUrl = certificateService.getDownloadUrl(certId);
-                      window.open(downloadUrl, '_blank');
-                    }}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1b7a43] to-[#52b788] text-white font-bold cursor-pointer hover:scale-105 transition-transform shadow-md flex items-center gap-1.5"
+                    onClick={() => handleDownload(tree)}
+                    disabled={downloadingId === (tree.id || tree.treeTag || tree.orderRef)}
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1b7a43] to-[#52b788] text-white font-bold cursor-pointer hover:scale-105 disabled:opacity-75 disabled:hover:scale-100 transition-transform shadow-md flex items-center gap-1.5"
                   >
-                    <span>📜</span>
-                    <span>Download Deed PDF</span>
+                    {downloadingId === (tree.id || tree.treeTag || tree.orderRef) ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Downloading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>📜</span>
+                        <span>Download Deed PDF</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>

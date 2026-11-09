@@ -56,6 +56,21 @@ export class DownloadCertificatePdfUseCase {
       certificate = await this.certificateRepository.findByCertificateHash(cleanId);
     }
 
+    // Locate certificate directly by tree tag or via tree instance order reference
+    if (!certificate) {
+      certificate = await this.certificateRepository.findByTreeTag(cleanId);
+    }
+
+    if (!certificate) {
+      const matchingTree = await this.treeInstanceRepository.findByTag(cleanId);
+      if (matchingTree?.orderRef) {
+        const byOrder = await this.certificateRepository.findByOrderRef(matchingTree.orderRef);
+        if (byOrder.length > 0) {
+          certificate = byOrder[0];
+        }
+      }
+    }
+
     // Fallback: if no certificate record exists yet in the certificates collection, check order status
     if (!certificate && this.orderRepository) {
       let order = await this.orderRepository.findByOrderNumber(strippedOrderRef);
@@ -64,6 +79,12 @@ export class DownloadCertificatePdfUseCase {
       }
       if (!order && isValidObjectId(cleanId)) {
         order = await this.orderRepository.findById(cleanId);
+      }
+      if (!order) {
+        const matchingTree = await this.treeInstanceRepository.findByTag(cleanId);
+        if (matchingTree?.orderRef) {
+          order = await this.orderRepository.findByOrderNumber(matchingTree.orderRef);
+        }
       }
 
       if (order) {

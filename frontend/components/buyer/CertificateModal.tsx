@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { BackendTreeInstance } from "@/services/tree-instances/tree-instance.service";
 import { certificateService } from "@/services/certificates/certificate.service";
 
@@ -10,9 +11,27 @@ interface CertificateModalProps {
 }
 
 export function CertificateModal({ tree, userName, onClose }: CertificateModalProps) {
+  const [isDownloading, setIsDownloading] = useState(false);
+
   if (!tree) return null;
 
   const recipient = userName || tree.adopterName || "Tree Adopter";
+
+  const handleDownload = async () => {
+    if (!tree || isDownloading) return;
+    try {
+      setIsDownloading(true);
+      const certId = tree.orderRef || tree.treeTag;
+      await certificateService.triggerPdfDownload(
+        certId,
+        `PlantOnAgro-Certificate-${tree.treeTag || certId}.pdf`
+      );
+    } catch (err) {
+      console.error("Certificate download error:", err);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
@@ -29,15 +48,21 @@ export function CertificateModal({ tree, userName, onClose }: CertificateModalPr
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => {
-                const certId = tree.treeTag || tree.orderRef;
-                const downloadUrl = certificateService.getDownloadUrl(certId);
-                window.open(downloadUrl, '_blank');
-              }}
-              className="text-xs font-bold px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#1b7a43] to-[#52b788] hover:scale-105 text-white border border-emerald-400/40 cursor-pointer flex items-center gap-1.5 transition-all shadow-sm"
+              onClick={handleDownload}
+              disabled={isDownloading}
+              className="text-xs font-bold px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#1b7a43] to-[#52b788] hover:scale-105 disabled:opacity-75 disabled:hover:scale-100 text-white border border-emerald-400/40 cursor-pointer flex items-center gap-1.5 transition-all shadow-sm"
             >
-              <span>📜</span>
-              <span>Download Official Deed PDF</span>
+              {isDownloading ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Downloading...</span>
+                </>
+              ) : (
+                <>
+                  <span>📜</span>
+                  <span>Download Official Deed PDF</span>
+                </>
+              )}
             </button>
             <button
               onClick={onClose}
