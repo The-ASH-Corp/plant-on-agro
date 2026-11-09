@@ -36,7 +36,7 @@ const TAB_TITLES: Record<BuyerDashboardTab, { title: string; subtitle: string; i
   },
   visits: {
     title: "Plantation Visits & Tours",
-    subtitle: "Phase 04 • Schedule plantation walks, inspect your trees & RAC wellness",
+    subtitle: "Phase 04 • Schedule plantation walks, inspect your trees & wellness nature trails",
     icon: "🗺️",
   },
 };

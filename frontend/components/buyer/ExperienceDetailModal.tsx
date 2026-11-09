@@ -147,7 +147,7 @@ export function ExperienceDetailModal({
             <div>
               <div className="text-xs font-bold text-[#173324]">{experience.location}</div>
               <div className="text-xs text-gray-500 mt-0.5">
-                Integrated Agro-Forestry & RAC Realty Destination. Arborist guides escort adopters to their exact tree coordinates.
+                Integrated Agro-Forestry & Living Sanctuary Destination. Arborist guides escort adopters to their exact tree coordinates.
               </div>
             </div>
           </div>

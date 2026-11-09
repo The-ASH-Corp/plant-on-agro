@@ -254,7 +254,7 @@ export class PdfKitCertificateGeneratorService implements IPdfGeneratorService {
       .fontSize(6.5)
       .fillColor('#52796f')
       .text(
-        `Issued on: ${issueDateStr} • Legally valid digital deed issued under the Indian Environmental & Agroforestry Stewardship Framework • Immutable Biological Custody • PlantOn Agro × RAC Realty`,
+        `Issued on: ${issueDateStr} • Legally valid digital deed issued under the Indian Environmental & Agroforestry Stewardship Framework • Immutable Biological Custody • PlantOn Agro Living Forest Network`,
         35,
         506,
         {

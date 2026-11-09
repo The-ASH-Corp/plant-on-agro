@@ -80,7 +80,7 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
             04 They Visit: Experience Your Living Forest
           </h1>
           <p className="text-emerald-100/90 text-sm sm:text-base leading-relaxed">
-            You plant. We grow. You track. <strong>Now, walk among your living legacy.</strong> Visit your dedicated trees in Kerala, pick fresh harvest produce, and unwind at the RAC Realty wellness sanctuary.
+            You plant. We grow. You track. <strong>Now, walk among your living legacy.</strong> Visit your dedicated trees in Kerala, pick fresh harvest produce, and unwind at our plantation eco-wellness sanctuary.
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <button
@@ -247,7 +247,7 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
         )}
       </div>
 
-      {/* Section 2: Explore Plantation & RAC Realty Experiences */}
+      {/* Section 2: Explore Plantation Experiences */}
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
@@ -255,7 +255,7 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
               Explore Experiences & Nature Tourism
             </h2>
             <p className="text-xs text-gray-500">
-              Agroforestry walks, seasonal harvests, and RAC Realty wellness therapies
+              Agroforestry walks, seasonal harvests, and restorative wellness therapies
             </p>
           </div>
 

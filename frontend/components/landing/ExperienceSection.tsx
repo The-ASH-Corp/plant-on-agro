@@ -51,7 +51,7 @@ export function ExperienceSection({ onScheduleVisit }: ExperienceSectionProps) {
             <span className="text-[#2d6a4f]">Now Walk Among Your Trees.</span>
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#52796f] leading-relaxed">
-            PlantOn is more than tree planting. Our flagship 30-acre Kerala destination connects living forests with productive fruit harvesting, heritage stays, and rejuvenating RAC Realty wellness experiences.
+            PlantOn is more than tree planting. Our flagship 30-acre Kerala destination connects living forests with productive fruit harvesting, heritage stays, and rejuvenating nature wellness experiences.
           </p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-[#173324]">
@@ -59,7 +59,7 @@ export function ExperienceSection({ onScheduleVisit }: ExperienceSectionProps) {
               🌲 20 Acres PlantOn Living Forest
             </span>
             <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-emerald-100 shadow-2xs">
-              🧖 10 Acres RAC Realty Wellness & Stays
+              🧖 10 Acres Nature Wellness & Eco-Stays
             </span>
             <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-emerald-100 shadow-2xs">
               📍 Flagship Project — Kerala | 2026
@@ -190,17 +190,17 @@ export function ExperienceSection({ onScheduleVisit }: ExperienceSectionProps) {
           </div>
         )}
 
-        {/* RAC Realty Partnership Banner */}
+        {/* Living Agroforestry Destination Banner */}
         <div className="mt-14 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#173324] via-[#1b4332] to-[#2d6a4f] text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold uppercase tracking-wider">
-              <span>PlantOn × RAC Realty × RAC Global Consortium</span>
+              <span>PlantOn Agro Living Sanctuary</span>
             </div>
             <h3 className="text-xl sm:text-2xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
               Nature Becomes The Destination
             </h3>
             <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed">
-              PlantOn creates the living forest. RAC Realty transforms the adjoining 10 acres into an experiential haven featuring heritage stays, farm-to-table dining, lotus ponds, mud therapy, and an Ayurvedic wellness spa.
+              PlantOn creates the living forest. Our adjoining 10 acres feature an experiential haven with heritage stays, farm-to-table dining, lotus ponds, mud therapy, and an Ayurvedic wellness spa.
             </p>
           </div>
 
