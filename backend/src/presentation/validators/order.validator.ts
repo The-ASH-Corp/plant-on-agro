@@ -63,6 +63,9 @@ export const updateOrderStatusSchema = z.object({
   status: adoptionOrderStatusEnum,
   notes: z.string().trim().optional(),
   gpsCoords: z.string().trim().optional(),
+  reserveName: z.string().trim().optional(),
+  treeTags: z.array(z.string().trim()).optional(),
+  assignedTreeInstanceIds: z.array(z.string().trim()).optional(),
 });
 
 export const getOrderByIdSchema = z.object({

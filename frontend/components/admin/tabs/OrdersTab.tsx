@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { Select } from "@/components/ui";
-import { AdoptionOrder, AdoptionOrderStatus } from "../types";
+import { AdoptionOrder, AdoptionOrderStatus, TreeInstanceItem } from "../types";
 import { orderService } from "@/services/orders/order.service";
 
 interface OrdersTabProps {
@@ -13,6 +13,8 @@ interface OrdersTabProps {
   onUpdateStatus?: (orderNumber: string, newStatus: AdoptionOrderStatus) => void;
   onMarkAllAsRead?: () => void;
   unreadCount?: number;
+  instances?: TreeInstanceItem[];
+  onOpenAssignTree?: (order: AdoptionOrder) => void;
 }
 
 const STATUS_CONFIG: Record<
@@ -62,6 +64,8 @@ export function OrdersTab({
   onUpdateStatus,
   onMarkAllAsRead,
   unreadCount = 0,
+  instances = [],
+  onOpenAssignTree,
 }: OrdersTabProps) {
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -303,11 +307,12 @@ export function OrdersTab({
       {/* Orders Data Table */}
       <div className="bg-white rounded-3xl border border-[#e2eae5] overflow-hidden shadow-xs">
         <div className="overflow-x-auto scrollbar-thin">
-          <table className="w-full text-left text-xs 3xl:text-sm min-w-[760px] 4k:min-w-[900px]">
+          <table className="w-full text-left text-xs 3xl:text-sm min-w-[860px] 4k:min-w-[1000px]">
             <thead className="bg-[#f7faf8] border-b border-[#e2eae5] text-[#7a8a80] uppercase tracking-wider font-bold">
               <tr>
                 <th className="py-4 px-4 3xl:px-6">Order / Adopter</th>
                 <th className="py-4 px-4 3xl:px-6">Species & Plan</th>
+                <th className="py-4 px-4 3xl:px-6">Assigned Tree</th>
                 <th className="py-4 px-4 3xl:px-6">Reserve Geotag</th>
                 <th className="py-4 px-4 3xl:px-6">Total Amount</th>
                 <th className="py-4 px-4 3xl:px-6">Status Workflow</th>
@@ -317,7 +322,7 @@ export function OrdersTab({
             <tbody className="divide-y divide-[#f0f4f1]">
               {totalCount === 0 && !isLoading ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-[#73877b]">
+                  <td colSpan={7} className="py-12 text-center text-[#73877b]">
                     <div className="text-3xl mb-2">🔍</div>
                     <div className="font-semibold text-sm text-[#173324]">No orders match this filter</div>
                     <p className="text-xs text-[#73877b] mt-1">Try resetting the status filter or search query</p>
@@ -327,6 +332,14 @@ export function OrdersTab({
                 displayOrders.map((order) => {
                   const isUnread = order.isRead === false || order.status === "New Request";
                   const config = STATUS_CONFIG[order.status] || STATUS_CONFIG["Certificate Issued"];
+
+                  // Find assigned tree instance tag if any
+                  const matchingInstance = instances.find(
+                    (inst) =>
+                      (inst.orderRef && (inst.orderRef === order.orderNumber || inst.orderRef === order.id)) ||
+                      (order.treeTag && inst.treeTag === order.treeTag)
+                  );
+                  const assignedTag = matchingInstance?.treeTag || order.treeTag;
 
                   return (
                     <tr
@@ -358,6 +371,43 @@ export function OrdersTab({
                         <span className="font-bold text-[#173324] block">{order.treeSpecies}</span>
                         <span className="text-[11px] text-[#55695d]">{order.planType}</span>
                       </td>
+
+                      {/* Explicit Tree Assignment Column */}
+                      <td className="py-3.5 px-4">
+                        {assignedTag ? (
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-mono text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-300">
+                              🏷️ {assignedTag}
+                            </span>
+                            {onOpenAssignTree && (
+                              <button
+                                type="button"
+                                onClick={() => onOpenAssignTree(order)}
+                                title="Change or reassign tree to user"
+                                className="text-[10px] text-emerald-700 hover:text-emerald-950 underline font-semibold cursor-pointer"
+                              >
+                                Change
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (onOpenAssignTree) {
+                                onOpenAssignTree(order);
+                              } else {
+                                handleStatusChange(order.orderNumber, "Planted");
+                              }
+                            }}
+                            className="px-2.5 py-1 text-[11px] font-bold text-white bg-gradient-to-r from-[#173324] to-[#1b7a43] hover:brightness-110 rounded-lg shadow-2xs transition-all cursor-pointer inline-flex items-center gap-1"
+                          >
+                            <span>🌱</span>
+                            <span>Assign Tree</span>
+                          </button>
+                        )}
+                      </td>
+
                       <td className="py-3.5 px-4">
                         <span className="text-[#173324] font-medium block">{order.reserveName}</span>
                         <span className="font-mono text-[10px] text-[#73877b]">{order.gpsCoords}</span>
@@ -371,24 +421,60 @@ export function OrdersTab({
                         </span>
                       </td>
 
-                      {/* Status changing dropdown selector */}
+                      {/* Sequential Purchase Status Workflow Controller */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
-                        <div className="relative inline-flex items-center">
-                          <Select
-                            id={`status-select-${order.orderNumber}`}
-                            value={order.status}
-                            onChange={(e) => {
-                              const newSt = e.target.value as AdoptionOrderStatus;
-                              handleStatusChange(order.orderNumber, newSt);
-                            }}
-                            className={`text-[11px] font-bold py-1.5 pl-3 pr-2.5 rounded-full border cursor-pointer outline-none transition-all ${config.badgeClass}`}
+                        <div className="flex items-center gap-2">
+                          {/* Current Status Badge */}
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border ${config.badgeClass}`}
                           >
-                            {ALL_STATUSES.map((st) => (
-                              <option key={st} value={st}>
-                                {st}
-                              </option>
-                            ))}
-                          </Select>
+                            <span className={`w-1.5 h-1.5 rounded-full ${config.dotClass}`} />
+                            {order.status}
+                          </span>
+
+                          {/* Strictly Monotonic, One-by-One Action Trigger */}
+                          {order.status === "New Request" && (
+                            <button
+                              type="button"
+                              onClick={() => handleStatusChange(order.orderNumber, "Verified & Tagged")}
+                              className="px-2.5 py-1 text-[10px] font-bold text-sky-700 bg-sky-50 border border-sky-300 hover:bg-sky-100 rounded-lg shadow-2xs transition-all cursor-pointer whitespace-nowrap"
+                            >
+                              Verify & Tag →
+                            </button>
+                          )}
+
+                          {order.status === "Verified & Tagged" && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (onOpenAssignTree) {
+                                  onOpenAssignTree(order);
+                                } else {
+                                  handleStatusChange(order.orderNumber, "Planted");
+                                }
+                              }}
+                              className="px-2.5 py-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 rounded-lg shadow-2xs transition-all cursor-pointer flex items-center gap-1 whitespace-nowrap animate-pulse"
+                            >
+                              <span>🌱</span>
+                              <span>Assign Tree & Mark Planted →</span>
+                            </button>
+                          )}
+
+                          {(order.status === "Planted" || order.status === "Certificate Issued") && (
+                            <button
+                              type="button"
+                              onClick={() => handleStatusChange(order.orderNumber, "Completed")}
+                              className="px-2.5 py-1 text-[10px] font-bold text-teal-800 bg-teal-50 border border-teal-300 hover:bg-teal-100 rounded-lg shadow-2xs transition-all cursor-pointer whitespace-nowrap"
+                            >
+                              Complete Order →
+                            </button>
+                          )}
+
+                          {order.status === "Completed" && (
+                            <span className="text-[10px] font-bold text-gray-400 select-none">
+                              ✓ Completed
+                            </span>
+                          )}
                         </div>
                       </td>
 

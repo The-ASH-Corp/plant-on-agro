@@ -125,12 +125,18 @@ export const orderService = {
     id: string,
     status: AdoptionOrderStatus,
     notes?: string,
-    gpsCoords?: string
+    gpsCoords?: string,
+    reserveName?: string,
+    treeTags?: string[],
+    assignedTreeInstanceIds?: string[]
   ): Promise<ApiResponse<BackendOrder>> {
     return apiClient.patch<BackendOrder>(API_ENDPOINTS.ORDERS.STATUS(id), {
       status,
       notes,
       gpsCoords,
+      reserveName,
+      treeTags,
+      assignedTreeInstanceIds,
     });
   },
 

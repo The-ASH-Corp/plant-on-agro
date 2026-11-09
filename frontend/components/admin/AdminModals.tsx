@@ -19,6 +19,7 @@ import { EditTreeInstanceModal } from "./modals/EditTreeInstanceModal";
 import { AddLocationModal } from "./modals/AddLocationModal";
 import { EditLocationModal } from "./modals/EditLocationModal";
 import { OrderDetailsModal } from "./modals/OrderDetailsModal";
+import { MarkOrderPlantedModal } from "./modals/MarkOrderPlantedModal";
 import { UserDetailsModal } from "./modals/UserDetailsModal";
 import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
 import { IssueCertificateModal } from "./modals/IssueCertificateModal";
@@ -133,6 +134,27 @@ export function AdminModals({
           setSelectedOrder(null);
         }}
         onUpdateStatus={orderActions.handleUpdateOrderStatus}
+        locations={data.locations}
+        instances={data.instances}
+        onOpenAssignTree={orderActions.handleOpenAssignTree}
+      />
+      <MarkOrderPlantedModal
+        isOpen={Boolean(orderActions.orderToMarkPlanted)}
+        order={orderActions.orderToMarkPlanted}
+        locations={data.locations}
+        instances={data.instances}
+        onClose={() => orderActions.setOrderToMarkPlanted(null)}
+        onSubmit={async (orderNumber, gpsCoords, reserveName, notes, treeTags, assignedTreeInstanceIds) => {
+          await orderActions.handleUpdateOrderStatus(
+            orderNumber,
+            "Planted",
+            gpsCoords,
+            reserveName,
+            notes,
+            treeTags,
+            assignedTreeInstanceIds
+          );
+        }}
       />
 
       {/* Certificates */}

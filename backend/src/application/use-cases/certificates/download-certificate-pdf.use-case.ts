@@ -3,7 +3,7 @@ import { ITreeInstanceRepository } from '../../../core/interfaces/tree-instance.
 import { IOrderRepository } from '../../../core/interfaces/order.repository.interface';
 import { IPdfGeneratorService } from '../../../core/interfaces/pdf-generator.interface';
 import { Certificate } from '../../../core/entities/certificate.entity';
-import { NotFoundError } from '../../../core/errors/app-error';
+import { NotFoundError, BadRequestError } from '../../../core/errors/app-error';
 import { env } from '../../../config/env';
 
 import { isValidObjectId } from 'mongoose';
@@ -56,7 +56,7 @@ export class DownloadCertificatePdfUseCase {
       certificate = await this.certificateRepository.findByCertificateHash(cleanId);
     }
 
-    // Fallback: if no certificate record exists yet in the certificates collection, check if a matching Order exists and auto-issue it
+    // Fallback: if no certificate record exists yet in the certificates collection, check order status
     if (!certificate && this.orderRepository) {
       let order = await this.orderRepository.findByOrderNumber(strippedOrderRef);
       if (!order && strippedOrderRef !== cleanId) {
@@ -67,6 +67,13 @@ export class DownloadCertificatePdfUseCase {
       }
 
       if (order) {
+        if (order.status === 'New Request' || order.status === 'Verified & Tagged') {
+          throw new BadRequestError(
+            `Certificate for order "${order.orderNumber}" is pending field planting (Current status: "${order.status}"). ` +
+              `An administrator must mark the order as "Planted" with verified geographical GPS coordinates before the digital deed can be downloaded.`
+          );
+        }
+
         const matchingInstances = await this.treeInstanceRepository.findByOrderRef(order.orderNumber);
         const firstInstance = matchingInstances[0];
         const certEntity = new Certificate({
@@ -90,6 +97,13 @@ export class DownloadCertificatePdfUseCase {
 
     if (!certificate) {
       throw new NotFoundError(`Certificate deed '${cleanId}'`);
+    }
+
+    if (certificate.status !== 'Issued') {
+      throw new BadRequestError(
+        `Certificate "${certificate.certificateNumber}" is currently in "${certificate.status}" status. ` +
+          `Official deed downloads are only available once the tree is physically planted and the deed is Issued.`
+      );
     }
 
     // 2. Fetch associated tree instance telemetry (GPS coordinates, health, arborist logs)

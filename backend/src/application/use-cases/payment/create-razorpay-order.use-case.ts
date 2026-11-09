@@ -59,11 +59,30 @@ export class CreateRazorpayOrderUseCase {
         unitTreePrice = firstWithPrice.price;
       }
 
-      // Randomly allocate a tree from the database for the user who is purchasing
-      const randomVariety = pool[Math.floor(Math.random() * pool.length)];
-      selectedVarietyName = randomVariety.commonName;
-      scientificName = randomVariety.scientificName;
-      category = randomVariety.category;
+      // Resolve requested variety if specified by the user, otherwise default cleanly (no random allocation)
+      if (dto.treeVarietyId && dto.treeVarietyId.trim().length > 0) {
+        const found = await this.treeVarietyRepository.findById(dto.treeVarietyId.trim());
+        if (found) {
+          selectedVarietyName = found.commonName;
+          scientificName = found.scientificName;
+          category = found.category;
+          if (found.price) unitTreePrice = found.price;
+        }
+      } else if (dto.treeSpecies && dto.treeSpecies.trim().length > 0) {
+        selectedVarietyName = dto.treeSpecies.trim();
+        const matched = pool.find(
+          (v) => v.commonName.toLowerCase() === dto.treeSpecies!.trim().toLowerCase()
+        );
+        if (matched) {
+          scientificName = matched.scientificName;
+          category = matched.category;
+          if (matched.price) unitTreePrice = matched.price;
+        }
+      } else {
+        selectedVarietyName = pool[0].commonName;
+        scientificName = pool[0].scientificName;
+        category = pool[0].category;
+      }
     }
 
     // 2. Resolve Plan Price Modifier from Server Database

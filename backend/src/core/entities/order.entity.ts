@@ -298,4 +298,9 @@ export class Order {
     this._gpsCoords = coords;
     this._updatedAt = new Date();
   }
+
+  public updateReserveName(reserve: string): void {
+    this._reserveName = reserve;
+    this._updatedAt = new Date();
+  }
 }

@@ -71,6 +71,9 @@ export interface AdoptionOrder {
   reserveName: string;
   gpsCoords: string;
   planType: string;
+  treeTag?: string;
+  treeTags?: string[];
+  assignedTreeInstanceIds?: string[];
   dedicationMessage?: string;
   quantity: number;
   totalAmount: number;

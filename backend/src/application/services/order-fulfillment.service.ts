@@ -99,115 +99,27 @@ export class OrderFulfillmentService {
           : existingRef || paymentId;
 
       freshOrder.updatePaymentStatus('Paid', combinedRef);
-      freshOrder.updateStatus('Planted');
+      freshOrder.updateStatus('New Request');
 
       const cleanOrderNumber = freshOrder.orderNumber.replace(/^POA-?/, '');
-      const certNumber = `POA-CERT-${new Date().getFullYear()}-${cleanOrderNumber}`;
-      freshOrder.setCertificateId(certNumber);
 
       await this.orderRepository.update(freshOrder);
       isFirstFulfillment = true;
 
-      // 2. Server-Side Idempotent Creation of Tree Instances
-      const speciesCode = (freshOrder.treeSpecies || 'TR').substring(0, 2).toUpperCase();
-      let createdTreeInstances = await this.treeInstanceRepository.findByOrderRef(freshOrder.orderNumber);
+      // 2. DO NOT automatically or randomly assign tree instances upon purchase.
+      // Tree instances must be explicitly assigned and managed by an Administrator
+      // when advancing the order to "Planted" status.
+      const createdTreeInstances: TreeInstance[] = [];
 
-      const baseCoords: Record<string, { lat: number; lng: number }> = {
-        'Wayanad Rainforest Reserve': { lat: 11.6854, lng: 76.132 },
-        'Western Ghats, Maharashtra': { lat: 19.9975, lng: 73.7898 },
-        'Nashik Valley, Maharashtra': { lat: 19.9975, lng: 73.7898 },
-        'Satara Plateau, Maharashtra': { lat: 17.6805, lng: 74.0183 },
-        'Pune Hills, Maharashtra': { lat: 18.5204, lng: 73.8567 },
-      };
-
-      let targetCoord = baseCoords[freshOrder.reserveName] || { lat: 11.6854, lng: 76.132 };
-      if (freshOrder.gpsCoords && freshOrder.gpsCoords.includes(',')) {
-        const [parsedLat, parsedLng] = freshOrder.gpsCoords.split(',').map((s) => Number(s.trim()));
-        if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
-          targetCoord = { lat: parsedLat, lng: parsedLng };
-        }
-      }
-
-      if (createdTreeInstances.length < freshOrder.quantity) {
-        const needed = freshOrder.quantity - createdTreeInstances.length;
-        const startIndex = createdTreeInstances.length;
-
-        for (let i = 0; i < needed; i++) {
-          const itemIndex = startIndex + i + 1;
-          const treeTag = `POA-${speciesCode}-${cleanOrderNumber}-${String(itemIndex).padStart(3, '0')}`;
-          const jitterLat = Number((targetCoord.lat + (Math.random() - 0.5) * 0.004).toFixed(4));
-          const jitterLng = Number((targetCoord.lng + (Math.random() - 0.5) * 0.004).toFixed(4));
-
-          const instance = new TreeInstance({
-            treeTag,
-            orderRef: freshOrder.orderNumber,
-            assignedReserve: freshOrder.reserveName,
-            gpsCoordinates: { latitude: jitterLat, longitude: jitterLng },
-            datePlanted: new Date(),
-            healthStatus: 'Sapling Growing',
-            treeVarietyName: freshOrder.treeSpecies,
-            adopterName: freshOrder.adopterName,
-            adopterEmail: freshOrder.adopterEmail,
-            notes: `Tree #${itemIndex} of ${freshOrder.quantity} adopted under "${freshOrder.planType}" lifetime stewardship. Geotagged & verified.`,
-            isActive: true,
-          });
-
-          try {
-            const savedInstance = await this.treeInstanceRepository.save(instance);
-            createdTreeInstances.push(savedInstance);
-          } catch (err: any) {
-            // Gracefully catch duplicate key collision and reuse existing record
-            if (err.code === 11000 || err.message?.includes('E11000')) {
-              const existing = await this.treeInstanceRepository.findByTag(treeTag);
-              if (existing) {
-                createdTreeInstances.push(existing);
-              }
-            } else {
-              throw err;
-            }
-          }
-        }
-      }
-
-      // 3. Server-Side Idempotent Creation of Digital Deed Certificate
+      // 3. Digital Deed Certificate: NEVER issued right after payment while order is 'New Request'.
+      // Certificate is officially minted only when Admin marks status as 'Planted' with exact GPS coordinates.
       let certificate: Certificate | null = null;
       const existingCerts = await this.certificateRepository.findByOrderRef(freshOrder.orderNumber);
-
-      if (existingCerts.length > 0) {
+      if (existingCerts.length > 0 && existingCerts[0].status === 'Issued') {
         certificate = existingCerts[0];
-      } else {
-        const newCertificate = new Certificate({
-          certificateNumber: certNumber,
-          orderRef: freshOrder.orderNumber,
-          recipientName: freshOrder.adopterName,
-          dedicatedMessage:
-            freshOrder.dedicationMessage ||
-            `Dedicated to ${freshOrder.adopterName} for sustainable forestry stewardship.`,
-          issueDate: new Date(),
-          treeTag: createdTreeInstances[0]?.treeTag || `POA-${speciesCode}-${cleanOrderNumber}-001`,
-          treeSpecies: freshOrder.treeSpecies,
-          reserveName: freshOrder.reserveName,
-          adopterName: freshOrder.adopterName,
-          status: 'Issued',
-          isActive: true,
-        });
-
-        try {
-          certificate = await this.certificateRepository.save(newCertificate);
-        } catch (err: any) {
-          // Gracefully catch duplicate key collision without 500 error and load existing
-          if (err.code === 11000 || err.message?.includes('E11000')) {
-            const existing =
-              (await this.certificateRepository.findByCertificateNumber(certNumber)) ||
-              (await this.certificateRepository.findByOrderRef(freshOrder.orderNumber))[0];
-            certificate = existing || null;
-          } else {
-            throw err;
-          }
-        }
       }
 
-      // 4. Dispatch Payment Complete with Invoice & Certificate Details Email (Only on initial fulfillment)
+      // 4. Dispatch Payment Complete with Invoice & Confirmation Email (Only on initial fulfillment)
       if (isFirstFulfillment && this.mailService && freshOrder.adopterEmail) {
         this.mailService
           .sendPaymentReceiptWithInvoiceEmail({
@@ -221,7 +133,7 @@ export class OrderFulfillmentService {
             planType: freshOrder.planType,
             reserveName: freshOrder.reserveName,
             quantity: freshOrder.quantity,
-            certificateNumber: certNumber,
+            certificateNumber: certificate ? certificate.certificateNumber : 'Unlocks Upon Field Planting',
             treeTags: createdTreeInstances.map((t) => t.treeTag),
             dedicationMessage: freshOrder.dedicationMessage,
           })

@@ -5,12 +5,14 @@ import { certificateService } from "@/services/certificates/certificate.service"
 
 interface BuyerCertificatesTabProps {
   trees: BackendTreeInstance[];
+  pendingTrees?: BackendTreeInstance[];
   userName?: string;
   onOpenModal: (tree: BackendTreeInstance) => void;
 }
 
 export function BuyerCertificatesTab({
   trees,
+  pendingTrees = [],
   userName,
   onOpenModal,
 }: BuyerCertificatesTabProps) {
@@ -30,6 +32,22 @@ export function BuyerCertificatesTab({
           {trees.length} Deeds Issued
         </span>
       </div>
+
+      {/* Notice for Adoptions Still Pending Planting */}
+      {pendingTrees.length > 0 && (
+        <div className="bg-amber-50/80 rounded-2xl p-4 border border-amber-200/90 text-amber-900 flex items-start gap-3 shadow-xs">
+          <span className="text-xl mt-0.5">⏳</span>
+          <div className="space-y-1">
+            <h4 className="text-xs font-bold uppercase tracking-wide">
+              {pendingTrees.length} {pendingTrees.length === 1 ? "Adoption" : "Adoptions"} Pending Field Planting
+            </h4>
+            <p className="text-xs text-amber-800 leading-relaxed">
+              Your tree adoption is confirmed! Our forestry team is currently preparing and nursery-tagging your sapling.
+              As soon as our arborist marks the order as <strong>Planted</strong> with verified ground GPS coordinates, your official certificate will be generated and available to inspect and download here.
+            </p>
+          </div>
+        </div>
+      )}
 
       {trees.length === 0 ? (
         <div className="bg-white rounded-2xl p-8 text-center border border-[#e2eae5] space-y-3 max-w-md mx-auto shadow-xs">

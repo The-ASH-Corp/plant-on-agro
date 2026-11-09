@@ -121,8 +121,10 @@ export function AdminTabContent({
       return (
         <OrdersTab
           orders={orders}
+          instances={instances}
           searchQuery={searchQuery}
           onSelectOrder={orderActions.handleSelectOrder}
+          onOpenAssignTree={orderActions.handleOpenAssignTree}
           onExportCSV={orderActions.handleExportOrdersCSV}
           onUpdateStatus={orderActions.handleUpdateOrderStatus}
           onMarkAllAsRead={orderActions.handleMarkAllOrdersAsRead}

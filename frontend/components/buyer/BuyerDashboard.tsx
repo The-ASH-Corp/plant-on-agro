@@ -324,6 +324,27 @@ export function BuyerDashboard() {
     [orders]
   );
 
+  // Filter trees based on whether they have been officially planted & geotagged
+  const plantedTreesWithCertificates = useMemo(() => {
+    return trees.filter((tree) => {
+      const order = orders.find((o) => o.orderNumber === tree.orderRef || o.id === tree.orderRef);
+      if (order) {
+        return order.status === "Planted" || order.status === "Certificate Issued" || order.status === "Completed";
+      }
+      return (tree.healthStatus as string) !== "Awaiting Planting" && (tree.healthStatus as string) !== "New Request";
+    });
+  }, [trees, orders]);
+
+  const pendingPlantingTrees = useMemo(() => {
+    return trees.filter((tree) => {
+      const order = orders.find((o) => o.orderNumber === tree.orderRef || o.id === tree.orderRef);
+      if (order) {
+        return order.status === "New Request" || order.status === "Verified & Tagged";
+      }
+      return false;
+    });
+  }, [trees, orders]);
+
   const kpiData: BuyerKpiData = {
     totalTrees,
     estimatedCO2,
@@ -400,6 +421,7 @@ export function BuyerDashboard() {
               {activeTab === "trees" && (
                 <BuyerTreesTab
                   trees={trees}
+                  orders={orders}
                   loading={loading}
                   onOpenPlantFlow={() => setPlantFlowOpen(true)}
                   onViewCertificate={(tree) => setSelectedCertificateTree(tree)}
@@ -409,7 +431,8 @@ export function BuyerDashboard() {
 
               {activeTab === "certificates" && (
                 <BuyerCertificatesTab
-                  trees={trees}
+                  trees={plantedTreesWithCertificates}
+                  pendingTrees={pendingPlantingTrees}
                   userName={user?.name}
                   onOpenModal={(tree) => setSelectedCertificateTree(tree)}
                 />

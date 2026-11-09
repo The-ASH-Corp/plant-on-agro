@@ -241,7 +241,10 @@ export class Container {
     Container.orderRepository
   );
   private static readonly updateOrderStatusUseCase = new UpdateOrderStatusUseCase(
-    Container.orderRepository
+    Container.orderRepository,
+    Container.treeInstanceRepository,
+    Container.certificateRepository,
+    Container.locationRepository
   );
   private static readonly markOrdersReadUseCase = new MarkOrdersReadUseCase(
     Container.orderRepository

@@ -1,14 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { Select } from "@/components/ui";
-import { AdoptionOrder, AdoptionOrderStatus } from "../types";
+import { useState, useEffect } from "react";
+import { AdoptionOrder, AdoptionOrderStatus, PlantationLocationItem, TreeInstanceItem } from "../types";
 
 interface OrderDetailsModalProps {
   order: AdoptionOrder | null;
   onClose: () => void;
   onDownloadCertificate: (certificateId: string) => void;
-  onUpdateStatus?: (orderNumber: string, newStatus: AdoptionOrderStatus) => void;
+  onUpdateStatus?: (
+    orderNumber: string,
+    newStatus: AdoptionOrderStatus,
+    gpsCoords?: string,
+    reserveName?: string,
+    notes?: string,
+    treeTags?: string[],
+    assignedTreeInstanceIds?: string[]
+  ) => void;
+  locations?: PlantationLocationItem[];
+  instances?: TreeInstanceItem[];
+  onOpenAssignTree?: (order: AdoptionOrder) => void;
 }
 
 const ALL_STATUSES: { value: AdoptionOrderStatus; label: string; desc: string; color: string }[] = [
@@ -46,22 +56,76 @@ const ALL_STATUSES: { value: AdoptionOrderStatus; label: string; desc: string; c
 
 export function OrderDetailsModal({
   order,
+  locations = [],
+  instances = [],
   onClose,
   onDownloadCertificate,
   onUpdateStatus,
+  onOpenAssignTree,
 }: OrderDetailsModalProps) {
   const [selectedStatus, setSelectedStatus] = useState<AdoptionOrderStatus | null>(null);
+  const [showPlantingInputs, setShowPlantingInputs] = useState(false);
+  const [gpsInput, setGpsInput] = useState("");
+  const [tagInput, setTagInput] = useState("");
+  const [reserveInput, setReserveInput] = useState("");
+  const [notesInput, setNotesInput] = useState("");
+
+  const matchingInstances = (instances || []).filter(
+    (inst) =>
+      (inst.orderRef && (inst.orderRef === order?.orderNumber || inst.orderRef === order?.id)) ||
+      (order?.treeTag && inst.treeTag === order?.treeTag)
+  );
+
+  const assignedTreeTags = matchingInstances.length > 0
+    ? matchingInstances.map((i) => i.treeTag).join(", ")
+    : (order?.treeTag || "");
+
+  useEffect(() => {
+    if (order) {
+      setSelectedStatus(null);
+      setShowPlantingInputs(false);
+      const res = order.reserveName || (locations[0]?.name ?? "Western Ghats, Maharashtra");
+      setReserveInput(res);
+      const match = locations.find((l) => l.name.toLowerCase() === res.toLowerCase());
+      setGpsInput(order.gpsCoords || match?.gps || "18.9894° N, 73.4428° E");
+      const speciesCode = (order.treeSpecies || "TR").substring(0, 2).toUpperCase();
+      const cleanOrderNumber = order.orderNumber.replace(/^POA-?/, "");
+      setTagInput(`POA-${speciesCode}-${cleanOrderNumber}-001`);
+      setNotesInput(order.notes || `Planted at verified reserve parcel for ${order.adopterName}.`);
+    }
+  }, [order, locations]);
 
   if (!order) return null;
 
   const currentStatus = selectedStatus || order.status;
   const isCertificateAvailable =
-    currentStatus === "Certificate Issued" || currentStatus === "Completed";
+    currentStatus === "Planted" ||
+    currentStatus === "Certificate Issued" ||
+    currentStatus === "Completed";
 
   const handleStatusChange = (newStatus: AdoptionOrderStatus) => {
+    if (newStatus === "Planted" && !gpsInput) {
+      setShowPlantingInputs(true);
+      return;
+    }
     setSelectedStatus(newStatus);
     if (onUpdateStatus) {
-      onUpdateStatus(order.orderNumber, newStatus);
+      onUpdateStatus(order.orderNumber, newStatus, gpsInput, reserveInput, notesInput);
+    }
+  };
+
+  const handleConfirmPlanted = () => {
+    setSelectedStatus("Planted");
+    setShowPlantingInputs(false);
+    if (onUpdateStatus) {
+      onUpdateStatus(
+        order.orderNumber,
+        "Planted",
+        gpsInput.trim(),
+        reserveInput.trim(),
+        notesInput.trim(),
+        tagInput.trim() ? [tagInput.trim().toUpperCase()] : undefined
+      );
     }
   };
 
@@ -72,7 +136,6 @@ export function OrderDetailsModal({
       case "Verified & Tagged":
         return "Planted";
       case "Planted":
-        return "Certificate Issued";
       case "Certificate Issued":
         return "Completed";
       default:
@@ -84,7 +147,7 @@ export function OrderDetailsModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-      <div className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-[#e2eae5] relative animate-fadeIn">
+      <div className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto no-scrollbar p-6 shadow-2xl border border-[#e2eae5] relative animate-fadeIn">
         <button
           onClick={onClose}
           className="absolute top-5 right-5 text-[#7a8a80] hover:text-[#173324] text-lg font-bold cursor-pointer"
@@ -109,11 +172,91 @@ export function OrderDetailsModal({
           {order.treeSpecies} Adoption Details
         </h3>
 
+        {/* Admin Tree Assignment Option Panel */}
+        <div
+          className={`p-4 mb-4 rounded-2xl border space-y-2.5 transition-all ${
+            assignedTreeTags
+              ? "bg-[#f2faf5] border-[#b4ddc3] text-[#173324]"
+              : "bg-gradient-to-r from-amber-50 to-[#fffdf5] border-amber-300 text-amber-950 shadow-xs"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🌲</span>
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-[#173324] block">
+                  Tree Assignment to Buyer
+                </span>
+                <span className="text-[11px] text-[#55695d]">
+                  {assignedTreeTags
+                    ? "Sapling officially linked to buyer's dashboard"
+                    : "Action Required: No tree specimen or RFID tag assigned yet"}
+                </span>
+              </div>
+            </div>
+            <span
+              className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
+                assignedTreeTags
+                  ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                  : "bg-amber-200 text-amber-900 border-amber-300 animate-pulse"
+              }`}
+            >
+              {assignedTreeTags ? "✓ Assigned" : "Not Assigned"}
+            </span>
+          </div>
+
+          {assignedTreeTags ? (
+            <div className="flex items-center justify-between pt-2 border-t border-[#c6e6d3] flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-bold text-xs bg-white text-emerald-800 px-2.5 py-1 rounded-lg border border-emerald-300 shadow-2xs">
+                  🏷️ {assignedTreeTags}
+                </span>
+                <span className="text-xs text-emerald-900 font-semibold">
+                  {order.treeSpecies}
+                </span>
+              </div>
+              {onOpenAssignTree && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenAssignTree(order);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-[#173324] hover:bg-[#1f4530] text-white font-bold text-xs transition-all cursor-pointer shadow-2xs flex items-center gap-1"
+                >
+                  <span>Reassign Tree ↺</span>
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-2 pt-1 border-t border-amber-200">
+              <p className="text-[11px] text-amber-900 leading-snug">
+                As Admin, you can assign an unassigned sapling from our nursery inventory or assign a custom physical RFID tag to <strong>{order.adopterName}</strong>.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  if (onOpenAssignTree) {
+                    onOpenAssignTree(order);
+                  } else {
+                    handleStatusChange("Planted");
+                  }
+                }}
+                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#173324] to-[#1b7a43] hover:brightness-110 text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>🌱</span>
+                <span>Assign Tree to User (Choose from Nursery / Enter Tag) →</span>
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Status Changing Option Panel */}
-        <div className="p-3.5 mb-4 rounded-2xl bg-[#f0faf4] border border-[#cbe9d8]">
+        <div className="p-4 mb-4 rounded-2xl bg-[#f0faf4] border border-[#cbe9d8]">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold uppercase tracking-wider text-[#173324]">
-              Workflow Status
+              Sequential Workflow Status
             </span>
             <span
               className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
@@ -125,33 +268,140 @@ export function OrderDetailsModal({
             </span>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <div className="flex-1">
-              <Select
-                id="select-order-modal-status"
-                value={currentStatus}
-                onChange={(e) => handleStatusChange(e.target.value as AdoptionOrderStatus)}
-                className="w-full text-xs font-medium py-2 px-3 rounded-xl border border-[#b2ddc4] bg-white text-[#173324] outline-none focus:border-[#1b7a43] focus:ring-1 focus:ring-[#1b7a43] cursor-pointer"
-              >
-                {ALL_STATUSES.map((st) => (
-                  <option key={st.value} value={st.value}>
-                    Status: {st.label}
-                  </option>
-                ))}
-              </Select>
-            </div>
+          {/* Sequential Step Progress Bar */}
+          <div className="grid grid-cols-4 gap-1.5 my-3">
+            {["New Request", "Verified & Tagged", "Planted", "Completed"].map((st, idx) => {
+              const stepIndex =
+                currentStatus === "New Request"
+                  ? 0
+                  : currentStatus === "Verified & Tagged"
+                  ? 1
+                  : currentStatus === "Planted" || currentStatus === "Certificate Issued"
+                  ? 2
+                  : 3;
+              const isPast = idx < stepIndex;
+              const isCurrent = idx === stepIndex;
+              return (
+                <div
+                  key={st}
+                  className={`text-center py-1 px-1 rounded-lg text-[9px] font-bold border transition-all ${
+                    isCurrent
+                      ? "bg-[#173324] text-white border-[#173324] shadow-xs"
+                      : isPast
+                      ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                      : "bg-white text-gray-400 border-gray-200"
+                  }`}
+                >
+                  {isPast ? "✓ " : `${idx + 1}. `}
+                  {st.replace("Verified & Tagged", "Tagged").replace("New Request", "New")}
+                </div>
+              );
+            })}
+          </div>
 
-            {nextStatus && (
+          {/* Sequential Action Controls */}
+          {currentStatus === "New Request" && (
+            <div className="mt-3">
               <button
                 type="button"
-                onClick={() => handleStatusChange(nextStatus)}
-                className="px-3 py-2 text-xs font-bold text-white bg-gradient-to-r from-[#1b7a43] to-[#2d6a4f] hover:brightness-105 rounded-xl shadow-xs transition-all cursor-pointer whitespace-nowrap"
+                onClick={() => handleStatusChange("Verified & Tagged")}
+                className="w-full py-2.5 px-4 text-xs font-bold text-white bg-gradient-to-r from-sky-600 to-sky-700 hover:brightness-105 rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
               >
-                Advance to: {nextStatus} →
+                <span>Advance to Step 2: Verified & Tagged →</span>
               </button>
-            )}
-          </div>
-          <p className="text-[11px] text-[#55695d] mt-2">
+            </div>
+          )}
+
+          {currentStatus === "Verified & Tagged" && (
+            <div className="mt-3 space-y-3 p-3 bg-white rounded-xl border border-emerald-300">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800">
+                <span>🌱</span> Step 3: Assign Geographical Location & Plant Tree
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-[#173324] mb-1">
+                  Planting Location (Selected by Buyer)
+                </label>
+                <div className="w-full text-xs font-semibold py-2 px-3 rounded-lg border border-[#d2e4d8] bg-[#f4f8f5] text-[#173324] flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 truncate">
+                    <span>📍</span> {reserveInput || order.reserveName || "—"}
+                  </span>
+                  <span className="text-[10px] font-bold text-[#687f72] uppercase tracking-wider shrink-0">🔒 Locked</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-[#173324] mb-1">
+                  Physical Tree Tag / RFID Serial <span className="text-emerald-600">*</span>
+                </label>
+                <div className="space-y-1.5">
+                  <input
+                    type="text"
+                    required
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    placeholder="e.g. POA-TK-2026-0042"
+                    className="w-full text-xs font-mono font-bold py-1.5 px-2.5 rounded-lg border border-[#b2ddc4] bg-[#fafcfb] text-[#173324] uppercase outline-none"
+                  />
+                  {onOpenAssignTree && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onOpenAssignTree(order);
+                      }}
+                      className="w-full py-1.5 px-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1"
+                    >
+                      <span>📦</span>
+                      <span>Or Select From Available Nursery Saplings Inventory →</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-[#173324] mb-1">
+                  Exact Ground GPS Coordinates <span className="text-emerald-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={gpsInput}
+                  onChange={(e) => setGpsInput(e.target.value)}
+                  placeholder="e.g. 18.9894° N, 73.4428° E"
+                  className="w-full text-xs font-mono font-bold py-1.5 px-2.5 rounded-lg border border-[#b2ddc4] bg-[#fafcfb] text-[#173324] outline-none"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={handleConfirmPlanted}
+                className="w-full py-2.5 px-4 text-xs font-bold text-white bg-gradient-to-r from-[#173324] to-[#1b7a43] hover:brightness-105 rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>Confirm Planting & Issue Certificate 📜</span>
+              </button>
+            </div>
+          )}
+
+          {(currentStatus === "Planted" || currentStatus === "Certificate Issued") && (
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={() => handleStatusChange("Completed")}
+                className="w-full py-2.5 px-4 text-xs font-bold text-white bg-gradient-to-r from-teal-700 to-teal-800 hover:brightness-105 rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>Finalize & Complete Order →</span>
+              </button>
+            </div>
+          )}
+
+          {currentStatus === "Completed" && (
+            <div className="mt-2 text-center text-xs font-bold text-emerald-800 bg-emerald-100/60 py-2 rounded-xl">
+              ✓ Order fully mature & registered in permanent living ledger
+            </div>
+          )}
+
+          <p className="text-[11px] text-[#55695d] mt-2.5">
             {ALL_STATUSES.find((s) => s.value === currentStatus)?.desc}
           </p>
         </div>
@@ -177,6 +427,25 @@ export function OrderDetailsModal({
               <span className="font-mono font-semibold text-[#1b7a43]">{order.invoiceNumber}</span>
             </div>
           )}
+          <div className="flex justify-between items-center py-1.5 px-2 rounded-xl bg-emerald-50/70 border border-emerald-200">
+            <span className="text-[#173324] font-bold">Assigned Living Tree:</span>
+            <span className="font-mono font-bold text-xs text-[#1b7a43] flex items-center gap-1.5">
+              {assignedTreeTags ? (
+                <span>🏷️ {assignedTreeTags}</span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenAssignTree?.(order);
+                  }}
+                  className="text-xs font-bold text-[#1b7a43] underline cursor-pointer"
+                >
+                  + Assign Tree Now
+                </button>
+              )}
+            </span>
+          </div>
           <div className="flex justify-between">
             <span className="text-[#7a8a80]">Botanical Name:</span>
             <span className="font-semibold italic text-[#173324]">{order.scientificName}</span>

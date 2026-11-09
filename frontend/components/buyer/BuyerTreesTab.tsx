@@ -5,6 +5,7 @@ import { BackendTreeInstance } from "@/services/tree-instances/tree-instance.ser
 
 interface BuyerTreesTabProps {
   trees: BackendTreeInstance[];
+  orders?: any[];
   loading: boolean;
   onOpenPlantFlow: () => void;
   onViewCertificate: (tree: BackendTreeInstance) => void;
@@ -13,6 +14,7 @@ interface BuyerTreesTabProps {
 
 export function BuyerTreesTab({
   trees,
+  orders = [],
   loading,
   onOpenPlantFlow,
   onViewCertificate,
@@ -21,13 +23,14 @@ export function BuyerTreesTab({
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
 
-  const filteredTrees = trees.filter((tree: any) => {
-    const variety = tree?.treeVarietyName || tree?._treeVarietyName || "Indigenous Tree";
-    const tag = tree?.treeTag || tree?._treeTag || "";
-    const reserve = tree?.assignedReserve || tree?._assignedReserve || "";
-    const health = tree?.healthStatus || tree?._healthStatus || "Healthy";
+  const filteredTrees = (trees || []).filter((tree: any) => {
+    if (!tree) return false;
+    const variety = String(tree?.treeVarietyName || tree?._treeVarietyName || "Indigenous Tree");
+    const tag = String(tree?.treeTag || tree?._treeTag || "");
+    const reserve = String(tree?.assignedReserve || tree?._assignedReserve || "");
+    const health = String(tree?.healthStatus || tree?._healthStatus || "Healthy");
 
-    const term = (searchTerm || "").toLowerCase();
+    const term = (searchTerm || "").toLowerCase().trim();
     const matchesSearch =
       variety.toLowerCase().includes(term) ||
       tag.toLowerCase().includes(term) ||
@@ -142,6 +145,13 @@ export function BuyerTreesTab({
             const notes = tree.notes || tree._notes || "";
             const imageUrl = tree.imageUrl || tree._imageUrl;
 
+            const matchingOrder = orders?.find(
+              (o: any) => o.orderNumber === orderRef || o.id === orderRef
+            );
+            const isPendingPlanting = matchingOrder
+              ? matchingOrder.status === "New Request" || matchingOrder.status === "Verified & Tagged"
+              : false;
+
             return (
               <div
                 key={treeId}
@@ -179,10 +189,17 @@ export function BuyerTreesTab({
 
                     {/* Health Status Pill */}
                     <div className="absolute top-3 right-3">
-                      <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-emerald-600/90 text-white border border-emerald-400/40 backdrop-blur-md flex items-center gap-1 shadow-xs">
-                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                        {healthStatus}
-                      </span>
+                      {isPendingPlanting ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-amber-500/90 text-white border border-amber-400/40 backdrop-blur-md flex items-center gap-1 shadow-xs">
+                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                          Awaiting Planting
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-emerald-600/90 text-white border border-emerald-400/40 backdrop-blur-md flex items-center gap-1 shadow-xs">
+                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                          {healthStatus}
+                        </span>
+                      )}
                     </div>
 
                     {/* Title overlay in image banner */}
@@ -212,7 +229,7 @@ export function BuyerTreesTab({
                       <div>
                         <span className="text-[9px] font-semibold text-[#52796f] block">GPS Telemetry</span>
                         <span className="font-mono text-[#173324] font-bold text-[11px] truncate block">
-                          {formattedGps}
+                          {isPendingPlanting ? "Pending Geotag" : formattedGps}
                         </span>
                       </div>
 
@@ -224,13 +241,13 @@ export function BuyerTreesTab({
                       <div>
                         <span className="text-[9px] font-semibold text-[#52796f] block">Field Inspection</span>
                         <span className="text-emerald-700 font-bold text-[11px] flex items-center gap-1">
-                          <span>🌿</span> {lastInspectedAt || "Recently Audited"}
+                          <span>🌿</span> {lastInspectedAt || (isPendingPlanting ? "In Nursery" : "Recently Audited")}
                         </span>
                       </div>
 
                       <div>
                         <span className="text-[9px] font-semibold text-[#52796f] block">Vigor & Canopy</span>
-                        <span className="text-emerald-700 font-bold text-[11px]">99% Optimal</span>
+                        <span className="text-emerald-700 font-bold text-[11px]">{isPendingPlanting ? "Sapling Ready" : "99% Optimal"}</span>
                       </div>
                     </div>
 
@@ -270,13 +287,23 @@ export function BuyerTreesTab({
                       </button>
                     )}
 
-                    <button
-                      onClick={() => onViewCertificate(tree)}
-                      className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#173324] to-[#1e4433] text-white hover:scale-105 font-bold cursor-pointer transition-transform shadow-xs flex items-center gap-1 text-xs"
-                    >
-                      <span>📜</span>
-                      <span>View Deed</span>
-                    </button>
+                    {isPendingPlanting ? (
+                      <span
+                        title="Official certificate unlocks once our forestry team plants the sapling with verified ground GPS coordinates"
+                        className="px-3 py-1.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-300 font-bold select-none flex items-center gap-1 text-xs"
+                      >
+                        <span>⏳</span>
+                        <span>Deed Pending</span>
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => onViewCertificate(tree)}
+                        className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#173324] to-[#1e4433] text-white hover:scale-105 font-bold cursor-pointer transition-transform shadow-xs flex items-center gap-1 text-xs"
+                      >
+                        <span>📜</span>
+                        <span>View Deed</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
