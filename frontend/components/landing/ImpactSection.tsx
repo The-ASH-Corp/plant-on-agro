@@ -57,6 +57,17 @@ export function ImpactSection({ content, liveStats, liveProjects }: ImpactSectio
       ? liveProjects
       : [];
 
+  const statsGridCols =
+    stats.length === 1
+      ? "grid-cols-1 max-w-sm"
+      : stats.length === 2
+      ? "grid-cols-1 sm:grid-cols-2 max-w-2xl"
+      : stats.length === 3
+      ? "grid-cols-1 sm:grid-cols-3 max-w-4xl"
+      : stats.length === 4
+      ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 max-w-6xl"
+      : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 max-w-7xl";
+
   return (
     <section
       id="impact"
@@ -95,11 +106,11 @@ export function ImpactSection({ content, liveStats, liveProjects }: ImpactSectio
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-6 mb-20">
+        <div className={`grid ${statsGridCols} gap-5 sm:gap-6 lg:gap-7 mb-20 mx-auto w-full items-stretch`}>
           {stats.map((s, idx) => (
             <div
               key={`${s.label}-${idx}`}
-              className="text-center p-6 rounded-2xl transition-transform duration-300 hover:-translate-y-1"
+              className="text-center p-6 rounded-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col items-center justify-center backdrop-blur-xs"
               style={{
                 background: "rgba(255,255,255,0.05)",
                 border: "1px solid rgba(82,183,136,0.15)",
@@ -108,11 +119,11 @@ export function ImpactSection({ content, liveStats, liveProjects }: ImpactSectio
               <div className="text-3xl mb-3">{s.icon}</div>
               <div
                 style={{ fontFamily: "var(--font-display)", color: s.color }}
-                className="text-3xl md:text-4xl mb-1"
+                className="text-3xl md:text-4xl mb-1 font-bold"
               >
                 <Counter target={s.value} suffix={s.suffix} />
               </div>
-              <div className="text-white/50 text-xs font-medium leading-snug mt-1">{s.label}</div>
+              <div className="text-white/60 text-xs font-medium leading-snug mt-1">{s.label}</div>
             </div>
           ))}
         </div>
