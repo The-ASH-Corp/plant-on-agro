@@ -102,7 +102,7 @@ export function AdoptionPlans({ openPlant }: AdoptionPlansProps) {
       : plans.filter((p) => (p.occasionDedications || ["general"]).includes(activeOccasion));
 
   return (
-    <section id="plans" className="py-28" style={{ background: "var(--color-cream)" }}>
+    <section id="plans" className="py-28 scroll-mt-20" style={{ background: "var(--color-cream)" }}>
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-100/80 border border-emerald-200 text-[#2d6a4f] text-xs font-bold uppercase tracking-wider mb-3">
