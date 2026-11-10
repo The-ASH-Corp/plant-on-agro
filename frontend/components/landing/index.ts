@@ -13,3 +13,5 @@ export type { ImpactSectionProps } from "./ImpactSection";
 export { CertificateSection } from "./CertificateSection";
 export type { CertificateSectionProps } from "./CertificateSection";
 export { ExperienceSection } from "./ExperienceSection";
+export { VisionCampaignSection } from "./VisionCampaignSection";
+export { VisionDonationModal } from "./VisionDonationModal";

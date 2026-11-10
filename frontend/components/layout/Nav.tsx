@@ -41,7 +41,7 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
     { label: "Home", id: "home", href: "/" },
     { label: "How It Works", id: "how-it-works", href: "/#how-it-works" },
     { label: "Plans", id: "plans" as any, href: "/#plans" },
-    { label: "Experiences", id: "experiences", href: "/#experiences" },
+    { label: "2M Vision", id: "vision", href: "/#vision-2m" },
     { label: "Impact", id: "impact", href: "/#impact" },
   ];
 

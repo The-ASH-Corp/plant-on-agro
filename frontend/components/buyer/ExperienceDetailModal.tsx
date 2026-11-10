@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ExperienceItem } from "@/services/experiences/experience.service";
+import { getMediaUrl, handleImageError } from "@/services/media/media.service";
 
 interface ExperienceDetailModalProps {
   experience: ExperienceItem;
@@ -26,8 +27,9 @@ export function ExperienceDetailModal({
         {/* Main Photo Gallery Hero */}
         <div className="relative h-64 sm:h-80 w-full bg-black overflow-hidden group">
           <img
-            src={images[activeImageIdx]}
+            src={getMediaUrl(images[activeImageIdx])}
             alt={experience.title}
+            onError={handleImageError}
             className="w-full h-full object-cover transition-all duration-300"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -91,7 +93,12 @@ export function ExperienceDetailModal({
                   activeImageIdx === idx ? "border-[#2d6a4f] ring-2 ring-[#2d6a4f]/30 scale-105" : "border-transparent opacity-70 hover:opacity-100"
                 }`}
               >
-                <img src={img} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
+                <img
+                  src={getMediaUrl(img)}
+                  alt={`Thumb ${idx}`}
+                  onError={handleImageError}
+                  className="w-full h-full object-cover"
+                />
               </button>
             ))}
             <span className="text-[11px] text-gray-400 ml-auto whitespace-nowrap pl-2">

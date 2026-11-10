@@ -20,6 +20,7 @@ export interface CreatePaymentOrderPayload {
   adopterPhone?: string;
   dedicationMessage?: string;
   amount?: number;
+  isDonation?: boolean;
   receipt?: string;
 }
 

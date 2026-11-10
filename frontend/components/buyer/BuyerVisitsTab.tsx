@@ -6,7 +6,9 @@ import { ExperienceItem, experienceService } from "@/services/experiences/experi
 import { VisitBookingRecord, visitService } from "@/services/visits/visit.service";
 import { BookVisitModal } from "./BookVisitModal";
 import { AddVisitMemoryModal } from "./AddVisitMemoryModal";
+import { ViewVisitMemoriesModal } from "./ViewVisitMemoriesModal";
 import { ExperienceDetailModal } from "./ExperienceDetailModal";
+import { getMediaUrl, handleImageError } from "@/services/media/media.service";
 import { User } from "@/types/auth";
 
 interface BuyerVisitsTabProps {
@@ -26,6 +28,7 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
   const [selectedExpForBooking, setSelectedExpForBooking] = useState<ExperienceItem | null>(null);
   const [detailExp, setDetailExp] = useState<ExperienceItem | null>(null);
   const [memoryBooking, setMemoryBooking] = useState<VisitBookingRecord | null>(null);
+  const [viewingMemoriesBooking, setViewingMemoriesBooking] = useState<VisitBookingRecord | null>(null);
 
   const loadData = async () => {
     try {
@@ -224,14 +227,25 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
                 </div>
 
                 {/* Footer Buttons */}
-                <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-[11px] text-gray-500">
-                    {booking.memories?.length || 0} Photos Recorded
-                  </span>
+                <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+                  {booking.memories && booking.memories.length > 0 ? (
+                    <button
+                      onClick={() => setViewingMemoriesBooking(booking)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold text-[#173324] bg-emerald-100/80 hover:bg-emerald-200 border border-emerald-300 transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs group"
+                      title="View all photos recorded for this visit"
+                    >
+                      <span>🖼️ View Photos ({booking.memories.length})</span>
+                      <span className="text-emerald-700 font-bold group-hover:translate-x-0.5 transition-transform">→</span>
+                    </button>
+                  ) : (
+                    <span className="text-[11px] text-gray-400 font-medium">
+                      0 Photos Recorded
+                    </span>
+                  )}
                   {booking.status !== "Cancelled" ? (
                     <button
                       onClick={() => setMemoryBooking(booking)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#2d6a4f] bg-emerald-50 hover:bg-emerald-100 transition-all cursor-pointer flex items-center gap-1.5"
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#2d6a4f] bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all cursor-pointer flex items-center gap-1.5"
                     >
                       <span>📸 Add Visit Photos</span>
                     </button>
@@ -298,8 +312,9 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
                   onClick={() => setDetailExp(exp)}
                 >
                   <img
-                    src={exp.featuredImage || exp.galleryImages[0]}
+                    src={getMediaUrl(exp.featuredImage || exp.galleryImages[0])}
                     alt={exp.title}
+                    onError={handleImageError}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -407,11 +422,27 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {allMemories.map((mem, idx) => (
-              <div key={idx} className="group relative rounded-xl overflow-hidden aspect-square border border-gray-100 shadow-xs">
-                <img src={mem.imageUrl} alt={mem.caption} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-2.5 flex flex-col justify-end text-white text-xs">
+              <div
+                key={idx}
+                onClick={() => {
+                  const matched = visits.find((v) => v.bookingReference === mem.bookingRef);
+                  if (matched) {
+                    setViewingMemoriesBooking(matched);
+                  }
+                }}
+                className="group relative rounded-xl overflow-hidden aspect-square border border-gray-100 shadow-xs hover:shadow-md transition-all cursor-pointer"
+                title="Click to view visit memory album"
+              >
+                <img
+                  src={getMediaUrl(mem.imageUrl)}
+                  alt={mem.caption || `Field memory ${idx + 1}`}
+                  onError={handleImageError}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-2.5 flex flex-col justify-end text-white text-xs">
                   <p className="font-medium line-clamp-2">{mem.caption}</p>
                   <span className="text-[10px] text-emerald-200 mt-1">{mem.reserve}</span>
+                  <span className="text-[9px] text-emerald-300 font-semibold mt-0.5">Click to view in album ↗</span>
                 </div>
               </div>
             ))}
@@ -457,6 +488,18 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
           onSuccess={() => {
             setMemoryBooking(null);
             loadData();
+          }}
+        />
+      )}
+
+      {viewingMemoriesBooking && (
+        <ViewVisitMemoriesModal
+          booking={viewingMemoriesBooking}
+          onClose={() => setViewingMemoriesBooking(null)}
+          onAddMorePhotos={() => {
+            const target = viewingMemoriesBooking;
+            setViewingMemoriesBooking(null);
+            setMemoryBooking(target);
           }}
         />
       )}
