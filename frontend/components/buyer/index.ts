@@ -11,6 +11,7 @@ export { BuyerOrdersTab } from "./BuyerOrdersTab";
 export { BuyerVisitsTab } from "./BuyerVisitsTab";
 export { BookVisitModal } from "./BookVisitModal";
 export { AddVisitMemoryModal } from "./AddVisitMemoryModal";
+export { ViewVisitMemoriesModal } from "./ViewVisitMemoriesModal";
 export { ExperienceDetailModal } from "./ExperienceDetailModal";
 export { CertificateModal } from "./CertificateModal";
 export { TreeInspectModal } from "./TreeInspectModal";

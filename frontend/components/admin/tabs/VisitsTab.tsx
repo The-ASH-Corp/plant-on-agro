@@ -5,6 +5,7 @@ import { VisitBookingRecord, visitService } from "@/services/visits/visit.servic
 import { ExperienceItem, experienceService } from "@/services/experiences/experience.service";
 import { AddExperienceModal } from "../modals/AddExperienceModal";
 import { DeleteConfirmationModal } from "../modals/DeleteConfirmationModal";
+import { getMediaUrl, handleImageError } from "@/services/media/media.service";
 import type { ShowToast } from "../hooks/useAdminToast";
 
 interface VisitsTabProps {
@@ -247,6 +248,11 @@ export function VisitsTab({ showToast }: VisitsTabProps) {
                         <td className="p-3.5 font-mono">
                           <span className="font-bold text-gray-900">{b.bookingReference}</span>
                           <span className="block text-[10px] text-gray-400 font-sans">Pass: {b.guestPassCode}</span>
+                          {b.memories && b.memories.length > 0 && (
+                            <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-sans">
+                              📸 {b.memories.length} Photos
+                            </span>
+                          )}
                         </td>
                         <td className="p-3.5">
                           <span className="font-semibold text-gray-900 block">{b.adopterName}</span>
@@ -388,8 +394,9 @@ export function VisitsTab({ showToast }: VisitsTabProps) {
                     {/* Multi-Image Gallery Strip Preview */}
                     <div className="relative h-44 w-full bg-black overflow-hidden">
                       <img
-                        src={exp.featuredImage || exp.galleryImages[0]}
+                        src={getMediaUrl(exp.featuredImage || exp.galleryImages[0])}
                         alt={exp.title}
+                        onError={handleImageError}
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
@@ -421,8 +428,9 @@ export function VisitsTab({ showToast }: VisitsTabProps) {
                           {exp.galleryImages.map((img, idx) => (
                             <img
                               key={idx}
-                              src={img}
+                              src={getMediaUrl(img)}
                               alt="thumb"
+                              onError={handleImageError}
                               className="w-8 h-8 rounded object-cover border border-gray-200 shrink-0"
                             />
                           ))}

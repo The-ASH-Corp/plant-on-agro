@@ -14,4 +14,5 @@ export * from './experiences/experience.service';
 export * from './visits/visit.service';
 export * from './upload/upload.service';
 export * from './payment/payment.service';
+export * from './media/media.service';
 

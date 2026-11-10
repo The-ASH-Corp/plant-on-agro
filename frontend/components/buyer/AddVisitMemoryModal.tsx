@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { VisitBookingRecord, visitService } from "@/services/visits/visit.service";
 import { uploadService } from "@/services/upload/upload.service";
+import { getMediaUrl, handleImageError } from "@/services/media/media.service";
 
 interface AddVisitMemoryModalProps {
   booking: VisitBookingRecord;
@@ -170,7 +171,12 @@ export function AddVisitMemoryModal({
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 p-2 bg-[#f9fbf9] rounded-xl border border-gray-200">
                 {imageUrls.map((url, idx) => (
                   <div key={idx} className="relative group rounded-lg overflow-hidden aspect-square border border-gray-200">
-                    <img src={url} alt={`Memory ${idx}`} className="w-full h-full object-cover" />
+                    <img
+                      src={getMediaUrl(url)}
+                      alt={`Memory ${idx}`}
+                      onError={handleImageError}
+                      className="w-full h-full object-cover"
+                    />
                     <button
                       type="button"
                       onClick={() => removeImage(idx)}
