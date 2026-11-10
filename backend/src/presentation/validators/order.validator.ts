@@ -60,9 +60,15 @@ export const createOrderSchema = z.object({
 });
 
 export const updateOrderStatusSchema = z.object({
-  status: adoptionOrderStatusEnum,
+  status: adoptionOrderStatusEnum.optional(),
   notes: z.string().trim().optional(),
   gpsCoords: z.string().trim().optional(),
+  reserveName: z.string().trim().optional(),
+  treeTags: z.array(z.string().trim()).optional(),
+  assignedTreeInstanceIds: z.array(z.string().trim()).optional(),
+  treeSpecies: z.string().trim().optional(),
+  scientificName: z.string().trim().optional(),
+  category: z.string().trim().optional(),
 });
 
 export const getOrderByIdSchema = z.object({

@@ -118,7 +118,7 @@ export function LivePreviewModal({
                 <h3 className="text-xl font-bold">{content.impact.title}</h3>
                 <p className="text-xs text-white/70 mt-1">{content.impact.description}</p>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+              <div className={`grid ${content.impact.stats.length === 4 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-2 md:grid-cols-5"} gap-3 mb-6`}>
                 {content.impact.stats.map((s, i) => (
                   <div key={i} className="text-center p-3 rounded-xl bg-white/5 border border-white/10">
                     <div className="text-xl mb-1">{s.icon}</div>

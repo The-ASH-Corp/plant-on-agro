@@ -7,6 +7,7 @@ export interface BackendAdoptionPlan {
   id: string;
   planLabel: string;
   icon: string;
+  price?: number;
   priceModifier: number;
   description: string;
   features: string[];
@@ -28,6 +29,7 @@ export interface AdoptionPlansListResponse {
 export interface CreateAdoptionPlanPayload {
   planLabel: string;
   icon?: string;
+  price?: number;
   priceModifier?: number;
   description: string;
   features?: string[];
@@ -39,6 +41,7 @@ export interface CreateAdoptionPlanPayload {
 export interface UpdateAdoptionPlanPayload {
   planLabel?: string;
   icon?: string;
+  price?: number;
   priceModifier?: number;
   description?: string;
   features?: string[];
@@ -91,6 +94,7 @@ export const adoptionPlanService = {
 
   // Helper mapper to UI model
   mapToUiItem(item: BackendAdoptionPlan): AdoptionPlanItem {
+    const rawPrice = typeof item.price === 'number' && item.price > 0 ? item.price : item.priceModifier;
     return {
       id: item.id,
       label: item.planLabel,
@@ -98,8 +102,8 @@ export const adoptionPlanService = {
       icon: item.icon || '🌱',
       desc: item.description,
       description: item.description,
-      price: item.priceModifier,
-      priceModifier: item.priceModifier,
+      price: rawPrice,
+      priceModifier: rawPrice,
       features: item.features || [],
       occasionDedications: item.occasionDedications || ['general'],
       badge: item.badge || 'Standard',

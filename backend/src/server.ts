@@ -4,6 +4,7 @@ import { env } from './config/env';
 import { Database } from './infrastructure/database/connection';
 import { redisService } from './infrastructure/redis/redis.client';
 import { ensureRedisContainerAsync } from './infrastructure/redis/redis-docker.helper';
+import { seedAdoptionPlansIfEmpty } from './infrastructure/database/seeds/adoption-plan.seeder';
 
 const bootstrap = async (): Promise<void> => {
   try {
@@ -12,6 +13,7 @@ const bootstrap = async (): Promise<void> => {
 
     // 1. Initialize Database connection
     await Database.connect();
+    await seedAdoptionPlansIfEmpty();
 
     // 2. Initialize Express application
     const app = createApp();

@@ -213,13 +213,14 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
     };
   }, [initialPlanId]);
 
-  const universalPrice =
-    trees.length > 0 && typeof trees[0].price === "number"
-      ? trees[0].price
-      : selectedTree?.price ?? 349;
   const selectedPlanData = plans.find((p) => p.id === selectedPlan);
-  const pricePerTree = universalPrice + (selectedPlanData?.price ?? 0);
-  const total = pricePerTree * qty;
+  // In this project, the amount is strictly for the PLAN, NOT for the tree.
+  const planPrice =
+    selectedPlanData && typeof selectedPlanData.price === "number" && selectedPlanData.price > 0
+      ? selectedPlanData.price
+      : 25000;
+  const pricePerTree = planPrice;
+  const total = planPrice * qty;
 
   const isOtherPlan = Boolean(
     selectedPlanData &&
@@ -268,95 +269,26 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
     // 1. Physical Tree Instance Records for Database
     const newInstances: any[] = [];
     if (serverData?.treeInstances && Array.isArray(serverData.treeInstances) && serverData.treeInstances.length > 0) {
-      newInstances.push(...serverData.treeInstances);
-    } else {
-      for (let i = 0; i < qty; i++) {
-        const serialNum = Math.floor(1000 + Math.random() * 9000);
-        // Randomly allocate tree variety from DB for this adoption instance
-        const allocatedTree =
-          trees.length > 0
-            ? trees[Math.floor(Math.random() * trees.length)]
-            : selectedTree;
-        const currentSpecies = allocatedTree?.name || selectedTree?.name || "Indigenous Sapling";
-        const currentImg =
-          allocatedTree?.img ||
-          selectedTree?.img ||
-          "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format";
-        const speciesShort = currentSpecies.substring(0, 2).toUpperCase();
-        const treeTag = `POA-${speciesShort}-${serialNum}`;
-        const jitterLat = Number(
-          (chosenCoords.lat + (Math.random() - 0.5) * 0.004).toFixed(4)
-        );
-        const jitterLng = Number(
-          (chosenCoords.lng + (Math.random() - 0.5) * 0.004).toFixed(4)
-        );
-
-        const noteText =
-          qty > 1
-            ? `Tree #${i + 1} of ${qty} adopted under "${effectivePlanLabel}" lifetime package. Physical nursery tagging and geotagging completed.`
-            : `Adopted under "${effectivePlanLabel}" lifetime package. Physical nursery tagging and geotagging completed.`;
-
-        // Persist to MongoDB through backend API
-        try {
-          const createdTreeRes = await treeInstanceService.create({
-            treeTag,
-            orderRef: orderId,
-            assignedReserve: location || "Flagship Living Forest — Wayanad, Kerala",
-            gpsCoordinates: { latitude: jitterLat, longitude: jitterLng },
-            datePlanted: new Date().toISOString(),
-            healthStatus: "Sapling Growing",
-            treeVarietyName: currentSpecies,
-            adopterName: name || user?.name || "Verified Adopter",
-            adopterEmail: email || user?.email || "adopter@example.com",
-            notes: noteText,
-            imageUrl: currentImg,
-          });
-
-          if (createdTreeRes.data) {
-            newInstances.push({
-              id: createdTreeRes.data.id,
-              treeTag: createdTreeRes.data.treeTag,
-              orderRef: createdTreeRes.data.orderRef,
-              assignedReserve: createdTreeRes.data.assignedReserve,
-              gpsCoordinates: createdTreeRes.data.gpsCoordinates,
-              formattedGps: `${jitterLat}° N, ${jitterLng}° E`,
-              datePlanted: formattedDate,
-              healthStatus: "Sapling Growing" as const,
-              treeVarietyName: currentSpecies,
-              adopterName: name || user?.name || "Verified Adopter",
-              adopterEmail: email || user?.email || "adopter@example.com",
-              notes: noteText,
-              imageUrl: currentImg,
-              lastInspectedAt: dateStr,
-              isActive: true,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            });
-          }
-        } catch (saveErr) {
-          console.warn("Could not save instance via API, fallback to memory record:", saveErr);
-          newInstances.push({
-            id: `inst-${Date.now()}-${i}`,
-            treeTag: treeTag,
-            orderRef: orderId,
-            assignedReserve: location || "Flagship Living Forest — Wayanad, Kerala",
-            gpsCoordinates: { latitude: jitterLat, longitude: jitterLng },
-            formattedGps: `${jitterLat}° N, ${jitterLng}° E`,
-            datePlanted: formattedDate,
-            healthStatus: "Sapling Growing" as const,
-            treeVarietyName: currentSpecies,
-            adopterName: name || "Verified Adopter",
-            adopterEmail: email || "adopter@example.com",
-            notes: noteText,
-            imageUrl: currentImg,
-            lastInspectedAt: dateStr,
-            isActive: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          });
-        }
-      }
+      const normalized = serverData.treeInstances.map((t: any) => ({
+        id: t.id || t._id || `inst-${Date.now()}`,
+        treeTag: t.treeTag || t._treeTag || "POA-TR-001",
+        orderRef: t.orderRef || t._orderRef || orderId,
+        assignedReserve: t.assignedReserve || t._assignedReserve || location || "Western Ghats, Maharashtra",
+        gpsCoordinates: t.gpsCoordinates || t._gpsCoordinates || { latitude: chosenCoords.lat, longitude: chosenCoords.lng },
+        formattedGps: t.formattedGps || (t.gpsCoordinates ? `${t.gpsCoordinates.latitude}° N, ${t.gpsCoordinates.longitude}° E` : chosenCoords.formatted),
+        datePlanted: t.datePlanted || t._datePlanted || formattedDate,
+        healthStatus: t.healthStatus || t._healthStatus || "Sapling Growing",
+        treeVarietyName: t.treeVarietyName || t._treeVarietyName || selectedTree?.name || "Indigenous Sapling",
+        adopterName: t.adopterName || t._adopterName || name || user?.name || "Verified Adopter",
+        adopterEmail: t.adopterEmail || t._adopterEmail || email || user?.email || "adopter@example.com",
+        notes: t.notes || t._notes || "",
+        imageUrl: t.imageUrl || t._imageUrl || selectedTree?.img || "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
+        lastInspectedAt: t.lastInspectedAt || t._lastInspectedAt || dateStr,
+        isActive: true,
+      }));
+      newInstances.push(...normalized);
     }
+    // Trees are never randomly allocated upon purchase; an administrator assigns the physical tree to the order/user.
 
     // 2. Order Record - Use server-verified order directly
     const invNumber = `INV-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -614,7 +546,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
       }}
     >
       <div
-        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl relative"
+        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar rounded-3xl relative"
         style={{ background: "#fff" }}
       >
         <PlantFlowHeader step={step} onClose={onClose} />
@@ -638,6 +570,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
               onSetQty={(q) => setQty(q)}
               selectedTree={selectedTree}
               total={total}
+              planLabel={effectivePlanLabel}
             />
           )}
 

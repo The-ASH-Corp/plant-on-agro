@@ -108,18 +108,15 @@ export function Step2Dedication({
                   </p>
                 </div>
 
-                {/* Price Modifier badge if any */}
-                {p.price !== 0 && (
-                  <span
-                    className="text-xs font-bold px-2 py-0.5 rounded-full"
-                    style={{
-                      background: p.price > 0 ? "#fef3ee" : "#eef8f2",
-                      color: p.price > 0 ? "#c8521d" : "#2d6a4f",
-                    }}
-                  >
-                    {p.price > 0 ? `+₹${p.price}` : `-₹${Math.abs(p.price)}`}
+                {/* Plan Price */}
+                <div className="shrink-0 text-right">
+                  <span className="text-sm font-extrabold text-[#173324] block">
+                    ₹{p.price ? p.price.toLocaleString("en-IN") : "25,000"}
                   </span>
-                )}
+                  <span className="text-[10px] text-emerald-700 font-semibold uppercase tracking-wider block">
+                    One-Time
+                  </span>
+                </div>
               </button>
             );
           })}

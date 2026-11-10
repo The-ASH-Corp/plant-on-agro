@@ -19,7 +19,7 @@
 
 ## 📖 Executive Summary
 
-**PlantOn AGRO** is an innovative platform developed in collaboration with **RAC Realty**, operating within their flagship high-altitude plantation reserve in **Wayanad, Kerala**. 
+**PlantOn AGRO** is an innovative agroforestry platform operating within flagship high-altitude plantation reserves in **Wayanad, Kerala**. 
 
 The platform bridges sustainable forestry investment and modern eco-tourism. Urban investors, nature enthusiasts, and corporations adopt high-value timber and ecological saplings (such as Agarwood, Sandalwood, Teak, and Rosewood), track individual tree lifecycles through biometric telemetry and satellite coordinates, verify digital deeds of ownership, and physically visit the reserve for curated agro-tourism experiences.
 
@@ -546,4 +546,4 @@ We welcome contributions to make the PlantOn AGRO ecosystem even more impactful!
 
 ## 📄 License & Attribution
 
-Distributed under the **ISC License**. Developed for **PlantOn × RAC Realty**. All agro-forestry, carbon calculation, and reserve mapping rights reserved.
+Distributed under the **ISC License**. Developed for **PlantOn Agro**. All agro-forestry, carbon calculation, and reserve mapping rights reserved.

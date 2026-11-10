@@ -116,7 +116,7 @@ export const DEFAULT_LANDING_PAGE_DATA: Omit<LandingPageProps, 'id' | 'createdAt
   howItWorks: {
     isEnabled: true,
     tagline: 'Simple Process',
-    title: 'How PlantOn agro Works',
+    title: 'How PlantOAgro Works',
     steps: [
       {
         num: '01',
@@ -149,7 +149,6 @@ export const DEFAULT_LANDING_PAGE_DATA: Omit<LandingPageProps, 'id' | 'createdAt
       { icon: '🌍', value: 0, suffix: ' MT', label: 'CO₂ Impact Offset / yr', color: '#95d5b2' },
       { icon: '🌱', value: 0, suffix: ' acres', label: 'Canopy Conserved', color: '#52b788' },
       { icon: '👥', value: 0, suffix: '+', label: 'Verified Adopters', color: '#95d5b2' },
-      { icon: '🌿', value: 0, suffix: ' Species', label: 'Botanical Varieties', color: '#52b788' },
     ],
     projects: [],
   },

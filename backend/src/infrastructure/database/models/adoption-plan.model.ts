@@ -4,6 +4,7 @@ import { OccasionDedication } from '../../../core/entities/adoption-plan.entity'
 export interface IAdoptionPlanDocument extends Document {
   planLabel: string;
   icon: string;
+  price: number;
   priceModifier: number;
   description: string;
   features: string[];
@@ -29,6 +30,11 @@ const AdoptionPlanSchema = new Schema<IAdoptionPlanDocument>(
       required: true,
       trim: true,
       default: '🌱',
+    },
+    price: {
+      type: Number,
+      required: false,
+      default: 0,
     },
     priceModifier: {
       type: Number,

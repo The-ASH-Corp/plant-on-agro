@@ -5,6 +5,8 @@ import { ICertificateRepository } from '../../../core/interfaces/certificate.rep
 import { OrderFulfillmentService } from '../../services/order-fulfillment.service';
 import { BadRequestError, NotFoundError } from '../../../core/errors/app-error';
 import { OrderResponseMapper } from '../../dto/order.dto';
+import { TreeInstanceResponseMapper } from '../../dto/tree-instance-response.dto';
+import { CertificateResponseMapper } from '../../dto/certificate-response.dto';
 
 export interface VerifyRazorpayPaymentDto {
   razorpayOrderId: string;
@@ -59,8 +61,8 @@ export class VerifyRazorpayPaymentUseCase {
         paymentId: dto.razorpayPaymentId,
         orderId: dto.razorpayOrderId,
         order: OrderResponseMapper.toDto(order),
-        treeInstances: existingInstances,
-        certificate: existingCert.length > 0 ? existingCert[0] : null,
+        treeInstances: existingInstances.map((t) => TreeInstanceResponseMapper.toDto(t)),
+        certificate: existingCert.length > 0 ? CertificateResponseMapper.toDto(existingCert[0]) : null,
       };
     }
 
@@ -107,8 +109,8 @@ export class VerifyRazorpayPaymentUseCase {
       paymentId: dto.razorpayPaymentId,
       orderId: dto.razorpayOrderId,
       order: OrderResponseMapper.toDto(fulfillment.order),
-      treeInstances: fulfillment.treeInstances,
-      certificate: fulfillment.certificate,
+      treeInstances: fulfillment.treeInstances.map((t) => TreeInstanceResponseMapper.toDto(t)),
+      certificate: fulfillment.certificate ? CertificateResponseMapper.toDto(fulfillment.certificate) : null,
     };
   }
 }

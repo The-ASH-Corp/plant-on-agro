@@ -282,7 +282,7 @@ export default function App() {
 
         <AdoptionPlans openPlant={(planId) => handleOpenPlant(planId)} />
 
-        <ExperienceSection onScheduleVisit={handleScheduleVisit} />
+        {/* <ExperienceSection onScheduleVisit={handleScheduleVisit} /> */}
 
         {cmsContent.impact?.isEnabled !== false && (
           <ImpactSection

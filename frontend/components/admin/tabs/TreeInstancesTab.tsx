@@ -440,7 +440,7 @@ export function TreeInstancesTab({
                       {/* Actions */}
                       <td className="py-3.5 px-4 text-right">
                         <div className="inline-flex items-center justify-end gap-1.5">
-                          {onEditInstance && (
+                          {onEditInstance && !item.orderRef && !item.adopterName && (
                             <button
                               type="button"
                               onClick={() => onEditInstance(item)}
@@ -449,6 +449,14 @@ export function TreeInstancesTab({
                             >
                               <PencilIcon className="w-3.5 h-3.5 text-[#1b7a43]" />
                             </button>
+                          )}
+                          {Boolean(item.orderRef || item.adopterName) && (
+                            <span
+                              className="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-semibold"
+                              title="Tree is assigned to an adopter and locked from editing"
+                            >
+                               Assigned
+                            </span>
                           )}
                           {onDeleteInstance && (
                             <button
@@ -567,7 +575,7 @@ export function TreeInstancesTab({
                   )}
 
                   <div className="flex items-center gap-1.5">
-                    {onEditInstance && (
+                    {onEditInstance && !item.orderRef && !item.adopterName && (
                       <button
                         type="button"
                         onClick={() => onEditInstance(item)}
@@ -577,6 +585,14 @@ export function TreeInstancesTab({
                         <PencilIcon className="w-3.5 h-3.5 text-[#1b7a43]" />
                         <span>Edit</span>
                       </button>
+                    )}
+                    {Boolean(item.orderRef || item.adopterName) && (
+                      <span
+                        className="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-semibold"
+                        title="Tree is assigned to an adopter and locked from editing"
+                      >
+                         Assigned
+                      </span>
                     )}
                     {onDeleteInstance && (
                       <button

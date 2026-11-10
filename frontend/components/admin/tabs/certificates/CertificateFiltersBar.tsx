@@ -52,17 +52,7 @@ export function CertificateFiltersBar({
 
         {/* Action Controls */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* Refresh Ledger */}
-          {onRefresh && (
-            <button
-              onClick={onRefresh}
-              title="Refresh certificate ledger"
-              className="px-3 py-2 rounded-2xl border border-[#d8e3dc] bg-white hover:bg-[#f4f7f5] text-xs font-semibold text-[#173324] transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
-            >
-              <span>🔄</span>
-              <span className="hidden sm:inline">Refresh</span>
-            </button>
-          )}
+          
 
           {/* Export CSV */}
           <button

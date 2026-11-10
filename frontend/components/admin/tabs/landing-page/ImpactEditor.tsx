@@ -121,7 +121,7 @@ export function ImpactEditor({ impact, onChange, onToggle }: ImpactEditorProps) 
           </button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className={`grid ${impact.stats.length === 4 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-2 sm:grid-cols-3 md:grid-cols-5"} gap-3`}>
           {impact.stats.map((s, idx) => (
             <div key={idx} className="p-3 rounded-xl border border-[#e2eae5] bg-[#fafcfb] space-y-2 relative group">
               <button

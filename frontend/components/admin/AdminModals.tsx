@@ -10,8 +10,6 @@ import type { CertificateActions } from "./hooks/useCertificateActions";
 import { DELETE_ITEM_LABELS, type DeleteActions } from "./hooks/useDeleteActions";
 import { certificateService } from "@/services/certificates/certificate.service";
 
-import { AddTreeModal } from "./modals/AddTreeModal";
-import { EditTreeModal } from "./modals/EditTreeModal";
 import { AddPlanModal } from "./modals/AddPlanModal";
 import { EditPlanModal } from "./modals/EditPlanModal";
 import { AddTreeInstanceModal } from "./modals/AddTreeInstanceModal";
@@ -19,7 +17,9 @@ import { EditTreeInstanceModal } from "./modals/EditTreeInstanceModal";
 import { AddLocationModal } from "./modals/AddLocationModal";
 import { EditLocationModal } from "./modals/EditLocationModal";
 import { OrderDetailsModal } from "./modals/OrderDetailsModal";
+import { MarkOrderPlantedModal } from "./modals/MarkOrderPlantedModal";
 import { UserDetailsModal } from "./modals/UserDetailsModal";
+import { BlockUserConfirmationModal } from "./modals/BlockUserConfirmationModal";
 import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
 import { IssueCertificateModal } from "./modals/IssueCertificateModal";
 import { InspectCertificateModal } from "./modals/InspectCertificateModal";
@@ -62,22 +62,6 @@ export function AdminModals({
 
   return (
     <>
-      {/* Tree Varieties */}
-      <AddTreeModal
-        isOpen={treeActions.showAddTreeModal}
-        universalPrice={treeActions.universalPrice}
-        onClose={() => treeActions.setShowAddTreeModal(false)}
-        onSubmit={treeActions.handleCreateTree}
-      />
-      <EditTreeModal
-        isOpen={Boolean(treeActions.selectedTreeForEdit)}
-        tree={treeActions.selectedTreeForEdit}
-        universalPrice={treeActions.universalPrice}
-        onClose={() => treeActions.setSelectedTreeForEdit(null)}
-        onSubmit={treeActions.handleUpdateTree}
-        isSubmitting={treeActions.isUpdatingTree}
-      />
-
       {/* Adoption Plans */}
       <AddPlanModal
         isOpen={planActions.showAddPlanModal}
@@ -133,6 +117,40 @@ export function AdminModals({
           setSelectedOrder(null);
         }}
         onUpdateStatus={orderActions.handleUpdateOrderStatus}
+        locations={data.locations}
+        instances={data.instances}
+        onOpenAssignTree={orderActions.handleOpenAssignTree}
+      />
+      <MarkOrderPlantedModal
+        isOpen={Boolean(orderActions.orderToMarkPlanted)}
+        order={orderActions.orderToMarkPlanted}
+        locations={data.locations}
+        instances={data.instances}
+        onClose={() => orderActions.setOrderToMarkPlanted(null)}
+        onSubmit={async (
+          orderNumber,
+          gpsCoords,
+          reserveName,
+          notes,
+          treeTags,
+          assignedTreeInstanceIds,
+          treeSpecies,
+          scientificName,
+          category
+        ) => {
+          await orderActions.handleUpdateOrderStatus(
+            orderNumber,
+            "Planted",
+            gpsCoords,
+            reserveName,
+            notes,
+            treeTags,
+            assignedTreeInstanceIds,
+            treeSpecies,
+            scientificName,
+            category
+          );
+        }}
       />
 
       {/* Certificates */}
@@ -172,6 +190,15 @@ export function AdminModals({
         onClose={() => userActions.setSelectedUser(null)}
         onToggleBlockUser={userActions.handleToggleBlockUser}
         orders={orders}
+      />
+
+      {/* Block / Unblock User Confirmation */}
+      <BlockUserConfirmationModal
+        isOpen={Boolean(userActions.userToToggleBlock)}
+        user={userActions.userToToggleBlock}
+        isProcessing={userActions.isTogglingBlock}
+        onClose={() => userActions.setUserToToggleBlock(null)}
+        onConfirm={userActions.handleConfirmToggleBlock}
       />
 
       {/* Delete Confirmation */}

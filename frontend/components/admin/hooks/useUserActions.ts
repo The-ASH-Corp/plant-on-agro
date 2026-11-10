@@ -13,6 +13,8 @@ export function useUserActions({ data, showToast }: Params) {
   const { setUsers } = data;
   const [isRefreshingUsers, setIsRefreshingUsers] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [userToToggleBlock, setUserToToggleBlock] = useState<User | null>(null);
+  const [isTogglingBlock, setIsTogglingBlock] = useState(false);
 
   const handleRefreshUsers = async () => {
     setIsRefreshingUsers(true);
@@ -31,8 +33,19 @@ export function useUserActions({ data, showToast }: Params) {
     }
   };
 
-  const handleToggleBlockUser = async (targetUser: User) => {
+  // Triggers the confirmation modal
+  const handleToggleBlockUser = async (targetUser: User): Promise<void> => {
+    setUserToToggleBlock(targetUser);
+  };
+
+  // Called after confirmation in BlockUserConfirmationModal
+  const handleConfirmToggleBlock = async () => {
+    if (!userToToggleBlock) return;
+    const targetUser = userToToggleBlock;
     const newIsActive = !targetUser.isActive;
+
+    setIsTogglingBlock(true);
+
     // Optimistic state update
     setUsers((prev) =>
       prev.map((u) => (u.id === targetUser.id ? { ...u, isActive: newIsActive } : u))
@@ -46,6 +59,7 @@ export function useUserActions({ data, showToast }: Params) {
       showToast(
         `User "${targetUser.name}" has been ${newIsActive ? "unblocked (activated)" : "blocked (deactivated)"}.`
       );
+      setUserToToggleBlock(null);
     } catch {
       // Rollback on failure
       setUsers((prev) =>
@@ -55,6 +69,8 @@ export function useUserActions({ data, showToast }: Params) {
         setSelectedUser((prev) => (prev ? { ...prev, isActive: targetUser.isActive } : null));
       }
       showToast(`Failed to update status for ${targetUser.name}`);
+    } finally {
+      setIsTogglingBlock(false);
     }
   };
 
@@ -62,8 +78,12 @@ export function useUserActions({ data, showToast }: Params) {
     isRefreshingUsers,
     selectedUser,
     setSelectedUser,
+    userToToggleBlock,
+    setUserToToggleBlock,
+    isTogglingBlock,
     handleRefreshUsers,
     handleToggleBlockUser,
+    handleConfirmToggleBlock,
   };
 }
 

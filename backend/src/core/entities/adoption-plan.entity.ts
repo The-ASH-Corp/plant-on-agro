@@ -12,6 +12,7 @@ export interface AdoptionPlanProps {
   id?: string;
   planLabel: string;
   icon: string;
+  price?: number;
   priceModifier: number; // positive = extra charge, negative = subsidy/discount, 0 = standard
   description: string;
   features: string[];
@@ -27,6 +28,7 @@ export class AdoptionPlan {
   private readonly _id?: string;
   private _planLabel: string;
   private _icon: string;
+  private _price: number;
   private _priceModifier: number;
   private _description: string;
   private _features: string[];
@@ -43,7 +45,8 @@ export class AdoptionPlan {
     this._id = props.id;
     this._planLabel = props.planLabel.trim();
     this._icon = props.icon.trim() || '🌱';
-    this._priceModifier = props.priceModifier;
+    this._price = props.price !== undefined ? props.price : props.priceModifier;
+    this._priceModifier = props.priceModifier !== undefined ? props.priceModifier : this._price;
     this._description = props.description.trim();
     this._features = props.features ?? [];
     this._occasionDedications = props.occasionDedications ?? ['general'];
@@ -74,6 +77,10 @@ export class AdoptionPlan {
 
   public get icon(): string {
     return this._icon;
+  }
+
+  public get price(): number {
+    return this._price !== undefined && this._price > 0 ? this._price : this._priceModifier;
   }
 
   public get priceModifier(): number {
@@ -121,8 +128,15 @@ export class AdoptionPlan {
     if (props.icon !== undefined) {
       this._icon = props.icon.trim() || '🌱';
     }
+    if (props.price !== undefined) {
+      this._price = props.price;
+      this._priceModifier = props.price;
+    }
     if (props.priceModifier !== undefined) {
       this._priceModifier = props.priceModifier;
+      if (props.price === undefined) {
+        this._price = props.priceModifier;
+      }
     }
     if (props.description !== undefined) {
       if (!props.description.trim()) throw new Error('Description cannot be empty');

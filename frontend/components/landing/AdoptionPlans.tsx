@@ -104,19 +104,43 @@ export function AdoptionPlans({ openPlant }: AdoptionPlansProps) {
   return (
     <section id="plans" className="py-28" style={{ background: "var(--color-cream)" }}>
       <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-14">
-          {/* <p className="text-[#2d6a4f] text-sm font-semibold tracking-widest uppercase mb-3">
-            Dedication & Occasion Packages
-          </p> */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-100/80 border border-emerald-200 text-[#2d6a4f] text-xs font-bold uppercase tracking-wider mb-3">
+            <span>🌿 Simple • Premium • Scalable</span>
+          </div>
           <h2
             style={{ fontFamily: "var(--font-display)" }}
             className="text-[#173324] text-4xl md:text-5xl mb-4"
           >
-            Our Plans
+            Adoption Packages & Living Forests
           </h2>
-          <p className="text-[#4a6557] max-w-xl mx-auto">
-            Celebrate life&apos;s milestones, honor loved ones, or grow a corporate forest. All adoptions are a single-time lifetime payment with zero renewal fees.
+          <p className="text-[#4a6557] max-w-2xl mx-auto leading-relaxed">
+            Customers are not buying a sapling — they are creating a living legacy. All adoptions are a single-time lifetime investment with legal digital deeds, GPS biometric tracking, and complimentary plantation visits.
           </p>
+        </div>
+
+        {/* PDF Page 8 Highlight Banner: Simple. Premium. Scalable. */}
+        <div className="mb-12 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#173324] via-[#1f4a33] to-[#2d6a4f] text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-1.5 max-w-2xl">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-300 font-mono">
+              ★ Flagship Retail Model
+            </span>
+            <h3 className="text-2xl sm:text-3xl font-bold tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
+              10 Trees — ₹25,000 <span className="text-sm font-normal text-emerald-200">(AED 1,000 • USD 300)</span>
+            </h3>
+            <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed">
+              10 dedicated trees with lifelong arborist custody, digital deed of ownership, high-resolution drone telemetry, and complimentary plantation visits. Larger personal and family plantations available in 25, 50, 100+ trees.
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              const retail10 = plans.find((p) => p.planLabel.includes("10 Trees"));
+              openPlant(retail10?.id);
+            }}
+            className="px-6 py-3.5 rounded-2xl text-xs sm:text-sm font-bold text-[#173324] bg-white hover:bg-emerald-50 transition-all shadow-lg shrink-0 cursor-pointer"
+          >
+            Adopt 10 Trees Plan (₹25,000) 🌿
+          </button>
         </div>
 
         {/* Occasion filter pills */}
@@ -193,7 +217,12 @@ export function AdoptionPlans({ openPlant }: AdoptionPlansProps) {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((plan) => {
-              const priceModifier = plan.priceModifier ?? 0;
+              const planPrice =
+                typeof plan.price === "number" && plan.price > 0
+                  ? plan.price
+                  : typeof plan.priceModifier === "number" && plan.priceModifier > 0
+                  ? plan.priceModifier
+                  : 25000;
               const features = plan.features || [];
               const occasions =
                 plan.occasionDedications && plan.occasionDedications.length > 0
@@ -203,10 +232,10 @@ export function AdoptionPlans({ openPlant }: AdoptionPlansProps) {
               return (
                 <div
                   key={plan.id}
-                  className="rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl group border border-[#e2eae5]"
+                  className="rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl group border border-[#d8e5dd]"
                   style={{
                     background: "#fff",
-                    boxShadow: "0 2px 20px rgba(23,51,36,0.08)",
+                    boxShadow: "0 4px 24px rgba(23,51,36,0.06)",
                   }}
                 >
                   <div>
@@ -220,41 +249,43 @@ export function AdoptionPlans({ openPlant }: AdoptionPlansProps) {
                       </span>
                     </div>
 
-                    {/* Title & Price modifier */}
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <h3
-                        style={{ fontFamily: "var(--font-display)" }}
-                        className="font-bold text-[#173324] text-lg"
-                      >
-                        {plan.planLabel}
-                      </h3>
-                      <span
-                        className="text-xs font-bold px-2.5 py-1 rounded-lg whitespace-nowrap"
-                        style={{
-                          background:
-                            priceModifier === 0
-                              ? "#f0faf4"
-                              : priceModifier > 0
-                              ? "#fff7ed"
-                              : "#ecfdf5",
-                          color:
-                            priceModifier === 0
-                              ? "#2d6a4f"
-                              : priceModifier > 0
-                              ? "#c2410c"
-                              : "#047857",
-                        }}
-                      >
-                        {priceModifier === 0
-                          ? "Base Rate"
-                          : priceModifier > 0
-                          ? `+₹${priceModifier}`
-                          : `-₹${Math.abs(priceModifier)} Subsidy`}
-                      </span>
+                    {/* Title */}
+                    <h3
+                      style={{ fontFamily: "var(--font-display)" }}
+                      className="font-bold text-[#173324] text-xl mb-2"
+                    >
+                      {plan.planLabel}
+                    </h3>
+
+                    {/* Price Section */}
+                    <div className="mb-4 pb-3 border-b border-[#f0f4f1]">
+                      <div className="flex items-baseline gap-1.5">
+                        <span
+                          className="text-3xl font-extrabold text-[#173324] tracking-tight"
+                          style={{ fontFamily: "var(--font-display)" }}
+                        >
+                          ₹{planPrice.toLocaleString("en-IN")}
+                        </span>
+                        <span className="text-xs font-semibold text-[#55695d]">
+                          / single-time
+                        </span>
+                      </div>
+                      {plan.planLabel.includes("10 Trees") && (
+                        <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-[#2d6a4f]">
+                          <span>🇦🇪 AED 1,000</span>
+                          <span>•</span>
+                          <span>🌐 $300 USD</span>
+                        </div>
+                      )}
+                      {(plan.planLabel.includes("100 Trees") || plan.planLabel.includes("50 Trees")) && (
+                        <div className="mt-1.5 text-[11px] font-semibold text-emerald-800">
+                          Bulk rate: Up to ₹20,000 per 10-tree equivalent
+                        </div>
+                      )}
                     </div>
 
                     {/* Description */}
-                    <p className="text-[#5a6b62] text-sm leading-relaxed mb-4">
+                    <p className="text-[#5a6b62] text-xs sm:text-[13px] leading-relaxed mb-4">
                       {plan.description}
                     </p>
 
@@ -302,7 +333,7 @@ export function AdoptionPlans({ openPlant }: AdoptionPlansProps) {
                   {/* Card Footer */}
                   <div className="pt-3 border-t border-[#f0f4f1]">
                     <div className="flex items-center justify-between text-xs text-[#6b8070] mb-3">
-                      <span>♾️ Lifetime Package</span>
+                      <span>♾️ Lifetime Biological Custody</span>
                       {plan.activeCount > 0 && (
                         <span className="font-semibold text-[#2d6a4f]">
                           🌿 {plan.activeCount.toLocaleString()} Adopters
@@ -311,13 +342,13 @@ export function AdoptionPlans({ openPlant }: AdoptionPlansProps) {
                     </div>
                     <button
                       onClick={() => openPlant(plan.id)}
-                      className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:shadow-lg cursor-pointer"
+                      className="w-full py-3 rounded-xl text-sm font-bold transition-all duration-200 hover:shadow-lg cursor-pointer"
                       style={{
                         background: "linear-gradient(135deg,#2d6a4f,#173324)",
                         color: "#fff",
                       }}
                     >
-                      Choose This Plan
+                      Choose Plan (₹{planPrice.toLocaleString("en-IN")})
                     </button>
                   </div>
                 </div>

@@ -1,19 +1,39 @@
 "use client";
 
+import { useState } from "react";
 import { BackendTreeInstance } from "@/services/tree-instances/tree-instance.service";
 import { certificateService } from "@/services/certificates/certificate.service";
 
 interface BuyerCertificatesTabProps {
   trees: BackendTreeInstance[];
+  pendingTrees?: BackendTreeInstance[];
   userName?: string;
   onOpenModal: (tree: BackendTreeInstance) => void;
 }
 
 export function BuyerCertificatesTab({
   trees,
+  pendingTrees = [],
   userName,
   onOpenModal,
 }: BuyerCertificatesTabProps) {
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const handleDownload = async (tree: BackendTreeInstance) => {
+    const certId = tree.orderRef || tree.treeTag;
+    if (!certId || downloadingId) return;
+    try {
+      setDownloadingId(tree.id || certId);
+      await certificateService.triggerPdfDownload(
+        certId,
+        `PlantOnAgro-Certificate-${tree.treeTag || certId}.pdf`
+      );
+    } catch (err) {
+      console.error("Certificate download error:", err);
+    } finally {
+      setDownloadingId(null);
+    }
+  };
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-xl p-3 sm:p-3.5 border border-[#e2eae5] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -30,6 +50,22 @@ export function BuyerCertificatesTab({
           {trees.length} Deeds Issued
         </span>
       </div>
+
+      {/* Notice for Adoptions Still Pending Planting */}
+      {pendingTrees.length > 0 && (
+        <div className="bg-amber-50/80 rounded-2xl p-4 border border-amber-200/90 text-amber-900 flex items-start gap-3 shadow-xs">
+          <span className="text-xl mt-0.5">⏳</span>
+          <div className="space-y-1">
+            <h4 className="text-xs font-bold uppercase tracking-wide">
+              {pendingTrees.length} {pendingTrees.length === 1 ? "Adoption" : "Adoptions"} Pending Field Planting
+            </h4>
+            <p className="text-xs text-amber-800 leading-relaxed">
+              Your tree adoption is confirmed! Our forestry team is currently preparing and nursery-tagging your sapling.
+              As soon as our arborist marks the order as <strong>Planted</strong> with verified ground GPS coordinates, your official certificate will be generated and available to inspect and download here.
+            </p>
+          </div>
+        </div>
+      )}
 
       {trees.length === 0 ? (
         <div className="bg-white rounded-2xl p-8 text-center border border-[#e2eae5] space-y-3 max-w-md mx-auto shadow-xs">
@@ -131,15 +167,21 @@ export function BuyerCertificatesTab({
                     🔍 Inspect Full Deed
                   </button>
                   <button
-                    onClick={() => {
-                      const certId = tree.treeTag || tree.orderRef;
-                      const downloadUrl = certificateService.getDownloadUrl(certId);
-                      window.open(downloadUrl, '_blank');
-                    }}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1b7a43] to-[#52b788] text-white font-bold cursor-pointer hover:scale-105 transition-transform shadow-md flex items-center gap-1.5"
+                    onClick={() => handleDownload(tree)}
+                    disabled={downloadingId === (tree.id || tree.treeTag || tree.orderRef)}
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1b7a43] to-[#52b788] text-white font-bold cursor-pointer hover:scale-105 disabled:opacity-75 disabled:hover:scale-100 transition-transform shadow-md flex items-center gap-1.5"
                   >
-                    <span>📜</span>
-                    <span>Download Deed PDF</span>
+                    {downloadingId === (tree.id || tree.treeTag || tree.orderRef) ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Downloading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>📜</span>
+                        <span>Download Deed PDF</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>

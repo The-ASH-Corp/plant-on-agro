@@ -23,38 +23,95 @@ const persistOrders = (orders: AdoptionOrder[]) => {
 export function useOrderActions({ data, showToast }: Params) {
   const { orders, setOrders, instances, certificates, setCertificates } = data;
   const [selectedOrder, setSelectedOrder] = useState<AdoptionOrder | null>(null);
+  const [orderToMarkPlanted, setOrderToMarkPlanted] = useState<AdoptionOrder | null>(null);
 
   // Unread / New Orders Tracking
   const unreadOrdersCount = orders.filter(
     (o) => o.isRead === false || o.status === "New Request"
   ).length;
 
-  const handleUpdateOrderStatus = async (orderIdentifier: string, newStatus: AdoptionOrderStatus) => {
+  const handleUpdateOrderStatus = async (
+    orderIdentifier: string,
+    newStatus: AdoptionOrderStatus,
+    gpsCoords?: string,
+    reserveName?: string,
+    notes?: string,
+    treeTags?: string[],
+    assignedTreeInstanceIds?: string[],
+    treeSpecies?: string,
+    scientificName?: string,
+    category?: string
+  ) => {
     const targetOrder = orders.find(
       (o) => o.orderNumber === orderIdentifier || o.id === orderIdentifier
     );
+
+    // If moving to Planted and no GPS coordinates passed yet, open the MarkOrderPlantedModal!
+    if (newStatus === "Planted" && !gpsCoords && targetOrder) {
+      setOrderToMarkPlanted(targetOrder);
+      return;
+    }
 
     if (
       selectedOrder &&
       (selectedOrder.orderNumber === orderIdentifier || selectedOrder.id === orderIdentifier)
     ) {
-      setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus, isRead: true } : null));
+      setSelectedOrder((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: newStatus,
+              isRead: true,
+              gpsCoords: gpsCoords || prev.gpsCoords,
+              reserveName: reserveName || prev.reserveName,
+              treeSpecies: treeSpecies || prev.treeSpecies,
+              scientificName: scientificName || prev.scientificName,
+              category: category || prev.category,
+            }
+          : null
+      );
     }
 
     // 1. Persist status change directly to MongoDB backend order entity first
     const lookupId = targetOrder?.id || orderIdentifier;
     try {
-      await orderService.updateStatus(lookupId, newStatus);
-    } catch (orderApiErr) {
+      await orderService.updateStatus(
+        lookupId,
+        newStatus,
+        notes,
+        gpsCoords,
+        reserveName,
+        treeTags,
+        assignedTreeInstanceIds,
+        treeSpecies,
+        scientificName,
+        category
+      );
+    } catch (orderApiErr: any) {
       // Fallback: try updating by orderIdentifier (orderNumber) if targetOrder.id was a derived ID
       if (lookupId !== orderIdentifier) {
         try {
-          await orderService.updateStatus(orderIdentifier, newStatus);
-        } catch (retryErr) {
-          console.warn("Failed to persist order status to backend API:", retryErr);
+          await orderService.updateStatus(
+            orderIdentifier,
+            newStatus,
+            notes,
+            gpsCoords,
+            reserveName,
+            treeTags,
+            assignedTreeInstanceIds,
+            treeSpecies,
+            scientificName,
+            category
+          );
+        } catch (retryErr: any) {
+          const msg = retryErr?.response?.data?.message || retryErr?.message || "Failed to update order status";
+          showToast(`❌ ${msg}`);
+          return;
         }
       } else {
-        console.warn("Failed to persist order status to backend API:", orderApiErr);
+        const msg = orderApiErr?.response?.data?.message || orderApiErr?.message || "Failed to update order status";
+        showToast(`❌ ${msg}`);
+        return;
       }
     }
 
@@ -62,60 +119,42 @@ export function useOrderActions({ data, showToast }: Params) {
     setOrders((prev) => {
       const updated = prev.map((o) =>
         o.orderNumber === orderIdentifier || o.id === orderIdentifier
-          ? { ...o, status: newStatus, isRead: true }
+          ? {
+              ...o,
+              status: newStatus,
+              isRead: true,
+              gpsCoords: gpsCoords || o.gpsCoords,
+              reserveName: reserveName || o.reserveName,
+              treeSpecies: treeSpecies || o.treeSpecies,
+              scientificName: scientificName || o.scientificName,
+              category: category || o.category,
+            }
           : o
       );
       persistOrders(updated);
       return updated;
     });
 
-    // 3. Persist status change to matching tree instances in database
-    const matchingInsts = instances.filter(
-      (i) => i.orderRef === orderIdentifier || i.treeTag === orderIdentifier
-    );
-    for (const inst of matchingInsts) {
+    // 3. If Planted, refresh certificates registry and tree instances
+    if (newStatus === "Planted") {
       try {
-        const cleanNotes = inst.notes ? inst.notes.replace(/Status: [^.]+\.\s*/, "") : "";
-        await treeInstanceService.update(inst.id, {
-          notes: `Status: ${newStatus}. ${cleanNotes}`,
-        });
-      } catch (err) {
-        console.warn("Failed to persist order status to instance in DB:", err);
-      }
-    }
-
-    // 4. If order was moved to "Certificate Issued", ensure a certificate deed exists
-    if (newStatus === "Certificate Issued" && targetOrder) {
-      const orderNum = targetOrder.orderNumber;
-      const alreadyHasCert = certificates.some(
-        (c) => c.orderRef === orderNum || c.certificateNumber === targetOrder.certificateId
-      );
-      if (!alreadyHasCert) {
-        try {
-          const autoCert = await certificateService.createCertificate({
-            certificateNumber: targetOrder.certificateId || `CERT-${orderNum}`,
-            orderRef: orderNum,
-            recipientName: targetOrder.adopterName,
-            adopterName: targetOrder.adopterName,
-            treeSpecies: targetOrder.treeSpecies,
-            reserveName: targetOrder.reserveName,
-            dedicatedMessage:
-              targetOrder.dedicationMessage ||
-              `PlantOn Agro certified green deed honoring ${targetOrder.adopterName} for sustainable environmental stewardship.`,
-            status: "Issued",
-          });
-          if (autoCert.data) {
-            const newCert = autoCert.data;
-            setCertificates((prev) => [newCert, ...prev]);
-            showToast(`📜 Deed certificate generated for ${orderNum}!`);
-          }
-        } catch (cErr) {
-          console.warn("Auto-issue certificate notice:", cErr);
+        const [certRes, instRes] = await Promise.all([
+          certificateService.getCertificates({ limit: 50 }),
+          treeInstanceService.getAll({ limit: 50 }),
+        ]);
+        if (certRes.data?.items) {
+          setCertificates(certRes.data.items);
         }
+        if (instRes.data?.items) {
+          data.setInstances(instRes.data.items);
+        }
+      } catch (cErr) {
+        console.warn("Could not refresh certificates after planting:", cErr);
       }
+      showToast(`🌱 Tree assigned & order ${targetOrder?.orderNumber || orderIdentifier} marked as Planted! Digital deed minted.`);
+    } else {
+      showToast(`✓ Order ${targetOrder?.orderNumber || orderIdentifier} status advanced to "${newStatus}"`);
     }
-
-    showToast(`✓ Order ${targetOrder?.orderNumber || orderIdentifier} status changed to "${newStatus}"`);
   };
 
   const handleMarkAllOrdersAsRead = async () => {
@@ -152,6 +191,14 @@ export function useOrderActions({ data, showToast }: Params) {
     }
   };
 
+  const handleOpenAssignTree = (order: AdoptionOrder) => {
+    if (order.treeTag) {
+      showToast(`Tree (${order.treeTag}) is already assigned to ${order.adopterName} and locked from editing.`);
+      return;
+    }
+    setOrderToMarkPlanted(order);
+  };
+
   const handleExportOrdersCSV = () => {
     if (orders.length === 0) {
       showToast("No orders available to export.");
@@ -164,7 +211,10 @@ export function useOrderActions({ data, showToast }: Params) {
   return {
     selectedOrder,
     setSelectedOrder,
+    orderToMarkPlanted,
+    setOrderToMarkPlanted,
     unreadOrdersCount,
+    handleOpenAssignTree,
     handleUpdateOrderStatus,
     handleMarkAllOrdersAsRead,
     handleSelectOrder,

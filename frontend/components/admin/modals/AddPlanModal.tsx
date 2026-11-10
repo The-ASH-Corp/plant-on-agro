@@ -113,18 +113,18 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">
-                Price Modifier / Subsidy (₹)
+                Plan Adoption Price (₹) *
               </label>
               <input
                 name="price"
                 type="number"
                 required
-                defaultValue={150}
-                placeholder="e.g. 150 (Extra), 0, or -50 (Subsidy)"
+                defaultValue={25000}
+                placeholder="e.g. 25000 (10 Trees), 50000 (25 Trees)"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7] focus:border-[#173324] transition-colors"
               />
               <span className="text-[10px] text-[#73877b] mt-0.5 block">
-                0 = base price, &gt;0 = premium, &lt;0 = subsidy
+                Total single-time adoption amount charged for this plan
               </span>
             </div>
             <div>

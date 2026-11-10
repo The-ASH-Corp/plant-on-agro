@@ -131,7 +131,7 @@ export function VisitsTab({ showToast }: VisitsTabProps) {
             <span>PlantOn Experiences & Visit Bookings</span>
           </h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            Phase 04 "They Visit" • Manage plantation trails, visitor passes, and RAC Realty experience offerings
+            Phase 04 "They Visit" • Manage plantation trails, visitor passes, and agroforestry experience offerings
           </p>
         </div>
 

@@ -73,6 +73,14 @@ export class MongoCertificateRepository implements ICertificateRepository {
     return docs.map(CertificateMapper.toDomain);
   }
 
+  public async findByTreeTag(treeTag: string): Promise<Nullable<Certificate>> {
+    const doc = await CertificateModel.findOne({
+      treeTag: treeTag.trim().toUpperCase(),
+    }).exec();
+    if (!doc) return null;
+    return CertificateMapper.toDomain(doc);
+  }
+
   public async findAll(
     filter?: CertificateFilter,
     limit = 50,

@@ -11,7 +11,6 @@ import type { CertificateActions } from "./hooks/useCertificateActions";
 import type { DeleteActions } from "./hooks/useDeleteActions";
 
 import { OverviewTab } from "./tabs/OverviewTab";
-import { TreesTab } from "./tabs/TreesTab";
 import { PlansTab } from "./tabs/PlansTab";
 import { TreeInstancesTab } from "./tabs/TreeInstancesTab";
 import { LocationsTab } from "./tabs/LocationsTab";
@@ -71,15 +70,18 @@ export function AdminTabContent({
       );
 
     case "trees":
+    case "orders":
       return (
-        <TreesTab
-          trees={trees}
+        <OrdersTab
+          orders={orders}
+          instances={instances}
           searchQuery={searchQuery}
-          universalPrice={treeActions.universalPrice}
-          onUpdateUniversalPrice={treeActions.handleSetUniversalPrice}
-          onOpenAddTree={() => treeActions.setShowAddTreeModal(true)}
-          onEditTree={(tree) => treeActions.setSelectedTreeForEdit(tree)}
-          onDeleteTree={deleteActions.handleDeleteTree}
+          onSelectOrder={orderActions.handleSelectOrder}
+          onOpenAssignTree={orderActions.handleOpenAssignTree}
+          onExportCSV={orderActions.handleExportOrdersCSV}
+          onUpdateStatus={orderActions.handleUpdateOrderStatus}
+          onMarkAllAsRead={orderActions.handleMarkAllOrdersAsRead}
+          unreadCount={orderActions.unreadOrdersCount}
         />
       );
 
@@ -114,19 +116,6 @@ export function AdminTabContent({
           onOpenAddLocation={() => locationActions.setShowAddLocationModal(true)}
           onEditLocation={(loc) => locationActions.setSelectedLocationForEdit(loc)}
           onDeleteLocation={deleteActions.handleDeleteLocation}
-        />
-      );
-
-    case "orders":
-      return (
-        <OrdersTab
-          orders={orders}
-          searchQuery={searchQuery}
-          onSelectOrder={orderActions.handleSelectOrder}
-          onExportCSV={orderActions.handleExportOrdersCSV}
-          onUpdateStatus={orderActions.handleUpdateOrderStatus}
-          onMarkAllAsRead={orderActions.handleMarkAllOrdersAsRead}
-          unreadCount={orderActions.unreadOrdersCount}
         />
       );
 

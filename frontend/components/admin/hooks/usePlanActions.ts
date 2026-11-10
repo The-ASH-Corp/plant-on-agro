@@ -47,6 +47,7 @@ export function usePlanActions({ data, showToast, setActiveTab }: Params) {
       const res = await adoptionPlanService.create({
         planLabel,
         icon,
+        price: priceModifier,
         priceModifier,
         badge,
         description,
@@ -145,6 +146,7 @@ export function usePlanActions({ data, showToast, setActiveTab }: Params) {
       const res = await adoptionPlanService.update(id, {
         planLabel,
         icon,
+        price: priceModifier,
         priceModifier,
         badge,
         description,

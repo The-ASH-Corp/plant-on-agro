@@ -80,7 +80,7 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
             04 They Visit: Experience Your Living Forest
           </h1>
           <p className="text-emerald-100/90 text-sm sm:text-base leading-relaxed">
-            You plant. We grow. You track. <strong>Now, walk among your living legacy.</strong> Visit your dedicated trees in Kerala, pick fresh harvest produce, and unwind at the RAC Realty wellness sanctuary.
+            You plant. We grow. You track. <strong>Now, walk among your living legacy.</strong> Visit your dedicated trees in Kerala, pick fresh harvest produce, and unwind at our plantation eco-wellness sanctuary.
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <button
@@ -111,15 +111,6 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
             </h2>
             <p className="text-xs text-gray-500">Show your digital visitor pass at the plantation reception gate</p>
           </div>
-          <button
-            onClick={() => {
-              setSelectedExpForBooking(null);
-              setBookModalOpen(true);
-            }}
-            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-[#2d6a4f] bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all cursor-pointer flex items-center gap-1.5"
-          >
-            <span>+ Book New Date</span>
-          </button>
         </div>
 
         {loading ? (
@@ -164,6 +155,8 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
                           ? "bg-emerald-100 text-emerald-800"
                           : booking.status === "Completed"
                           ? "bg-blue-100 text-blue-800"
+                          : booking.status === "Cancelled"
+                          ? "bg-rose-100 text-rose-800"
                           : "bg-amber-100 text-amber-800"
                       }`}>
                         {booking.status}
@@ -235,12 +228,18 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
                   <span className="text-[11px] text-gray-500">
                     {booking.memories?.length || 0} Photos Recorded
                   </span>
-                  <button
-                    onClick={() => setMemoryBooking(booking)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#2d6a4f] bg-emerald-50 hover:bg-emerald-100 transition-all cursor-pointer flex items-center gap-1.5"
-                  >
-                    <span>📸 Add Visit Photos</span>
-                  </button>
+                  {booking.status !== "Cancelled" ? (
+                    <button
+                      onClick={() => setMemoryBooking(booking)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#2d6a4f] bg-emerald-50 hover:bg-emerald-100 transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>📸 Add Visit Photos</span>
+                    </button>
+                  ) : (
+                    <span className="text-[11px] font-semibold text-rose-600 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-lg">
+                      Cancelled Visit
+                    </span>
+                  )}
                 </div>
               </div>
             ))}
@@ -248,7 +247,7 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
         )}
       </div>
 
-      {/* Section 2: Explore Plantation & RAC Realty Experiences */}
+      {/* Section 2: Explore Plantation Experiences */}
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
@@ -256,7 +255,7 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
               Explore Experiences & Nature Tourism
             </h2>
             <p className="text-xs text-gray-500">
-              Agroforestry walks, seasonal harvests, and RAC Realty wellness therapies
+              Agroforestry walks, seasonal harvests, and restorative wellness therapies
             </p>
           </div>
 

@@ -171,10 +171,30 @@ export function BuyerDashboard() {
           if (typeof window !== "undefined") {
             try {
               const raw = localStorage.getItem("poa_buyer_trees");
-              const parsed: BackendTreeInstance[] = raw ? JSON.parse(raw) : [];
+              const parsed: any[] = raw ? JSON.parse(raw) : [];
+              const normalized: BackendTreeInstance[] = parsed.map((t: any) => ({
+                id: t.id || t._id || `inst-${Math.random().toString(36).substring(2, 7)}`,
+                treeTag: t.treeTag || t._treeTag || "POA-TR-001",
+                orderRef: t.orderRef || t._orderRef || "",
+                assignedReserve: t.assignedReserve || t._assignedReserve || "Western Ghats, Maharashtra",
+                gpsCoordinates: t.gpsCoordinates || t._gpsCoordinates || { latitude: 18.9894, longitude: 73.4428 },
+                formattedGps: t.formattedGps || "18.9894° N, 73.4428° E",
+                datePlanted: t.datePlanted || t._datePlanted || new Date().toISOString().split("T")[0],
+                healthStatus: t.healthStatus || t._healthStatus || "Sapling Growing",
+                treeVarietyName: t.treeVarietyName || t._treeVarietyName || "Indigenous Tree",
+                adopterName: t.adopterName || t._adopterName || "Verified Adopter",
+                adopterEmail: t.adopterEmail || t._adopterEmail || "",
+                notes: t.notes || t._notes || "",
+                imageUrl: t.imageUrl || t._imageUrl || "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800",
+                growthUpdates: t.growthUpdates || t._growthUpdates || [],
+                lastInspectedAt: t.lastInspectedAt || t._lastInspectedAt || null,
+                isActive: t.isActive !== false && t._isActive !== false,
+                createdAt: t.createdAt || t._createdAt || new Date().toISOString(),
+                updatedAt: t.updatedAt || t._updatedAt || new Date().toISOString(),
+              }));
               return userEmail
-                ? parsed.filter(
-                    (t) => t.adopterEmail?.toLowerCase() === userEmail
+                ? normalized.filter(
+                    (t) => (t.adopterEmail || "").toLowerCase() === userEmail
                   )
                 : [];
             } catch {
@@ -304,6 +324,27 @@ export function BuyerDashboard() {
     [orders]
   );
 
+  // Filter trees based on whether they have been officially planted & geotagged
+  const plantedTreesWithCertificates = useMemo(() => {
+    return trees.filter((tree) => {
+      const order = orders.find((o) => o.orderNumber === tree.orderRef || o.id === tree.orderRef);
+      if (order) {
+        return order.status === "Planted" || order.status === "Certificate Issued" || order.status === "Completed";
+      }
+      return (tree.healthStatus as string) !== "Awaiting Planting" && (tree.healthStatus as string) !== "New Request";
+    });
+  }, [trees, orders]);
+
+  const pendingPlantingTrees = useMemo(() => {
+    return trees.filter((tree) => {
+      const order = orders.find((o) => o.orderNumber === tree.orderRef || o.id === tree.orderRef);
+      if (order) {
+        return order.status === "New Request" || order.status === "Verified & Tagged";
+      }
+      return false;
+    });
+  }, [trees, orders]);
+
   const kpiData: BuyerKpiData = {
     totalTrees,
     estimatedCO2,
@@ -380,6 +421,7 @@ export function BuyerDashboard() {
               {activeTab === "trees" && (
                 <BuyerTreesTab
                   trees={trees}
+                  orders={orders}
                   loading={loading}
                   onOpenPlantFlow={() => setPlantFlowOpen(true)}
                   onViewCertificate={(tree) => setSelectedCertificateTree(tree)}
@@ -389,7 +431,8 @@ export function BuyerDashboard() {
 
               {activeTab === "certificates" && (
                 <BuyerCertificatesTab
-                  trees={trees}
+                  trees={plantedTreesWithCertificates}
+                  pendingTrees={pendingPlantingTrees}
                   userName={user?.name}
                   onOpenModal={(tree) => setSelectedCertificateTree(tree)}
                 />

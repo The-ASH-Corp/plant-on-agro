@@ -1,6 +1,6 @@
 import { IVisitBookingRepository } from '../../../core/interfaces/visit-booking.repository.interface';
 import { VisitBooking, VisitMemory } from '../../../core/entities/visit-booking.entity';
-import { NotFoundError, ForbiddenError } from '../../../core/errors/app-error';
+import { NotFoundError, ForbiddenError, BadRequestError } from '../../../core/errors/app-error';
 import { UserPayload } from '../../../core/interfaces/jwt-service.interface';
 
 export interface AddVisitMemoriesDto {
@@ -18,6 +18,10 @@ export class AddVisitMemoryUseCase {
     const booking = await this.visitBookingRepository.findById(id);
     if (!booking) {
       throw new NotFoundError(`Visit booking with ID ${id} not found.`);
+    }
+
+    if (booking.status === 'Cancelled') {
+      throw new BadRequestError('Cannot add photographs or memories to a cancelled visit booking.');
     }
 
     // Only allow admin or the booking's registered buyer

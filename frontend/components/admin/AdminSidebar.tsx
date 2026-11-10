@@ -18,7 +18,7 @@ interface AdminSidebarProps {
   setSidebarOpen: (open: boolean) => void;
   activeTab: AdminTabType;
   setActiveTab: (tab: AdminTabType) => void;
-  treesCount: number;
+  treesCount?: number;
   plansCount: number;
   instancesCount?: number;
   locationsCount: number;
@@ -28,7 +28,7 @@ interface AdminSidebarProps {
   usersCount?: number;
   userName?: string;
   onLogout: () => void;
-  onOpenAddTree: () => void;
+  onOpenAddTree?: () => void;
   onOpenAddPlan: () => void;
   onOpenAddLocation: () => void;
   onOpenAddInstance?: () => void;
@@ -58,7 +58,6 @@ export function AdminSidebar({
 }: AdminSidebarProps) {
   const navItems: NavItemDef[] = [
     { id: "overview", label: "Overview", icon: "📊", badge: "Live" },
-    { id: "trees", label: "Tree Varieties", icon: "🌳", count: treesCount },
     { id: "plans", label: "Adoption Plans", icon: "🌱", count: plansCount },
     { id: "instances", label: "Tree Instances", icon: "🏷️", count: instancesCount },
     { id: "locations", label: "Reserves & GPS", icon: "📍", count: locationsCount },
@@ -161,12 +160,6 @@ export function AdminSidebar({
                 Fast Configuration
               </span>
               <div className="space-y-1 px-1">
-                <button
-                  onClick={onOpenAddTree}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 3xl:py-2.5 rounded-xl text-xs 3xl:text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
-                >
-                  <span className="text-emerald-400">+</span> Add Tree Species
-                </button>
                 <button
                   onClick={onOpenAddPlan}
                   className="w-full flex items-center gap-2.5 px-3 py-2 3xl:py-2.5 rounded-xl text-xs 3xl:text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
