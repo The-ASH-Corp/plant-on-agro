@@ -24,9 +24,14 @@ export const createApp = (): Application => {
       crossOriginEmbedderPolicy: false,
     })
   );
+  const allowedOrigins =
+    env.CORS_ORIGIN === '*'
+      ? true
+      : env.CORS_ORIGIN.split(',').map((origin) => origin.trim());
+
   app.use(
     cors({
-      origin: env.CORS_ORIGIN === '*' ? '*' : env.CORS_ORIGIN.split(','),
+      origin: allowedOrigins,
       credentials: true,
     })
   );
