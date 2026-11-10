@@ -7,19 +7,21 @@ interface Step3QuantityProps {
   onSetQty: (qty: number) => void;
   selectedTree: Tree | null;
   total: number;
+  planLabel?: string;
 }
 
-const PRESETS = [5, 10, 25, 50];
+const PRESETS = [1, 2, 5, 10];
 
 export function Step3Quantity({
   qty,
   onSetQty,
   selectedTree,
   total,
+  planLabel,
 }: Step3QuantityProps) {
   return (
     <div className="text-center py-6">
-      <p className="text-[#4a6557] mb-8">How many trees would you like to plant?</p>
+      <p className="text-[#4a6557] mb-8 font-medium">Select package quantity to enroll:</p>
       <div className="flex items-center justify-center gap-6 mb-8">
         <button
           id="btn-qty-minus"
@@ -51,8 +53,8 @@ export function Step3Quantity({
         </button>
       </div>
       <div className="text-[#4a6557] text-sm mb-2">
-        {selectedTree?.name} × {qty} ={" "}
-        <strong className="text-[#2d6a4f]">
+        {planLabel || selectedTree?.name || "Adoption Package"} × {qty} ={" "}
+        <strong className="text-[#2d6a4f] text-base">
           ₹{total.toLocaleString("en-IN")}
         </strong>
       </div>

@@ -85,26 +85,27 @@ export class CreateRazorpayOrderUseCase {
       }
     }
 
-    // 2. Resolve Plan Price Modifier from Server Database
-    let planModifier = 0;
-    let selectedPlanLabel = dto.planLabel?.trim() || 'Individual Lifetime';
+    // 2. Resolve Plan Price from Server Database (Amount is strictly for the PLAN, NOT for the tree)
+    let planPrice = 25000; // Default flagship retail plan (₹25,000 as per PDF)
+    let selectedPlanLabel = dto.planLabel?.trim() || '10 Trees Retail Plan';
 
     if (dto.planId && dto.planId.trim().length > 0) {
       const plan = await this.adoptionPlanRepository.findById(dto.planId.trim());
       if (plan) {
-        planModifier = plan.priceModifier;
+        planPrice = plan.price > 0 ? plan.price : (plan.priceModifier > 0 ? plan.priceModifier : 25000);
         selectedPlanLabel = plan.planLabel;
       }
     } else if (dto.planLabel && dto.planLabel.trim().length > 0) {
       const plan = await this.adoptionPlanRepository.findByLabel(dto.planLabel.trim());
       if (plan) {
-        planModifier = plan.priceModifier;
+        planPrice = plan.price > 0 ? plan.price : (plan.priceModifier > 0 ? plan.priceModifier : 25000);
         selectedPlanLabel = plan.planLabel;
       }
     }
 
     // 3. Authoritative Total Price Calculation (Immune to client tampering)
-    const unitPrice = Math.max(1, unitTreePrice + planModifier);
+    // The amount is determined strictly by the Plan, not the tree species.
+    const unitPrice = Math.max(1, planPrice);
     const authoritativeTotal = unitPrice * qty;
 
     if (authoritativeTotal <= 0) {

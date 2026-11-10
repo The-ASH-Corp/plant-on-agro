@@ -18,6 +18,7 @@ export const createAdoptionPlanSchema = z.object({
     .min(1, 'Plan label cannot be empty')
     .max(100, 'Plan label too long'),
   icon: z.string().trim().optional().default('🌱'),
+  price: z.number().optional(),
   priceModifier: z.number().optional().default(0),
   description: z
     .string()
@@ -37,6 +38,7 @@ export const createAdoptionPlanSchema = z.object({
 export const updateAdoptionPlanSchema = z.object({
   planLabel: z.string().trim().min(1).max(100).optional(),
   icon: z.string().trim().min(1).optional(),
+  price: z.number().optional(),
   priceModifier: z.number().optional(),
   description: z.string().trim().min(1).max(1000).optional(),
   features: z.array(z.string().trim().min(1)).optional(),

@@ -75,7 +75,7 @@ export function PlansTab({
             Adoption Packages & Occasion Programs ({filteredPlans.length})
           </h2>
           <p className="text-xs text-[#73877b]">
-            Configure plan labels, pricing modifiers/subsidies, occasion dedications, and features.
+            Configure plan labels, fixed adoption pricing (₹), occasion dedications, and included features.
           </p>
         </div>
         <button
@@ -233,26 +233,14 @@ export function PlansTab({
                   )}
                 </div>
 
-                {/* Footer: Price Modifier & Adopters & Actions */}
+                {/* Footer: Plan Price & Adopters & Actions */}
                 <div className="mt-6 pt-4 border-t border-[#f0f4f1] flex items-center justify-between text-xs">
                   <div>
                     <span className="text-[10px] text-[#a0b0a6] uppercase font-bold block">
-                      Pricing Modifier / Subsidy
+                      Plan Adoption Price
                     </span>
-                    <span
-                      className={`font-bold ${
-                        priceModifier === 0
-                          ? "text-[#173324]"
-                          : priceModifier > 0
-                          ? "text-[#173324]"
-                          : "text-emerald-700"
-                      }`}
-                    >
-                      {priceModifier === 0
-                        ? "₹0 (Standard Base Rate)"
-                        : priceModifier > 0
-                        ? `+₹${priceModifier} Extra Charge`
-                        : `-₹${Math.abs(priceModifier)} Subsidy`}
+                    <span className="text-base font-extrabold text-[#173324]">
+                      ₹{(priceModifier ?? 25000).toLocaleString("en-IN")}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">

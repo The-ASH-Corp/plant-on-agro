@@ -7,6 +7,7 @@ export class AdoptionPlanMapper {
       id: doc._id ? String(doc._id) : undefined,
       planLabel: doc.planLabel,
       icon: doc.icon,
+      price: (doc as any).price !== undefined ? (doc as any).price : doc.priceModifier,
       priceModifier: doc.priceModifier,
       description: doc.description,
       features: doc.features,
@@ -23,7 +24,8 @@ export class AdoptionPlanMapper {
     return {
       planLabel: plan.planLabel,
       icon: plan.icon,
-      priceModifier: plan.priceModifier,
+      price: plan.price,
+      priceModifier: plan.price,
       description: plan.description,
       features: plan.features,
       occasionDedications: plan.occasionDedications,

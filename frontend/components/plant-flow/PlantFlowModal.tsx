@@ -213,13 +213,14 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
     };
   }, [initialPlanId]);
 
-  const universalPrice =
-    trees.length > 0 && typeof trees[0].price === "number"
-      ? trees[0].price
-      : selectedTree?.price ?? 349;
   const selectedPlanData = plans.find((p) => p.id === selectedPlan);
-  const pricePerTree = universalPrice + (selectedPlanData?.price ?? 0);
-  const total = pricePerTree * qty;
+  // In this project, the amount is strictly for the PLAN, NOT for the tree.
+  const planPrice =
+    selectedPlanData && typeof selectedPlanData.price === "number" && selectedPlanData.price > 0
+      ? selectedPlanData.price
+      : 25000;
+  const pricePerTree = planPrice;
+  const total = planPrice * qty;
 
   const isOtherPlan = Boolean(
     selectedPlanData &&
@@ -569,6 +570,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
               onSetQty={(q) => setQty(q)}
               selectedTree={selectedTree}
               total={total}
+              planLabel={effectivePlanLabel}
             />
           )}
 

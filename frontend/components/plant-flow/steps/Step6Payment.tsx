@@ -42,7 +42,7 @@ export function Step6Payment({
         <div className="space-y-1.5 text-xs">
           <div className="flex justify-between text-[#4a6557]">
             <span>Dedication Plan</span>
-            <span className="text-[#173324] font-medium">{displayPackage}</span>
+            <span className="text-[#173324] font-bold">{displayPackage}</span>
           </div>
           {dedicationMessage ? (
             <div className="flex justify-between text-[#4a6557]">
@@ -53,17 +53,13 @@ export function Step6Payment({
             </div>
           ) : null}
           <div className="flex justify-between text-[#4a6557]">
-            <span>Allocated Tree Species</span>
-            <span className="text-[#173324] font-medium">{selectedTree?.name}</span>
-          </div>
-          <div className="flex justify-between text-[#4a6557]">
-            <span>Quantity</span>
-            <span className="text-[#173324] font-medium">{qty} trees</span>
+            <span>Package Enrolled</span>
+            <span className="text-[#173324] font-medium">{qty} × Adoption Package</span>
           </div>
           <div className="flex justify-between text-[#4a6557]">
             <span>Reserve Location</span>
             <span className="text-[#173324] font-medium text-right max-w-[60%] truncate">
-              {location}
+              {location || "Flagship Living Forest Reserve"}
             </span>
           </div>
           <div className="flex justify-between text-[#4a6557]">

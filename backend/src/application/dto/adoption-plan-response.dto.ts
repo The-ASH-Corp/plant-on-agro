@@ -7,6 +7,7 @@ export interface AdoptionPlanResponseDto {
   id: string;
   planLabel: string;
   icon: string;
+  price: number;
   priceModifier: number;
   description: string;
   features: string[];
@@ -24,6 +25,7 @@ export class AdoptionPlanResponseMapper {
       id: entity.id || '',
       planLabel: entity.planLabel,
       icon: entity.icon,
+      price: entity.price,
       priceModifier: entity.priceModifier,
       description: entity.description,
       features: entity.features,

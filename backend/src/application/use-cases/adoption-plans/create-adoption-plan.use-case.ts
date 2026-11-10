@@ -15,10 +15,12 @@ export class CreateAdoptionPlanUseCase {
       throw new Error(`An adoption plan with label "${input.planLabel}" already exists`);
     }
 
+    const planPrice = input.price !== undefined ? input.price : (input.priceModifier ?? 0);
     const plan = new AdoptionPlan({
       planLabel: input.planLabel,
       icon: input.icon ?? '🌱',
-      priceModifier: input.priceModifier ?? 0,
+      price: planPrice,
+      priceModifier: planPrice,
       description: input.description,
       features: input.features ?? [],
       occasionDedications: input.occasionDedications ?? ['general'],
