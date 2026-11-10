@@ -15,11 +15,11 @@ export function VisionCampaignSection({ user }: VisionCampaignSectionProps) {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const presets = [
-    { value: 500, label: "₹500", desc: "1 Native Sapling + 3-Yr Arborist Care" },
-    { value: 1000, label: "₹1,000", desc: "2 Native Trees + Organic Soil Restoration" },
-    { value: 2500, label: "₹2,500", desc: "5 Living Trees + GPS Geotagging Deed" },
-    { value: 5000, label: "₹5,000", desc: "10 Living Trees + Sanctuary Parcel" },
-    { value: 10000, label: "₹10,000", desc: "20 Living Trees + Visionary Legacy Deed" },
+    { value: 500, label: "₹500",},
+    { value: 1000, label: "₹1,000", },
+    { value: 2500, label: "₹2,500", },
+    { value: 5000, label: "₹5,000",},
+    { value: 10000, label: "₹10,000",  },
   ];
 
   // Active donation amount
@@ -49,9 +49,7 @@ export function VisionCampaignSection({ user }: VisionCampaignSectionProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Campaign Header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100/90 border border-emerald-300/80 text-[#2d6a4f] text-xs font-extrabold uppercase tracking-widest mb-3 shadow-2xs">
-            <span>🌿 5-Year National Mission • 2026–2031</span>
-          </div>
+          
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#173324] tracking-tight leading-tight" style={{ fontFamily: "var(--font-display)" }}>
             2M Trees Vision Campaign
@@ -59,40 +57,11 @@ export function VisionCampaignSection({ user }: VisionCampaignSectionProps) {
 
           <p className="mt-4 text-base sm:text-lg text-gray-600 leading-relaxed">
             Building India’s most trusted network of technology-enabled living forests, regenerative farms, and nature sanctuaries.
-            <strong> Our goal: 20 Lakh (2,000,000) Trees across 20 Living Forest Destinations.</strong>
+            <strong> Our goal: 20 Lakh (2,000,000) Trees</strong>
           </p>
         </div>
 
-        {/* 4 Pillars of 2M Trees Vision */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          <div className="bg-white rounded-2xl p-5 border border-[#d4e9dd] shadow-2xs text-center hover:shadow-md transition-shadow">
-            <span className="text-3xl">🌳</span>
-            <div className="mt-2 text-2xl font-black text-[#173324]">20,00,000</div>
-            <p className="text-xs font-bold text-[#2d6a4f] uppercase tracking-wider mt-0.5">Living Trees Target</p>
-            <p className="text-[11px] text-gray-500 mt-1">Native species & biodiversity corridors</p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-5 border border-[#d4e9dd] shadow-2xs text-center hover:shadow-md transition-shadow">
-            <span className="text-3xl">📍</span>
-            <div className="mt-2 text-2xl font-black text-[#173324]">20 Locations</div>
-            <p className="text-xs font-bold text-[#2d6a4f] uppercase tracking-wider mt-0.5">Sanctuary Destinations</p>
-            <p className="text-[11px] text-gray-500 mt-1">Kerala, Maharashtra, Western Ghats & more</p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-5 border border-[#d4e9dd] shadow-2xs text-center hover:shadow-md transition-shadow">
-            <span className="text-3xl">🌿</span>
-            <div className="mt-2 text-2xl font-black text-[#173324]">400 Acres</div>
-            <p className="text-xs font-bold text-[#2d6a4f] uppercase tracking-wider mt-0.5">Living Forests Conserved</p>
-            <p className="text-[11px] text-gray-500 mt-1">Dense canopies & regenerative agroforestry</p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-5 border border-[#d4e9dd] shadow-2xs text-center hover:shadow-md transition-shadow">
-            <span className="text-3xl">📡</span>
-            <div className="mt-2 text-2xl font-black text-[#173324]">100% Geotagged</div>
-            <p className="text-xs font-bold text-[#2d6a4f] uppercase tracking-wider mt-0.5">Digital Life Telemetry</p>
-            <p className="text-[11px] text-gray-500 mt-1">GPS coordinates & physical tree RFID IDs</p>
-          </div>
-        </div>
+    
 
         {/* Interactive Donation Card ("Users Can Donate Any Amount") */}
         <div className="max-w-4xl mx-auto bg-gradient-to-br from-[#173324] via-[#1b4332] to-[#2d6a4f] rounded-3xl p-6 sm:p-10 text-white shadow-2xl relative overflow-hidden border border-emerald-600/30">
@@ -103,7 +72,7 @@ export function VisionCampaignSection({ user }: VisionCampaignSectionProps) {
                   🤝 Open Crowdfunded Vision
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-extrabold mt-2" style={{ fontFamily: "var(--font-display)" }}>
-                  Donate Any Amount to the 2M Trees Vision
+                  Donate to the 2M Trees Vision
                 </h3>
                 <p className="text-emerald-100/90 text-xs sm:text-sm mt-1 max-w-xl leading-relaxed">
                   You don’t have to buy a fixed package to be part of history. Whether you give ₹100 or ₹25,000, 100% of your contribution directly funds saplings, bio-enrichment, and lifetime arborist stewardship.
@@ -111,7 +80,7 @@ export function VisionCampaignSection({ user }: VisionCampaignSectionProps) {
               </div>
 
               {/* Dynamic Trees Count Badge */}
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 text-center shrink-0 min-w-[170px]">
+              {/* <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 text-center shrink-0 min-w-[170px]">
                 <span className="text-[11px] text-emerald-200 uppercase font-semibold block">Your Direct Impact</span>
                 <div className="text-3xl font-black text-emerald-300 mt-0.5">
                   ~{estimatedTrees} {estimatedTrees === 1 ? "Tree" : "Trees"}
@@ -119,7 +88,7 @@ export function VisionCampaignSection({ user }: VisionCampaignSectionProps) {
                 <span className="text-[10px] text-emerald-100/80 block mt-0.5">
                   Nurtured for a Lifetime
                 </span>
-              </div>
+              </div> */}
             </div>
 
             {/* Quick Amount Presets */}
@@ -145,9 +114,7 @@ export function VisionCampaignSection({ user }: VisionCampaignSectionProps) {
                       <span className={`text-lg font-black ${isSelected ? "text-[#173324]" : "text-white"}`}>
                         {p.label}
                       </span>
-                      <span className={`text-[10px] line-clamp-2 mt-1 leading-tight ${isSelected ? "text-[#2d6a4f] font-medium" : "text-emerald-200/80"}`}>
-                        {p.desc}
-                      </span>
+                     
                     </button>
                   );
                 })}
