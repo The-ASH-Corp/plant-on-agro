@@ -232,7 +232,15 @@ export default function App() {
 
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+    if (el) {
+      const navOffset = 80;
+      const elementPosition = el.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+      window.scrollTo({
+        top: Math.max(0, offsetPosition),
+        behavior: "smooth",
+      });
+    }
   };
 
   const handleOpenPlant = (planId?: string) => {
@@ -248,13 +256,14 @@ export default function App() {
     }
     const map: Partial<Record<Section, string>> = {
       "how-it-works": "how-it-works",
+      plans: "plans",
       trees: "plans",
       vision: "vision-2m",
       experiences: "vision-2m",
       impact: "impact",
       home: "home",
     };
-    const id = map[s];
+    const id = map[s] || s;
     if (id) scrollTo(id);
   };
 
