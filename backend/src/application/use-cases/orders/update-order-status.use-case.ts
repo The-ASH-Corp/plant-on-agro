@@ -34,7 +34,8 @@ export class UpdateOrderStatusUseCase {
     assignedTreeInstanceIds?: string[],
     treeSpecies?: string,
     scientificName?: string,
-    category?: string
+    category?: string,
+    treeGpsCoords?: string[]
   ): Promise<OrderDto> {
     const cleanId = (idOrNumber || '').trim();
     if (!cleanId) {
@@ -171,9 +172,16 @@ export class UpdateOrderStatusUseCase {
 
         // 2. If Admin explicitly provided physical tree tag(s) (e.g. from physical metal RFID tag stamped on the sapling)
         if (treeTags && treeTags.length > 0 && treeInstances.length < order.quantity) {
-          for (const rawTag of treeTags) {
+          for (let tagIdx = 0; tagIdx < treeTags.length; tagIdx++) {
+            const rawTag = treeTags[tagIdx];
             const cleanTag = (rawTag || '').trim().toUpperCase();
             if (cleanTag && !treeInstances.some((t) => t.treeTag === cleanTag)) {
+              // Determine GPS for this specific tree (either custom per-tree GPS or grove GPS)
+              const specificGps = (treeGpsCoords && treeGpsCoords[tagIdx] && treeGpsCoords[tagIdx].trim().length > 0)
+                ? treeGpsCoords[tagIdx].trim()
+                : effectiveGps;
+              const treeCoord = parseGpsCoords(specificGps);
+
               let existing = await this.treeInstanceRepository.findByTag(cleanTag);
               if (existing) {
                 existing.update({
@@ -186,9 +194,9 @@ export class UpdateOrderStatusUseCase {
                   datePlanted: new Date(),
                   notes:
                     notes ||
-                    `Assigned to order ${order.orderNumber} for ${order.adopterName}. Geotagged at ${effectiveGps}.`,
+                    `Assigned to order ${order.orderNumber} for ${order.adopterName}. Geotagged at ${specificGps}.`,
                 });
-                existing.updateGpsCoordinates(targetCoord.lat, targetCoord.lng);
+                existing.updateGpsCoordinates(treeCoord.lat, treeCoord.lng);
                 await this.treeInstanceRepository.update(existing);
                 treeInstances.push(existing);
               } else {
@@ -196,7 +204,7 @@ export class UpdateOrderStatusUseCase {
                   treeTag: cleanTag,
                   orderRef: order.orderNumber,
                   assignedReserve: order.reserveName,
-                  gpsCoordinates: { latitude: targetCoord.lat, longitude: targetCoord.lng },
+                  gpsCoordinates: { latitude: treeCoord.lat, longitude: treeCoord.lng },
                   datePlanted: new Date(),
                   healthStatus: 'Healthy',
                   treeVarietyName: order.treeSpecies,
@@ -204,7 +212,7 @@ export class UpdateOrderStatusUseCase {
                   adopterEmail: order.adopterEmail,
                   notes:
                     notes ||
-                    `Physically tagged (${cleanTag}) & planted at verified coordinates (${effectiveGps}). Geotagged by admin.`,
+                    `Physically tagged (${cleanTag}) & planted at verified coordinates (${specificGps}). Geotagged by admin.`,
                   isActive: true,
                 });
                 const saved = await this.treeInstanceRepository.save(newInstance);

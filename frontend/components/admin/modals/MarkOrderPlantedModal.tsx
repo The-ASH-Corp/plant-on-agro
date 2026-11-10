@@ -46,7 +46,8 @@ interface MarkOrderPlantedModalProps {
     assignedTreeInstanceIds?: string[],
     treeSpecies?: string,
     scientificName?: string,
-    category?: string
+    category?: string,
+    treeGpsCoords?: string[]
   ) => Promise<void> | void;
 }
 
@@ -54,7 +55,6 @@ export function MarkOrderPlantedModal({
   isOpen,
   order,
   locations = [],
-  instances = [],
   onClose,
   onSubmit,
 }: MarkOrderPlantedModalProps) {
@@ -63,19 +63,15 @@ export function MarkOrderPlantedModal({
   const [scientificName, setScientificName] = useState<string>("Santalum album");
   const [category, setCategory] = useState<string>("Timber Trees");
 
-  const [assignMode, setAssignMode] = useState<"tags" | "inventory">("tags");
   const [treeTags, setTreeTags] = useState<string[]>([]);
-  const [selectedInventoryId, setSelectedInventoryId] = useState<string>("");
   const [selectedReserve, setSelectedReserve] = useState<string>("");
   const [gpsCoords, setGpsCoords] = useState<string>("");
+  const [useIndividualGps, setUseIndividualGps] = useState<boolean>(false);
+  const [perTreeGps, setPerTreeGps] = useState<string[]>([]);
+
   const [notes, setNotes] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
-  // Unassigned saplings in nursery
-  const unassignedSaplings = (instances || []).filter(
-    (i) => !i.orderRef || i.orderRef.trim() === ""
-  );
 
   // Initialize reserve, default GPS, tree species, and tree tags from order
   useEffect(() => {
@@ -107,14 +103,14 @@ export function MarkOrderPlantedModal({
         `POA-${speciesCode}-${cleanOrderNumber}-${String(i + 1).padStart(3, "0")}`
       );
       setTreeTags(initialTags);
+      setPerTreeGps(Array.from({ length: count }, () => initialGps));
+      setUseIndividualGps(false);
 
       setNotes(
         order.notes ||
           `Physically planted at assigned reserve parcel. Geotagged & arborist verified for ${order.adopterName}.`
       );
       setErrorMsg(null);
-      setAssignMode("tags");
-      setSelectedInventoryId("");
     }
   }, [order, locations]);
 
@@ -136,7 +132,7 @@ export function MarkOrderPlantedModal({
     setTreeTags(updatedTags);
   };
 
-  // Helper: Use current device geolocation
+  // Helper: Use current device geolocation for main / grove GPS
   const handleUseDeviceLocation = () => {
     if (!navigator.geolocation) {
       setErrorMsg("Geolocation is not supported by your browser.");
@@ -147,7 +143,9 @@ export function MarkOrderPlantedModal({
       (pos) => {
         const lat = pos.coords.latitude.toFixed(4);
         const lng = pos.coords.longitude.toFixed(4);
-        setGpsCoords(`${lat}° N, ${lng}° E`);
+        const formatted = `${lat}° N, ${lng}° E`;
+        setGpsCoords(formatted);
+        setPerTreeGps((prev) => prev.map(() => formatted));
       },
       () => {
         setErrorMsg("Unable to retrieve device GPS coordinates. Please enter manually.");
@@ -155,27 +153,42 @@ export function MarkOrderPlantedModal({
     );
   };
 
-  // Handle Inventory Selection
-  const handleSelectInventoryTree = (instanceId: string) => {
-    setSelectedInventoryId(instanceId);
-    const found = unassignedSaplings.find((i) => i.id === instanceId);
-    if (found) {
-      if (found.treeVarietyName) {
-        setTreeSpecies(found.treeVarietyName);
-      }
-      if (found.formattedGps) {
-        setGpsCoords(found.formattedGps);
-      } else if (found.gpsCoordinates) {
-        setGpsCoords(`${found.gpsCoordinates.latitude}° N, ${found.gpsCoordinates.longitude}° E`);
-      }
-      setTreeTags([found.treeTag]);
+  // Helper: Use current device geolocation for a specific individual tree
+  const handleUseDeviceLocationForTree = (idx: number) => {
+    if (!navigator.geolocation) {
+      setErrorMsg("Geolocation is not supported by your browser.");
+      return;
     }
+    setErrorMsg(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude.toFixed(4);
+        const lng = pos.coords.longitude.toFixed(4);
+        const formatted = `${lat}° N, ${lng}° E`;
+        setPerTreeGps((prev) => {
+          const next = [...prev];
+          next[idx] = formatted;
+          return next;
+        });
+      },
+      () => {
+        setErrorMsg("Unable to retrieve device GPS coordinates for this tree. Please enter manually.");
+      }
+    );
   };
 
   const handleTagChange = (index: number, val: string) => {
     setTreeTags((prev) => {
       const next = [...prev];
       next[index] = val.trim().toUpperCase();
+      return next;
+    });
+  };
+
+  const handlePerTreeGpsChange = (index: number, val: string) => {
+    setPerTreeGps((prev) => {
+      const next = [...prev];
+      next[index] = val;
       return next;
     });
   };
@@ -187,35 +200,41 @@ export function MarkOrderPlantedModal({
       return;
     }
 
-    if (!gpsCoords.trim()) {
+    if (!useIndividualGps && !gpsCoords.trim()) {
       setErrorMsg("Exact GPS coordinates are required before marking tree as Planted.");
       return;
     }
 
-    if (assignMode === "tags") {
-      const hasEmptyTag = treeTags.some((t) => !t || t.trim().length === 0);
-      if (hasEmptyTag) {
-        setErrorMsg("Please provide valid physical Tree Tags for all trees in this order.");
+    const hasEmptyTag = treeTags.some((t) => !t || t.trim().length === 0);
+    if (hasEmptyTag) {
+      setErrorMsg("Please provide valid physical Tree Tags for all trees in this order.");
+      return;
+    }
+
+    if (useIndividualGps) {
+      const hasEmptyGps = perTreeGps.some((g) => !g || g.trim().length === 0);
+      if (hasEmptyGps) {
+        setErrorMsg("Please provide valid GPS coordinates for all individual trees.");
         return;
       }
-    } else if (assignMode === "inventory" && !selectedInventoryId) {
-      setErrorMsg("Please select an unassigned nursery sapling to assign to this purchase.");
-      return;
     }
 
     try {
       setIsSubmitting(true);
       setErrorMsg(null);
+      const effectivePrimaryGps = useIndividualGps && perTreeGps[0] ? perTreeGps[0].trim() : gpsCoords.trim();
+
       await onSubmit(
         order.orderNumber,
-        gpsCoords.trim(),
+        effectivePrimaryGps,
         selectedReserve.trim(),
         notes.trim(),
-        assignMode === "tags" ? treeTags : undefined,
-        assignMode === "inventory" && selectedInventoryId ? [selectedInventoryId] : undefined,
+        treeTags,
+        undefined, // no nursery IDs
         treeSpecies.trim(),
         scientificName.trim(),
-        category.trim()
+        category.trim(),
+        useIndividualGps ? perTreeGps : undefined
       );
       onClose();
     } catch (err: any) {
@@ -224,6 +243,8 @@ export function MarkOrderPlantedModal({
       setIsSubmitting(false);
     }
   };
+
+  const treeCount = Math.max(1, order.quantity || 1);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fadeIn">
@@ -244,7 +265,7 @@ export function MarkOrderPlantedModal({
           <div>
             <h2 className="text-lg font-bold tracking-tight">Enter Tree Details & Mark Planted</h2>
             <p className="text-xs text-[#52796f]">
-              Specify the tree species, botanical details & physical tag to appear on the official certificate
+              Specify tree species, botanical details, physical RFID tags & GPS coordinates for the official certificate
             </p>
           </div>
         </div>
@@ -264,7 +285,7 @@ export function MarkOrderPlantedModal({
           <div className="flex justify-between items-center">
             <span className="text-[#687f72] font-medium">Adoption Plan & Qty:</span>
             <span className="font-bold text-[#173324]">
-              {order.quantity} Tree(s) • {order.planType}
+              {treeCount} Tree(s) • {order.planType}
             </span>
           </div>
         </div>
@@ -281,18 +302,18 @@ export function MarkOrderPlantedModal({
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-[#173324] flex items-center gap-1.5">
                 <span>🌳</span>
-                <span>Tree to Plant (Appears on Certificate)</span>
+                <span>Tree Species to Plant (Stamped on Deed)</span>
                 <span className="text-emerald-600">*</span>
               </span>
               <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-full border border-emerald-300">
-                Stamped on Deed
+                Official Deed
               </span>
             </div>
 
             {/* Quick Presets Chips */}
             <div>
               <span className="text-[10px] font-semibold text-[#55695d] block mb-1.5">
-                Quick Native Tree Presets (or type your own below):
+                Quick Native Tree Presets (or type below):
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {POPULAR_TREE_PRESETS.map((preset) => {
@@ -364,91 +385,6 @@ export function MarkOrderPlantedModal({
             </div>
           </div>
 
-          {/* SECTION 2: Tree Assignment Method Tabs */}
-          <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-[#173324] mb-1.5">
-              Physical Tree Identification <span className="text-emerald-600">*</span>
-            </label>
-            <div className="grid grid-cols-2 gap-2 p-1 bg-[#edf4f0] rounded-xl">
-              <button
-                type="button"
-                onClick={() => setAssignMode("tags")}
-                className={`py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                  assignMode === "tags"
-                    ? "bg-white text-[#173324] shadow-xs"
-                    : "text-[#55695d] hover:text-[#173324]"
-                }`}
-              >
-                🏷️ Enter Physical Tag(s)
-              </button>
-              <button
-                type="button"
-                onClick={() => setAssignMode("inventory")}
-                className={`py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                  assignMode === "inventory"
-                    ? "bg-white text-[#173324] shadow-xs"
-                    : "text-[#55695d] hover:text-[#173324]"
-                }`}
-              >
-                📦 Select from Nursery ({unassignedSaplings.length})
-              </button>
-            </div>
-          </div>
-
-          {/* Mode 1: Physical Tags */}
-          {assignMode === "tags" && (
-            <div className="p-3 rounded-xl bg-[#fafdfa] border border-[#d2e4d8] space-y-2">
-              <span className="text-[11px] font-bold text-[#173324] block">
-                Assign Specific Physical Serial Tag(s)
-              </span>
-              <p className="text-[10px] text-[#55695d]">
-                Enter the physical RFID marker tag code stamped on the sapling:
-              </p>
-              {treeTags.map((tag, idx) => (
-                <div key={idx} className="flex items-center gap-2">
-                  <span className="text-[11px] font-mono font-bold text-[#1b7a43] shrink-0 w-16">
-                    Tree #{idx + 1}:
-                  </span>
-                  <input
-                    type="text"
-                    required
-                    value={tag}
-                    onChange={(e) => handleTagChange(idx, e.target.value)}
-                    placeholder="e.g. POA-SW-2026-001"
-                    className="flex-1 px-3 py-1.5 rounded-lg border border-[#b2ddc4] bg-white font-mono font-bold text-[#173324] uppercase outline-none focus:border-[#1b7a43]"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Mode 2: Select From Nursery Inventory */}
-          {assignMode === "inventory" && (
-            <div className="p-3 rounded-xl bg-[#fafdfa] border border-[#d2e4d8] space-y-2">
-              <span className="text-[11px] font-bold text-[#173324] block">
-                Select Available Unassigned Nursery Sapling
-              </span>
-              {unassignedSaplings.length === 0 ? (
-                <div className="p-3 bg-amber-50 rounded-lg border border-amber-200 text-amber-900 text-[11px]">
-                  No unassigned saplings currently exist in nursery inventory. Switch to <strong>Enter Physical Tag(s)</strong> above to register a new physical tag directly.
-                </div>
-              ) : (
-                <select
-                  value={selectedInventoryId}
-                  onChange={(e) => handleSelectInventoryTree(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-[#b2ddc4] bg-white font-medium text-[#173324] outline-none"
-                >
-                  <option value="">-- Choose an unassigned tree from nursery --</option>
-                  {unassignedSaplings.map((sapling) => (
-                    <option key={sapling.id} value={sapling.id}>
-                      {sapling.treeTag} — {sapling.treeVarietyName || "Indigenous Sapling"} ({sapling.assignedReserve})
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-          )}
-
           {/* Planting Location (chosen by the buyer — read-only for admin) */}
           <div>
             <label className="block text-[11px] font-bold uppercase tracking-wider text-[#173324] mb-1.5">
@@ -461,48 +397,154 @@ export function MarkOrderPlantedModal({
             </div>
           </div>
 
-          {/* Geographical Coordinates (GPS) */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-[#173324]">
-                Exact Ground GPS Coordinates <span className="text-emerald-600">*</span>
-              </label>
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const match = locations.find(
-                      (l) => l.name.toLowerCase() === selectedReserve.toLowerCase()
-                    );
-                    if (match && match.gps) setGpsCoords(match.gps);
-                  }}
-                  className="text-[10px] text-[#1b7a43] hover:underline font-semibold cursor-pointer"
-                >
-                  📍 Use Reserve Center
-                </button>
-                <span className="text-gray-300">|</span>
-                <button
-                  type="button"
-                  onClick={handleUseDeviceLocation}
-                  className="text-[10px] text-blue-700 hover:underline font-semibold cursor-pointer"
-                >
-                  🛰️ Device GPS
-                </button>
+          {/* SECTION 2: Physical Tree Identification & Tags */}
+          <div className="p-3.5 rounded-2xl bg-[#fafdfa] border border-[#d2e4d8] space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-[#173324] block">
+                  Physical Tree Identification ({treeCount} {treeCount > 1 ? "Trees" : "Tree"}) <span className="text-emerald-600">*</span>
+                </label>
+                <p className="text-[10px] text-[#55695d]">
+                  Enter the physical RFID marker tag code stamped on each sapling:
+                </p>
               </div>
+
+              {/* Mode Toggle when multiple trees exist */}
+              {treeCount > 1 && (
+                <div className="flex items-center gap-1 p-1 bg-[#edf4f0] rounded-xl self-start sm:self-auto shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setUseIndividualGps(false)}
+                    className={`px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
+                      !useIndividualGps
+                        ? "bg-white text-[#173324] shadow-xs"
+                        : "text-[#55695d] hover:text-[#173324]"
+                    }`}
+                  >
+                    📍 Same GPS for All
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setUseIndividualGps(true)}
+                    className={`px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
+                      useIndividualGps
+                        ? "bg-white text-[#173324] shadow-xs"
+                        : "text-[#55695d] hover:text-[#173324]"
+                    }`}
+                  >
+                    🛰️ Separate GPS Per Tree
+                  </button>
+                </div>
+              )}
             </div>
 
-            <input
-              type="text"
-              required
-              value={gpsCoords}
-              onChange={(e) => setGpsCoords(e.target.value)}
-              placeholder="e.g. 18.9894° N, 73.4428° E"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#b2ddc4] bg-white text-[#173324] font-mono font-bold focus:outline-none focus:border-[#1b7a43] focus:ring-1 focus:ring-[#1b7a43]"
-            />
-            <p className="text-[10px] text-[#60776b] mt-1">
-              These verified coordinates will be stamped onto the buyer&apos;s legal digital certificate and deed registry.
-            </p>
+            {/* Tree Rows List */}
+            <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+              {treeTags.map((tag, idx) => (
+                <div
+                  key={idx}
+                  className={`p-2.5 rounded-xl border transition-all ${
+                    useIndividualGps
+                      ? "bg-white border-[#b2ddc4] space-y-2"
+                      : "bg-[#fbfdfa] border-[#e2eae5] flex items-center gap-2"
+                  }`}
+                >
+                  {/* Tag Input */}
+                  <div className="flex items-center gap-2 flex-1">
+                    <span className="text-[11px] font-mono font-bold text-[#1b7a43] shrink-0 w-16">
+                      Tree #{idx + 1}:
+                    </span>
+                    <input
+                      type="text"
+                      required
+                      value={tag}
+                      onChange={(e) => handleTagChange(idx, e.target.value)}
+                      placeholder="e.g. POA-SW-2026-001"
+                      className="flex-1 px-3 py-1.5 rounded-lg border border-[#b2ddc4] bg-white font-mono font-bold text-[#173324] uppercase outline-none focus:border-[#1b7a43]"
+                    />
+                  </div>
+
+                  {/* Individual GPS Input if enabled */}
+                  {useIndividualGps && (
+                    <div className="flex items-center gap-2 pt-1 border-t border-[#eaf2ec]">
+                      <span className="text-[11px] font-mono font-bold text-[#55695d] shrink-0 w-16">
+                        GPS:
+                      </span>
+                      <input
+                        type="text"
+                        required
+                        value={perTreeGps[idx] || ""}
+                        onChange={(e) => handlePerTreeGpsChange(idx, e.target.value)}
+                        placeholder="e.g. 18.9894° N, 73.4428° E"
+                        className="flex-1 px-3 py-1.5 rounded-lg border border-[#b2ddc4] bg-white font-mono text-xs text-[#173324] outline-none focus:border-[#1b7a43]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleUseDeviceLocationForTree(idx)}
+                        className="px-2.5 py-1.5 rounded-lg bg-[#edf4f0] hover:bg-[#e0ece4] text-[#1b7a43] text-[10px] font-bold cursor-pointer shrink-0 transition-colors"
+                        title="Capture device GPS for this sapling"
+                      >
+                        🛰️ GPS
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* Geographical Coordinates (Single Grove GPS when !useIndividualGps) */}
+          {!useIndividualGps && (
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-[#173324]">
+                  Exact Ground GPS Coordinates {treeCount > 1 && `(Grove / Plot for all ${treeCount} trees)`} <span className="text-emerald-600">*</span>
+                </label>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const match = locations.find(
+                        (l) => l.name.toLowerCase() === selectedReserve.toLowerCase()
+                      );
+                      if (match && match.gps) {
+                        setGpsCoords(match.gps);
+                        setPerTreeGps((prev) => prev.map(() => match.gps!));
+                      }
+                    }}
+                    className="text-[10px] text-[#1b7a43] hover:underline font-semibold cursor-pointer"
+                  >
+                    📍 Use Reserve Center
+                  </button>
+                  <span className="text-gray-300">|</span>
+                  <button
+                    type="button"
+                    onClick={handleUseDeviceLocation}
+                    className="text-[10px] text-blue-700 hover:underline font-semibold cursor-pointer"
+                  >
+                    🛰️ Device GPS
+                  </button>
+                </div>
+              </div>
+
+              <input
+                type="text"
+                required
+                value={gpsCoords}
+                onChange={(e) => {
+                  setGpsCoords(e.target.value);
+                  setPerTreeGps((prev) => prev.map(() => e.target.value));
+                }}
+                placeholder="e.g. 18.9894° N, 73.4428° E"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#b2ddc4] bg-white text-[#173324] font-mono font-bold focus:outline-none focus:border-[#1b7a43] focus:ring-1 focus:ring-[#1b7a43]"
+              />
+              <p className="text-[10px] text-[#60776b] mt-1">
+                🌱 {treeCount > 1
+                  ? `All ${treeCount} trees in this adoption are planted together in this reserve grove and will share these coordinates on the deed. (Click "Separate GPS Per Tree" above if you wish to record individual coordinates per tree).`
+                  : "These verified coordinates will be stamped onto the buyer's legal digital certificate and deed registry."}
+              </p>
+            </div>
+          )}
 
           {/* Arborist Planting Notes */}
           <div>
@@ -524,7 +566,7 @@ export function MarkOrderPlantedModal({
             <div>
               <strong>Certificate Deed Stamping:</strong> Upon confirming, the official certificate will be generated and issued displaying:
               <div className="mt-1 font-semibold text-emerald-900 bg-white/70 p-2 rounded-lg border border-emerald-200 text-[11px]">
-                🌿 Specimen: <strong>{treeSpecies}</strong> ({scientificName}) • Tag: <strong>{treeTags[0] || "POA-TR-001"}</strong> • Reserve: <strong>{selectedReserve}</strong>
+                🌿 Specimen: <strong>{treeSpecies}</strong> ({scientificName}) • Tag: <strong>{treeTags[0] || "POA-TR-001"}{treeCount > 1 ? ` (and ${treeCount - 1} more)` : ""}</strong> • Reserve: <strong>{selectedReserve}</strong>
               </div>
             </div>
           </div>

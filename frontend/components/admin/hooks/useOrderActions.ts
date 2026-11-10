@@ -40,7 +40,8 @@ export function useOrderActions({ data, showToast }: Params) {
     assignedTreeInstanceIds?: string[],
     treeSpecies?: string,
     scientificName?: string,
-    category?: string
+    category?: string,
+    treeGpsCoords?: string[]
   ) => {
     const targetOrder = orders.find(
       (o) => o.orderNumber === orderIdentifier || o.id === orderIdentifier
@@ -85,7 +86,8 @@ export function useOrderActions({ data, showToast }: Params) {
         assignedTreeInstanceIds,
         treeSpecies,
         scientificName,
-        category
+        category,
+        treeGpsCoords
       );
     } catch (orderApiErr: any) {
       // Fallback: try updating by orderIdentifier (orderNumber) if targetOrder.id was a derived ID
@@ -101,7 +103,8 @@ export function useOrderActions({ data, showToast }: Params) {
             assignedTreeInstanceIds,
             treeSpecies,
             scientificName,
-            category
+            category,
+            treeGpsCoords
           );
         } catch (retryErr: any) {
           const msg = retryErr?.response?.data?.message || retryErr?.message || "Failed to update order status";

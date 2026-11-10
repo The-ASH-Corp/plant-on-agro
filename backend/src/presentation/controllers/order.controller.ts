@@ -77,6 +77,7 @@ export class OrderController {
         treeSpecies,
         scientificName,
         category,
+        treeGpsCoords,
       } = req.body;
       const result = await this.updateOrderStatusUseCase.execute(
         id as string,
@@ -88,7 +89,8 @@ export class OrderController {
         assignedTreeInstanceIds,
         treeSpecies,
         scientificName,
-        category
+        category,
+        treeGpsCoords
       );
       ApiResponse.success(res, result, `Order status updated to "${status}" successfully`);
     } catch (error) {

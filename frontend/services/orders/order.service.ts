@@ -131,7 +131,8 @@ export const orderService = {
     assignedTreeInstanceIds?: string[],
     treeSpecies?: string,
     scientificName?: string,
-    category?: string
+    category?: string,
+    treeGpsCoords?: string[]
   ): Promise<ApiResponse<BackendOrder>> {
     return apiClient.patch<BackendOrder>(API_ENDPOINTS.ORDERS.STATUS(id), {
       status,
@@ -143,6 +144,7 @@ export const orderService = {
       treeSpecies,
       scientificName,
       category,
+      treeGpsCoords,
     });
   },
 
