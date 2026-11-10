@@ -1,4 +1,4 @@
-export type Section = "home" | "how-it-works" | "trees" | "experiences" | "impact" | "plant";
+export type Section = "home" | "how-it-works" | "trees" | "experiences" | "vision" | "impact" | "plant";
 
 
 export type TreeCategory =

@@ -20,7 +20,8 @@ export interface CreateRazorpayOrderDto {
   adopterPhone?: string;
   dedicationMessage?: string;
   receipt?: string;
-  amount?: number; // Optional client-reported amount, strictly overridden by authoritative server calculation
+  amount?: number; // Custom donation amount or client-reported amount
+  isDonation?: boolean;
 }
 
 export interface SecurePaymentOrderResult extends PaymentOrderResult {
@@ -89,7 +90,17 @@ export class CreateRazorpayOrderUseCase {
     let planPrice = 25000; // Default flagship retail plan (₹25,000 as per PDF)
     let selectedPlanLabel = dto.planLabel?.trim() || '10 Trees Retail Plan';
 
-    if (dto.planId && dto.planId.trim().length > 0) {
+    const isVisionDonation =
+      Boolean(dto.isDonation) ||
+      dto.planId === 'vision-2m-donation' ||
+      dto.planId === 'donation' ||
+      dto.planLabel?.toLowerCase().includes('vision') ||
+      dto.planLabel?.toLowerCase().includes('donation');
+
+    if (isVisionDonation && typeof dto.amount === 'number' && dto.amount > 0) {
+      planPrice = Math.max(1, Math.round(dto.amount));
+      selectedPlanLabel = dto.planLabel?.trim() || '2M Trees Vision Campaign';
+    } else if (dto.planId && dto.planId.trim().length > 0) {
       const plan = await this.adoptionPlanRepository.findById(dto.planId.trim());
       if (plan) {
         planPrice = plan.price > 0 ? plan.price : (plan.priceModifier > 0 ? plan.priceModifier : 25000);
@@ -104,9 +115,11 @@ export class CreateRazorpayOrderUseCase {
     }
 
     // 3. Authoritative Total Price Calculation (Immune to client tampering)
-    // The amount is determined strictly by the Plan, not the tree species.
+    // The amount is determined strictly by the Plan or custom Vision Donation.
     const unitPrice = Math.max(1, planPrice);
-    const authoritativeTotal = unitPrice * qty;
+    const authoritativeTotal = isVisionDonation && typeof dto.amount === 'number' && dto.amount > 0
+      ? Math.max(1, Math.round(dto.amount))
+      : unitPrice * qty;
 
     if (authoritativeTotal <= 0) {
       throw new BadRequestError('Calculated adoption price must be greater than zero.');

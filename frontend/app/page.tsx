@@ -10,6 +10,7 @@ import {
   ExperienceSection,
   ImpactSection,
   CertificateSection,
+  VisionCampaignSection,
 } from "@/components/landing";
 
 import { HeroLiveStats } from "@/components/landing/Hero";
@@ -248,7 +249,8 @@ export default function App() {
     const map: Partial<Record<Section, string>> = {
       "how-it-works": "how-it-works",
       trees: "plans",
-      experiences: "experiences",
+      vision: "vision-2m",
+      experiences: "vision-2m",
       impact: "impact",
       home: "home",
     };
@@ -282,7 +284,8 @@ export default function App() {
 
         <AdoptionPlans openPlant={(planId) => handleOpenPlant(planId)} />
 
-        {/* <ExperienceSection onScheduleVisit={handleScheduleVisit} /> */}
+        {/* 2M Trees Vision Campaign Section with Custom Donation */}
+        <VisionCampaignSection user={user} />
 
         {cmsContent.impact?.isEnabled !== false && (
           <ImpactSection
