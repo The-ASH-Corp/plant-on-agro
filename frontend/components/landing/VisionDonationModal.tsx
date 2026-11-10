@@ -207,7 +207,14 @@ export function VisionDonationModal({
                 </div>
               </div>
 
-              <div className="pt-3 flex gap-3">
+              <div className="p-3.5 rounded-xl bg-blue-50/80 border border-blue-200 text-blue-900 text-xs flex items-center gap-2.5 text-left">
+                <span className="text-lg">📧</span>
+                <span className="leading-relaxed">
+                  An official tax invoice and contribution receipt have been dispatched to <strong>{donorEmail}</strong>.
+                </span>
+              </div>
+
+              <div className="pt-2 flex gap-3">
                 <button
                   onClick={onClose}
                   className="w-full py-2.5 rounded-xl text-xs font-bold text-white bg-[#2d6a4f] hover:bg-[#1b4332] shadow-sm transition-all cursor-pointer"
@@ -235,9 +242,6 @@ export function VisionDonationModal({
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="text-xl font-black text-[#173324]">
                       ₹{amount.toLocaleString("en-IN")}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      (~{estimatedTrees} {estimatedTrees === 1 ? "Tree" : "Trees"} Nurtured)
                     </span>
                   </div>
                 </div>
