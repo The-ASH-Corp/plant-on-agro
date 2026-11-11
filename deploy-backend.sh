@@ -25,20 +25,27 @@ echo "🔄 [4/4] Reloading PM2 process..."
 pm2 reload ecosystem.config.cjs || pm2 start ecosystem.config.cjs
 pm2 save
 
-# Verify health status
-sleep 2
+# Verify health status with polling
 echo "🩺 Verifying API health check..."
-RESPONSE=$(curl -s http://127.0.0.1:5008/api/v1/health)
-echo "Health check response: $RESPONSE"
+HEALTHY=false
+for i in {1..15}; do
+  RESPONSE=$(curl -s http://127.0.0.1:5008/api/v1/health || true)
+  if echo "$RESPONSE" | grep -q '"status":"UP"'; then
+    echo "Health check response: $RESPONSE"
+    HEALTHY=true
+    break
+  fi
+  sleep 1
+done
 
-if echo "$RESPONSE" | grep -q '"status":"UP"'; then
+if [ "$HEALTHY" = true ]; then
   echo "=========================================="
   echo "✅ Deployment Successful & Backend Healthy!"
   echo "=========================================="
   exit 0
 else
   echo "=========================================="
-  echo "❌ Health check failed after reload!"
+  echo "❌ Health check failed after 15 seconds!"
   echo "=========================================="
   exit 1
 fi
