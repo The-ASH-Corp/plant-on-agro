@@ -136,7 +136,8 @@ export function AdminModals({
           assignedTreeInstanceIds,
           treeSpecies,
           scientificName,
-          category
+          category,
+          treeGpsCoords
         ) => {
           await orderActions.handleUpdateOrderStatus(
             orderNumber,
@@ -148,7 +149,8 @@ export function AdminModals({
             assignedTreeInstanceIds,
             treeSpecies,
             scientificName,
-            category
+            category,
+            treeGpsCoords
           );
         }}
       />

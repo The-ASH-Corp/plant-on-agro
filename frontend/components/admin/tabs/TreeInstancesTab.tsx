@@ -458,12 +458,12 @@ export function TreeInstancesTab({
                                Assigned
                             </span>
                           )}
-                          {onDeleteInstance && (
+                          {onDeleteInstance && !item.orderRef && !item.adopterName && (
                             <button
                               type="button"
                               onClick={() => onDeleteInstance(item.id, item.treeTag ? `${item.treeTag} (${item.treeVarietyName})` : item.treeVarietyName)}
                               className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 p-1.5 rounded-lg transition-colors cursor-pointer text-xs inline-flex items-center justify-center border border-transparent hover:border-rose-200"
-                              title={`Delete tree instance ${item.treeTag}`}
+                              title={`Delete unassigned tree instance ${item.treeTag}`}
                             >
                               <TrashIcon className="w-3.5 h-3.5" />
                             </button>
@@ -594,12 +594,12 @@ export function TreeInstancesTab({
                          Assigned
                       </span>
                     )}
-                    {onDeleteInstance && (
+                    {onDeleteInstance && !item.orderRef && !item.adopterName && (
                       <button
                         type="button"
                         onClick={() => onDeleteInstance(item.id, item.treeTag ? `${item.treeTag} (${item.treeVarietyName})` : item.treeVarietyName)}
                         className="inline-flex items-center gap-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors border border-transparent hover:border-rose-200"
-                        title={`Delete tree instance ${item.treeTag}`}
+                        title={`Delete unassigned tree instance ${item.treeTag}`}
                       >
                         <TrashIcon className="w-3.5 h-3.5" />
                         <span>Delete</span>

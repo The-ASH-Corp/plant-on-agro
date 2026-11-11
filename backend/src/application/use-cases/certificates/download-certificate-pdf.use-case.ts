@@ -3,6 +3,7 @@ import { ITreeInstanceRepository } from '../../../core/interfaces/tree-instance.
 import { IOrderRepository } from '../../../core/interfaces/order.repository.interface';
 import { IPdfGeneratorService } from '../../../core/interfaces/pdf-generator.interface';
 import { Certificate } from '../../../core/entities/certificate.entity';
+import { TreeInstance } from '../../../core/entities/tree-instance.entity';
 import { NotFoundError, BadRequestError } from '../../../core/errors/app-error';
 import { env } from '../../../config/env';
 
@@ -136,6 +137,31 @@ export class DownloadCertificatePdfUseCase {
       const instances = await this.treeInstanceRepository.findByOrderRef(certificate.orderRef);
       if (instances.length > 0) {
         treeInstance = instances[0];
+      }
+    }
+
+    if (!treeInstance && certificate.orderRef && this.orderRepository) {
+      const order = await this.orderRepository.findByOrderNumber(certificate.orderRef);
+      if (order && order.gpsCoords) {
+        const matches = order.gpsCoords.match(/[-+]?[0-9]*\.?[0-9]+/g);
+        if (matches && matches.length >= 2) {
+          const lat = parseFloat(matches[0]);
+          const lng = parseFloat(matches[1]);
+          if (!isNaN(lat) && !isNaN(lng)) {
+            treeInstance = new TreeInstance({
+              treeTag: certificate.treeTag || 'POA-TR-001',
+              orderRef: order.orderNumber,
+              assignedReserve: order.reserveName,
+              gpsCoordinates: { latitude: lat, longitude: lng },
+              datePlanted: certificate.issueDate || new Date(),
+              healthStatus: 'Healthy',
+              treeVarietyName: certificate.treeSpecies,
+              adopterName: certificate.adopterName,
+              adopterEmail: order.adopterEmail,
+              isActive: true,
+            });
+          }
+        }
       }
     }
 

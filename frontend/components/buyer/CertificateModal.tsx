@@ -141,27 +141,65 @@ export function CertificateModal({ tree, userName, onClose }: CertificateModalPr
               </div>
             </div>
 
-            {/* Seal & Signatures */}
-            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-6 pt-4 border-t border-emerald-500/20">
-              <div className="text-left">
-                <span className="text-[10px] text-white/40 block">Digital Verification Hash</span>
-                <span className="font-mono text-[10px] text-emerald-400/80">
-                  SHA-256: 8f9b2a7e4c10...verified
-                </span>
+            {/* Seal, GPS QR Code & Signatures */}
+            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-emerald-500/20">
+              {/* Left: Satellite GPS Navigation QR Code */}
+              <div className="flex items-center gap-2.5 text-left bg-white/5 p-2 rounded-xl border border-white/10">
+                <a
+                  href={`https://maps.google.com/?q=${encodeURIComponent(
+                    tree.formattedGps?.replace(/[°NSEW]/gi, "").trim() || `${tree.gpsCoordinates?.latitude},${tree.gpsCoordinates?.longitude}`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1 bg-white rounded-md shrink-0 hover:scale-105 transition-transform"
+                  title="Scan or click to open GPS location in Google Maps"
+                >
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=64x64&data=${encodeURIComponent(
+                      `https://maps.google.com/?q=${
+                        tree.gpsCoordinates?.latitude && tree.gpsCoordinates?.longitude
+                          ? `${tree.gpsCoordinates.latitude},${tree.gpsCoordinates.longitude}`
+                          : encodeURIComponent(tree.formattedGps || "18.9894,73.4428")
+                      }`
+                    )}`}
+                    alt="GPS Navigation QR Code"
+                    className="w-12 h-12"
+                  />
+                </a>
+                <div>
+                  <span className="text-[9px] text-emerald-300 font-bold uppercase tracking-wider block">
+                    📍 Satellite GPS Geotag
+                  </span>
+                  <span className="font-mono text-[11px] text-white font-bold block">
+                    {tree.formattedGps || "18.9894° N, 73.4428° E"}
+                  </span>
+                  <a
+                    href={`https://maps.google.com/?q=${encodeURIComponent(
+                      tree.formattedGps?.replace(/[°NSEW]/gi, "").trim() || `${tree.gpsCoordinates?.latitude},${tree.gpsCoordinates?.longitude}`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[9px] text-emerald-400 hover:underline inline-flex items-center gap-1 mt-0.5"
+                  >
+                    <span>🛰️ Open in Google Maps →</span>
+                  </a>
+                </div>
               </div>
 
               {/* Official Seal Badge */}
-              <div className="w-20 h-20 rounded-full border-2 border-emerald-400/40 bg-gradient-to-br from-[#1b7a43] to-[#0a1f14] p-1 flex items-center justify-center text-center shadow-lg">
-                <div className="w-full h-full rounded-full border border-dashed border-emerald-300/40 flex flex-col items-center justify-center text-[8px] font-bold text-emerald-200">
+              <div className="w-16 h-16 rounded-full border-2 border-emerald-400/40 bg-gradient-to-br from-[#1b7a43] to-[#0a1f14] p-1 flex items-center justify-center text-center shadow-lg shrink-0">
+                <div className="w-full h-full rounded-full border border-dashed border-emerald-300/40 flex flex-col items-center justify-center text-[7px] font-bold text-emerald-200">
                   <span>★ VERIFIED ★</span>
-                  <span className="text-xs my-0.5">🌿</span>
+                  <span className="text-[10px] my-0.5">🌿</span>
                   <span>PLANTON AGRO</span>
                 </div>
               </div>
 
+              {/* Right: Forestry Director Signature */}
               <div className="text-right">
                 <span className="text-[10px] text-white/40 block">Forestry Director Signature</span>
-                <span className="font-serif italic text-sm text-emerald-200">Dr. K. R. Sharma</span>
+                <span className="font-serif italic text-sm text-emerald-200 block">Dr. K. R. Sharma</span>
+                <span className="text-[9px] text-emerald-400/60 block">Western Ghats Stewardship</span>
               </div>
             </div>
           </div>

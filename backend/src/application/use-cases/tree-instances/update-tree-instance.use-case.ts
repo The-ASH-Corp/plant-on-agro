@@ -1,5 +1,5 @@
 import { ITreeInstanceRepository } from '../../../core/interfaces/tree-instance.repository.interface';
-import { NotFoundError } from '../../../core/errors/app-error';
+import { NotFoundError, BadRequestError } from '../../../core/errors/app-error';
 import { UpdateTreeInstanceDto } from '../../dto/update-tree-instance.dto';
 import {
   TreeInstanceResponseDto,
@@ -16,6 +16,20 @@ export class UpdateTreeInstanceUseCase {
     const existing = await this.treeInstanceRepository.findById(id);
     if (!existing) {
       throw new NotFoundError(`Tree instance with ID '${id}' not found`);
+    }
+
+    // Protection rule: If tree is already assigned to an adopter, its assignment & variety cannot be changed
+    if (existing.orderRef || existing.adopterName) {
+      if (input.treeVarietyName && input.treeVarietyName !== existing.treeVarietyName) {
+        throw new BadRequestError(
+          `Cannot change species of tree "${existing.treeTag}". This tree is permanently assigned to adopter "${existing.adopterName || existing.orderRef}".`
+        );
+      }
+      if (input.adopterName && input.adopterName !== existing.adopterName) {
+        throw new BadRequestError(
+          `Cannot reassign tree "${existing.treeTag}" to another adopter. Assigned trees are immutable.`
+        );
+      }
     }
 
     if (input.treeTag && input.treeTag.trim().toUpperCase() !== existing.treeTag) {
