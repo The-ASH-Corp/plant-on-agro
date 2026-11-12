@@ -163,6 +163,18 @@ export const useAuthStore = create<AuthState>()(
         state?.setHasHydrated(true);
         if (state?.token) {
           setAuthHeaderToken(state.token);
+          // Authenticate with server on rehydration to ensure token is valid and user profile has not been tampered with
+          authService
+            .getProfile()
+            .then((res) => {
+              if (res.data) {
+                state.setUser(res.data);
+              }
+            })
+            .catch(() => {
+              // Token invalid or tampered with - clear session immediately
+              state.logout();
+            });
         }
       },
     }

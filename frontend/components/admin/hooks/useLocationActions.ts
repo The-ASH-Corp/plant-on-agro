@@ -69,14 +69,6 @@ export function useLocationActions({ data, showToast, setActiveTab }: Params) {
       setLocations((prev) => [localLoc, ...prev]);
     }
 
-    if (typeof window !== "undefined") {
-      try {
-        const raw = localStorage.getItem("poa_custom_locations");
-        const custom = raw ? JSON.parse(raw) : [];
-        localStorage.setItem("poa_custom_locations", JSON.stringify([...custom, localLoc]));
-      } catch {}
-    }
-
     setShowAddLocationModal(false);
     showToast(`Added reserve location "${name}"!`);
     setActiveTab("locations");

@@ -12,14 +12,6 @@ interface Params {
   showToast: ShowToast;
 }
 
-const persistOrders = (orders: AdoptionOrder[]) => {
-  try {
-    localStorage.setItem("poa_orders", JSON.stringify(orders));
-  } catch (e) {
-    console.warn("Could not save orders:", e);
-  }
-};
-
 export function useOrderActions({ data, showToast }: Params) {
   const { orders, setOrders, instances, certificates, setCertificates } = data;
   const [selectedOrder, setSelectedOrder] = useState<AdoptionOrder | null>(null);
@@ -134,7 +126,6 @@ export function useOrderActions({ data, showToast }: Params) {
             }
           : o
       );
-      persistOrders(updated);
       return updated;
     });
 
@@ -169,7 +160,6 @@ export function useOrderActions({ data, showToast }: Params) {
 
     setOrders((prev) => {
       const updated = prev.map((o) => ({ ...o, isRead: true }));
-      persistOrders(updated);
       return updated;
     });
     showToast("✓ All adoption requests marked as reviewed.");
@@ -188,7 +178,6 @@ export function useOrderActions({ data, showToast }: Params) {
 
       setOrders((prev) => {
         const updated = prev.map((o) => (o.id === order.id ? { ...o, isRead: true } : o));
-        persistOrders(updated);
         return updated;
       });
     }
