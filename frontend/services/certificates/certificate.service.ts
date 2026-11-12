@@ -1,4 +1,4 @@
-import { apiClient } from '../api/api-client';
+import { apiClient, getApiBaseUrl } from '../api/api-client';
 import { API_ENDPOINTS } from '../api/endpoints';
 import { ApiResponse, PaginatedResult } from '@/types/api';
 
@@ -154,7 +154,7 @@ export const certificateService = {
    * Returns the direct streaming URL for downloading or previewing an official PDF deed.
    */
   getDownloadUrl(certificateNumberOrId: string, download = false): string {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+    const baseUrl = getApiBaseUrl();
     const cleanUrl = baseUrl.replace(/\/+$/, '');
     const cleanNumber = encodeURIComponent(certificateNumberOrId.trim());
     return `${cleanUrl}/certificates/${cleanNumber}/download${download ? '?download=true' : ''}`;

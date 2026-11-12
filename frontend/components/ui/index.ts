@@ -6,3 +6,4 @@ export { ErrorPopup } from "./ErrorPopup";
 export { Select } from "./Select";
 export { SignOutConfirmationModal } from "./SignOutConfirmationModal";
 export { PhoneInput, validatePhoneNumber } from "./PhoneInput";
+export { ProductionEnvWarning } from "./ProductionEnvWarning";

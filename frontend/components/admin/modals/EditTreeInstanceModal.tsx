@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Select } from "@/components/ui";
 import { TreeInstanceItem, TreeHealthStatus, TreeGrowthUpdateItem } from "../types";
 import { treeInstanceService } from "@/services/tree-instances/tree-instance.service";
+import { getBackendOrigin } from "@/services/api/api-client";
 
 interface EditTreeInstanceModalProps {
   isOpen: boolean;
@@ -256,8 +257,7 @@ export function EditTreeInstanceModal({
     if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
       return url;
     }
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
-    const origin = apiUrl.replace(/\/api\/v1\/?$/, "");
+    const origin = getBackendOrigin();
     return `${origin}${url.startsWith("/") ? "" : "/"}${url}`;
   };
 

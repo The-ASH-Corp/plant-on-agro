@@ -166,85 +166,25 @@ export function BuyerDashboard() {
             : Promise.resolve({ data: { items: [], total: 0 } } as any),
         ]);
 
-        // Check if any trees were adopted during this session matching the current user
-        const storedBuyerTrees: BackendTreeInstance[] = (() => {
-          if (typeof window !== "undefined") {
-            try {
-              const raw = localStorage.getItem("poa_buyer_trees");
-              const parsed: any[] = raw ? JSON.parse(raw) : [];
-              const normalized: BackendTreeInstance[] = parsed.map((t: any) => ({
-                id: t.id || t._id || `inst-${Math.random().toString(36).substring(2, 7)}`,
-                treeTag: t.treeTag || t._treeTag || "POA-TR-001",
-                orderRef: t.orderRef || t._orderRef || "",
-                assignedReserve: t.assignedReserve || t._assignedReserve || "Western Ghats, Maharashtra",
-                gpsCoordinates: t.gpsCoordinates || t._gpsCoordinates || { latitude: 18.9894, longitude: 73.4428 },
-                formattedGps: t.formattedGps || "18.9894° N, 73.4428° E",
-                datePlanted: t.datePlanted || t._datePlanted || new Date().toISOString().split("T")[0],
-                healthStatus: t.healthStatus || t._healthStatus || "Sapling Growing",
-                treeVarietyName: t.treeVarietyName || t._treeVarietyName || "Indigenous Tree",
-                adopterName: t.adopterName || t._adopterName || "Verified Adopter",
-                adopterEmail: t.adopterEmail || t._adopterEmail || "",
-                notes: t.notes || t._notes || "",
-                imageUrl: t.imageUrl || t._imageUrl || "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800",
-                growthUpdates: t.growthUpdates || t._growthUpdates || [],
-                lastInspectedAt: t.lastInspectedAt || t._lastInspectedAt || null,
-                isActive: t.isActive !== false && t._isActive !== false,
-                createdAt: t.createdAt || t._createdAt || new Date().toISOString(),
-                updatedAt: t.updatedAt || t._updatedAt || new Date().toISOString(),
-              }));
-              return userEmail
-                ? normalized.filter(
-                    (t) => (t.adopterEmail || "").toLowerCase() === userEmail
-                  )
-                : [];
-            } catch {
-              return [];
-            }
-          }
-          return [];
-        })();
-
-        // Load stored orders from localStorage + backend database matching current user
-        const storedOrders: any[] = (() => {
-          let local: any[] = [];
-          if (typeof window !== "undefined") {
-            try {
-              const raw = localStorage.getItem("poa_orders");
-              const parsed = raw ? JSON.parse(raw) : [];
-              local = userEmail
-                ? parsed.filter(
-                    (o: any) => o.adopterEmail?.toLowerCase() === userEmail
-                  )
-                : [];
-            } catch {
-              local = [];
-            }
-          }
-          const backendOrders = ordersRes.data?.items || [];
-          return [...backendOrders, ...local];
-        })();
+        // Purge any legacy unverified keys from localStorage to prevent client-side data tampering
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.removeItem("poa_buyer_trees");
+            localStorage.removeItem("poa_orders");
+            localStorage.removeItem("poa_instances");
+            localStorage.removeItem("poa_custom_locations");
+          } catch {}
+        }
 
         if (isMounted) {
-          const apiItems = res.data?.items || [];
-          let currentTrees: BackendTreeInstance[] = [];
+          // Sole source of truth: authoritative data from the backend database
+          const backendTrees: BackendTreeInstance[] = res.data?.items || [];
+          const backendOrders: any[] = ordersRes.data?.items || [];
 
-          if (apiItems.length > 0) {
-            const apiIds = new Set(apiItems.map((i: BackendTreeInstance) => i.id));
-            currentTrees = [
-              ...storedBuyerTrees.filter((s) => !apiIds.has(s.id)),
-              ...apiItems,
-            ];
-          } else if (storedBuyerTrees.length > 0) {
-            currentTrees = storedBuyerTrees;
-          } else {
-            // Clean empty state: No fallback to other customers' trees
-            currentTrees = [];
-          }
+          setTrees(backendTrees);
 
-          setTrees(currentTrees);
-
-          // Derive comprehensive orders ledger
-          const derivedOrders = deriveBuyerOrders(currentTrees, storedOrders);
+          // Derive comprehensive verified orders ledger
+          const derivedOrders = deriveBuyerOrders(backendTrees, backendOrders);
           setOrders(derivedOrders);
         }
       } catch (err) {

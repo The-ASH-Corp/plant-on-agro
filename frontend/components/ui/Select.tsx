@@ -164,6 +164,33 @@ export function Select({
     }
   }, [maxOptionLength]);
 
+  const handleSelectOption = useCallback(
+    (newValue: string, closeMenu = true) => {
+      if (!isControlled) {
+        setInternalValue(newValue);
+      }
+      if (onChange) {
+        const syntheticTarget = {
+          name: name || "",
+          id: id || "",
+          value: newValue,
+          type: "select-one",
+        };
+        const syntheticEvent = {
+          target: syntheticTarget,
+          currentTarget: syntheticTarget,
+          preventDefault: () => {},
+          stopPropagation: () => {},
+        } as unknown as React.ChangeEvent<HTMLSelectElement>;
+        onChange(syntheticEvent);
+      }
+      if (closeMenu) {
+        setIsOpen(false);
+      }
+    },
+    [isControlled, onChange, name, id]
+  );
+
   useEffect(() => {
     if (!isOpen) return;
     updatePosition();
@@ -215,31 +242,7 @@ export function Select({
       window.removeEventListener("resize", handleScrollOrResize);
       window.removeEventListener("scroll", handleScrollOrResize, true);
     };
-  }, [isOpen, updatePosition, options, currentValue]);
-
-  const handleSelectOption = (newValue: string, closeMenu = true) => {
-    if (!isControlled) {
-      setInternalValue(newValue);
-    }
-    if (onChange) {
-      const syntheticTarget = {
-        name: name || "",
-        id: id || "",
-        value: newValue,
-        type: "select-one",
-      };
-      const syntheticEvent = {
-        target: syntheticTarget,
-        currentTarget: syntheticTarget,
-        preventDefault: () => {},
-        stopPropagation: () => {},
-      } as unknown as React.ChangeEvent<HTMLSelectElement>;
-      onChange(syntheticEvent);
-    }
-    if (closeMenu) {
-      setIsOpen(false);
-    }
-  };
+  }, [isOpen, updatePosition, options, currentValue, handleSelectOption]);
 
   return (
     <>

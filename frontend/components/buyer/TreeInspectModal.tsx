@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { BackendTreeInstance } from "@/services/tree-instances/tree-instance.service";
 import { TreeGrowthUpdateItem } from "@/components/admin/types";
+import { getBackendOrigin } from "@/services/api/api-client";
 
 interface TreeInspectModalProps {
   tree: BackendTreeInstance | null;
@@ -24,8 +25,7 @@ export function TreeInspectModal({
     if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
       return url;
     }
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
-    const origin = apiUrl.replace(/\/api\/v1\/?$/, "");
+    const origin = getBackendOrigin();
     return `${origin}${url.startsWith("/") ? "" : "/"}${url}`;
   };
 

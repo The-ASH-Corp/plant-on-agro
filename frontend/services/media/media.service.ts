@@ -1,3 +1,5 @@
+import { getBackendOrigin } from "../api/api-client";
+
 export const DEFAULT_NATURE_IMAGE =
   "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1200&q=80";
 
@@ -33,9 +35,7 @@ export function getMediaUrl(
   }
 
   // Prepend backend server origin
-  const apiBase =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
-  const backendOrigin = apiBase.replace(/\/api\/v1\/?$/, "");
+  const backendOrigin = getBackendOrigin();
 
   const normalizedPath = clean.startsWith("/") ? clean : `/${clean}`;
   return `${backendOrigin}${normalizedPath}`;

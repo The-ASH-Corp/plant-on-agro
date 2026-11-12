@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit, DM_Serif_Display } from "next/font/google";
+import { ProductionEnvWarning } from "@/components/ui/ProductionEnvWarning";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -46,7 +47,10 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ProductionEnvWarning />
+        {children}
+      </body>
     </html>
   );
 }

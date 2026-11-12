@@ -1,9 +1,60 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { ApiResponse } from '@/types/api';
+import { ApiError, ApiResponse } from '@/types/api';
 import { extractApiError } from './error-handler';
 
+/**
+ * Checks whether the application is running in a production environment.
+ */
+export function isProductionEnvironment(): boolean {
+  if (process.env.NODE_ENV === 'production') return true;
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    return (
+      host !== 'localhost' &&
+      host !== '127.0.0.1' &&
+      host !== '0.0.0.0' &&
+      !host.endsWith('.local')
+    );
+  }
+  return false;
+}
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+/**
+ * Returns true if the application is running in production and NEXT_PUBLIC_API_URL is missing.
+ */
+export function isMissingProductionApiUrl(): boolean {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  return isProductionEnvironment() && (!envUrl || envUrl.trim() === '');
+}
+
+/**
+ * Resolves the API base URL directly from the environment variable NEXT_PUBLIC_API_URL.
+ * If in production and NEXT_PUBLIC_API_URL is not set, logs a critical error.
+ */
+export function getApiBaseUrl(): string {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (envUrl && envUrl.trim()) {
+    return envUrl.trim().replace(/\/+$/, '');
+  }
+
+  if (isProductionEnvironment()) {
+    console.error(
+      '[CRITICAL CONFIG ERROR] NEXT_PUBLIC_API_URL is not configured in this production environment. ' +
+        'Please set NEXT_PUBLIC_API_URL in your hosting provider (e.g. Vercel Project Settings -> Environment Variables).'
+    );
+    return '';
+  }
+
+  // Development fallback for local machine only
+  return 'http://localhost:5000/api/v1';
+}
+
+export function getBackendOrigin(): string {
+  const base = getApiBaseUrl();
+  return base ? base.replace(/\/api\/v1\/?$/, '') : '';
+}
+
+const BASE_URL = getApiBaseUrl();
 
 
 export function getStoredAuthToken(): string | null {
@@ -78,6 +129,18 @@ export function setAuthHeaderToken(token: string | null): void {
 
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    if (isMissingProductionApiUrl()) {
+      const configError = new ApiError(
+        'Configuration Error: Backend API URL (NEXT_PUBLIC_API_URL) is not configured in this production environment. Please configure NEXT_PUBLIC_API_URL in your hosting provider settings.',
+        500,
+        {},
+        undefined,
+        true
+      );
+      return Promise.reject(configError);
+    }
+
+    config.baseURL = getApiBaseUrl();
     const token = getStoredAuthToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
