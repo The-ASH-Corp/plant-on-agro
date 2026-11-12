@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { TreeInstanceItem, TreeHealthStatus } from "../types";
 import { TrashIcon, PencilIcon, Select } from "@/components/ui";
 import { treeInstanceService } from "@/services/tree-instances/tree-instance.service";
+import { getBackendOrigin } from "@/services/api/api-client";
 
 interface TreeInstancesTabProps {
   instances: TreeInstanceItem[];
@@ -34,8 +35,7 @@ const HEALTH_BADGES: Record<TreeHealthStatus, { label: string; icon: string; bg:
 const resolveImageUrl = (url?: string) => {
   if (!url) return "";
   if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) return url;
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
-  const origin = apiUrl.replace(/\/api\/v1\/?$/, "");
+  const origin = getBackendOrigin();
   return `${origin}${url.startsWith("/") ? "" : "/"}${url}`;
 };
 

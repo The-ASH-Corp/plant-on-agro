@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
+import { authService } from "@/services/auth/auth.service";
 
-/** Waits for auth store rehydration and redirects non-admins to /login. */
 export function useAdminAuthGuard() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
   const logout = useAuthStore((s) => s.logout);
+  const setUser = useAuthStore((s) => s.setUser);
 
   const [mounted, setMounted] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(true);
+  const [isVerifiedAdmin, setIsVerifiedAdmin] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -24,15 +27,52 @@ export function useAdminAuthGuard() {
     const storeHydrated = hasHydrated || (useAuthStore.persist?.hasHydrated?.() ?? false);
     if (!storeHydrated) return;
 
-    // Only redirect if rehydration has finished and the user is verified not to be admin
-    if (!isAuthenticated || user?.role !== "admin") {
+    if (!isAuthenticated) {
       router.replace("/login");
+      return;
     }
-  }, [mounted, hasHydrated, isAuthenticated, user, router]);
 
-  // Wait until client has mounted and store has rehydrated
-  const isReady = mounted && (hasHydrated || (useAuthStore.persist?.hasHydrated?.() ?? false));
-  const isAdmin = isAuthenticated && user?.role === "admin";
+    let isCancelled = false;
+
+    // Securely verify role with backend server rather than trusting localStorage
+    async function verifyAdminSession() {
+      try {
+        const res = await authService.getProfile();
+        const profile = res.data;
+        if (!profile || profile.role !== "admin") {
+          console.warn("Unauthorized admin attempt or tampered role detected. Logging out.");
+          logout();
+          router.replace("/login");
+          return;
+        }
+
+        if (!isCancelled) {
+          // Sync server-verified user profile into store
+          setUser(profile);
+          setIsVerifiedAdmin(true);
+          setIsVerifying(false);
+        }
+      } catch (err) {
+        console.warn("Failed to verify admin credentials with backend:", err);
+        logout();
+        router.replace("/login");
+      }
+    }
+
+    verifyAdminSession();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [mounted, hasHydrated, isAuthenticated, logout, setUser, router]);
+
+  // Wait until client has mounted, store has rehydrated, and backend has verified admin role
+  const isReady =
+    mounted &&
+    (hasHydrated || (useAuthStore.persist?.hasHydrated?.() ?? false)) &&
+    !isVerifying &&
+    isVerifiedAdmin;
+  const isAdmin = isVerifiedAdmin;
 
   return { user, logout, isReady, isAdmin };
 }

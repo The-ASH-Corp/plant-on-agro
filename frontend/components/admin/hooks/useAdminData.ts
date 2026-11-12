@@ -17,23 +17,6 @@ import { locationService } from "@/services/locations/location.service";
 import { deriveLocationsFromData, deriveOrdersFromInstances } from "../utils/deriveAdminData";
 import type { ShowToast } from "./useAdminToast";
 
-function loadStoredOrders(): AdoptionOrder[] {
-  if (typeof window !== "undefined") {
-    try {
-      const stored = localStorage.getItem("poa_orders");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      }
-    } catch (e) {
-      console.warn("Could not load stored orders:", e);
-    }
-  }
-  return [];
-}
-
 /** Holds all admin dashboard collections and loads them from the backend on mount. */
 export function useAdminData(showToast: ShowToast) {
   const [trees, setTrees] = useState<TreeVarietyItem[]>([]);
@@ -41,7 +24,7 @@ export function useAdminData(showToast: ShowToast) {
   const [instances, setInstances] = useState<TreeInstanceItem[]>([]);
   const [locations, setLocations] = useState<PlantationLocationItem[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const [orders, setOrders] = useState<AdoptionOrder[]>(loadStoredOrders);
+  const [orders, setOrders] = useState<AdoptionOrder[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
 
   // Listen for real-time new orders placed from client storefront
@@ -141,16 +124,8 @@ export function useAdminData(showToast: ShowToast) {
           });
           setLocations(apiLocations);
         } else {
-          let customLocations: PlantationLocationItem[] = [];
-          if (typeof window !== "undefined") {
-            try {
-              const raw = localStorage.getItem("poa_custom_locations");
-              if (raw) customLocations = JSON.parse(raw);
-            } catch {}
-          }
-
           setLocations(
-            deriveLocationsFromData(instancesRes.data?.items || [], treesRes.data?.items || [], customLocations)
+            deriveLocationsFromData(instancesRes.data?.items || [], treesRes.data?.items || [], [])
           );
         }
 

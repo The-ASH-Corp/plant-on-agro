@@ -87,20 +87,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
   // Live Database Catalog State (purely managed from Admin side)
   const [trees, setTrees] = useState<Tree[]>([]);
   const [plans, setPlans] = useState<Plan[]>([]);
-  const [locations, setLocations] = useState<string[]>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const raw = localStorage.getItem("poa_custom_locations");
-        if (raw) {
-          const custom = JSON.parse(raw);
-          if (Array.isArray(custom)) {
-            return custom.map((c: any) => c.name || c).filter(Boolean);
-          }
-        }
-      } catch {}
-    }
-    return [];
-  });
+  const [locations, setLocations] = useState<string[]>([]);
   const [loadingCatalog, setLoadingCatalog] = useState(true);
 
   // Auto-fill user contact info if logged in
@@ -377,34 +364,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
     }
 
     try {
-      // Update orders ledger in localStorage for instant fast UI responsiveness
-      const existingOrders = JSON.parse(
-        localStorage.getItem("poa_orders") || "[]"
-      );
-      localStorage.setItem(
-        "poa_orders",
-        JSON.stringify([finalOrderRecord, ...existingOrders])
-      );
-
-      // Update tree instances ledger in localStorage
-      const existingInstances = JSON.parse(
-        localStorage.getItem("poa_instances") || "[]"
-      );
-      localStorage.setItem(
-        "poa_instances",
-        JSON.stringify([...newInstances, ...existingInstances])
-      );
-
-      // Update buyer adopted trees in localStorage
-      const existingBuyerTrees = JSON.parse(
-        localStorage.getItem("poa_buyer_trees") || "[]"
-      );
-      localStorage.setItem(
-        "poa_buyer_trees",
-        JSON.stringify([...newInstances, ...existingBuyerTrees])
-      );
-
-      // Dispatch event for any active admin or buyer windows
+      // In-memory event dispatch for active UI listeners (avoids localStorage data tampering)
       window.dispatchEvent(
         new CustomEvent("poa-new-order", {
           detail: {

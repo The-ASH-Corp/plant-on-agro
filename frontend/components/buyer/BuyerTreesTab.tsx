@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { BackendTreeInstance } from "@/services/tree-instances/tree-instance.service";
+import { getMediaUrl } from "@/services/media/media.service";
 
 interface BuyerTreesTabProps {
   trees: BackendTreeInstance[];
@@ -131,8 +132,15 @@ export function BuyerTreesTab({
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredTrees.map((tree: any) => {
-            const treeId = tree.id || tree._id || `inst-${tree.treeTag || Math.random()}`;
+          {filteredTrees.map((tree: any, idx: number) => {
+            const treeId =
+              tree.id ||
+              tree._id ||
+              (tree.treeTag
+                ? `inst-${tree.treeTag}`
+                : tree.orderRef
+                ? `inst-${tree.orderRef}-${idx}`
+                : `inst-${idx}`);
             const treeVarietyName = tree.treeVarietyName || tree._treeVarietyName || "Indigenous Tree";
             const treeTag = tree.treeTag || tree._treeTag || "POA-TR-001";
             const orderRef = tree.orderRef || tree._orderRef || "";
@@ -162,13 +170,10 @@ export function BuyerTreesTab({
                   <div className="relative h-48 w-full bg-gray-900 overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={
-                        imageUrl
-                          ? imageUrl.startsWith("http") || imageUrl.startsWith("data:")
-                            ? imageUrl
-                            : `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1").replace(/\/api\/v1\/?$/, "")}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`
-                          : "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format"
-                      }
+                      src={getMediaUrl(
+                        imageUrl,
+                        "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format"
+                      )}
                       alt={treeVarietyName}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90"
                     />

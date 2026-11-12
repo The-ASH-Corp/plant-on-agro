@@ -19,6 +19,23 @@ export function extractApiError(error: unknown): ApiError {
           true
         );
       }
+
+      // Check if this occurred because NEXT_PUBLIC_API_URL is missing or misconfigured in production
+      if (
+        typeof window !== 'undefined' &&
+        window.location.hostname !== 'localhost' &&
+        window.location.hostname !== '127.0.0.1' &&
+        (!process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_URL.includes('localhost'))
+      ) {
+        return new ApiError(
+          'Configuration Error: Backend API URL (NEXT_PUBLIC_API_URL) is not configured in this production environment. Please configure NEXT_PUBLIC_API_URL in your hosting provider settings.',
+          500,
+          {},
+          undefined,
+          true
+        );
+      }
+
       return new ApiError(
         'Unable to connect to the server. Please check your internet connection.',
         0,

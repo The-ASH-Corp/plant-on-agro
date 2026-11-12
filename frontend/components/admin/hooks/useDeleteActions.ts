@@ -135,15 +135,6 @@ export function useDeleteActions({ data, showToast, certificateActions }: Params
         showToast(`Tree instance "${name}" record removed.`);
       } else if (type === "location") {
         setLocations((prev) => prev.filter((l) => l.id !== id));
-        if (typeof window !== "undefined") {
-          try {
-            const raw = localStorage.getItem("poa_custom_locations");
-            if (raw) {
-              const custom = JSON.parse(raw).filter((l: any) => l.id !== id && l.name !== name);
-              localStorage.setItem("poa_custom_locations", JSON.stringify(custom));
-            }
-          } catch {}
-        }
         showToast(`Reserve location "${name}" removed.`);
       } else if (type === "certificate") {
         try {

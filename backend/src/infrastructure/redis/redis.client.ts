@@ -108,6 +108,61 @@ export class RedisClientService {
     }
   }
 
+  /**
+   * Retrieves and deserializes a JSON-cached item from Redis.
+   */
+  public async get<T>(key: string): Promise<T | null> {
+    if (!this.isReady()) return null;
+    try {
+      const data = await this.getClient().get(key);
+      return data ? (JSON.parse(data) as T) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Serializes and caches an item in Redis with an expiration TTL (default: 300s / 5 mins).
+   */
+  public async set(key: string, value: unknown, ttlSeconds = 300): Promise<boolean> {
+    if (!this.isReady()) return false;
+    try {
+      const serialized = JSON.stringify(value);
+      await this.getClient().set(key, serialized, 'EX', ttlSeconds);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Deletes a cached key from Redis.
+   */
+  public async del(key: string): Promise<boolean> {
+    if (!this.isReady()) return false;
+    try {
+      await this.getClient().del(key);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Deletes all cached keys matching a specific pattern (e.g. 'poa:catalog:*').
+   */
+  public async delPattern(pattern: string): Promise<void> {
+    if (!this.isReady()) return;
+    try {
+      const keys = await this.getClient().keys(pattern);
+      if (keys.length > 0) {
+        await this.getClient().del(...keys);
+      }
+    } catch (err) {
+      console.warn('⚠️ [REDIS] Error deleting pattern keys:', err);
+    }
+  }
+
   public async disconnect(): Promise<void> {
     if (this.client) {
       try {
