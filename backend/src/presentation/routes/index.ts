@@ -12,6 +12,7 @@ import { uploadRoutes } from './upload.routes';
 import { experienceRoutes } from './experience.routes';
 import { visitBookingRoutes } from './visit-booking.routes';
 import { paymentRoutes } from './payment.routes';
+import { waitlistRoutes } from './waitlist.routes';
 import { ApiResponse } from '../../shared/utils/api-response';
 import { redisService } from '../../infrastructure/redis/redis.client';
 
@@ -50,6 +51,7 @@ apiRouter.use('/upload', uploadRoutes);
 apiRouter.use('/experiences', experienceRoutes);
 apiRouter.use('/visits', visitBookingRoutes);
 apiRouter.use('/payment', paymentRoutes);
+apiRouter.use('/waitlist', waitlistRoutes);
 
 export const routes = apiRouter;
 

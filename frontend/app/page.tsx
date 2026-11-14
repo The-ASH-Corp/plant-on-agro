@@ -8,6 +8,7 @@ import {
   HowItWorks,
   VisionMissionSection,
   AdoptionPlans,
+  WishlistSection,
   ExperienceSection,
   ImpactSection,
   CertificateSection,
@@ -30,6 +31,10 @@ import { treeVarietyService, BackendTreeVariety } from "@/services/tree-varietie
 import { adoptionPlanService } from "@/services/adoption-plans/adoption-plan.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
+
+// Set to true to display the Priority Waitlist/Wishlist section;
+// Change to false whenever you want to display the full Adoption Plans & Packages
+const SHOW_WAITLIST_MODE = true;
 
 const RESERVE_METADATA: Record<string, { region: string; img: string }> = {
   "Western Ghats, Maharashtra": {
@@ -302,7 +307,12 @@ export default function App() {
           <HowItWorks content={cmsContent.howItWorks} />
         )}
 
-        <AdoptionPlans openPlant={(planId) => handleOpenPlant(planId)} />
+        {/* Toggle between Wishlist/Waitlist section and live Adoption Plans */}
+        {SHOW_WAITLIST_MODE ? (
+          <WishlistSection />
+        ) : (
+          <AdoptionPlans openPlant={(planId) => handleOpenPlant(planId)} />
+        )}
 
         {/* 2M Trees Vision Campaign Section with Custom Donation */}
         <VisionCampaignSection user={user} />

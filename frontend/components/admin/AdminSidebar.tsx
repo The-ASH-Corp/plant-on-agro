@@ -26,6 +26,7 @@ interface AdminSidebarProps {
   unreadOrdersCount?: number;
   certificatesCount?: number;
   usersCount?: number;
+  waitlistCount?: number;
   userName?: string;
   onLogout: () => void;
   onOpenAddTree?: () => void;
@@ -48,6 +49,7 @@ export function AdminSidebar({
   unreadOrdersCount = 0,
   certificatesCount = 0,
   usersCount,
+  waitlistCount = 0,
   userName = "Admin User",
   onLogout,
   onOpenAddTree,
@@ -71,6 +73,7 @@ export function AdminSidebar({
     { id: "certificates", label: "Certificates", icon: "📜", count: certificatesCount },
     { id: "visits", label: "Visits & Tours", icon: "🗺️", badge: "04 They Visit" },
     { id: "users", label: "All Users", icon: "👥", count: usersCount },
+    { id: "waitlist", label: "Waitlist Leads", icon: "📋", count: waitlistCount },
     { id: "landing-page", label: "Landing Page CMS", icon: "🎨", badge: "Editor" },
   ];
 

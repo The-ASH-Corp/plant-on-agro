@@ -17,6 +17,7 @@ interface OverviewTabProps {
   onSelectOrder: (order: AdoptionOrder) => void;
   unreadOrdersCount?: number;
   onMarkAllAsRead?: () => void;
+  waitlistCount?: number;
 }
 
 export function OverviewTab({
@@ -28,6 +29,7 @@ export function OverviewTab({
   onSelectOrder,
   unreadOrdersCount = 0,
   onMarkAllAsRead,
+  waitlistCount = 0,
 }: OverviewTabProps) {
   // Dynamically computed metrics from real database records
   const totalTreesCount = instances.length > 0
@@ -130,6 +132,35 @@ export function OverviewTab({
         {/* Decorative Glowing Circles in Hero */}
         <div className="absolute right-0 top-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none"></div>
+      </div>
+
+      {/* Waitlist Leads Alert Card */}
+      <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-emerald-500/15 via-white to-amber-500/10 border border-emerald-300 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-[#1b7a43] text-white flex items-center justify-center text-xl shrink-0 shadow-xs">
+            📋
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className="font-bold text-[#173324] text-sm sm:text-base">
+                Adoption Packages Waitlist: <span className="font-mono text-[#1b7a43] font-extrabold">{waitlistCount}</span> Lead{waitlistCount === 1 ? "" : "s"} Registered
+              </h4>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
+                Priority Queue
+              </span>
+            </div>
+            <p className="text-xs text-[#4a6557] mt-0.5 leading-relaxed">
+              Leads collected from the storefront “Join in Waitlist” button with recorded phone numbers and emails.
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => setActiveTab("waitlist")}
+          className="px-4 py-2.5 rounded-xl bg-[#173324] hover:bg-[#1f4230] text-white text-xs font-bold transition-all cursor-pointer shrink-0 shadow-sm flex items-center gap-1.5 self-end sm:self-center"
+        >
+          <span>View Waitlist Leads</span>
+          <span>→</span>
+        </button>
       </div>
 
       {/* 4 Primary KPI Cards */}

@@ -25,6 +25,7 @@ const TAB_META: Record<AdminTabType, { label: string }> = {
   users: { label: "All Users Directory" },
   certificates: { label: "Certificate Deeds" },
   visits: { label: "Plantation Visits & Tours" },
+  waitlist: { label: "Waitlist Leads" },
   "landing-page": { label: "Landing Page CMS" },
 };
 

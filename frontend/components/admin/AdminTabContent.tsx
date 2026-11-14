@@ -19,6 +19,7 @@ import { UsersTab } from "./tabs/UsersTab";
 import { LandingPageTab } from "./tabs/LandingPageTab";
 import { CertificatesTab } from "./tabs/CertificatesTab";
 import { VisitsTab } from "./tabs/VisitsTab";
+import { WaitlistTab } from "./tabs/WaitlistTab";
 
 
 interface AdminTabContentProps {
@@ -66,6 +67,7 @@ export function AdminTabContent({
           onSelectOrder={orderActions.handleSelectOrder}
           unreadOrdersCount={orderActions.unreadOrdersCount}
           onMarkAllAsRead={orderActions.handleMarkAllOrdersAsRead}
+          waitlistCount={data.waitlist.length}
         />
       );
 
@@ -152,6 +154,15 @@ export function AdminTabContent({
 
     case "visits":
       return <VisitsTab showToast={showToast} />;
+
+    case "waitlist":
+      return (
+        <WaitlistTab
+          waitlist={data.waitlist}
+          setWaitlist={data.setWaitlist}
+          showToast={showToast}
+        />
+      );
 
     default:
       return null;

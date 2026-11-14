@@ -153,10 +153,10 @@ export const DEFAULT_LANDING_PAGE_CONTENT: LandingPageContent = {
     missionSubtitle:
       'A structured, phased pathway from our 30-acre Kerala flagship to a pan-national 600-acre regenerative network.',
     initialTrees: '1,00,000',
-    initialAcres: '20 Acres',
+    initialAcres: '20',
     fiveYearTrees: '20 Lakh (2,000,000)',
-    fiveYearLocations: '20 Locations',
-    fiveYearTotalAcres: '600 Acres',
+    fiveYearLocations: '20',
+    fiveYearTotalAcres: '600',
   },
   howItWorks: {
     isEnabled: true,

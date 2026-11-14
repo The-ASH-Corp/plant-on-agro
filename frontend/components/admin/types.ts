@@ -8,7 +8,20 @@ export type AdminTabType =
   | "certificates"
   | "users"
   | "visits"
-  | "landing-page";
+  | "landing-page"
+  | "waitlist";
+
+export interface WaitlistEntry {
+  id: string;
+  email: string;
+  phoneNumber: string;
+  name?: string;
+  source: string;
+  status: "pending" | "contacted" | "admitted";
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 
 export type TreeHealthStatus =
