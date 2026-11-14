@@ -15,3 +15,6 @@ export type { CertificateSectionProps } from "./CertificateSection";
 export { ExperienceSection } from "./ExperienceSection";
 export { VisionCampaignSection } from "./VisionCampaignSection";
 export { VisionDonationModal } from "./VisionDonationModal";
+export { VisionMissionSection } from "./VisionMissionSection";
+export { WishlistSection } from "./WishlistSection";
+export { JoinWaitlistModal } from "./JoinWaitlistModal";

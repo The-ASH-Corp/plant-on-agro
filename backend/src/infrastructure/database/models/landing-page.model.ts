@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import {
   HeroSectionContent,
+  VisionMissionSectionContent,
   HowItWorksSectionContent,
   ImpactSectionContent,
   CertificateSectionContent,
@@ -10,6 +11,7 @@ import {
 export interface ILandingPageDocument extends Document {
   slug: string;
   hero: HeroSectionContent;
+  visionMission?: VisionMissionSectionContent;
   howItWorks: HowItWorksSectionContent;
   impact: ImpactSectionContent;
   certificate: CertificateSectionContent;
@@ -59,6 +61,29 @@ const ImpactProjectSchema = new Schema(
   { _id: false }
 );
 
+const VisionMissionSchema = new Schema(
+  {
+    isEnabled: { type: Boolean, default: true },
+    badge: { type: String, required: true },
+    headline: { type: String, required: true },
+    headlineHighlight: { type: String, required: true },
+    description: { type: String, required: true },
+    locationTag: { type: String, required: true },
+    reserveTag: { type: String, required: true },
+    initialTreesTag: { type: String, required: true },
+    visionTitle: { type: String, required: true },
+    visionDescription: { type: String, required: true },
+    missionTitle: { type: String, required: true },
+    missionSubtitle: { type: String, required: true },
+    initialTrees: { type: String, required: true },
+    initialAcres: { type: String, required: true },
+    fiveYearTrees: { type: String, required: true },
+    fiveYearLocations: { type: String, required: true },
+    fiveYearTotalAcres: { type: String, required: true },
+  },
+  { _id: false }
+);
+
 const LandingPageSchema = new Schema<ILandingPageDocument>(
   {
     slug: {
@@ -79,6 +104,10 @@ const LandingPageSchema = new Schema<ILandingPageDocument>(
       secondaryCtaText: { type: String, required: true },
       bgImageUrl: { type: String, required: true },
       stats: { type: [HeroStatSchema], default: [] },
+    },
+    visionMission: {
+      type: VisionMissionSchema,
+      required: false,
     },
     howItWorks: {
       isEnabled: { type: Boolean, default: true },

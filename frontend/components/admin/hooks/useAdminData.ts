@@ -5,6 +5,7 @@ import {
   PlantationLocationItem,
   TreeInstanceItem,
   TreeVarietyItem,
+  WaitlistEntry,
 } from "../types";
 import { User } from "@/types/auth";
 import { Certificate, certificateService } from "@/services/certificates/certificate.service";
@@ -14,6 +15,7 @@ import { treeInstanceService } from "@/services/tree-instances/tree-instance.ser
 import { userService } from "@/services/user/user.service";
 import { orderService } from "@/services/orders/order.service";
 import { locationService } from "@/services/locations/location.service";
+import { waitlistService } from "@/services/waitlist/waitlist.service";
 import { deriveLocationsFromData, deriveOrdersFromInstances } from "../utils/deriveAdminData";
 import type { ShowToast } from "./useAdminToast";
 
@@ -26,6 +28,7 @@ export function useAdminData(showToast: ShowToast) {
   const [users, setUsers] = useState<User[]>([]);
   const [orders, setOrders] = useState<AdoptionOrder[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([]);
 
   // Listen for real-time new orders placed from client storefront
   useEffect(() => {
@@ -64,7 +67,7 @@ export function useAdminData(showToast: ShowToast) {
     let isMounted = true;
     async function loadCatalog() {
       try {
-        const [treesRes, plansRes, instancesRes, usersRes, ordersRes, certsRes, locationsRes] = await Promise.all([
+        const [treesRes, plansRes, instancesRes, usersRes, ordersRes, certsRes, locationsRes, waitlistRes] = await Promise.all([
           treeVarietyService.getAll(),
           adoptionPlanService.getAll(),
           treeInstanceService.getAll(),
@@ -79,6 +82,10 @@ export function useAdminData(showToast: ShowToast) {
           }),
           locationService.getAll({ limit: 100 }).catch((err) => {
             console.warn("Could not load locations from backend:", err);
+            return null;
+          }),
+          waitlistService.getAll().catch((err) => {
+            console.warn("Could not load waitlist:", err);
             return null;
           }),
         ]);
@@ -100,6 +107,10 @@ export function useAdminData(showToast: ShowToast) {
 
         if (certsRes?.data?.items) {
           setCertificates(certsRes.data.items);
+        }
+
+        if (waitlistRes?.data?.items) {
+          setWaitlist(waitlistRes.data.items);
         }
 
         // Count live trees planted per reserve
@@ -154,6 +165,7 @@ export function useAdminData(showToast: ShowToast) {
     users, setUsers,
     orders, setOrders,
     certificates, setCertificates,
+    waitlist, setWaitlist,
   };
 }
 

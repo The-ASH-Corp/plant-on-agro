@@ -4,6 +4,7 @@ export * from "./CmsHeaderActions";
 export * from "./CmsSectionNav";
 export * from "./SectionVisibilityMaster";
 export * from "./HeroSectionEditor";
+export * from "./VisionMissionEditor";
 export * from "./HowItWorksEditor";
 export * from "./ImpactEditor";
 export * from "./CertificateEditor";

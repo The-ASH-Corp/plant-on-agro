@@ -80,10 +80,31 @@ export interface FooterSectionContent {
   copyrightText: string;
 }
 
+export interface VisionMissionSectionContent {
+  isEnabled?: boolean;
+  badge: string;
+  headline: string;
+  headlineHighlight: string;
+  description: string;
+  locationTag: string;
+  reserveTag: string;
+  initialTreesTag: string;
+  visionTitle: string;
+  visionDescription: string;
+  missionTitle: string;
+  missionSubtitle: string;
+  initialTrees: string;
+  initialAcres: string;
+  fiveYearTrees: string;
+  fiveYearLocations: string;
+  fiveYearTotalAcres: string;
+}
+
 export interface LandingPageProps {
   id?: string;
   slug?: string;
   hero: HeroSectionContent;
+  visionMission?: VisionMissionSectionContent;
   howItWorks: HowItWorksSectionContent;
   impact: ImpactSectionContent;
   certificate: CertificateSectionContent;
@@ -112,6 +133,28 @@ export const DEFAULT_LANDING_PAGE_DATA: Omit<LandingPageProps, 'id' | 'createdAt
       { target: 0, suffix: "", label: "Native Tree Varieties" },
       { target: 0, suffix: "+", label: "Protected Bio-Reserves" },
     ],
+  },
+  visionMission: {
+    isEnabled: true,
+    badge: '🌿 Integrated Agro-Forestry, Nature Tourism & Wellness Ecosystem',
+    headline: 'Plant a Story.',
+    headlineHighlight: 'Grow a Legacy.',
+    description:
+      'Building technology-enabled living forests, regenerative farms, and immersive nature destinations across India.',
+    locationTag: '📍 Flagship Project: Kerala | 2026',
+    reserveTag: '📐 30-Acre Master Reserve',
+    initialTreesTag: '🌱 1,00,000 Tree Initial Mission',
+    visionTitle: 'The PlantOn Vision',
+    visionDescription:
+      "To build the world's most transparent, connected, and physically verifiable green ecosystem—where adopting a tree is not just a digital transaction, but the beginning of a lifelong relationship with living nature.",
+    missionTitle: 'Our Immediate & Long-Term Mission',
+    missionSubtitle:
+      'A structured, phased pathway from our 30-acre Kerala flagship to a pan-national 600-acre regenerative network.',
+    initialTrees: '1,00,000',
+    initialAcres: '20',
+    fiveYearTrees: '20 Lakh (2,000,000)',
+    fiveYearLocations: '20',
+    fiveYearTotalAcres: '600',
   },
   howItWorks: {
     isEnabled: true,
@@ -190,6 +233,7 @@ export class LandingPage {
   private readonly _id?: string;
   private _slug: string;
   private _hero: HeroSectionContent;
+  private _visionMission?: VisionMissionSectionContent;
   private _howItWorks: HowItWorksSectionContent;
   private _impact: ImpactSectionContent;
   private _certificate: CertificateSectionContent;
@@ -202,6 +246,7 @@ export class LandingPage {
     this._id = props.id;
     this._slug = props.slug || 'default';
     this._hero = props.hero;
+    this._visionMission = props.visionMission || DEFAULT_LANDING_PAGE_DATA.visionMission;
     this._howItWorks = props.howItWorks;
     this._impact = props.impact;
     this._certificate = props.certificate;
@@ -221,6 +266,10 @@ export class LandingPage {
 
   public get hero(): HeroSectionContent {
     return this._hero;
+  }
+
+  public get visionMission(): VisionMissionSectionContent | undefined {
+    return this._visionMission;
   }
 
   public get howItWorks(): HowItWorksSectionContent {
@@ -253,6 +302,7 @@ export class LandingPage {
 
   public update(props: Partial<Omit<LandingPageProps, 'id' | 'createdAt' | 'updatedAt'>>): void {
     if (props.hero) this._hero = { ...this._hero, ...props.hero };
+    if (props.visionMission) this._visionMission = { ...(this._visionMission || DEFAULT_LANDING_PAGE_DATA.visionMission!), ...props.visionMission };
     if (props.howItWorks) this._howItWorks = { ...this._howItWorks, ...props.howItWorks };
     if (props.impact) this._impact = { ...this._impact, ...props.impact };
     if (props.certificate) this._certificate = { ...this._certificate, ...props.certificate };
@@ -263,6 +313,7 @@ export class LandingPage {
 
   public resetToDefaults(): void {
     this._hero = { ...DEFAULT_LANDING_PAGE_DATA.hero };
+    this._visionMission = { ...DEFAULT_LANDING_PAGE_DATA.visionMission! };
     this._howItWorks = { ...DEFAULT_LANDING_PAGE_DATA.howItWorks };
     this._impact = { ...DEFAULT_LANDING_PAGE_DATA.impact };
     this._certificate = { ...DEFAULT_LANDING_PAGE_DATA.certificate };

@@ -21,6 +21,27 @@ export class LandingPageMapper {
           label: s.label,
         })),
       },
+      visionMission: doc.visionMission
+        ? {
+            isEnabled: doc.visionMission.isEnabled !== false,
+            badge: doc.visionMission.badge,
+            headline: doc.visionMission.headline,
+            headlineHighlight: doc.visionMission.headlineHighlight,
+            description: doc.visionMission.description,
+            locationTag: doc.visionMission.locationTag,
+            reserveTag: doc.visionMission.reserveTag,
+            initialTreesTag: doc.visionMission.initialTreesTag,
+            visionTitle: doc.visionMission.visionTitle,
+            visionDescription: doc.visionMission.visionDescription,
+            missionTitle: doc.visionMission.missionTitle,
+            missionSubtitle: doc.visionMission.missionSubtitle,
+            initialTrees: doc.visionMission.initialTrees,
+            initialAcres: doc.visionMission.initialAcres,
+            fiveYearTrees: doc.visionMission.fiveYearTrees,
+            fiveYearLocations: doc.visionMission.fiveYearLocations,
+            fiveYearTotalAcres: doc.visionMission.fiveYearTotalAcres,
+          }
+        : undefined,
       howItWorks: {
         isEnabled: doc.howItWorks.isEnabled !== false,
         tagline: doc.howItWorks.tagline,
@@ -85,6 +106,7 @@ export class LandingPageMapper {
     return {
       slug: entity.slug,
       hero: entity.hero,
+      visionMission: entity.visionMission,
       howItWorks: entity.howItWorks,
       impact: entity.impact,
       certificate: entity.certificate,

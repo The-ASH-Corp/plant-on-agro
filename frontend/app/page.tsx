@@ -6,7 +6,9 @@ import { Nav, Footer } from "@/components/layout";
 import {
   Hero,
   HowItWorks,
+  VisionMissionSection,
   AdoptionPlans,
+  WishlistSection,
   ExperienceSection,
   ImpactSection,
   CertificateSection,
@@ -29,6 +31,10 @@ import { treeVarietyService, BackendTreeVariety } from "@/services/tree-varietie
 import { adoptionPlanService } from "@/services/adoption-plans/adoption-plan.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
+
+// Set to true to display the Priority Waitlist/Wishlist section;
+// Change to false whenever you want to display the full Adoption Plans & Packages
+const SHOW_WAITLIST_MODE = true;
 
 const RESERVE_METADATA: Record<string, { region: string; img: string }> = {
   "Western Ghats, Maharashtra": {
@@ -255,6 +261,7 @@ export default function App() {
       return;
     }
     const map: Partial<Record<Section, string>> = {
+      "vision-mission": "vision-mission",
       "how-it-works": "how-it-works",
       plans: "plans",
       trees: "plans",
@@ -287,11 +294,25 @@ export default function App() {
           </div>
         )}
 
+        {/* Vision & Mission Section (Integrated Agro-Forestry & Nature Tourism Ecosystem) */}
+        {cmsContent.visionMission?.isEnabled !== false && (
+          <VisionMissionSection
+            content={cmsContent.visionMission}
+            openPlant={(planId) => handleOpenPlant(planId)}
+            onExplorePlans={() => scrollTo("plans")}
+          />
+        )}
+
         {cmsContent.howItWorks?.isEnabled !== false && (
           <HowItWorks content={cmsContent.howItWorks} />
         )}
 
-        <AdoptionPlans openPlant={(planId) => handleOpenPlant(planId)} />
+        {/* Toggle between Wishlist/Waitlist section and live Adoption Plans */}
+        {SHOW_WAITLIST_MODE ? (
+          <WishlistSection />
+        ) : (
+          <AdoptionPlans openPlant={(planId) => handleOpenPlant(planId)} />
+        )}
 
         {/* 2M Trees Vision Campaign Section with Custom Donation */}
         <VisionCampaignSection user={user} />

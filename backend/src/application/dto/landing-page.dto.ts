@@ -1,6 +1,7 @@
 import {
   LandingPage,
   HeroSectionContent,
+  VisionMissionSectionContent,
   HowItWorksSectionContent,
   ImpactSectionContent,
   CertificateSectionContent,
@@ -11,6 +12,7 @@ export interface LandingPageResponseDto {
   id?: string;
   slug: string;
   hero: HeroSectionContent;
+  visionMission?: VisionMissionSectionContent;
   howItWorks: HowItWorksSectionContent;
   impact: ImpactSectionContent;
   certificate: CertificateSectionContent;
@@ -22,6 +24,7 @@ export interface LandingPageResponseDto {
 
 export interface UpdateLandingPageDto {
   hero?: Partial<HeroSectionContent>;
+  visionMission?: Partial<VisionMissionSectionContent>;
   howItWorks?: Partial<HowItWorksSectionContent>;
   impact?: Partial<ImpactSectionContent>;
   certificate?: Partial<CertificateSectionContent>;
@@ -35,6 +38,7 @@ export class LandingPageResponseMapper {
       id: entity.id,
       slug: entity.slug,
       hero: entity.hero,
+      visionMission: entity.visionMission,
       howItWorks: entity.howItWorks,
       impact: entity.impact,
       certificate: entity.certificate,

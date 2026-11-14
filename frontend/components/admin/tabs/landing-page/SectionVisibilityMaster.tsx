@@ -9,6 +9,7 @@ export function SectionVisibilityMaster({
   onSelectSection,
 }: SectionVisibilityMasterProps) {
   const isHeroEnabled = content.hero.isEnabled !== false;
+  const isVisionMissionEnabled = content.visionMission?.isEnabled !== false;
   const isHowItWorksEnabled = content.howItWorks.isEnabled !== false;
   const isImpactEnabled = content.impact.isEnabled !== false;
   const isCertificateEnabled = content.certificate.isEnabled !== false;
@@ -21,6 +22,13 @@ export function SectionVisibilityMaster({
       icon: "🌲",
       enabled: isHeroEnabled,
       desc: "Hero banner, title, counter stats",
+    },
+    {
+      id: "visionMission" as const,
+      title: "Vision & Mission",
+      icon: "🔭",
+      enabled: isVisionMissionEnabled,
+      desc: "Flagship reserve, 4 ecosystem layers & 20L targets",
     },
     {
       id: "howItWorks" as const,
@@ -54,6 +62,7 @@ export function SectionVisibilityMaster({
 
   const activeCount = [
     isHeroEnabled,
+    isVisionMissionEnabled,
     isHowItWorksEnabled,
     isImpactEnabled,
     isCertificateEnabled,

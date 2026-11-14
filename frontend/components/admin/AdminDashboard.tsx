@@ -96,6 +96,7 @@ export function AdminDashboard() {
         unreadOrdersCount={orderActions.unreadOrdersCount}
         certificatesCount={data.certificates.length}
         usersCount={data.users.filter((u) => u.role !== "admin").length}
+        waitlistCount={data.waitlist.length}
         userName={user?.name}
         onLogout={() => setShowSignOutModal(true)}
         onOpenAddPlan={() => planActions.setShowAddPlanModal(true)}

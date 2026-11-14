@@ -1,13 +1,14 @@
 import {
   LandingPageContent,
   HeroSectionContent,
+  VisionMissionSectionContent,
   HowItWorksSectionContent,
   ImpactSectionContent,
   CertificateSectionContent,
   FooterSectionContent,
 } from "@/services/landing-page/landing-page.service";
 
-export type SectionKey = "all" | "hero" | "howItWorks" | "impact" | "certificate" | "footer";
+export type SectionKey = "all" | "hero" | "visionMission" | "howItWorks" | "impact" | "certificate" | "footer";
 
 export interface ToggleSwitchProps {
   enabled: boolean;
@@ -22,6 +23,11 @@ export interface SectionEditorBaseProps {
 export interface HeroSectionEditorProps extends SectionEditorBaseProps {
   hero: HeroSectionContent;
   onChange: (updated: HeroSectionContent) => void;
+}
+
+export interface VisionMissionEditorProps extends SectionEditorBaseProps {
+  visionMission: VisionMissionSectionContent;
+  onChange: (updated: VisionMissionSectionContent) => void;
 }
 
 export interface HowItWorksEditorProps extends SectionEditorBaseProps {
@@ -46,7 +52,7 @@ export interface FooterEditorProps extends SectionEditorBaseProps {
 
 export interface SectionVisibilityMasterProps {
   content: LandingPageContent;
-  onToggleSection: (section: "hero" | "howItWorks" | "impact" | "certificate" | "footer") => void;
+  onToggleSection: (section: "hero" | "visionMission" | "howItWorks" | "impact" | "certificate" | "footer") => void;
   onSelectSection: (section: SectionKey) => void;
 }
 
