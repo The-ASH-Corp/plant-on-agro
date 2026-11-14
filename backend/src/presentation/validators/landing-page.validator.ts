@@ -18,6 +18,26 @@ const heroSectionSchema = z.object({
   stats: z.array(heroStatSchema).optional(),
 });
 
+const visionMissionSectionSchema = z.object({
+  isEnabled: z.boolean().optional(),
+  badge: z.string().trim().optional(),
+  headline: z.string().trim().optional(),
+  headlineHighlight: z.string().trim().optional(),
+  description: z.string().trim().optional(),
+  locationTag: z.string().trim().optional(),
+  reserveTag: z.string().trim().optional(),
+  initialTreesTag: z.string().trim().optional(),
+  visionTitle: z.string().trim().optional(),
+  visionDescription: z.string().trim().optional(),
+  missionTitle: z.string().trim().optional(),
+  missionSubtitle: z.string().trim().optional(),
+  initialTrees: z.string().trim().optional(),
+  initialAcres: z.string().trim().optional(),
+  fiveYearTrees: z.string().trim().optional(),
+  fiveYearLocations: z.string().trim().optional(),
+  fiveYearTotalAcres: z.string().trim().optional(),
+});
+
 const howItWorksStepSchema = z.object({
   num: z.string().trim(),
   icon: z.string().trim(),
@@ -84,6 +104,7 @@ const footerSectionSchema = z.object({
 
 export const updateLandingPageSchema = z.object({
   hero: heroSectionSchema.optional(),
+  visionMission: visionMissionSectionSchema.optional(),
   howItWorks: howItWorksSectionSchema.optional(),
   impact: impactSectionSchema.optional(),
   certificate: certificateSectionSchema.optional(),

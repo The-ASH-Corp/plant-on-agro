@@ -15,10 +15,13 @@ export function LivePreviewModal({
   if (!isOpen) return null;
 
   const isHeroEnabled = content.hero.isEnabled !== false;
+  const isVisionMissionEnabled = content.visionMission?.isEnabled !== false;
   const isHowItWorksEnabled = content.howItWorks.isEnabled !== false;
   const isImpactEnabled = content.impact.isEnabled !== false;
   const isCertificateEnabled = content.certificate.isEnabled !== false;
   const isCtaBandEnabled = content.footer.ctaBandEnabled !== false;
+
+  const vm = content.visionMission;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
@@ -83,6 +86,33 @@ export function LivePreviewModal({
           ) : (
             <div className="p-4 rounded-xl border border-dashed border-gray-300 text-center text-gray-400 text-xs">
               🌲 Hero Section (Hidden via CMS)
+            </div>
+          )}
+
+          {/* Vision & Mission Preview Card */}
+          {isVisionMissionEnabled && vm ? (
+            <div
+              className="rounded-2xl p-6 text-center space-y-3 transition-colors border border-[#d2ded7] shadow-sm"
+              style={{ background: "var(--color-cream)" }}
+            >
+              <div className="inline-block px-3 py-1 rounded-full bg-emerald-100/90 text-[#2d6a4f] text-[11px] font-bold border border-emerald-200">
+                {vm.badge}
+              </div>
+              <h3 className="text-xl font-bold text-[#173324]">
+                {vm.headline} <span className="text-[#2d6a4f]">{vm.headlineHighlight}</span>
+              </h3>
+              <p className="text-xs text-gray-600 max-w-xl mx-auto leading-relaxed">
+                {vm.description}
+              </p>
+              <div className="flex flex-wrap justify-center gap-2 pt-1 text-[10px] font-mono text-[#2d6a4f]">
+                <span className="px-2.5 py-1 rounded bg-white border border-[#d2ded7]">{vm.locationTag}</span>
+                <span className="px-2.5 py-1 rounded bg-white border border-[#d2ded7]">{vm.reserveTag}</span>
+                <span className="px-2.5 py-1 rounded bg-white border border-[#d2ded7]">{vm.initialTreesTag}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 rounded-xl border border-dashed border-gray-300 text-center text-gray-400 text-xs">
+              🔭 Vision & Mission Section (Hidden via CMS)
             </div>
           )}
 

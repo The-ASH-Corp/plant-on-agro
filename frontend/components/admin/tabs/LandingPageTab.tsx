@@ -12,6 +12,7 @@ import {
   CmsSectionNav,
   SectionVisibilityMaster,
   HeroSectionEditor,
+  VisionMissionEditor,
   HowItWorksEditor,
   ImpactEditor,
   CertificateEditor,
@@ -43,8 +44,13 @@ export function LandingPageTab({ showToast }: LandingPageTabProps) {
         setLoading(true);
         const res = await landingPageService.get();
         if (isMounted && res.data) {
-          setContent(res.data);
-          setInitialContent(res.data);
+          const merged: LandingPageContent = {
+            ...DEFAULT_LANDING_PAGE_CONTENT,
+            ...res.data,
+            visionMission: res.data.visionMission || DEFAULT_LANDING_PAGE_CONTENT.visionMission,
+          };
+          setContent(merged);
+          setInitialContent(merged);
         }
       } catch (err) {
         console.warn("Could not load landing page CMS from API, using fallback:", err);
@@ -112,11 +118,19 @@ export function LandingPageTab({ showToast }: LandingPageTabProps) {
   };
 
   // Section visibility toggle helper
-  const toggleSection = (section: "hero" | "howItWorks" | "impact" | "certificate" | "footer") => {
+  const toggleSection = (section: "hero" | "visionMission" | "howItWorks" | "impact" | "certificate" | "footer") => {
     if (section === "footer") {
       const current = content.footer.ctaBandEnabled !== false;
       setContent({ ...content, footer: { ...content.footer, ctaBandEnabled: !current } });
       showToast(`CTA Banner Band ${!current ? "Enabled" : "Disabled"}`);
+    } else if (section === "visionMission") {
+      const current = (content.visionMission?.isEnabled ?? true) !== false;
+      const updatedVision = {
+        ...(content.visionMission || DEFAULT_LANDING_PAGE_CONTENT.visionMission!),
+        isEnabled: !current,
+      };
+      setContent({ ...content, visionMission: updatedVision });
+      showToast(`Vision & Mission section ${!current ? "Enabled" : "Disabled"}`);
     } else {
       const current = content[section].isEnabled !== false;
       setContent({ ...content, [section]: { ...content[section], isEnabled: !current } });
@@ -168,6 +182,15 @@ export function LandingPageTab({ showToast }: LandingPageTabProps) {
           hero={content.hero}
           onChange={(updatedHero) => setContent({ ...content, hero: updatedHero })}
           onToggle={() => toggleSection("hero")}
+        />
+      )}
+
+      {/* 1B. Vision & Mission Section Editor */}
+      {(activeSection === "all" || activeSection === "visionMission") && (
+        <VisionMissionEditor
+          visionMission={content.visionMission || DEFAULT_LANDING_PAGE_CONTENT.visionMission!}
+          onChange={(updatedVision) => setContent({ ...content, visionMission: updatedVision })}
+          onToggle={() => toggleSection("visionMission")}
         />
       )}
 

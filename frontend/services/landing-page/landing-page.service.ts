@@ -84,10 +84,31 @@ export interface FooterSectionContent {
   copyrightText: string;
 }
 
+export interface VisionMissionSectionContent {
+  isEnabled?: boolean;
+  badge: string;
+  headline: string;
+  headlineHighlight: string;
+  description: string;
+  locationTag: string;
+  reserveTag: string;
+  initialTreesTag: string;
+  visionTitle: string;
+  visionDescription: string;
+  missionTitle: string;
+  missionSubtitle: string;
+  initialTrees: string;
+  initialAcres: string;
+  fiveYearTrees: string;
+  fiveYearLocations: string;
+  fiveYearTotalAcres: string;
+}
+
 export interface LandingPageContent {
   id?: string;
   slug?: string;
   hero: HeroSectionContent;
+  visionMission?: VisionMissionSectionContent;
   howItWorks: HowItWorksSectionContent;
   impact: ImpactSectionContent;
   certificate: CertificateSectionContent;
@@ -114,6 +135,28 @@ export const DEFAULT_LANDING_PAGE_CONTENT: LandingPageContent = {
       { target: 0, suffix: "", label: "Native Tree Varieties" },
       { target: 0, suffix: "+", label: "Protected Bio-Reserves" },
     ],
+  },
+  visionMission: {
+    isEnabled: true,
+    badge: '🌿 Integrated Agro-Forestry, Nature Tourism & Wellness Ecosystem',
+    headline: 'Plant a Story.',
+    headlineHighlight: 'Grow a Legacy.',
+    description:
+      'Building technology-enabled living forests, regenerative farms, and immersive nature destinations across India.',
+    locationTag: '📍 Flagship Project: Kerala | 2026',
+    reserveTag: '📐 30-Acre Master Reserve',
+    initialTreesTag: '🌱 1,00,000 Tree Initial Mission',
+    visionTitle: 'The PlantOn Vision',
+    visionDescription:
+      "To build the world's most transparent, connected, and physically verifiable green ecosystem—where adopting a tree is not just a digital transaction, but the beginning of a lifelong relationship with living nature.",
+    missionTitle: 'Our Immediate & Long-Term Mission',
+    missionSubtitle:
+      'A structured, phased pathway from our 30-acre Kerala flagship to a pan-national 600-acre regenerative network.',
+    initialTrees: '1,00,000',
+    initialAcres: '20 Acres',
+    fiveYearTrees: '20 Lakh (2,000,000)',
+    fiveYearLocations: '20 Locations',
+    fiveYearTotalAcres: '600 Acres',
   },
   howItWorks: {
     isEnabled: true,

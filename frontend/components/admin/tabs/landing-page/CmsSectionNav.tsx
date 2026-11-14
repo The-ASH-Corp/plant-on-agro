@@ -8,6 +8,7 @@ export function CmsSectionNav({
   content,
 }: CmsSectionNavProps) {
   const isHeroEnabled = content.hero.isEnabled !== false;
+  const isVisionMissionEnabled = content.visionMission?.isEnabled !== false;
   const isHowItWorksEnabled = content.howItWorks.isEnabled !== false;
   const isImpactEnabled = content.impact.isEnabled !== false;
   const isCertificateEnabled = content.certificate.isEnabled !== false;
@@ -16,6 +17,7 @@ export function CmsSectionNav({
   const tabs: { id: SectionKey; label: string; desc: string; isEnabled?: boolean }[] = [
     { id: "all", label: "🌟 All Sections", desc: "Overview" },
     { id: "hero", label: "🌲 Hero & Intro", desc: "Above-the-fold", isEnabled: isHeroEnabled },
+    { id: "visionMission", label: "🔭 Vision & Mission", desc: "Ecosystem & Reserve", isEnabled: isVisionMissionEnabled },
     { id: "howItWorks", label: "📋 How It Works", desc: "3-Step Flow", isEnabled: isHowItWorksEnabled },
     { id: "impact", label: "🌍 Impact & Projects", desc: "Metrics & Sites", isEnabled: isImpactEnabled },
     { id: "certificate", label: "📜 Certificate", desc: "Showcase & Proof", isEnabled: isCertificateEnabled },

@@ -39,6 +39,7 @@ export function Nav({ active = "home", setActive, openPlant }: NavProps) {
 
   const links: { label: string; id: Section; href: string }[] = [
     { label: "Home", id: "home", href: "/" },
+    { label: "Vision & Mission", id: "vision-mission", href: "/#vision-mission" },
     { label: "How It Works", id: "how-it-works", href: "/#how-it-works" },
     { label: "Plans", id: "plans", href: "/#plans" },
     { label: "2M Vision", id: "vision", href: "/#vision-2m" },

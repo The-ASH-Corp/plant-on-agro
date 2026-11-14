@@ -6,6 +6,7 @@ import { Nav, Footer } from "@/components/layout";
 import {
   Hero,
   HowItWorks,
+  VisionMissionSection,
   AdoptionPlans,
   ExperienceSection,
   ImpactSection,
@@ -255,6 +256,7 @@ export default function App() {
       return;
     }
     const map: Partial<Record<Section, string>> = {
+      "vision-mission": "vision-mission",
       "how-it-works": "how-it-works",
       plans: "plans",
       trees: "plans",
@@ -285,6 +287,15 @@ export default function App() {
               liveStats={heroLiveStats}
             />
           </div>
+        )}
+
+        {/* Vision & Mission Section (Integrated Agro-Forestry & Nature Tourism Ecosystem) */}
+        {cmsContent.visionMission?.isEnabled !== false && (
+          <VisionMissionSection
+            content={cmsContent.visionMission}
+            openPlant={(planId) => handleOpenPlant(planId)}
+            onExplorePlans={() => scrollTo("plans")}
+          />
         )}
 
         {cmsContent.howItWorks?.isEnabled !== false && (
