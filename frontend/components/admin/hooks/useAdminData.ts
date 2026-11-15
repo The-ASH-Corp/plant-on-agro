@@ -16,7 +16,7 @@ import { userService } from "@/services/user/user.service";
 import { orderService } from "@/services/orders/order.service";
 import { locationService } from "@/services/locations/location.service";
 import { waitlistService } from "@/services/waitlist/waitlist.service";
-import { deriveLocationsFromData, deriveOrdersFromInstances } from "../utils/deriveAdminData";
+import { deriveOrdersFromInstances } from "../utils/deriveAdminData";
 import type { ShowToast } from "./useAdminToast";
 
 /** Holds all admin dashboard collections and loads them from the backend on mount. */
@@ -122,7 +122,7 @@ export function useAdminData(showToast: ShowToast) {
           }
         });
 
-        // Load bio-reserves from backend API with fallback to local deriving
+        // Load bio-reserves strictly from backend API (no fabricated random places)
         if (locationsRes?.data?.items && locationsRes.data.items.length > 0) {
           const apiLocations = locationsRes.data.items.map((item) => {
             const uiLoc = locationService.mapToUiItem(item);
@@ -135,9 +135,7 @@ export function useAdminData(showToast: ShowToast) {
           });
           setLocations(apiLocations);
         } else {
-          setLocations(
-            deriveLocationsFromData(instancesRes.data?.items || [], treesRes.data?.items || [], [])
-          );
+          setLocations([]);
         }
 
         // Dynamically load adoption orders directly from MongoDB database (collection: adoptionorders)
