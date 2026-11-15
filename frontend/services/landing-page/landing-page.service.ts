@@ -185,16 +185,16 @@ export const DEFAULT_LANDING_PAGE_CONTENT: LandingPageContent = {
   },
   impact: {
     isEnabled: true,
-    tagline: 'Collective Action',
+    tagline: 'Growth With Measurable Impact',
     title: 'Your Impact Is Growing.',
     description:
-      'Every tree planted creates a ripple — cleaner air, cooler ground, and a living legacy.',
+      'Building technology-enabled living forests, regenerative farms, and immersive nature destinations across India. Every tree planted creates permanent biodiversity, verified CO₂ absorption, and rural prosperity.',
     stats: [
-      { icon: '🌳', value: 0, suffix: '+', label: 'Trees Planted & Geotagged', color: '#52b788' },
-      { icon: '🌍', value: 0, suffix: ' MT', label: 'CO₂ Impact Offset / yr', color: '#95d5b2' },
-      { icon: '🌱', value: 0, suffix: ' acres', label: 'Canopy Conserved', color: '#52b788' },
-      { icon: '👥', value: 0, suffix: '+', label: 'Verified Adopters', color: '#95d5b2' },
-      { icon: '🌿', value: 0, suffix: ' Species', label: 'Botanical Varieties', color: '#52b788' },
+      { icon: '🌳', value: 100000, suffix: '+', label: 'Flagship Target Trees', color: '#52b788' },
+      { icon: '🌍', value: 2850, suffix: ' MT', label: 'CO₂ Sequestration / yr', color: '#95d5b2' },
+      { icon: '🌱', value: 30, suffix: ' Acres', label: 'Flagship Master Reserve', color: '#52b788' },
+      { icon: '👥', value: 10000, suffix: '+', label: 'Adopter Grove Capacity', color: '#95d5b2' },
+      { icon: '📍', value: 20, suffix: ' Locations', label: '5-Year Network Horizon', color: '#52b788' },
     ],
     projects: [],
   },
