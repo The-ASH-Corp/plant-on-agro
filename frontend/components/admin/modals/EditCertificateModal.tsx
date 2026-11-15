@@ -156,7 +156,7 @@ export function EditCertificateModal({
                 name="reserveName"
                 type="text"
                 defaultValue={certificate.reserveName}
-                placeholder="e.g. Satara Plateau, Maharashtra"
+                placeholder="e.g. Flagship Living Reserve, Kerala"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7] focus:border-[#173324]"
               />
             </div>

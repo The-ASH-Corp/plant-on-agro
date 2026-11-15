@@ -29,43 +29,13 @@ import {
 import { treeInstanceService, BackendTreeInstance } from "@/services/tree-instances/tree-instance.service";
 import { treeVarietyService, BackendTreeVariety } from "@/services/tree-varieties/tree-variety.service";
 import { adoptionPlanService } from "@/services/adoption-plans/adoption-plan.service";
+import { locationService, BackendLocation } from "@/services/locations/location.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
 
 // Set to true to display the Priority Waitlist/Wishlist section;
 // Change to false whenever you want to display the full Adoption Plans & Packages
 const SHOW_WAITLIST_MODE = true;
-
-const RESERVE_METADATA: Record<string, { region: string; img: string }> = {
-  "Western Ghats, Maharashtra": {
-    region: "Maharashtra",
-    img: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
-  },
-  "Western Ghats Ecological Corridor, MH": {
-    region: "Maharashtra",
-    img: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
-  },
-  "Nashik Valley, Maharashtra": {
-    region: "Maharashtra",
-    img: "https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=600&h=400&fit=crop&auto=format",
-  },
-  "Satara Plateau, Maharashtra": {
-    region: "Maharashtra",
-    img: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=600&h=400&fit=crop&auto=format",
-  },
-  "Nagpur Forest Zone": {
-    region: "Vidarbha, MH",
-    img: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&h=400&fit=crop&auto=format",
-  },
-  "Aurangabad Green Belt": {
-    region: "Marathwada, MH",
-    img: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=600&h=400&fit=crop&auto=format",
-  },
-  "Pune Hills, Maharashtra": {
-    region: "Pune, MH",
-    img: "https://images.unsplash.com/photo-1511497584788-87676104235f?w=600&h=400&fit=crop&auto=format",
-  },
-};
 
 export default function App() {
   const user = useHydratedStore(useAuthStore, (s) => s.user);
@@ -95,12 +65,13 @@ export default function App() {
 
     async function loadAllData() {
       try {
-        const [cmsRes, instancesRes, varietiesRes, plansRes, expRes] = await Promise.allSettled([
+        const [cmsRes, instancesRes, varietiesRes, plansRes, expRes, locationsRes] = await Promise.allSettled([
           landingPageService.get(),
           treeInstanceService.getAll({ limit: 100 }),
           treeVarietyService.getAll({ limit: 50 }),
           adoptionPlanService.getAll({ limit: 50 }),
           experienceService.getAll(),
+          locationService.getAll({ limit: 100 }),
         ]);
 
         if (!isMounted) return;
@@ -142,11 +113,12 @@ export default function App() {
             ? varietiesRes.value.data.total
             : varieties.length;
 
-        // Extract active bio-reserves
-        const reservesSet = new Set<string>();
-        instances.forEach((i) => i.assignedReserve && reservesSet.add(i.assignedReserve));
-        varieties.forEach((v) => v.location && reservesSet.add(v.location));
-        const totalReserves = reservesSet.size;
+        // Extract verified bio-reserves from database
+        const verifiedLocations: BackendLocation[] =
+          locationsRes.status === "fulfilled" && locationsRes.value.data?.items
+            ? locationsRes.value.data.items
+            : [];
+        const totalReserves = verifiedLocations.length;
 
         // Compute unique verified adopters
         const adoptersSet = new Set<string>();
@@ -182,7 +154,7 @@ export default function App() {
           varietiesCount: totalVarieties,
         });
 
-        // Compute Live Projects from database reserves
+        // Compute Live Projects from verified database reserves
         const reserveCounts: Record<string, number> = {};
         instances.forEach((i) => {
           if (i.assignedReserve) {
@@ -191,21 +163,19 @@ export default function App() {
         });
 
         const projectsList: ImpactProjectItem[] = [];
-        for (const resName of reservesSet) {
-          const count = reserveCounts[resName] || 1;
-          const meta = RESERVE_METADATA[resName] || {
-            region: "Maharashtra",
-            img: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
-          };
+        for (const loc of verifiedLocations) {
+          const count = reserveCounts[loc.name] || loc.treesPlanted || 0;
           projectsList.push({
-            title: resName,
+            title: loc.name,
             trees: `${count} ${count === 1 ? "tree" : "trees"} planted`,
-            region: meta.region,
-            img: meta.img,
+            region: loc.region,
+            img: loc.image || "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
           });
         }
         if (projectsList.length > 0) {
           setLiveProjects(projectsList);
+        } else {
+          setLiveProjects([]);
         }
 
         // Live Sample Certificate from DB tree
@@ -215,7 +185,7 @@ export default function App() {
             recipientName: user?.name || firstInstance.adopterName || "Tree Adopter",
             treeName: firstInstance.treeVarietyName || "Sacred Banyan",
             treeId: firstInstance.treeTag || "POA-BY-1204",
-            location: firstInstance.assignedReserve || "Satara Plateau, Maharashtra",
+            location: firstInstance.assignedReserve || verifiedLocations[0]?.name || "Flagship Reserve",
             date: firstInstance.datePlanted
               ? new Date(firstInstance.datePlanted).toLocaleDateString("en-IN", {
                   day: "numeric",

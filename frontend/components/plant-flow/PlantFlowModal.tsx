@@ -101,20 +101,15 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
               setSelectedTree(randomTree);
             }
 
-            // Extract unique active bio-reserves from database trees
+            // Extract bio-reserves strictly from locations API
+            const apiLocations =
+              locationsRes?.data?.items?.map((l) => l.name).filter(Boolean) || [];
+
             const treeLocations = mappedTrees
               .map((t) => t.location)
               .filter((loc): loc is string => Boolean(loc && loc.trim()));
 
-            // Extract bio-reserves from locations API
-            const apiLocations =
-              locationsRes?.data?.items?.map((l) => l.name).filter(Boolean) || [];
-
-            const combinedLocations = Array.from(
-              new Set([...treeLocations, ...apiLocations])
-            );
-
-            setLocations(combinedLocations);
+            setLocations(apiLocations.length > 0 ? apiLocations : treeLocations);
           }
 
           if (plansRes.data?.items) {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { treeVarietyService } from "@/services/tree-varieties/tree-variety.service";
 import { adoptionPlanService } from "@/services/adoption-plans/adoption-plan.service";
 import { treeInstanceService } from "@/services/tree-instances/tree-instance.service";
+import { locationService } from "@/services/locations/location.service";
 import { certificateService } from "@/services/certificates/certificate.service";
 import type { AdminData } from "./useAdminData";
 import type { ShowToast } from "./useAdminToast";
@@ -134,6 +135,11 @@ export function useDeleteActions({ data, showToast, certificateActions }: Params
         setInstances((prev) => prev.filter((i) => i.id !== id));
         showToast(`Tree instance "${name}" record removed.`);
       } else if (type === "location") {
+        try {
+          await locationService.delete(id);
+        } catch (err) {
+          console.warn("Location deletion notice:", err);
+        }
         setLocations((prev) => prev.filter((l) => l.id !== id));
         showToast(`Reserve location "${name}" removed.`);
       } else if (type === "certificate") {
