@@ -26,7 +26,7 @@ export function CertificateSection({ content, sampleTree }: CertificateSectionPr
       ? content.features
       : [
           "Your name on every certificate",
-          "GPS coordinates of your tree",
+          "Unique Tree ID of your tree",
           "Linked to live growth tracking",
           "Shareable on LinkedIn & social",
         ];

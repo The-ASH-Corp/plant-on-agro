@@ -313,7 +313,7 @@ export function OrdersTab({
                 <th className="py-4 px-4 3xl:px-6">Order / Adopter</th>
                 <th className="py-4 px-4 3xl:px-6">Species & Plan</th>
                 <th className="py-4 px-4 3xl:px-6">Assigned Tree</th>
-                <th className="py-4 px-4 3xl:px-6">Reserve Geotag</th>
+                <th className="py-4 px-4 3xl:px-6">Reserve Location</th>
                 <th className="py-4 px-4 3xl:px-6">Total Amount</th>
                 <th className="py-4 px-4 3xl:px-6">Status Workflow</th>
                 <th className="py-4 px-4 3xl:px-6 text-right">Inspect</th>
@@ -403,7 +403,9 @@ export function OrdersTab({
 
                       <td className="py-3.5 px-4">
                         <span className="text-[#173324] font-medium block">{order.reserveName}</span>
-                        <span className="font-mono text-[10px] text-[#73877b]">{order.gpsCoords}</span>
+                        {order.assignedTreeTags && order.assignedTreeTags.length > 0 && (
+                          <span className="font-mono text-[10px] text-[#2d6a4f] block">{order.assignedTreeTags.join(", ")}</span>
+                        )}
                       </td>
                       <td className="py-3.5 px-4">
                         <span className="font-bold text-[#173324] block">

@@ -85,7 +85,7 @@ export function Step6Payment({
             <span className="font-bold text-[#173324]">
               One-Time Single Payment Guarantee:
             </span>{" "}
-            No recurring subscriptions or maintenance fees. Covers RFID tagging, arborist care, GPS mapping, and digital deed.
+            No recurring subscriptions or maintenance fees. Covers Tree id.
           </div>
         </div>
       </div>
@@ -151,9 +151,9 @@ export function Step6Payment({
         </div>
 
         {/* Trust Badges */}
-        <div className="pt-2.5 border-t border-emerald-100/80 flex flex-wrap items-center justify-between gap-2 text-[10px] text-[#345d47]">
+        {/* <div className="pt-2.5 border-t border-emerald-100/80 flex flex-wrap items-center justify-between gap-2 text-[10px] text-[#345d47]">
           <span className="flex items-center gap-1 font-medium">
-            <span className="text-emerald-600">✓</span> Instant RFID Tag Allotment
+            <span className="text-emerald-600">✓</span> Instant Tree Tag Allotment
           </span>
           <span className="flex items-center gap-1 font-medium">
             <span className="text-emerald-600">✓</span> Cryptographic SHA-256 Deed
@@ -161,7 +161,7 @@ export function Step6Payment({
           <span className="flex items-center gap-1 font-medium">
             <span className="text-emerald-600">✓</span> GST Tax Invoice Included
           </span>
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -51,6 +51,9 @@ export interface BackendOrder {
   isRead: boolean;
   notes: string;
   datePlanted: string;
+  treeTag?: string;
+  treeTags?: string[];
+  assignedTreeTags?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -183,6 +186,9 @@ export const orderService = {
         : new Date().toISOString().split('T')[0],
       status: order.status,
       certificateId: order.certificateId,
+      treeTag: order.treeTag,
+      treeTags: order.treeTags || order.assignedTreeTags,
+      assignedTreeTags: order.assignedTreeTags || order.treeTags,
       ndviScore: order.ndviScore,
       isRead: order.isRead !== undefined ? order.isRead : true,
       notes: order.notes,

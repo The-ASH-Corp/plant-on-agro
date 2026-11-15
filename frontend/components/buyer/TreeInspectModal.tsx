@@ -206,8 +206,8 @@ export function TreeInspectModal({
             </div>
 
             <div className="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 space-y-1">
-              <span className="text-[10px] text-white/50 uppercase font-mono block">GPS Coordinates</span>
-              <p className="font-mono font-bold text-emerald-300 text-sm">{tree.formattedGps}</p>
+              <span className="text-[10px] text-white/50 uppercase font-mono block">Unique Tree ID</span>
+              <p className="font-mono font-bold text-emerald-300 text-sm">{tree.treeTag}</p>
             </div>
 
             <div className="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 space-y-1">

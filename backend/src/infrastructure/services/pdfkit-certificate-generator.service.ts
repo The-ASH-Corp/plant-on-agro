@@ -6,18 +6,12 @@ export class PdfKitCertificateGeneratorService implements IPdfGeneratorService {
   public async generateCertificatePdf(data: CertificatePdfData): Promise<NodeJS.ReadableStream> {
     const { certificate, treeInstance } = data;
 
-    // Determine exact GPS coordinates for the QR code and telemetry card
-    let lat = 11.6854;
-    let lng = 76.1320;
-    if (treeInstance?.gpsCoordinates && !isNaN(treeInstance.gpsCoordinates.latitude) && !isNaN(treeInstance.gpsCoordinates.longitude)) {
-      lat = treeInstance.gpsCoordinates.latitude;
-      lng = treeInstance.gpsCoordinates.longitude;
-    }
-    const gpsText = `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lng).toFixed(4)}° ${lng >= 0 ? 'E' : 'W'}`;
-    const gpsMapsUrl = `https://maps.google.com/?q=${lat.toFixed(6)},${lng.toFixed(6)}`;
+    const treeTag = certificate.treeTag || treeInstance?.treeTag || 'POA-WEST-0001';
+    const reserveName = certificate.reserveName || treeInstance?.assignedReserve || 'Wayanad Rainforest Reserve';
+    const verificationUrl = `https://plantonagro.com/verify?cert=${encodeURIComponent(certificate.certificateNumber)}&tag=${encodeURIComponent(treeTag)}`;
 
-    // 1. Generate High-Resolution QR Code containing exact Google Maps GPS Coordinates
-    const qrBuffer = await QRCode.toBuffer(gpsMapsUrl, {
+    // 1. Generate High-Resolution QR Code containing Deed Verification
+    const qrBuffer = await QRCode.toBuffer(verificationUrl, {
       errorCorrectionLevel: 'H',
       margin: 1,
       color: {
@@ -180,16 +174,14 @@ export class PdfKitCertificateGeneratorService implements IPdfGeneratorService {
         width: 602,
       });
 
-    // 10. Specifications & Telemetry 4-Card Grid
+    // 10. Specifications & Custody 4-Card Grid
     const cardY = 262;
-    const treeTag = certificate.treeTag || treeInstance?.treeTag || 'POA-WEST-0001';
-    const reserveName = certificate.reserveName || treeInstance?.assignedReserve || 'Wayanad Rainforest Reserve';
     
     const cards = [
       { title: 'CERTIFICATE NUMBER', val: certificate.certificateNumber, sub: 'Immutable Serial ID' },
-      { title: 'PHYSICAL TREE TAG', val: treeTag, sub: 'RFID & Geotagged' },
+      { title: 'UNIQUE TREE ID', val: treeTag, sub: 'Officially Cataloged' },
       { title: 'RESERVE SANCTUARY', val: reserveName, sub: 'Western Ghats, Kerala' },
-      { title: 'GPS COORDINATES', val: gpsText, sub: 'Satellite Verified' },
+      { title: 'CUSTODY DEED', val: 'LIFELONG STEWARDSHIP', sub: 'Permanent Heritage' },
     ];
 
     cards.forEach((c, idx) => {
@@ -201,15 +193,15 @@ export class PdfKitCertificateGeneratorService implements IPdfGeneratorService {
     });
 
     // 11. Bottom Authentication Section (y: 326 to 480)
-    // Left: High-Res GPS QR Code & Instructions
+    // Left: High-Res Verification QR Code & Instructions
     doc.image(qrBuffer, 55, 335, { width: 88, height: 88 });
-    doc.font('Helvetica-Bold').fontSize(8.5).fillColor('#0a2918').text('SATELLITE GPS NAVIGATION', 152, 345);
+    doc.font('Helvetica-Bold').fontSize(8.5).fillColor('#0a2918').text('DIGITAL DEED VERIFICATION', 152, 345);
     doc
       .font('Helvetica')
       .fontSize(7.5)
       .fillColor('#3b5a48')
       .text(
-        'Scan this QR code with any smartphone camera to open live ground GPS coordinates on Google Maps and navigate directly to your adopted living tree.',
+        'Scan this QR code with any smartphone camera to authenticate the official Tree ID deed, biological status, and arborist stewardship record.',
         152,
         358,
         { width: 175, lineGap: 2 }
@@ -218,12 +210,12 @@ export class PdfKitCertificateGeneratorService implements IPdfGeneratorService {
       .font('Courier-Bold')
       .fontSize(7)
       .fillColor('#1b4332')
-      .text(`COORDS: ${gpsText}`, 152, 400, { width: 175 });
+      .text(`TREE ID: ${treeTag}`, 152, 400, { width: 175 });
     doc
       .font('Courier')
       .fontSize(6)
       .fillColor('#2d6a4f')
-      .text(gpsMapsUrl, 152, 412, { width: 175 });
+      .text(verificationUrl, 152, 412, { width: 175 });
 
     // Center: Verified Seal Badge
     const sealX = 421;
@@ -231,7 +223,7 @@ export class PdfKitCertificateGeneratorService implements IPdfGeneratorService {
     doc.circle(sealX, sealY, 44).lineWidth(2).strokeColor('#b38728').stroke();
     doc.circle(sealX, sealY, 40).fillColor('#163824').fill();
     doc.circle(sealX, sealY, 36).lineWidth(0.75).strokeColor('#d4af37').stroke();
-    doc.font('Helvetica-Bold').fontSize(6.5).fillColor('#d8f3dc').text('VERIFIED & GEOTAGGED', sealX - 35, sealY - 24, { width: 70, align: 'center' });
+    doc.font('Helvetica-Bold').fontSize(6.5).fillColor('#d8f3dc').text('VERIFIED & CERTIFIED', sealX - 35, sealY - 24, { width: 70, align: 'center' });
     
     // Draw gold diamond leaf crest in center
     doc.polygon([sealX, sealY - 13], [sealX + 8, sealY - 5], [sealX, sealY + 3], [sealX - 8, sealY - 5]).fillColor('#d4af37').fill();

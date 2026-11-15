@@ -104,13 +104,13 @@ export function OrderDetailsModal({
     currentStatus === "Completed";
 
   const handleStatusChange = (newStatus: AdoptionOrderStatus) => {
-    if (newStatus === "Planted" && !gpsInput) {
+    if (newStatus === "Planted" && !tagInput.trim() && !assignedTreeTags) {
       setShowPlantingInputs(true);
       return;
     }
     setSelectedStatus(newStatus);
     if (onUpdateStatus) {
-      onUpdateStatus(order.orderNumber, newStatus, gpsInput, reserveInput, notesInput);
+      onUpdateStatus(order.orderNumber, newStatus, "", reserveInput, notesInput);
     }
   };
 
@@ -121,7 +121,7 @@ export function OrderDetailsModal({
       onUpdateStatus(
         order.orderNumber,
         "Planted",
-        gpsInput.trim(),
+        "",
         reserveInput.trim(),
         notesInput.trim(),
         tagInput.trim() ? [tagInput.trim().toUpperCase()] : undefined
@@ -189,7 +189,7 @@ export function OrderDetailsModal({
                 </span>
                 <span className="text-[11px] text-[#55695d]">
                   {assignedTreeTags
-                    ? "Tree species & physical RFID tag officially linked to buyer deed"
+                    ? "Tree species & physical tree tag officially linked to buyer deed"
                     : "Action Required: Enter tree species & planting details for this purchase"}
                 </span>
               </div>
@@ -224,7 +224,7 @@ export function OrderDetailsModal({
           ) : (
             <div className="space-y-2 pt-1 border-t border-amber-200">
               <p className="text-[11px] text-amber-900 leading-snug">
-                As Admin, specify the tree species (e.g. Sandalwood, Teak, Neem), botanical details, RFID tag, and exact ground GPS to be planted for <strong>{order.adopterName}</strong> and stamped on their certificate.
+                As Admin, specify the tree species (e.g. Sandalwood, Teak, Neem), botanical details, and physical tree tag to be planted for <strong>{order.adopterName}</strong> and stamped on their certificate.
               </p>
               <button
                 type="button"
@@ -239,7 +239,7 @@ export function OrderDetailsModal({
                 className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#173324] to-[#1b7a43] hover:brightness-110 text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>🌱</span>
-                <span>Enter Tree Details to Plant (Species, Tag, GPS) →</span>
+                <span>Enter Tree Details to Plant (Species, Tree ID) →</span>
               </button>
             </div>
           )}
@@ -325,7 +325,7 @@ export function OrderDetailsModal({
 
               <div>
                 <label className="block text-[10px] font-bold uppercase text-[#173324] mb-1">
-                  Physical Tree Tag / RFID Serial <span className="text-emerald-600">*</span>
+                  Physical Tree Tag / Serial <span className="text-emerald-600">*</span>
                 </label>
                 <div className="space-y-1.5">
                   <input
@@ -350,20 +350,6 @@ export function OrderDetailsModal({
                     </button>
                   )}
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-[#173324] mb-1">
-                  Exact Ground GPS Coordinates <span className="text-emerald-600">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={gpsInput}
-                  onChange={(e) => setGpsInput(e.target.value)}
-                  placeholder="e.g. 18.9894° N, 73.4428° E"
-                  className="w-full text-xs font-mono font-bold py-1.5 px-2.5 rounded-lg border border-[#b2ddc4] bg-[#fafcfb] text-[#173324] outline-none"
-                />
               </div>
 
               <button
@@ -447,10 +433,12 @@ export function OrderDetailsModal({
             <span className="text-[#7a8a80]">Plantation Reserve:</span>
             <span className="font-semibold text-[#173324]">{order.reserveName} (On-Site Planting)</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-[#7a8a80]">GPS Coordinates:</span>
-            <span className="font-mono font-semibold text-[#1b7a43]">{order.gpsCoords}</span>
-          </div>
+          {assignedTreeTags && (
+            <div className="flex justify-between">
+              <span className="text-[#7a8a80]">Assigned Tree IDs:</span>
+              <span className="font-mono font-semibold text-[#1b7a43]">{assignedTreeTags}</span>
+            </div>
+          )}
           <div className="flex justify-between">
             <span className="text-[#7a8a80]">Plan Type:</span>
             <span className="font-semibold text-[#173324]">{order.planType}</span>

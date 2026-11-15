@@ -26,7 +26,7 @@ export function AddLocationModal({
         <h3 style={{ fontFamily: "var(--font-display)" }} className="text-2xl text-[#173324] mb-1">
           Add Plantation Location
         </h3>
-        <p className="text-xs text-[#55695d] mb-4">Register a new geotagged agroforestry reserve or farmer partner parcel.</p>
+        <p className="text-xs text-[#55695d] mb-4">Register a new verified agroforestry reserve or farmer partner parcel.</p>
 
         <form onSubmit={onSubmit} className="space-y-3.5 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -113,7 +113,7 @@ export function AddLocationModal({
               type="submit"
               className="flex-1 py-3 rounded-xl bg-[#173324] text-white font-semibold hover:bg-[#1e4433] transition-all cursor-pointer"
             >
-              Save & Geotag Location
+              Save Reserve Location
             </button>
             <button
               type="button"

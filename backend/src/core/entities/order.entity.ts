@@ -41,7 +41,7 @@ export interface OrderProps {
   scientificName?: string;
   category?: string;
   reserveName: string; // Designated reserve / plantation location requested by client
-  gpsCoords?: string; // Geotagged ground coordinates
+  gpsCoords?: string; // Ground GPS coordinates
   planType: string; // e.g. "Individual", "Memorial", "Birthday", "Corporate"
   dedicationMessage?: string; // Personalized dedication or arborist instructions
   quantity: number;

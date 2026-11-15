@@ -27,7 +27,7 @@ export function HowItWorks({ content }: HowItWorksProps) {
             num: "03",
             icon: "📜",
             title: "Watch It Grow",
-            desc: "Track your tree with geo-tagged photos, verified field reports, and a legal digital deed.",
+            desc: "Track your tree with verified photographic logs, arborist field reports, and a legal digital deed.",
           },
         ];
 

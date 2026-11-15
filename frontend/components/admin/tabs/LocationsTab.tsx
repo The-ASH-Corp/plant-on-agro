@@ -37,7 +37,7 @@ export function LocationsTab({
             Protected Bio-Sanctuaries & Reserves ({filteredLocations.length})
           </h2>
           <p className="text-xs text-[#73877b]">
-            Geotagged forest sectors with live GPS telemetry, hectare metrics, and soil health
+            Protected forest sectors with hectare metrics, ecological boundaries, and soil health
           </p>
         </div>
         <button
@@ -45,23 +45,23 @@ export function LocationsTab({
           className="px-4 py-2 rounded-xl bg-[#173324] hover:bg-[#1f4230] text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
         >
           <span>+</span>
-          <span>Geotag Reserve</span>
+          <span>Register Reserve</span>
         </button>
       </div>
 
       {filteredLocations.length === 0 ? (
         <div className="bg-white rounded-3xl border border-[#e2eae5] p-12 text-center space-y-3">
           <span className="text-4xl">🗺️</span>
-          <h3 className="text-lg font-bold text-[#173324]">No Protected Bio-Reserves Geotagged Yet</h3>
+          <h3 className="text-lg font-bold text-[#173324]">No Protected Bio-Reserves Registered Yet</h3>
           <p className="text-xs text-[#73877b] max-w-md mx-auto">
-            You have not registered any plantation reserves or forest sanctuaries yet. Click the button below to geotag your first verified reserve.
+            You have not registered any plantation reserves or forest sanctuaries yet. Click the button below to register your first verified reserve.
           </p>
           <button
             onClick={onOpenAddLocation}
             className="px-5 py-2.5 rounded-xl bg-[#173324] hover:bg-[#1f4230] text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
           >
             <span>+</span>
-            <span>Geotag Your First Reserve</span>
+            <span>Register Your First Reserve</span>
           </button>
         </div>
       ) : (

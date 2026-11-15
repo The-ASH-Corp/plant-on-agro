@@ -20,11 +20,11 @@ export const SEED_ADOPTION_PLANS: SeedPlan[] = [
     icon: '🌱',
     price: 25000,
     priceModifier: 25000,
-    description: '10 dedicated living legacy trees in our flagship bio-reserve with lifelong custody, geotagging, and plantation visit access. (AED 1,000 • $300)',
+    description: '10 dedicated living legacy trees in our flagship bio-reserve with lifelong custody, unique Tree IDs, and plantation visit access. (AED 1,000 • $300)',
     features: [
       '10 Dedicated Native Trees',
       'Digital Certificate Deed of Custody',
-      'Individual GPS Geotagging & Telemetry',
+      'Individual Unique Tree IDs & Biological Tracking',
       'Complimentary Plantation Visit Pass',
       'Annual Growth & Biomass Reports',
     ],
@@ -96,7 +96,7 @@ export const SEED_ADOPTION_PLANS: SeedPlan[] = [
     features: [
       '1 Dedicated Native Living Tree',
       'Personalized Occasion Certificate & Deed',
-      'Precise GPS Coordinates & Live Map Tracking',
+      'Unique Tree IDs & Growth Tracking',
       'Annual Field Growth Updates & Photos',
       'Single-Time Lifetime Custody (Zero Renewal Fees)',
     ],

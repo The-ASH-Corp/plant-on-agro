@@ -89,7 +89,7 @@ export function EditLocationModal({
           </h3>
         </div>
         <p className="text-xs text-[#55695d] mb-4">
-          Modify geotagged sector telemetry, capacity limits, and soil health conditions for{" "}
+          Modify reserve sector telemetry, capacity limits, and soil health conditions for{" "}
           <strong className="text-[#173324]">{location.name}</strong>.
         </p>
 

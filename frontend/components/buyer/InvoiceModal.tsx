@@ -84,8 +84,8 @@ export function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                   Afforestation Parcel
                 </span>
                 <p className="font-bold text-gray-900">{order.reserveName}</p>
-                {order.gpsCoords && (
-                  <p className="font-mono text-gray-600 text-[11px]">GPS: {order.gpsCoords}</p>
+                {order.assignedTreeTags && order.assignedTreeTags.length > 0 && (
+                  <p className="font-mono text-gray-600 text-[11px]">Tree ID: {order.assignedTreeTags.join(", ")}</p>
                 )}
                 <p className="font-mono text-gray-600 text-[11px]">Deed ID: {order.certificateId || "CERT-" + order.orderNumber}</p>
                 <p className="text-gray-600 text-[11px]">Method: {order.paymentMethod.toUpperCase()}</p>
@@ -108,7 +108,7 @@ export function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                     <td className="py-3">
                       <strong className="text-gray-900 block">{order.treeSpecies}</strong>
                       <span className="text-[11px] text-gray-500">
-                        {order.planType} Lifetime Adoption Package (Nursery seed, GPS tagging, arborist care)
+                        {order.planType} Lifetime Adoption Package (Nursery sapling, unique Tree ID, arborist care)
                       </span>
                     </td>
                     <td className="py-3 text-center font-bold text-gray-800">{order.quantity}</td>
@@ -134,7 +134,7 @@ export function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                 <span className="font-mono">₹0</span>
               </div>
               <div className="flex justify-between text-gray-600">
-                <span>Lifelong Forestry Care & GPS Mapping Fee:</span>
+                <span>Lifelong Forestry Care & Custody Fee:</span>
                 <span className="font-mono text-emerald-700 font-bold">Included (Lifetime Single-Payment)</span>
               </div>
               <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-200">

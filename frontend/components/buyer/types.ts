@@ -25,6 +25,9 @@ export interface BuyerOrderRecord {
   planType: string;
   reserveName: string;
   gpsCoords?: string;
+  treeTag?: string;
+  treeTags?: string[];
+  assignedTreeTags?: string[];
   quantity: number;
   totalAmount: number;
   paymentMethod: string;

@@ -195,9 +195,9 @@ export function BuyerOrdersTab({
                         <span className="text-[#173324] font-medium block truncate max-w-[160px]">
                           {order.reserveName}
                         </span>
-                        {order.gpsCoords && (
-                          <span className="text-[10px] font-mono text-[#73877b] block truncate max-w-[160px]">
-                            {order.gpsCoords}
+                        {order.assignedTreeTags && order.assignedTreeTags.length > 0 && (
+                          <span className="text-[10px] font-mono text-[#2d6a4f] block truncate max-w-[160px]">
+                            {order.assignedTreeTags.join(", ")}
                           </span>
                         )}
                       </td>

@@ -112,7 +112,7 @@ export class OrderFulfillmentService {
       const createdTreeInstances: TreeInstance[] = [];
 
       // 3. Digital Deed Certificate: NEVER issued right after payment while order is 'New Request'.
-      // Certificate is officially minted only when Admin marks status as 'Planted' with exact GPS coordinates.
+      // Certificate is officially minted only when Admin marks status as 'Planted' with assigned Tree IDs.
       let certificate: Certificate | null = null;
       const existingCerts = await this.certificateRepository.findByOrderRef(freshOrder.orderNumber);
       if (existingCerts.length > 0 && existingCerts[0].status === 'Issued') {

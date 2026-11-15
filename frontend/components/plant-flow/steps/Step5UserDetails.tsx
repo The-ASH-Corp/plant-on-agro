@@ -26,7 +26,7 @@ export function Step5UserDetails({
   return (
     <div>
       <p className="text-[#4a6557] mb-5 text-sm">
-        Your digital adoption certificate and lifetime geotagged deed will be issued with these details.
+        Your digital adoption certificate and lifetime digital deed will be issued with these details.
       </p>
       <div className="space-y-4">
         <div>

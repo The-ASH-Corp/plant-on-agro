@@ -28,12 +28,12 @@ The platform bridges sustainable forestry investment and modern eco-tourism. Urb
 ```
 ┌─────────────────┐       ┌─────────────────┐       ┌─────────────────┐       ┌─────────────────┐
 │   01 WE PLANT   │ ────> │   02 WE GROW    │ ────> │  03 THEY TRACK  │ ────> │  04 THEY VISIT  │
-│ Elite Saplings  │       │ Arborist Care   │       │ GPS & Satellite │       │ Agro-Tourism    │
-│ Geotagged RFID  │       │ Health & NDVI   │       │ Digital Deeds   │       │ Reserve Walking │
+│ Elite Saplings  │       │ Arborist Care   │       │ Unique Tree IDs │       │ Agro-Tourism    │
+│ Unique Tree IDs │       │ Health & NDVI   │       │ Digital Deeds   │       │ Reserve Walking │
 └─────────────────┘       └─────────────────┘       └─────────────────┘       └─────────────────┘
 ```
 
-1. **01 We Plant**: High-yield saplings are selected, cataloged, physically tagged (RFID/Barcode), and planted in certified geo-polygons.
+1. **01 We Plant**: High-yield saplings are selected, cataloged, physically tagged, and planted in certified geo-polygons.
 2. **02 We Grow**: Dedicated arborists nurture the plantation, recording periodic growth milestones (height, canopy spread), health logs, and satellite NDVI index scores.
 3. **03 They Track**: Adopters receive verifiable Digital Deeds with SHA-256 cryptographic hashes, QR verification, satellite coordinates, and real-time carbon sequestration telemetry.
 4. **04 They Visit**: Adopters book bundled, complimentary agro-tourism visits to walk through the reserve, meet assigned expert arborist guides, experience honey tapping and canopy dining, and upload photos to their private Visit Memory Vault.
@@ -67,14 +67,14 @@ A frictionless, animated step-by-step tree adoption wizard powered by Framer Mot
 
 ### 4. 📜 Verifiable Digital Deeds & Certificates
 - **Tamper-Evident Hashing**: Each adopted tree produces an immutable digital deed featuring a SHA-256 cryptographic hash.
-- **Public Verification Endpoint**: Anyone can scan the QR code or query `/api/v1/certificates/verify/:hash` to verify authenticity, adopter identity, planting date, and GPS coordinates.
+- **Public Verification Endpoint**: Anyone can scan the QR code or query `/api/v1/certificates/verify/:hash` to verify authenticity, adopter identity, planting date, and unique Tree ID.
 - **High-Resolution Deeds**: Formatted certificates suitable for printing, framing, or ESG/CSR carbon auditing.
 
 ### 5. 🧑‍🌾 Buyer Experience Portal (`/buyer/dashboard`)
 A dedicated, responsive portal for tree parents and institutional adopters:
 - **Executive KPI Dashboard**: Immediate overview of trees adopted, lifetime $CO_2$ sequestered (kg), oxygen produced (kg), and biomass generated.
 - **My Trees Inventory**: Detailed tree cards with species data, planting date, age, current height, and canopy status.
-- **Tree Inspector Modal**: Deep-dive into specific tree telemetry—view exact GPS coordinates, satellite aerial view, arborist health logs, NDVI vegetation health scores, and growth milestone photos.
+- **Tree Inspector Modal**: Deep-dive into specific tree information—view unique Tree ID, assigned reserve, arborist health logs, NDVI vegetation health scores, and growth milestone photos.
 - **Orders & Invoices**: Full ledger of adoption transactions with printable, GST-compliant tax invoice generation.
 - **Certificates Vault**: Central repository of all issued digital deeds with one-click PDF downloads and deed verification links.
 - **Impact Telemetry**: Environmental impact comparison widgets (equivalent car kilometers offset, flight emissions neutralized).
@@ -86,7 +86,7 @@ A dedicated, responsive portal for tree parents and institutional adopters:
 
 ### 6. 🌿 Phase 04: Agro-Tourism & Visit Management
 - **Integrated Nature Experiences**: Pre-seeded with 6 flagship experiences:
-  - *Tree Plantation & Geotagging Walk* (complimentary with adoption)
+  - *Tree Plantation & Guided Reserve Walk* (complimentary with adoption)
   - *Wayanad Agro-Forestry Canopy Trek*
   - *Forest Honey Tapping & Spices Workshop*
   - *Night Forest & Bioluminescence Trail*
@@ -100,7 +100,7 @@ Comprehensive enterprise dashboard for plantation managers and executives:
 - **Executive Overview**: Total revenue metrics, total orders, planted saplings, active users, and system health status.
 - **Orders Tab**: Manage, filter, search, and fulfill buyer orders. Inspect customer contact info, adoption tiers, and payment receipts.
 - **Tree Varieties Tab**: CRUD management for tree species—name, botanical name, category, maturity period, $CO_2$/Oxygen metrics, market price, and gallery photos.
-- **Tree Instances Tab**: Individual physical tree tracking—assign physical RFID tag IDs, set GPS lat/long, update height and health (`HEALTHY`, `ATTENTION`, `CRITICAL`), record NDVI scores, log arborist inspections, and upload milestone photos.
+- **Tree Instances Tab**: Individual physical tree tracking—assign physical Tree IDs, update height and health (`HEALTHY`, `ATTENTION`, `CRITICAL`), record NDVI scores, log arborist inspections, and upload milestone photos.
 - **Locations & Reserves Tab**: Manage plantation parcels, geographic zones, elevation, soil characteristics, polygon boundaries, and capacity limits.
 - **Adoption Plans Tab**: Configure pricing tiers (Silver, Gold, Platinum, Custom), tree bundle limits, yield sharing terms, and benefits.
 - **Certificates Tab**: Audit all issued digital deeds, search by certificate number or SHA-256 hash, and regenerate documents.

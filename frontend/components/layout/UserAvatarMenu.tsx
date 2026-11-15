@@ -44,7 +44,7 @@ export function UserAvatarMenu({ user, onLogout, openPlant }: UserAvatarMenuProp
   const isAdmin = user.role === "admin";
   const dashboardHref = isAdmin ? "/admin" : "/buyer/dashboard";
   const dashboardLabel = isAdmin ? "Admin Dashboard" : "Buyer Dashboard";
-  const dashboardDesc = isAdmin ? "Operations & CMS Controls" : "My Trees, GPS & Certificates";
+  const dashboardDesc = isAdmin ? "Operations & CMS Controls" : "My Trees & Certificates";
   const dashboardIcon = isAdmin ? "🛡️" : "🌿";
 
   // Initials for avatar

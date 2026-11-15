@@ -121,12 +121,12 @@ export function CertificateModal({ tree, userName, onClose }: CertificateModalPr
             {/* Telemetry Grid */}
             <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-3 bg-white/5 p-4 rounded-xl border border-white/10 text-left text-xs mb-8">
               <div>
-                <span className="text-[10px] text-emerald-300/80 uppercase font-semibold block">Tree Serial ID</span>
+                <span className="text-[10px] text-emerald-300/80 uppercase font-semibold block">Unique Tree ID</span>
                 <strong className="font-mono text-white text-xs">{tree.treeTag}</strong>
               </div>
               <div>
-                <span className="text-[10px] text-emerald-300/80 uppercase font-semibold block">GPS Location</span>
-                <strong className="font-mono text-white text-xs">{tree.formattedGps}</strong>
+                <span className="text-[10px] text-emerald-300/80 uppercase font-semibold block">Reserve Sanctuary</span>
+                <strong className="text-white text-xs truncate block">{tree.assignedReserve}</strong>
               </div>
               <div>
                 <span className="text-[10px] text-emerald-300/80 uppercase font-semibold block">Date Planted</span>
@@ -141,48 +141,29 @@ export function CertificateModal({ tree, userName, onClose }: CertificateModalPr
               </div>
             </div>
 
-            {/* Seal, GPS QR Code & Signatures */}
+            {/* Seal, Verification QR Code & Signatures */}
             <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-emerald-500/20">
-              {/* Left: Satellite GPS Navigation QR Code */}
+              {/* Left: Digital Deed QR Code */}
               <div className="flex items-center gap-2.5 text-left bg-white/5 p-2 rounded-xl border border-white/10">
-                <a
-                  href={`https://maps.google.com/?q=${encodeURIComponent(
-                    tree.formattedGps?.replace(/[°NSEW]/gi, "").trim() || `${tree.gpsCoordinates?.latitude},${tree.gpsCoordinates?.longitude}`
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-1 bg-white rounded-md shrink-0 hover:scale-105 transition-transform"
-                  title="Scan or click to open GPS location in Google Maps"
-                >
+                <div className="p-1 bg-white rounded-md shrink-0">
                   <img
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=64x64&data=${encodeURIComponent(
-                      `https://maps.google.com/?q=${
-                        tree.gpsCoordinates?.latitude && tree.gpsCoordinates?.longitude
-                          ? `${tree.gpsCoordinates.latitude},${tree.gpsCoordinates.longitude}`
-                          : encodeURIComponent(tree.formattedGps || "18.9894,73.4428")
-                      }`
+                      `https://plantonagro.com/verify?tag=${encodeURIComponent(tree.treeTag || "")}`
                     )}`}
-                    alt="GPS Navigation QR Code"
+                    alt="Digital Deed Verification QR Code"
                     className="w-12 h-12"
                   />
-                </a>
+                </div>
                 <div>
                   <span className="text-[9px] text-emerald-300 font-bold uppercase tracking-wider block">
-                    📍 Satellite GPS Geotag
+                    📜 Verified Tree Deed
                   </span>
                   <span className="font-mono text-[11px] text-white font-bold block">
-                    {tree.formattedGps || "18.9894° N, 73.4428° E"}
+                    ID: {tree.treeTag}
                   </span>
-                  <a
-                    href={`https://maps.google.com/?q=${encodeURIComponent(
-                      tree.formattedGps?.replace(/[°NSEW]/gi, "").trim() || `${tree.gpsCoordinates?.latitude},${tree.gpsCoordinates?.longitude}`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[9px] text-emerald-400 hover:underline inline-flex items-center gap-1 mt-0.5"
-                  >
-                    <span>🛰️ Open in Google Maps →</span>
-                  </a>
+                  <span className="text-[9px] text-emerald-400 font-medium block mt-0.5">
+                    Official Custody Register
+                  </span>
                 </div>
               </div>
 

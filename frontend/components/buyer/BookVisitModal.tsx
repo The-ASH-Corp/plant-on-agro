@@ -146,7 +146,7 @@ export function BookVisitModal({
                 <span>🌱</span> Why adopt first?
               </div>
               <ul className="space-y-1.5 text-gray-600 pl-4 list-disc">
-                <li>Your dedicated GPS-tagged tree is mapped directly to your personal walking trail</li>
+                <li>Your dedicated adopted trees are mapped directly to your personal walking trail with your guide</li>
                 <li>Complimentary lifetime guided plantation tours for you and your family</li>
                 <li>Digital certificate, live photo monitoring, and arborist escort included</li>
               </ul>
@@ -311,7 +311,7 @@ export function BookVisitModal({
                 Select Your Adopted Trees to Inspect in Person
               </label>
               <p className="text-xs text-gray-500 mb-2">
-                Our arborists will map your walking trail directly to these GPS tags so you can touch and measure them!
+                Our arborists will map your walking trail directly to your assigned Tree IDs so you can visit, touch, and measure them!
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-36 overflow-y-auto p-2 bg-[#f9fbf9] rounded-xl border border-emerald-100">
                 {userTrees.map((tree) => {

@@ -129,7 +129,7 @@ export const DEFAULT_LANDING_PAGE_DATA: Omit<LandingPageProps, 'id' | 'createdAt
     bgImageUrl:
       'https://images.unsplash.com/photo-1568241640298-1adf2974314c?w=1920&h=1080&fit=crop&auto=format',
     stats: [
-      { target: 0, suffix: "+", label: "Trees Planted & Geotagged" },
+      { target: 0, suffix: "+", label: "Trees Planted & Protected" },
       { target: 0, suffix: "", label: "Native Tree Varieties" },
       { target: 0, suffix: "+", label: "Protected Bio-Reserves" },
     ],
@@ -177,7 +177,7 @@ export const DEFAULT_LANDING_PAGE_DATA: Omit<LandingPageProps, 'id' | 'createdAt
         num: '03',
         icon: '📜',
         title: 'Watch It Grow',
-        desc: 'Track your tree with geo-tagged photos, verified field reports, and a legal digital deed.',
+        desc: 'Track your tree with verified photographic logs, arborist field reports, and a legal digital deed.',
       },
     ],
   },
@@ -205,7 +205,7 @@ export const DEFAULT_LANDING_PAGE_DATA: Omit<LandingPageProps, 'id' | 'createdAt
       'Every tree you plant comes with a premium digital certificate — personalised, shareable, and backed by real plantation data.',
     features: [
       'Your name on every certificate',
-      'GPS coordinates of your tree',
+      'Unique Tree ID of your tree',
       'Linked to live growth tracking',
       'Shareable on LinkedIn & social',
     ],

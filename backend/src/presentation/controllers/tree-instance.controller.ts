@@ -20,7 +20,7 @@ export class TreeInstanceController {
   public create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const result = await this.createTreeInstanceUseCase.execute(req.body);
-      ApiResponse.created(res, result, 'Tree instance created and geotagged successfully');
+      ApiResponse.created(res, result, 'Tree instance created successfully');
     } catch (error) {
       next(error);
     }

@@ -86,6 +86,7 @@ export interface AdoptionOrder {
   planType: string;
   treeTag?: string;
   treeTags?: string[];
+  assignedTreeTags?: string[];
   assignedTreeInstanceIds?: string[];
   dedicationMessage?: string;
   quantity: number;

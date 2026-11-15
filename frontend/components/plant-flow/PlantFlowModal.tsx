@@ -25,38 +25,7 @@ import {
 const LOCATION_COORDINATES: Record<
   string,
   { lat: number; lng: number; formatted: string }
-> = {
-  "Western Ghats, Maharashtra": {
-    lat: 18.9894,
-    lng: 73.4428,
-    formatted: "18.9894° N, 73.4428° E",
-  },
-  "Nashik Valley, Maharashtra": {
-    lat: 19.9975,
-    lng: 73.7898,
-    formatted: "19.9975° N, 73.7898° E",
-  },
-  "Satara Plateau, Maharashtra": {
-    lat: 17.6805,
-    lng: 73.9904,
-    formatted: "17.6805° N, 73.9904° E",
-  },
-  "Nagpur Forest Zone": {
-    lat: 21.1458,
-    lng: 79.0882,
-    formatted: "21.1458° N, 79.0882° E",
-  },
-  "Aurangabad Green Belt": {
-    lat: 19.8762,
-    lng: 75.3433,
-    formatted: "19.8762° N, 75.3433° E",
-  },
-  "Pune Hills, Maharashtra": {
-    lat: 18.5204,
-    lng: 73.8567,
-    formatted: "18.5204° N, 73.8567° E",
-  },
-};
+> = {};
 
 export interface PlantFlowProps {
   onClose: () => void;
@@ -116,7 +85,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
               sci: v.scientificName,
               category: v.category as any,
               price: v.price,
-              location: v.location || "Western Ghats, Maharashtra",
+              location: v.location || "",
               growth: v.growthTimeline,
               img:
                 v.coverImages?.[0] ||
@@ -145,11 +114,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
               new Set([...treeLocations, ...apiLocations])
             );
 
-            if (combinedLocations.length > 0) {
-              setLocations((prev) =>
-                Array.from(new Set([...prev, ...combinedLocations]))
-              );
-            }
+            setLocations(combinedLocations);
           }
 
           if (plansRes.data?.items) {
@@ -260,7 +225,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
         id: t.id || t._id || `inst-${Date.now()}`,
         treeTag: t.treeTag || t._treeTag || "POA-TR-001",
         orderRef: t.orderRef || t._orderRef || orderId,
-        assignedReserve: t.assignedReserve || t._assignedReserve || location || "Western Ghats, Maharashtra",
+        assignedReserve: t.assignedReserve || t._assignedReserve || location || "Flagship Living Forest Reserve",
         gpsCoordinates: t.gpsCoordinates || t._gpsCoordinates || { latitude: chosenCoords.lat, longitude: chosenCoords.lng },
         formattedGps: t.formattedGps || (t.gpsCoordinates ? `${t.gpsCoordinates.latitude}° N, ${t.gpsCoordinates.longitude}° E` : chosenCoords.formatted),
         datePlanted: t.datePlanted || t._datePlanted || formattedDate,
@@ -279,7 +244,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
 
     // 2. Order Record - Use server-verified order directly
     const invNumber = `INV-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
-    const orderNotes = `Adoption contract for ${qty}x ${selectedTree?.name || "tree"} planted at ${location || "Flagship Living Forest — Wayanad, Kerala"} under "${effectivePlanLabel}". Geotagged and physically nurtured. Paid via ${methodUsed}.`;
+    const orderNotes = `Adoption contract for ${qty}x ${selectedTree?.name || "tree"} planted at ${location || "Flagship Living Forest Reserve"} under "${effectivePlanLabel}". Officially cataloged and physically nurtured. Paid via ${methodUsed}.`;
 
     let finalOrderRecord: any = serverData?.order ? orderService.mapToUiItem(serverData.order) : null;
 

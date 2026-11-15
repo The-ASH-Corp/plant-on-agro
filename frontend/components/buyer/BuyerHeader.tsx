@@ -16,7 +16,7 @@ interface BuyerHeaderProps {
 const TAB_TITLES: Record<BuyerDashboardTab, { title: string; subtitle: string; icon: string }> = {
   trees: {
     title: "My Living Forest",
-    subtitle: "Verified growth monitoring, arborist care & satellite GPS coordinates",
+    subtitle: "Verified growth monitoring, arborist care & living tree deeds",
     icon: "🌲",
   },
   certificates: {
