@@ -25,7 +25,7 @@ export interface ImpactSectionProps {
 }
 
 export function ImpactSection({ content, liveStats, liveProjects }: ImpactSectionProps) {
-  const tagline = content?.tagline || "Collective Action";
+  const tagline = content?.tagline || "Growth With Measurable Impact";
   const title = content?.title || "Your Impact Is Growing.";
   const description =
     content?.description ||
@@ -34,7 +34,7 @@ export function ImpactSection({ content, liveStats, liveProjects }: ImpactSectio
   const stats =
     content?.stats && content.stats.length > 0
       ? content.stats
-      : liveStats
+      : liveStats && liveStats.totalTrees > 0
       ? [
           { icon: "🌳", value: liveStats.totalTrees, suffix: liveStats.totalTrees > 0 ? "+" : "", label: "Trees Planted & Geotagged", color: "#52b788" },
           { icon: "🌍", value: liveStats.totalCo2Mt, suffix: " MT", label: "CO₂ Impact Offset / yr", color: "#95d5b2" },
@@ -43,11 +43,11 @@ export function ImpactSection({ content, liveStats, liveProjects }: ImpactSectio
           { icon: "🌿", value: liveStats.varietiesCount, suffix: " Species", label: "Botanical Varieties", color: "#52b788" },
         ]
       : [
-          { icon: "🌳", value: 0, suffix: "", label: "Trees Planted & Geotagged", color: "#52b788" },
-          { icon: "🌍", value: 0, suffix: " MT", label: "CO₂ Impact Offset / yr", color: "#95d5b2" },
-          { icon: "🌱", value: 0, suffix: " acres", label: "Canopy Area Conserved", color: "#52b788" },
-          { icon: "👥", value: 0, suffix: "", label: "Verified Adopters", color: "#95d5b2" },
-          { icon: "🌿", value: 0, suffix: " Species", label: "Botanical Varieties", color: "#52b788" },
+          { icon: "🌳", value: 100000, suffix: "+", label: "Flagship Target Trees", color: "#52b788" },
+          { icon: "🌍", value: 2850, suffix: " MT", label: "CO₂ Sequestration / yr", color: "#95d5b2" },
+          { icon: "🌱", value: 30, suffix: " Acres", label: "Flagship Master Reserve", color: "#52b788" },
+          { icon: "👥", value: 10000, suffix: "+", label: "Adopter Grove Capacity", color: "#95d5b2" },
+          { icon: "📍", value: 20, suffix: " Locations", label: "5-Year Network Horizon", color: "#52b788" },
         ];
 
   const projects =

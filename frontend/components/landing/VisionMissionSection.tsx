@@ -18,12 +18,17 @@ interface MetricBoxProps {
 function MetricBox({ value, label, accentColor = "emerald" }: MetricBoxProps) {
   const raw = (value || "").trim();
 
-  // Extract parenthetical sub-value, e.g. "20 Lakh (2,000,000)" -> primary: "20 Lakh", secondary: "(2,000,000)"
+  // 1. Extract parenthetical sub-value, e.g. "20 Lakh (2,000,000)" -> primary: "20 Lakh", secondary: "(2,000,000)"
   const parenMatch = raw.match(/^(.*?)\s*(\([^)]+\))\s*$/);
   let primary = parenMatch ? parenMatch[1].trim() : raw;
   const secondary = parenMatch ? parenMatch[2].trim() : null;
 
-  // Clean redundant units if the label already contains that unit (e.g. "20 Acres" with label "PlantOn Acres")
+  // 2. Clean redundant units if the label already contains that unit
+  // e.g. "20 Acres" with label "PlantOn Acres" -> primary becomes "20"
+  // e.g. "20 Locations" with label "Locations" -> primary becomes "20"
+  // e.g. "600 Acres" with label "Total Acres" -> primary becomes "600"
+  // e.g. "400 Acres" with label "Forest Acres" -> primary becomes "400"
+  // e.g. "100,000 Trees" with label "Trees & Plants" -> primary becomes "100,000"
   const labelWords = label.toLowerCase().split(/\s+/);
   const primaryParts = primary.split(/\s+/);
   if (primaryParts.length > 1) {
@@ -34,37 +39,38 @@ function MetricBox({ value, label, accentColor = "emerald" }: MetricBoxProps) {
     }
   }
 
-  // Adaptive font sizing based on length so text always fits cleanly inside the card
+  // 3. Adaptive font sizing based on length so text always fits cleanly inside the card
   const primaryLen = primary.length;
   let textSizeClass = "text-xl sm:text-2xl lg:text-3xl";
   if (primaryLen > 8) {
-    textSizeClass = "text-sm sm:text-base lg:text-lg";
+    textSizeClass = "text-xs sm:text-sm lg:text-base";
   } else if (primaryLen > 5) {
-    textSizeClass = "text-base sm:text-lg lg:text-xl";
+    // e.g. "1,00,000" (8 chars), "20 Lakh" (7 chars), "1 Year" (6 chars)
+    textSizeClass = "text-sm sm:text-base lg:text-lg";
   } else if (primaryLen > 3) {
-    textSizeClass = "text-lg sm:text-xl lg:text-2xl";
+    textSizeClass = "text-base sm:text-lg lg:text-xl";
   }
 
   const textColorClass = accentColor === "amber" ? "text-amber-300" : "text-[#95d5b2]";
-  const secondaryColorClass = accentColor === "amber" ? "text-amber-200/80" : "text-emerald-200/80";
+  const secondaryColorClass = accentColor === "amber" ? "text-amber-200/90" : "text-emerald-200/90";
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[96px] sm:min-h-[104px] px-2 py-3 sm:px-3 sm:py-3.5 rounded-2xl bg-white/10 border border-white/15 text-center overflow-hidden hover:bg-white/15 transition-all">
-      <div className="flex flex-col items-center justify-center min-h-[38px] leading-none">
+    <div className="flex flex-col items-center justify-center min-w-0 w-full min-h-[92px] sm:min-h-[102px] px-2 py-2.5 sm:px-2.5 sm:py-3.5 rounded-2xl bg-white/10 border border-white/15 text-center overflow-hidden hover:bg-white/15 transition-all">
+      <div className="flex flex-col items-center justify-center min-h-[36px] sm:min-h-[40px] leading-none max-w-full">
         <span
-          className={`${textSizeClass} font-black ${textColorClass} tracking-tight tabular-nums block whitespace-nowrap leading-tight`}
+          className={`${textSizeClass} font-bold ${textColorClass} tracking-tight block whitespace-nowrap leading-tight max-w-full truncate`}
         >
           {primary}
         </span>
         {secondary && (
           <span
-            className={`text-[10px] sm:text-[11px] font-mono font-medium ${secondaryColorClass} tracking-tight block mt-0.5 whitespace-nowrap`}
+            className={`text-[9px] sm:text-[10px] font-mono font-medium ${secondaryColorClass} tracking-tight block mt-0.5 whitespace-nowrap max-w-full truncate`}
           >
             {secondary}
           </span>
         )}
       </div>
-      <span className="text-[10px] sm:text-[11px] uppercase font-bold text-emerald-200/90 tracking-wider block mt-1 leading-tight">
+      <span className="text-[9px] sm:text-[10px] uppercase font-bold text-emerald-200/90 tracking-wider block mt-1.5 leading-tight max-w-full line-clamp-2">
         {label}
       </span>
     </div>
@@ -374,7 +380,7 @@ export function VisionMissionSection({
           </div>
 
           {/* MISSION CARD (Signature Brand Forest Card with Milestone Tabs) */}
-          <div className="lg:col-span-7 rounded-3xl bg-gradient-to-br from-[#173324] via-[#1b4332] to-[#2d6a4f] p-8 sm:p-10 flex flex-col justify-between shadow-xl relative overflow-hidden border border-emerald-600/30 text-white">
+          <div className="lg:col-span-7 rounded-3xl bg-gradient-to-br from-[#173324] via-[#1b4332] to-[#2d6a4f] p-6 sm:p-8 lg:p-10 flex flex-col justify-between shadow-xl relative overflow-hidden border border-emerald-600/30 text-white">
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-400/20 text-emerald-300 text-xs font-bold tracking-widest uppercase border border-emerald-400/30">
@@ -422,7 +428,7 @@ export function VisionMissionSection({
                     Establishing our flagship high-density living reserve in Kerala to prove our full-stack model of agroforestry, telemetry, and visitor hospitality.
                   </p>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 lg:gap-3 pt-2">
                     <MetricBox
                       value={initialTrees}
                       label="Trees & Plants"
@@ -445,9 +451,9 @@ export function VisionMissionSection({
                     />
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-black/30 border border-emerald-500/25 text-xs text-emerald-200 flex items-center justify-between">
+                  <div className="p-3 sm:p-3.5 rounded-xl bg-black/30 border border-emerald-500/25 text-xs text-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
                     <span>📍 Flagship Site: Kerala (2026 Launch)</span>
-                    <span className="font-mono text-[#95d5b2] font-bold">₹20–25 Cr Booking Potential</span>
+                    <span className="font-mono text-[#95d5b2] font-bold shrink-0">₹20–25 Cr Booking Potential</span>
                   </div>
                 </div>
               ) : (
@@ -457,7 +463,7 @@ export function VisionMissionSection({
                     Scaling the proven Kerala blueprint across 20 strategic agro-climatic locations in India, creating a self-sustaining green corridor network.
                   </p>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 lg:gap-3 pt-2">
                     <MetricBox
                       value={fiveYearTrees}
                       label="Trees & Canopy"
@@ -480,9 +486,9 @@ export function VisionMissionSection({
                     />
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-black/30 border border-emerald-500/25 text-xs text-emerald-200 flex items-center justify-between">
-                    <span>🌐 400 Acres Living Forest + 200 Acres Nature Tourism & Wellness Destinations</span>
-                    <span className="font-mono text-amber-300 font-bold">₹400–500 Cr Ecosystem</span>
+                  <div className="p-3 sm:p-3.5 rounded-xl bg-black/30 border border-emerald-500/25 text-xs text-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
+                    <span>🌐 400 Acres Living Forest + 200 Acres Nature Tourism & Wellness</span>
+                    <span className="font-mono text-amber-300 font-bold shrink-0">₹400–500 Cr Ecosystem</span>
                   </div>
                 </div>
               )}
@@ -563,7 +569,7 @@ export function VisionMissionSection({
         {/* ========================================================= */}
         {/* THE 30-ACRE FLAGSHIP DESTINATION BREAKDOWN */}
         {/* ========================================================= */}
-        <div className="rounded-3xl bg-white border border-[#e2eae5] p-6 sm:p-10 lg:p-12 shadow-lg relative overflow-hidden space-y-10">
+        {/* <div className="rounded-3xl bg-white border border-[#e2eae5] p-6 sm:p-10 lg:p-12 shadow-lg relative overflow-hidden space-y-10">
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-[#f0f4f1] pb-8">
             <div className="space-y-2 max-w-2xl">
               <span className="text-xs font-mono uppercase tracking-widest text-[#2d6a4f] font-bold">
@@ -652,7 +658,7 @@ export function VisionMissionSection({
               </button>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* ========================================================= */}
         {/* NETWORK AMBITION BANNER */}
