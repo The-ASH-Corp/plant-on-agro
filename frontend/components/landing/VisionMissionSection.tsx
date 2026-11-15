@@ -137,7 +137,6 @@ export function VisionMissionSection({
       desc: "Every tree is assigned a physical RFID tag, micro-level ground GPS coordinates, periodic photographic growth timelines, and a legal digital deed.",
       points: [
         "Individual Tree IDs & Monospace tags",
-        "Exact Ground GPS telemetry coordinates",
         "Interactive customer dashboard & updates",
       ],
     },
@@ -311,7 +310,7 @@ export function VisionMissionSection({
                     They Track.
                   </h4>
                   <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-                    Verified ground GPS coordinates, photographic milestones, and digital certificate deed.
+                    photographic milestones, and digital certificate deed.
                   </p>
                 </div>
 
