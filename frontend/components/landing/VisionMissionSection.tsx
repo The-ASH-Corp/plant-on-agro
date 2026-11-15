@@ -450,10 +450,7 @@ export function VisionMissionSection({
                     />
                   </div>
 
-                  <div className="p-3 sm:p-3.5 rounded-xl bg-black/30 border border-emerald-500/25 text-xs text-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
-                    <span>📍 Flagship Site: Kerala (2026 Launch)</span>
-                    <span className="font-mono text-[#95d5b2] font-bold shrink-0">₹20–25 Cr Booking Potential</span>
-                  </div>
+                  
                 </div>
               ) : (
                 /* Tab 2: 5-Year Mission */
@@ -485,10 +482,7 @@ export function VisionMissionSection({
                     />
                   </div>
 
-                  <div className="p-3 sm:p-3.5 rounded-xl bg-black/30 border border-emerald-500/25 text-xs text-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
-                    <span>🌐 400 Acres Living Forest + 200 Acres Nature Tourism & Wellness</span>
-                    <span className="font-mono text-amber-300 font-bold shrink-0">₹400–500 Cr Ecosystem</span>
-                  </div>
+                  
                 </div>
               )}
             </div>
