@@ -379,7 +379,7 @@ export function VisionMissionSection({
             <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 divide-y md:divide-y-0 md:divide-x divide-emerald-500/20">
               {/* Mission */}
               <div className="space-y-3.5 md:pr-8">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-400/20 text-emerald-300 text-xs font-mono font-bold uppercase tracking-wider border border-emerald-400/30">
+                {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-400/20 text-emerald-300 text-xs font-mono font-bold uppercase tracking-wider border border-emerald-400/30">
                   🎯 Our Mission
                 </div>
                 <h4
@@ -387,7 +387,7 @@ export function VisionMissionSection({
                   className="text-2xl sm:text-3xl font-bold text-white tracking-tight"
                 >
                   Our mission
-                </h4>
+                </h4> */}
                 <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed font-light">
                   To restore green cover by making tree planting simple, transparent and accessible. When you contribute, we plant, care for and track trees, so your support becomes real, lasting growth.
                 </p>
@@ -406,7 +406,7 @@ export function VisionMissionSection({
 
               {/* Vision */}
               <div className="space-y-3.5 pt-8 md:pt-0 md:pl-8">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-400/20 text-emerald-300 text-xs font-mono font-bold uppercase tracking-wider border border-emerald-400/30">
+                {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-400/20 text-emerald-300 text-xs font-mono font-bold uppercase tracking-wider border border-emerald-400/30">
                   🔭 Our Vision
                 </div>
                 <h4
@@ -414,7 +414,7 @@ export function VisionMissionSection({
                   className="text-2xl sm:text-3xl font-bold text-white tracking-tight"
                 >
                   Our vision
-                </h4>
+                </h4> */}
                 <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed font-light">
                   A greener, cooler and more resilient world, where communities and nature thrive together and every degraded landscape gets a chance to recover.
                 </p>
