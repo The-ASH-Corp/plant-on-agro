@@ -237,100 +237,213 @@ export function VisionMissionSection({
         </div>
 
         {/* ========================================================= */}
-        {/* PROBLEM & SOLUTION: "What if planting trees became a lifetime experience?" */}
+        {/* GLOBAL CONTEXT & DEFORESTATION REALITY (From Global Forest Watch / WRI) */}
         {/* ========================================================= */}
-        <div className="rounded-3xl bg-white border border-[#e2eae5] p-6 sm:p-10 lg:p-12 shadow-lg relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-100/40 rounded-full blur-3xl pointer-events-none" />
+        <div className="rounded-3xl bg-white/90 backdrop-blur-md border border-[#e2eae5] p-6 sm:p-10 lg:p-14 shadow-xl relative overflow-hidden space-y-10">
+          {/* Subtle Ambient Background Gradients */}
+          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-emerald-100/50 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-amber-100/30 blur-3xl pointer-events-none" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-            {/* Left: The Reality / Problem */}
-            <div className="lg:col-span-6 space-y-6">
-              <span className="text-xs font-mono uppercase tracking-widest text-[#2d6a4f] font-bold">
-                The Opportunity
-              </span>
-              <h3
-                style={{ fontFamily: "var(--font-display)" }}
-                className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#173324] leading-snug"
-              >
-                What if planting trees became a lifetime experience?
-              </h3>
-              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                People genuinely want to contribute to nature. Yet, millions cannot because they:
-              </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm text-[#173324] font-medium">
-                <div className="flex items-center gap-2.5 p-3 rounded-xl bg-[#f8faf9] border border-[#e2eae5]">
-                  <span className="text-rose-500 font-bold">✕</span> Don’t own fertile land
-                </div>
-                <div className="flex items-center gap-2.5 p-3 rounded-xl bg-[#f8faf9] border border-[#e2eae5]">
-                  <span className="text-rose-500 font-bold">✕</span> Lack time to maintain trees
-                </div>
-                <div className="flex items-center gap-2.5 p-3 rounded-xl bg-[#f8faf9] border border-[#e2eae5]">
-                  <span className="text-rose-500 font-bold">✕</span> Live away from home or abroad
-                </div>
-                <div className="flex items-center gap-2.5 p-3 rounded-xl bg-[#f8faf9] border border-[#e2eae5]">
-                  <span className="text-rose-500 font-bold">✕</span> Lack visible proof of impact
-                </div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-xs sm:text-sm text-[#173324] leading-relaxed">
-                💡 <strong className="text-[#1b7a43]">PlantOn bridges this gap:</strong> Customers fund professionally managed plantations, celebrate birthdays, weddings, or memorials, and remain digitally connected to their living trees for life.
-              </div>
+          {/* 1. Header & Lead Narrative */}
+          <div className="space-y-4 max-w-4xl relative z-10">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 text-[#b54f24] text-xs font-mono font-bold tracking-widest uppercase border border-[#b54f24]/20 shadow-2xs">
+              <span>🔥</span>
+              <span>Global Deforestation Crisis & Climate Urgency</span>
             </div>
 
-            {/* Right: The 4-Beat Solution */}
-            <div className="lg:col-span-6 flex flex-col justify-center space-y-4">
-              <div className="text-xs font-mono uppercase tracking-wider text-[#2d6a4f] font-semibold mb-2">
-                The 4-Step Lifelong Journey
+            <h3
+              style={{ fontFamily: "var(--font-display)" }}
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#173324] leading-[1.18] tracking-tight"
+            >
+              The world is losing its trees.{" "}
+              <span className="text-[#2d6a4f] underline decoration-[#52b788]/40 decoration-wavy underline-offset-8">
+                Together, we can bring them back.
+              </span>
+            </h3>
+
+            <p className="text-gray-700 text-sm sm:text-base lg:text-lg leading-relaxed font-normal max-w-3xl">
+              Forests clean our air, cool our cities, protect our water and shelter countless species. Every year the world loses far more tree cover than it can afford to. International studies show how big the problem is, and why every tree we plant matters.
+            </p>
+          </div>
+
+          {/* 2. Causes Split Bar Infographic */}
+          <div className="p-6 sm:p-8 rounded-2xl bg-[#f8faf9] border border-[#e2eae5] shadow-xs space-y-4 relative z-10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <span className="text-xs sm:text-sm font-bold text-[#173324] flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#c85a2b] animate-ping" />
+                What caused the world&apos;s 25.5 million hectares of tree cover loss in 2025
+              </span>
+              <span className="text-[11px] font-mono font-bold text-[#2d6a4f] bg-emerald-100/70 px-2.5 py-0.5 rounded-full self-start sm:self-auto">
+                2025 Global Forest Data
+              </span>
+            </div>
+
+            {/* Split Bar */}
+            <div className="w-full h-12 sm:h-14 rounded-2xl p-1.5 bg-[#eef3f0] border border-[#d2ded7] flex gap-1.5 shadow-inner">
+              <div
+                style={{ width: "42%" }}
+                className="bg-gradient-to-r from-[#d95a2b] to-[#b84820] rounded-xl flex items-center justify-between px-3 sm:px-4 text-white shadow-sm shrink-0 transition-all"
+              >
+                <span className="text-xs sm:text-sm font-extrabold flex items-center gap-1.5 whitespace-nowrap">
+                  <span>🔥</span>
+                  <span>42%</span>
+                  <span className="font-medium opacity-90 hidden sm:inline text-xs">wildfires</span>
+                </span>
+                <span className="text-[11px] font-medium opacity-90 sm:hidden">wildfires</span>
               </div>
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                <div className="p-5 rounded-2xl bg-[#f8faf9] border border-[#e2eae5] hover:border-[#1b7a43] hover:shadow-md transition-all group">
-                  <span className="text-2xl font-mono font-bold text-[#1b7a43]">01</span>
-                  <h4 className="text-base sm:text-lg font-bold text-[#173324] mt-1 group-hover:text-[#1b7a43] transition-colors">
-                    We Plant.
-                  </h4>
-                  <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-                    Native biodiverse species planted by certified arborists on fertile reserve soil.
-                  </p>
-                </div>
-
-                <div className="p-5 rounded-2xl bg-[#f8faf9] border border-[#e2eae5] hover:border-[#1b7a43] hover:shadow-md transition-all group">
-                  <span className="text-2xl font-mono font-bold text-[#1b7a43]">02</span>
-                  <h4 className="text-base sm:text-lg font-bold text-[#173324] mt-1 group-hover:text-[#1b7a43] transition-colors">
-                    We Grow.
-                  </h4>
-                  <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-                    Lifetime organic nourishment, drip-irrigation, and continuous health monitoring.
-                  </p>
-                </div>
-
-                <div className="p-5 rounded-2xl bg-[#f8faf9] border border-[#e2eae5] hover:border-[#1b7a43] hover:shadow-md transition-all group">
-                  <span className="text-2xl font-mono font-bold text-[#1b7a43]">03</span>
-                  <h4 className="text-base sm:text-lg font-bold text-[#173324] mt-1 group-hover:text-[#1b7a43] transition-colors">
-                    They Track.
-                  </h4>
-                  <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-                    photographic milestones, and digital certificate deed.
-                  </p>
-                </div>
-
-                <div className="p-5 rounded-2xl bg-[#f8faf9] border border-[#e2eae5] hover:border-[#1b7a43] hover:shadow-md transition-all group">
-                  <span className="text-2xl font-mono font-bold text-[#1b7a43]">04</span>
-                  <h4 className="text-base sm:text-lg font-bold text-[#173324] mt-1 group-hover:text-[#1b7a43] transition-colors">
-                    They Visit.
-                  </h4>
-                  <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-                    Walk through your personalized grove, harvest seasonal fruits, and stay in eco-cottages.
-                  </p>
-                </div>
-              </div>
-
-              <div className="text-center pt-2">
-                <span className="text-xs sm:text-sm font-semibold tracking-wider text-[#2d6a4f] italic">
-                  🌿 “The forest continues growing, and your legacy endures.”
+              <div
+                style={{ width: "58%" }}
+                className="bg-gradient-to-r from-[#173324] to-[#1f4a33] rounded-xl flex items-center justify-between px-3 sm:px-4 text-white shadow-sm grow transition-all"
+              >
+                <span className="text-xs sm:text-sm font-extrabold flex items-center gap-1.5 whitespace-nowrap">
+                  <span>🚜</span>
+                  <span>58%</span>
+                </span>
+                <span className="text-[11px] sm:text-xs font-medium text-emerald-200/90 truncate pl-2">
+                  all other causes, led by agriculture
                 </span>
               </div>
             </div>
+
+            {/* Sub-text quote */}
+            <div className="flex items-start sm:items-center gap-2.5 text-xs text-gray-600 bg-white/80 p-3.5 rounded-xl border border-[#e2eae5]">
+              <span className="text-base shrink-0">⚠️</span>
+              <p className="leading-relaxed">
+                <strong className="text-[#173324] font-semibold">Accelerating Reality:</strong> Over the past three years, fires have destroyed twice as much forest as they did two decades ago.
+              </p>
+            </div>
+          </div>
+
+          {/* 3. Three Stat Highlights */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 relative z-10">
+            {/* Stat 1 */}
+            <div className="p-6 rounded-2xl bg-white border border-[#e8ece9] hover:border-amber-400/50 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 border border-amber-200/60 flex items-center justify-center text-lg font-bold">
+                  🪵
+                </div>
+                <h4
+                  style={{ fontFamily: "var(--font-display)" }}
+                  className="text-2xl sm:text-3xl font-bold text-[#173324] tracking-tight"
+                >
+                  25.5 million hectares
+                </h4>
+              </div>
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-normal pt-4 border-t border-gray-100 mt-4">
+                of tree cover were lost worldwide in 2025.
+              </p>
+            </div>
+
+            {/* Stat 2 */}
+            <div className="p-6 rounded-2xl bg-white border border-[#e8ece9] hover:border-rose-400/50 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-700 border border-rose-200/60 flex items-center justify-center text-lg font-bold">
+                  ⚠️
+                </div>
+                <h4
+                  style={{ fontFamily: "var(--font-display)" }}
+                  className="text-2xl sm:text-3xl font-bold text-[#b54f24] tracking-tight"
+                >
+                  70% too high
+                </h4>
+              </div>
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-normal pt-4 border-t border-gray-100 mt-4">
+                Deforestation is still 70% above the level needed to meet the 2030 pledge to halt and reverse forest loss, made by more than 140 countries.
+              </p>
+            </div>
+
+            {/* Stat 3 */}
+            <div className="p-6 rounded-2xl bg-emerald-50/40 border border-emerald-200/80 hover:border-emerald-400 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300/60 flex items-center justify-center text-lg font-bold">
+                  🌱
+                </div>
+                <h4
+                  style={{ fontFamily: "var(--font-display)" }}
+                  className="text-2xl sm:text-3xl font-bold text-[#1b7a43] tracking-tight"
+                >
+                  36% lower
+                </h4>
+              </div>
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-normal pt-4 border-t border-emerald-100 mt-4">
+                Tropical rainforest loss fell 36% in 2025 from the 2024 record. Protection and restoration work when people act.
+              </p>
+            </div>
+          </div>
+
+          {/* 4. Our Mission & Our Vision Dark Container */}
+          <div className="rounded-3xl bg-gradient-to-br from-[#173324] via-[#1b4332] to-[#2d6a4f] p-8 sm:p-10 lg:p-12 text-white shadow-2xl relative overflow-hidden border border-emerald-600/30">
+            <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-emerald-400/10 blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-black/20 blur-2xl pointer-events-none" />
+
+            <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 divide-y md:divide-y-0 md:divide-x divide-emerald-500/20">
+              {/* Mission */}
+              <div className="space-y-3.5 md:pr-8">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-400/20 text-emerald-300 text-xs font-mono font-bold uppercase tracking-wider border border-emerald-400/30">
+                  🎯 Our Mission
+                </div>
+                <h4
+                  style={{ fontFamily: "var(--font-display)" }}
+                  className="text-2xl sm:text-3xl font-bold text-white tracking-tight"
+                >
+                  Our mission
+                </h4>
+                <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed font-light">
+                  To restore green cover by making tree planting simple, transparent and accessible. When you contribute, we plant, care for and track trees, so your support becomes real, lasting growth.
+                </p>
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <span className="px-3 py-1 rounded-lg bg-black/25 border border-emerald-500/30 text-[11px] text-emerald-200">
+                    ✓ Simple & Accessible
+                  </span>
+                  <span className="px-3 py-1 rounded-lg bg-black/25 border border-emerald-500/30 text-[11px] text-emerald-200">
+                    ✓ Transparent Care
+                  </span>
+                  <span className="px-3 py-1 rounded-lg bg-black/25 border border-emerald-500/30 text-[11px] text-emerald-200">
+                    ✓ Real Growth
+                  </span>
+                </div>
+              </div>
+
+              {/* Vision */}
+              <div className="space-y-3.5 pt-8 md:pt-0 md:pl-8">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-400/20 text-emerald-300 text-xs font-mono font-bold uppercase tracking-wider border border-emerald-400/30">
+                  🔭 Our Vision
+                </div>
+                <h4
+                  style={{ fontFamily: "var(--font-display)" }}
+                  className="text-2xl sm:text-3xl font-bold text-white tracking-tight"
+                >
+                  Our vision
+                </h4>
+                <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed font-light">
+                  A greener, cooler and more resilient world, where communities and nature thrive together and every degraded landscape gets a chance to recover.
+                </p>
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <span className="px-3 py-1 rounded-lg bg-black/25 border border-emerald-500/30 text-[11px] text-emerald-200">
+                    ✓ Cooler & Resilient World
+                  </span>
+                  <span className="px-3 py-1 rounded-lg bg-black/25 border border-emerald-500/30 text-[11px] text-emerald-200">
+                    ✓ Communities & Nature
+                  </span>
+                  <span className="px-3 py-1 rounded-lg bg-black/25 border border-emerald-500/30 text-[11px] text-emerald-200">
+                    ✓ Landscape Recovery
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 5. CTA & Sources */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pt-2 border-t border-gray-200/80 relative z-10">
+            <button
+              onClick={() => openPlant?.()}
+              className="px-7 py-3.5 rounded-xl bg-[#c85a2b] hover:bg-[#b04a20] active:scale-95 text-white font-bold text-sm tracking-wide transition-all shadow-md hover:shadow-xl hover:scale-[1.02] cursor-pointer inline-flex items-center gap-2 group self-start sm:self-auto"
+            >
+              <span>🌱 Plant a tree today</span>
+              <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+            </button>
+
+          
           </div>
         </div>
 
