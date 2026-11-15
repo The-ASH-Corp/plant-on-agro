@@ -76,7 +76,7 @@ export function useDeleteActions({ data, showToast, certificateActions }: Params
       id,
       name: tag || item?.treeTag || "Tree Sapling Instance",
       description:
-        "Are you sure you want to remove this tagged tree instance and its GPS telemetry record?",
+        "Are you sure you want to remove this tagged tree instance and its biological growth record?",
     });
   };
 

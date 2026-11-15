@@ -10,69 +10,83 @@ interface VisionMissionSectionProps {
 }
 
 interface MetricBoxProps {
+  icon?: string;
   value: string;
+  suffix?: string;
   label: string;
   accentColor?: "emerald" | "amber";
 }
 
-function MetricBox({ value, label, accentColor = "emerald" }: MetricBoxProps) {
+function MetricBox({
+  icon,
+  value,
+  suffix,
+  label,
+  accentColor = "emerald",
+}: MetricBoxProps) {
   const raw = (value || "").trim();
 
-  // 1. Extract parenthetical sub-value, e.g. "20 Lakh (2,000,000)" -> primary: "20 Lakh", secondary: "(2,000,000)"
-  const parenMatch = raw.match(/^(.*?)\s*(\([^)]+\))\s*$/);
+  // 1. Extract parenthetical sub-value, e.g. "20 Lakh (2,000,000)" -> primary: "20 Lakh", secondary: "2,000,000"
+  const parenMatch = raw.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
   let primary = parenMatch ? parenMatch[1].trim() : raw;
   const secondary = parenMatch ? parenMatch[2].trim() : null;
 
-  // 2. Clean redundant units if the label already contains that unit
-  // e.g. "20 Acres" with label "PlantOn Acres" -> primary becomes "20"
-  // e.g. "20 Locations" with label "Locations" -> primary becomes "20"
-  // e.g. "600 Acres" with label "Total Acres" -> primary becomes "600"
-  // e.g. "400 Acres" with label "Forest Acres" -> primary becomes "400"
-  // e.g. "100,000 Trees" with label "Trees & Plants" -> primary becomes "100,000"
-  const labelWords = label.toLowerCase().split(/\s+/);
-  const primaryParts = primary.split(/\s+/);
-  if (primaryParts.length > 1) {
-    const lastPart = primaryParts[primaryParts.length - 1].toLowerCase().replace(/s$/, "");
-    const matchesLabel = labelWords.some((w) => w.replace(/s$/, "") === lastPart);
-    if (matchesLabel && /^\d+[\d,.]*$/.test(primaryParts[0])) {
-      primary = primaryParts.slice(0, -1).join(" ");
-    }
+  // 2. Attach suffix if provided and not already present in primary
+  if (suffix && !primary.toLowerCase().includes(suffix.trim().toLowerCase())) {
+    primary = `${primary}${suffix.startsWith("+") || suffix.startsWith("%") ? suffix : ` ${suffix.trim()}`}`;
   }
 
   // 3. Adaptive font sizing based on length so text always fits cleanly inside the card
   const primaryLen = primary.length;
   let textSizeClass = "text-xl sm:text-2xl lg:text-3xl";
-  if (primaryLen > 8) {
-    textSizeClass = "text-xs sm:text-sm lg:text-base";
-  } else if (primaryLen > 5) {
-    // e.g. "1,00,000" (8 chars), "20 Lakh" (7 chars), "1 Year" (6 chars)
-    textSizeClass = "text-sm sm:text-base lg:text-lg";
-  } else if (primaryLen > 3) {
-    textSizeClass = "text-base sm:text-lg lg:text-xl";
+  if (primaryLen > 10) {
+    textSizeClass = "text-sm sm:text-base lg:text-base";
+  } else if (primaryLen > 6) {
+    textSizeClass = "text-lg sm:text-xl lg:text-2xl";
   }
 
-  const textColorClass = accentColor === "amber" ? "text-amber-300" : "text-[#95d5b2]";
-  const secondaryColorClass = accentColor === "amber" ? "text-amber-200/90" : "text-emerald-200/90";
+  const primaryColor = accentColor === "amber" ? "#f3c053" : "#52b788";
+  const borderStyle =
+    accentColor === "amber"
+      ? "1px solid rgba(245, 158, 11, 0.25)"
+      : "1px solid rgba(82, 183, 136, 0.2)";
+  const hoverBorderClass =
+    accentColor === "amber"
+      ? "hover:border-amber-400/50"
+      : "hover:border-emerald-400/50";
 
   return (
-    <div className="flex flex-col items-center justify-center min-w-0 w-full min-h-[92px] sm:min-h-[102px] px-2 py-2.5 sm:px-2.5 sm:py-3.5 rounded-2xl bg-white/10 border border-white/15 text-center overflow-hidden hover:bg-white/15 transition-all">
-      <div className="flex flex-col items-center justify-center min-h-[36px] sm:min-h-[40px] leading-none max-w-full">
+    <div
+      className={`text-center p-3.5 sm:p-4 lg:p-5 rounded-2xl transition-all duration-300 hover:-translate-y-1 ${hoverBorderClass} flex flex-col items-center justify-center backdrop-blur-xs min-w-0 w-full group shadow-sm`}
+      style={{
+        background: "rgba(255,255,255,0.05)",
+        border: borderStyle,
+      }}
+    >
+      {icon && (
+        <div className="text-2xl sm:text-3xl mb-2 sm:mb-2.5 transition-transform duration-300 group-hover:scale-110">
+          {icon}
+        </div>
+      )}
+
+      <div className="flex flex-col items-center justify-center min-h-[34px] sm:min-h-[38px] max-w-full">
         <span
-          className={`${textSizeClass} font-bold ${textColorClass} tracking-tight block whitespace-nowrap leading-tight max-w-full truncate`}
+          style={{ fontFamily: "var(--font-display)", color: primaryColor }}
+          className={`${textSizeClass} font-bold tracking-tight block whitespace-nowrap leading-tight max-w-full truncate`}
         >
           {primary}
         </span>
+
         {secondary && (
-          <span
-            className={`text-[9px] sm:text-[10px] font-mono font-medium ${secondaryColorClass} tracking-tight block mt-0.5 whitespace-nowrap max-w-full truncate`}
-          >
+          <span className="text-[10px] sm:text-[11px] font-mono font-medium text-amber-200/90 px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-400/25 block truncate max-w-full mt-1">
             {secondary}
           </span>
         )}
       </div>
-      <span className="text-[9px] sm:text-[10px] uppercase font-bold text-emerald-200/90 tracking-wider block mt-1.5 leading-tight max-w-full line-clamp-2">
+
+      <div className="text-white/70 text-xs sm:text-[12px] font-medium leading-snug mt-1.5 text-center max-w-full line-clamp-2">
         {label}
-      </span>
+      </div>
     </div>
   );
 }
@@ -134,7 +148,7 @@ export function VisionMissionSection({
       badge: "Verifiable Proof",
       title: "PLANTON DIGITAL",
       icon: "🛰️",
-      desc: "Every tree is assigned a physical RFID tag, micro-level ground GPS coordinates, periodic photographic growth timelines, and a legal digital deed.",
+      desc: "Every tree is assigned a unique Tree ID, dedicated arborist care, periodic photographic growth timelines, and a legal digital deed.",
       points: [
         "Individual Tree IDs & Monospace tags",
         "Interactive customer dashboard & updates",
@@ -379,7 +393,7 @@ export function VisionMissionSection({
             <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 divide-y md:divide-y-0 md:divide-x divide-emerald-500/20">
               {/* Mission */}
               <div className="space-y-3.5 md:pr-8">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-400/20 text-emerald-300 text-xs font-mono font-bold uppercase tracking-wider border border-emerald-400/30">
+                {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-400/20 text-emerald-300 text-xs font-mono font-bold uppercase tracking-wider border border-emerald-400/30">
                   🎯 Our Mission
                 </div>
                 <h4
@@ -387,7 +401,7 @@ export function VisionMissionSection({
                   className="text-2xl sm:text-3xl font-bold text-white tracking-tight"
                 >
                   Our mission
-                </h4>
+                </h4> */}
                 <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed font-light">
                   To restore green cover by making tree planting simple, transparent and accessible. When you contribute, we plant, care for and track trees, so your support becomes real, lasting growth.
                 </p>
@@ -406,7 +420,7 @@ export function VisionMissionSection({
 
               {/* Vision */}
               <div className="space-y-3.5 pt-8 md:pt-0 md:pl-8">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-400/20 text-emerald-300 text-xs font-mono font-bold uppercase tracking-wider border border-emerald-400/30">
+                {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-400/20 text-emerald-300 text-xs font-mono font-bold uppercase tracking-wider border border-emerald-400/30">
                   🔭 Our Vision
                 </div>
                 <h4
@@ -414,7 +428,7 @@ export function VisionMissionSection({
                   className="text-2xl sm:text-3xl font-bold text-white tracking-tight"
                 >
                   Our vision
-                </h4>
+                </h4> */}
                 <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed font-light">
                   A greener, cooler and more resilient world, where communities and nature thrive together and every degraded landscape gets a chance to recover.
                 </p>
@@ -479,7 +493,7 @@ export function VisionMissionSection({
                   🌱 Living Forests
                 </span>
                 <span className="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[#173324] font-medium">
-                  🛰️ GPS Telemetry
+                  🏷️ Unique Tree IDs
                 </span>
                 <span className="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[#173324] font-medium">
                   🛖 Eco-Tourism
@@ -540,25 +554,32 @@ export function VisionMissionSection({
                     Establishing our flagship high-density living reserve in Kerala to prove our full-stack model of agroforestry, telemetry, and visitor hospitality.
                   </p>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 lg:gap-3 pt-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-3.5 pt-2">
                     <MetricBox
+                      icon="🌳"
                       value={initialTrees}
+                      suffix={initialTrees.includes("+") ? "" : "+"}
                       label="Trees & Plants"
                       accentColor="emerald"
                     />
                     <MetricBox
+                      icon="🌱"
                       value={initialAcres}
-                      label="PlantOn Acres"
+                      suffix="Acres"
+                      label="Flagship Reserve"
                       accentColor="emerald"
                     />
                     <MetricBox
+                      icon="🌲"
                       value="1"
-                      label="Flagship Forest"
+                      suffix="Forest"
+                      label="Flagship Project"
                       accentColor="emerald"
                     />
                     <MetricBox
+                      icon="⏳"
                       value="1 Year"
-                      label="Establishment"
+                      label="Establishment Phase"
                       accentColor="emerald"
                     />
                   </div>
@@ -572,25 +593,32 @@ export function VisionMissionSection({
                     Scaling the proven Kerala blueprint across 20 strategic agro-climatic locations in India, creating a self-sustaining green corridor network.
                   </p>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 lg:gap-3 pt-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-3.5 pt-2">
                     <MetricBox
+                      icon="🌳"
                       value={fiveYearTrees}
                       label="Trees & Canopy"
                       accentColor="amber"
                     />
                     <MetricBox
+                      icon="📍"
                       value={fiveYearLocations}
-                      label="Locations"
+                      suffix="Locations"
+                      label="Strategic Reserves"
                       accentColor="amber"
                     />
                     <MetricBox
+                      icon="🌲"
                       value="400"
-                      label="Forest Acres"
+                      suffix="Acres"
+                      label="Forest Canopy"
                       accentColor="amber"
                     />
                     <MetricBox
+                      icon="🗺️"
                       value={fiveYearTotalAcres}
-                      label="Total Acres"
+                      suffix="Acres"
+                      label="Total Reserve Network"
                       accentColor="amber"
                     />
                   </div>

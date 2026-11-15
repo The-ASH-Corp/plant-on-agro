@@ -42,7 +42,7 @@ export function BuyerCertificatesTab({
             <span>📜</span> Verified Digital Certificates & Living Deeds
           </h2>
           <p className="text-[11px] text-[#52796f]">
-            Legally valid proof of afforestation, permanent GPS coordinates, and cryptographic verification stamps.
+            Legally valid proof of afforestation, permanent Tree ID records, and cryptographic verification stamps.
           </p>
         </div>
 
@@ -61,7 +61,7 @@ export function BuyerCertificatesTab({
             </h4>
             <p className="text-xs text-amber-800 leading-relaxed">
               Your tree adoption is confirmed! Our forestry team is currently preparing and nursery-tagging your sapling.
-              As soon as our arborist marks the order as <strong>Planted</strong> with verified ground GPS coordinates, your official certificate will be generated and available to inspect and download here.
+              As soon as our arborist marks the order as <strong>Planted</strong> with an assigned Tree ID, your official certificate will be generated and available to inspect and download here.
             </p>
           </div>
         </div>
@@ -75,7 +75,7 @@ export function BuyerCertificatesTab({
           <div>
             <h3 className="text-sm font-bold text-[#173324]">No Deeds Issued Yet</h3>
             <p className="text-xs text-[#52796f] mt-0.5 leading-relaxed">
-              When you adopt a tree, your official cryptographic certificate of adoption and permanent GPS registry deed will be generated here.
+              When you adopt a tree, your official cryptographic certificate of adoption and permanent Tree ID deed will be generated here.
             </p>
           </div>
         </div>
@@ -137,8 +137,8 @@ export function BuyerCertificatesTab({
                     <span className="text-white font-medium truncate block">{tree.assignedReserve}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-emerald-300 block font-semibold">GPS Coordinates</span>
-                    <span className="text-white font-mono">{tree.formattedGps}</span>
+                    <span className="text-[10px] text-emerald-300 block font-semibold">Tree Serial ID</span>
+                    <span className="text-white font-mono">{tree.treeTag}</span>
                   </div>
                   <div>
                     <span className="text-[10px] text-emerald-300 block font-semibold">Planting Date</span>

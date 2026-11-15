@@ -57,7 +57,7 @@ export function ImpactEditor({ impact, onChange, onToggle }: ImpactEditorProps) 
           <h3 className="text-base font-bold text-[#173324] flex items-center gap-2">
             <span>🌍</span> Collective Impact & Featured Projects
           </h3>
-          <p className="text-xs text-[#52796f]">High-impact statistics and geotagged verified reserve highlights.</p>
+          <p className="text-xs text-[#52796f]">High-impact statistics and verified reserve highlights.</p>
         </div>
         <div className="flex items-center gap-3">
           <ToggleSwitch

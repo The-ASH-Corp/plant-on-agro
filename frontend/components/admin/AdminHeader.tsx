@@ -20,7 +20,7 @@ const TAB_META: Record<AdminTabType, { label: string }> = {
   trees: { label: "Tree Varieties" },
   plans: { label: "Adoption Plans" },
   instances: { label: "Tree Instances" },
-  locations: { label: "Reserves & GPS" },
+  locations: { label: "Reserves & Locations" },
   orders: { label: "Adoption Orders" },
   users: { label: "All Users Directory" },
   certificates: { label: "Certificate Deeds" },

@@ -263,7 +263,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
           </h2>
           <p className="text-[#55695d] text-sm leading-relaxed">
             {mode === "register"
-              ? "Create an account to plant your first tree and track its lifelong growth with verified GPS geotagging."
+              ? "Create an account to plant your first tree and track its lifelong growth with verified Tree ID tracking."
               : "Sign in to track your trees, view your impact, and access certificates."}
           </p>
         </div>
@@ -810,7 +810,7 @@ export function AuthForm({ mode, onToggleMode, onSubmit }: AuthFormProps) {
             <span className="w-3.5 h-3.5 rounded-full bg-[#1b7a43] text-white flex items-center justify-center text-[8px] font-bold">
               ✓
             </span>
-            Real-time GPS Tracking
+            Unique Tree ID Tracking
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-3.5 h-3.5 rounded-full bg-[#1b7a43] text-white flex items-center justify-center text-[8px] font-bold">

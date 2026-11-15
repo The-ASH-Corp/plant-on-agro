@@ -55,7 +55,7 @@ export function BuyerHeroBanner({
               </span>
             </h1>
             <p className="text-xs sm:text-sm text-white/75 mt-1 leading-relaxed max-w-xl font-light">
-              Your living environmental legacy is nurtured and protected by verified field arborists. Inspect verified GPS coordinates, health logs, and legal plantation deeds.
+              Your living environmental legacy is nurtured and protected by verified field arborists. Inspect verified growth logs, tree health status, and legal plantation deeds.
             </p>
           </div>
 
@@ -66,7 +66,7 @@ export function BuyerHeroBanner({
               <div>
                 <span className="text-[11px] text-white/60 uppercase font-semibold block">Active Living Trees</span>
                 <span className="text-sm font-bold text-white">
-                  {totalTrees} {totalTrees === 1 ? "Tree Planted" : "Trees Planted & Geotagged"}
+                  {totalTrees} {totalTrees === 1 ? "Tree Planted" : "Trees Planted & Protected"}
                 </span>
               </div>
             </div>

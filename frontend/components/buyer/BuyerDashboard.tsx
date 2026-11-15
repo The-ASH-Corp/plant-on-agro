@@ -38,9 +38,13 @@ function deriveBuyerOrders(
   for (const o of storedOrders) {
     if (o && (o.orderNumber || o.id)) {
       const orderNumber = o.orderNumber || o.id;
+      const tags = o.assignedTreeTags || o.treeTags || (o.treeTag ? [o.treeTag] : undefined);
       byOrderNum.set(orderNumber, {
         id: o.id || `ord-${orderNumber}`,
         orderNumber,
+        treeTag: o.treeTag || (tags && tags[0]),
+        treeTags: tags,
+        assignedTreeTags: tags,
         invoiceNumber:
           o.invoiceNumber ||
           `INV-2026-${orderNumber.replace(/^ORD-?/, "").toUpperCase()}`,
@@ -83,9 +87,13 @@ function deriveBuyerOrders(
     if (!byOrderNum.has(ref)) {
       const first = insts[0];
       const qty = insts.length;
+      const allTags = insts.map((i) => i.treeTag).filter(Boolean);
       byOrderNum.set(ref, {
         id: `ord-${ref}`,
         orderNumber: ref,
+        treeTag: first.treeTag,
+        treeTags: allTags,
+        assignedTreeTags: allTags,
         invoiceNumber: `INV-2026-${ref.replace(/^ORD-?/, "").toUpperCase()}`,
         date:
           typeof first.datePlanted === "string"
@@ -209,9 +217,13 @@ export function BuyerDashboard() {
 
       if (e.detail?.order) {
         const o = e.detail.order;
+        const oTags = o.assignedTreeTags || o.treeTags || (o.treeTag ? [o.treeTag] : undefined);
         const newRecord: BuyerOrderRecord = {
           id: o.id || `ord-${o.orderNumber}`,
           orderNumber: o.orderNumber,
+          treeTag: o.treeTag || (oTags && oTags[0]),
+          treeTags: oTags,
+          assignedTreeTags: oTags,
           invoiceNumber:
             o.invoiceNumber || `INV-2026-${o.orderNumber.replace(/^ORD-?/, "")}`,
           date: o.datePlanted || new Date().toISOString().split("T")[0],
@@ -264,7 +276,7 @@ export function BuyerDashboard() {
     [orders]
   );
 
-  // Filter trees based on whether they have been officially planted & geotagged
+  // Filter trees based on whether they have been officially planted & verified
   const plantedTreesWithCertificates = useMemo(() => {
     return trees.filter((tree) => {
       const order = orders.find((o) => o.orderNumber === tree.orderRef || o.id === tree.orderRef);

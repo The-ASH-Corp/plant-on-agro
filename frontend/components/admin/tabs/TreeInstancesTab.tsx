@@ -197,7 +197,7 @@ export function TreeInstancesTab({
         <div>
           <div className="flex items-center gap-2.5">
             <h2 style={{ fontFamily: "var(--font-display)" }} className="text-xl font-bold text-[#173324]">
-              Individual Tree Instances & Geotags ({totalCount})
+              Individual Tree Instances & Locations ({totalCount})
             </h2>
             {totalPages > 1 && (
               <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#1b7a43] border border-emerald-200">
@@ -209,7 +209,7 @@ export function TreeInstancesTab({
             )}
           </div>
           <p className="text-xs text-[#73877b]">
-            Physical saplings with unique serial tags, verified GPS coordinates, and ground health logs
+            Physical saplings with unique Tree ID tags and ground health logs
           </p>
         </div>
 
@@ -306,7 +306,7 @@ export function TreeInstancesTab({
           <p className="text-xs text-[#73877b] max-w-sm mx-auto">
             {searchQuery || selectedHealth !== "All"
               ? "No tree instances match your active search or health status filter."
-              : "No physical saplings have been geotagged yet. Tag your first sapling with serial tag and GPS coordinates!"}
+              : "No physical saplings have been registered yet. Add your first sapling with a unique Tree ID!"}
           </p>
           <button
             onClick={onOpenAddInstance}
@@ -322,10 +322,10 @@ export function TreeInstancesTab({
             <table className="w-full text-left text-xs">
               <thead className="bg-[#f7faf8] border-b border-[#e2eae5] text-[#7a8a80] uppercase tracking-wider font-bold">
                 <tr>
-                  <th className="py-4 px-4">Tree Tag / Serial</th>
+                  <th className="py-4 px-4">Tree ID / Tag</th>
                   <th className="py-4 px-4">Order Ref / Adopter</th>
                   <th className="py-4 px-4">Variety & Reserve</th>
-                  <th className="py-4 px-4">Exact GPS Lat / Long</th>
+                  <th className="py-4 px-4">Sanctuary Zone</th>
                   <th className="py-4 px-4">Date Planted</th>
                   <th className="py-4 px-4">Health Status</th>
                   <th className="py-4 px-4 text-right">Actions</th>
@@ -393,19 +393,12 @@ export function TreeInstancesTab({
                         </span>
                       </td>
 
-                      {/* Exact GPS Coordinates */}
-                      <td className="py-3.5 px-4 font-mono">
-                        <a
-                          href={mapsUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-bold text-[#1b7a43] hover:underline flex items-center gap-1 w-fit"
-                          title="Open in Google Maps"
-                        >
+                      {/* Sanctuary Zone */}
+                      <td className="py-3.5 px-4 font-medium text-[#173324]">
+                        <span className="flex items-center gap-1">
                           <span>📍</span>
-                          <span>{item.formattedGps}</span>
-                        </a>
-                       
+                          <span>{item.assignedReserve}</span>
+                        </span>
                       </td>
 
                       {/* Date Planted */}
@@ -536,15 +529,10 @@ export function TreeInstancesTab({
                       </div>
                     )}
                     <div className="flex justify-between items-center">
-                      <span className="text-[#8b9c92]">Exact GPS:</span>
-                      <a
-                        href={mapsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-mono font-bold text-[#1b7a43] hover:underline text-[11px]"
-                      >
-                        📍 {item.formattedGps}
-                      </a>
+                      <span className="text-[#8b9c92]">Sanctuary:</span>
+                      <span className="font-semibold text-[#173324] text-[11px]">
+                        📍 {item.assignedReserve}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-[#8b9c92]">Date Planted:</span>

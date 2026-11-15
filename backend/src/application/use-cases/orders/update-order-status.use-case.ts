@@ -93,11 +93,11 @@ export class UpdateOrderStatusUseCase {
       order.updateTreeSpecies(treeSpecies.trim(), scientificName, category);
     }
 
-    // 3. Handle Transition to "Planted" (Geographical Location & Official Certificate Minting)
+    // 3. Handle Transition to "Planted" (Tree ID Allotment & Official Certificate Minting)
     if (newStatus === 'Planted') {
       let effectiveGps = (gpsCoords || order.gpsCoords || '').trim();
 
-      // If no GPS was passed, try to resolve from reserve in location repository or fallback
+      // If no GPS was passed, try to resolve from reserve in location repository or leave empty
       if (!effectiveGps && this.locationRepository && order.reserveName) {
         try {
           const loc = await this.locationRepository.findByName(order.reserveName);
@@ -107,13 +107,6 @@ export class UpdateOrderStatusUseCase {
         } catch {
           // ignore lookup error
         }
-      }
-
-      if (!effectiveGps) {
-        throw new BadRequestError(
-          `Geographical location (GPS coordinates) is required to mark order "${order.orderNumber}" as Planted. ` +
-            `Please specify the exact planting coordinates.`
-        );
       }
 
       order.updateGpsCoords(effectiveGps);
@@ -160,7 +153,7 @@ export class UpdateOrderStatusUseCase {
                   datePlanted: new Date(),
                   notes:
                     notes ||
-                    `Physically assigned to order ${order.orderNumber} for ${order.adopterName}. Geotagged & verified.`,
+                    `Physically assigned to order ${order.orderNumber} for ${order.adopterName}. Verified.`,
                 });
                 inst.updateGpsCoordinates(targetCoord.lat, targetCoord.lng);
                 await this.treeInstanceRepository.update(inst);
@@ -170,7 +163,7 @@ export class UpdateOrderStatusUseCase {
           }
         }
 
-        // 2. If Admin explicitly provided physical tree tag(s) (e.g. from physical metal RFID tag stamped on the sapling)
+        // 2. If Admin explicitly provided physical tree tag(s) (e.g. from physical marker tag stamped on the sapling)
         if (treeTags && treeTags.length > 0 && treeInstances.length < order.quantity) {
           for (let tagIdx = 0; tagIdx < treeTags.length; tagIdx++) {
             const rawTag = treeTags[tagIdx];
@@ -194,7 +187,7 @@ export class UpdateOrderStatusUseCase {
                   datePlanted: new Date(),
                   notes:
                     notes ||
-                    `Assigned to order ${order.orderNumber} for ${order.adopterName}. Geotagged at ${specificGps}.`,
+                    `Assigned to order ${order.orderNumber} for ${order.adopterName}. Planted in ${order.reserveName || 'reserve'}.`,
                 });
                 existing.updateGpsCoordinates(treeCoord.lat, treeCoord.lng);
                 await this.treeInstanceRepository.update(existing);
@@ -212,7 +205,7 @@ export class UpdateOrderStatusUseCase {
                   adopterEmail: order.adopterEmail,
                   notes:
                     notes ||
-                    `Physically tagged (${cleanTag}) & planted at verified coordinates (${specificGps}). Geotagged by admin.`,
+                    `Tree ID (${cleanTag}) assigned & planted in ${order.reserveName || 'reserve'}. Verified by admin.`,
                   isActive: true,
                 });
                 const saved = await this.treeInstanceRepository.save(newInstance);
@@ -232,13 +225,13 @@ export class UpdateOrderStatusUseCase {
                 assignedReserve: order.reserveName,
                 healthStatus: 'Healthy',
                 treeVarietyName: order.treeSpecies,
-                notes: notes || `Planted at verified coordinates (${effectiveGps}). Geotagged by admin.`,
+                notes: notes || `Planted in ${order.reserveName || 'reserve'}. Verified by admin.`,
               });
               await this.treeInstanceRepository.update(inst);
               treeInstances.push(inst);
             }
           } else {
-            // Create required quantity with deterministic tags and exact GPS coordinates (NO random jitter)
+            // Create required quantity with deterministic tags
             for (let i = 0; i < order.quantity; i++) {
               const itemIndex = i + 1;
               const treeTag = `POA-${speciesCode}-${cleanOrderNumber}-${String(itemIndex).padStart(3, '0')}`;
@@ -254,7 +247,7 @@ export class UpdateOrderStatusUseCase {
                 adopterEmail: order.adopterEmail,
                 notes:
                   notes ||
-                  `Planted at verified coordinates (${effectiveGps}). Geotagged by admin.`,
+                  `Planted in ${order.reserveName || 'reserve'}. Verified by admin.`,
                 isActive: true,
               });
               const saved = await this.treeInstanceRepository.save(newInstance);
@@ -264,7 +257,7 @@ export class UpdateOrderStatusUseCase {
         }
       }
 
-      // Mint and Issue Official Certificate with Admin's exact Geotag
+      // Mint and Issue Official Certificate with Tree ID
       if (this.certificateRepository) {
         const certNumber = order.certificateId || `POA-CERT-${new Date().getFullYear()}-${cleanOrderNumber}`;
         const existingCerts = await this.certificateRepository.findByOrderRef(order.orderNumber);

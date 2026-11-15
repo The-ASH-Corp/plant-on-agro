@@ -142,7 +142,7 @@ export function Step2Dedication({
             className="w-full px-3.5 py-2.5 text-xs bg-white rounded-xl border-2 border-[#d4e9dd] focus:border-[#52b788] outline-none text-[#173324] placeholder:text-[#8a9b90]"
           />
           <p className="text-[11px] text-[#55695d] mt-1.5">
-            This occasion will be printed on your digital certificate and geotagged adoption deed.
+            This occasion will be printed on your digital certificate and adoption deed.
           </p>
         </div>
       )}

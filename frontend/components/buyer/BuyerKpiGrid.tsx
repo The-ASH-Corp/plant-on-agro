@@ -50,7 +50,7 @@ export function BuyerKpiGrid({ kpi }: BuyerKpiGridProps) {
       unit: "Official Deeds",
       badge: "Tamper-Proof",
       badgeColor: "bg-purple-500/15 text-purple-700 border-purple-300",
-      description: "GPS-bound certified ownership records",
+      description: "Certified Tree ID ownership records",
       icon: "📜",
       iconBg: "bg-gradient-to-tr from-purple-500/20 to-purple-500/10 text-purple-700",
       accentBorder: "border-purple-500/30",

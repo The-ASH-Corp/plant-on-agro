@@ -144,7 +144,7 @@ export function JoinWaitlistModal({
                 Join the Exclusive Waitlist
               </h3>
               <p className="text-xs sm:text-sm text-[#4a6557] leading-relaxed">
-                Be the first to access our verified agroforestry allocations, ground GPS deeds, and private adopter groves when packages unlock.
+                Be the first to access our verified agroforestry allocations, digital deeds, and private adopter groves when packages unlock.
               </p>
             </div>
 

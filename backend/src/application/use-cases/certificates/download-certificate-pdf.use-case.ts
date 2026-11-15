@@ -92,7 +92,7 @@ export class DownloadCertificatePdfUseCase {
         if (order.status === 'New Request' || order.status === 'Verified & Tagged') {
           throw new BadRequestError(
             `Certificate for order "${order.orderNumber}" is pending field planting (Current status: "${order.status}"). ` +
-              `An administrator must mark the order as "Planted" with verified geographical GPS coordinates before the digital deed can be downloaded.`
+              `An administrator must mark the order as "Planted" with an assigned Tree ID before the digital deed can be downloaded.`
           );
         }
 

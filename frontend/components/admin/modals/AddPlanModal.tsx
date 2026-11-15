@@ -164,8 +164,8 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
             <textarea
               name="features"
               rows={3}
-              placeholder="Geo-tagged physical plaque&#10;Quarterly high-res field photo logs&#10;Framed digital certificate of adoption&#10;Direct farmer community support"
-              defaultValue={`Geo-tagged physical plaque\nQuarterly arborist health monitoring\nFramed dedication certificate\nAnnual impact report`}
+              placeholder="Physical engraved tree plaque&#10;Quarterly high-res field photo logs&#10;Framed digital certificate of adoption&#10;Direct farmer community support"
+              defaultValue={`Physical engraved tree plaque\nQuarterly arborist health monitoring\nFramed dedication certificate\nAnnual impact report`}
               className="w-full px-3.5 py-2 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7] focus:border-[#173324] transition-colors"
             />
             <span className="text-[10px] text-[#73877b] mt-0.5 block">

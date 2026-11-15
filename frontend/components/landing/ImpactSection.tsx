@@ -36,7 +36,7 @@ export function ImpactSection({ content, liveStats, liveProjects }: ImpactSectio
       ? content.stats
       : liveStats && liveStats.totalTrees > 0
       ? [
-          { icon: "🌳", value: liveStats.totalTrees, suffix: liveStats.totalTrees > 0 ? "+" : "", label: "Trees Planted & Geotagged", color: "#52b788" },
+          { icon: "🌳", value: liveStats.totalTrees, suffix: liveStats.totalTrees > 0 ? "+" : "", label: "Trees Planted & Protected", color: "#52b788" },
           { icon: "🌍", value: liveStats.totalCo2Mt, suffix: " MT", label: "CO₂ Impact Offset / yr", color: "#95d5b2" },
           { icon: "🌱", value: liveStats.canopyAcres, suffix: " acres", label: "Canopy Area Conserved", color: "#52b788" },
           { icon: "👥", value: liveStats.peopleCount, suffix: liveStats.peopleCount > 0 ? "+" : "", label: "Verified Adopters", color: "#95d5b2" },

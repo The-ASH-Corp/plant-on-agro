@@ -39,8 +39,13 @@ export function useOrderActions({ data, showToast }: Params) {
       (o) => o.orderNumber === orderIdentifier || o.id === orderIdentifier
     );
 
-    // If moving to Planted and no GPS coordinates passed yet, open the MarkOrderPlantedModal!
-    if (newStatus === "Planted" && !gpsCoords && targetOrder) {
+    // If moving to Planted and no tree tags/IDs passed yet, open the MarkOrderPlantedModal!
+    if (
+      newStatus === "Planted" &&
+      (!treeTags || treeTags.length === 0) &&
+      (!targetOrder?.assignedTreeTags || targetOrder.assignedTreeTags.length === 0) &&
+      targetOrder
+    ) {
       setOrderToMarkPlanted(targetOrder);
       return;
     }

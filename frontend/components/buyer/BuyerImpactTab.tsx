@@ -77,7 +77,7 @@ export function BuyerImpactTab({ totalTrees, estimatedCO2 }: BuyerImpactTabProps
             Afforestation Lifecycle & Field Care Journey
           </h3>
           <p className="text-xs text-[#52796f]">
-            How your adopted living trees are nurtured, GPS tagged, and audited over their lifespan.
+            How your adopted living trees are nurtured, cataloged with unique Tree IDs, and audited over their lifespan.
           </p>
         </div>
 
@@ -93,11 +93,11 @@ export function BuyerImpactTab({ totalTrees, estimatedCO2 }: BuyerImpactTabProps
             },
             {
               step: "02",
-              title: "GPS Field Geo-Tagging",
+              title: "Tree ID & Field Planting",
               status: "Verified ✓",
               statusColor: "text-emerald-700 bg-emerald-100",
-              desc: "Planted at verified reserve with organic compost and assigned unique cryptographic tag.",
-              icon: "📍",
+              desc: "Planted at verified reserve with organic compost and assigned unique Tree ID tag.",
+              icon: "🏷️",
             },
             {
               step: "03",

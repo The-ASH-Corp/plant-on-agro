@@ -210,7 +210,7 @@ export const EmailTemplates = {
       <h2 style="margin: 0 0 12px; font-size: 24px; color: #173324;">Welcome to PlantOnAgro! 🌿</h2>
       <p style="font-size: 15px; line-height: 1.6; color: #3a5042; margin: 0 0 20px;">
         Dear <strong>${name}</strong>,<br>
-        Thank you for joining PlantOnAgro. We connect conscious individuals and organizations with real, verified agroforestry plantations where every tree you adopt is nurtured, geotagged, and preserved for life.
+        Thank you for joining PlantOnAgro. We connect conscious individuals and organizations with real, verified agroforestry plantations where every tree you adopt is nurtured, protected, and preserved for life.
       </p>
 
       <div style="background-color: #f7faf8; border-radius: 14px; border: 1px solid #e2ebe5; padding: 20px; margin: 24px 0;">

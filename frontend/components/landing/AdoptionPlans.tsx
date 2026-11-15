@@ -17,9 +17,9 @@ export function AdoptionPlans({ openPlant: _openPlant }: AdoptionPlansProps) {
       desc: "One-time adoption with multi-decade care, organic nourishment, and regular canopy monitoring.",
     },
     {
-      icon: "🛰️",
-      title: "Ground GPS & Telemetry",
-      desc: "Exact coordinates, individual tree identity tags, and verified periodic photographic growth logs.",
+      icon: "🏷️",
+      title: "Unique Tree ID & Tracking",
+      desc: "Individual tree identity tags, cataloged reserve records, and verified periodic photographic growth logs.",
     },
     {
       icon: "📜",
@@ -53,7 +53,7 @@ export function AdoptionPlans({ openPlant: _openPlant }: AdoptionPlansProps) {
           </h2>
 
           <p className="text-gray-600 text-base sm:text-lg leading-relaxed">
-            Public retail packages for our flagship 30-acre Kerala reserve are currently locked while arborist survey teams finalize GPS telemetry grids. Join our exclusive waitlist for priority reservation access.
+            Public retail packages for our flagship 30-acre Kerala reserve are currently locked while arborist survey teams finalize plantation registers. Join our exclusive waitlist for priority reservation access.
           </p>
         </div>
 

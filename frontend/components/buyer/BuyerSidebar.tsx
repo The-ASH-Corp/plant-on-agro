@@ -49,7 +49,7 @@ export function BuyerSidebar({
       label: "My Forest",
       icon: "🌲",
       count: totalTrees,
-      desc: "Living specimens & GPS",
+      desc: "Living specimens & Tree IDs",
     },
     {
       id: "certificates",

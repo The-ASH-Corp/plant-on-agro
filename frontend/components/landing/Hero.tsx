@@ -41,12 +41,12 @@ export function Hero({ openPlant, goImpact, content, liveStats }: HeroProps) {
       ? content.stats
       : liveStats
       ? [
-          { target: liveStats.totalTrees, suffix: liveStats.totalTrees > 0 ? "+" : "", label: "Trees Planted & Geotagged" },
+          { target: liveStats.totalTrees, suffix: liveStats.totalTrees > 0 ? "+" : "", label: "Trees Planted & Protected" },
           { target: liveStats.totalVarieties, suffix: "", label: "Native Tree Varieties" },
           { target: liveStats.totalReserves, suffix: liveStats.totalReserves > 0 ? "+" : "", label: "Protected Bio-Reserves" },
         ]
       : [
-          { target: 0, suffix: "", label: "Trees Planted & Geotagged" },
+          { target: 0, suffix: "", label: "Trees Planted & Protected" },
           { target: 0, suffix: "", label: "Native Tree Varieties" },
           { target: 0, suffix: "", label: "Protected Bio-Reserves" },
         ];

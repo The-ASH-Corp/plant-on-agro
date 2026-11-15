@@ -68,7 +68,7 @@ export function AddTreeInstanceModal({
           </h3>
         </div>
         <p className="text-xs text-[#55695d] mb-4">
-          Register a physical sapling put into the ground with unique serial tag, exact GPS coordinates, and initial health status.
+          Register a physical sapling put into the ground with unique Tree ID tag, reserve sanctuary, and initial health status.
         </p>
 
         <form onSubmit={onSubmit} className="space-y-3.5 text-xs">

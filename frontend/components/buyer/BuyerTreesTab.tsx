@@ -58,7 +58,7 @@ export function BuyerTreesTab({
             </span>
           </div>
           <p className="text-xs text-[#52796f] mt-0.5">
-            Living saplings geotagged, cared for by dedicated field arborists, and protected under permanent forestry care.
+            Living saplings cared for by dedicated field arborists and protected under permanent forestry care.
           </p>
         </div>
 
@@ -105,7 +105,7 @@ export function BuyerTreesTab({
       {loading ? (
         <div className="py-20 text-center bg-white rounded-3xl border border-[#e2eae5]">
           <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-          <p className="text-xs font-medium text-[#52796f]">Querying living tree instances & GPS telemetry...</p>
+          <p className="text-xs font-medium text-[#52796f]">Querying living tree instances & records...</p>
         </div>
       ) : filteredTrees.length === 0 ? (
         <div className="bg-white rounded-3xl p-10 text-center border border-[#e2eae5] space-y-4 max-w-lg mx-auto shadow-xs my-6">
@@ -232,9 +232,9 @@ export function BuyerTreesTab({
                     {/* Sensor and Telemetry Data */}
                     <div className="grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-[#f7faf8] border border-[#e2eae5] text-xs">
                       <div>
-                        <span className="text-[9px] font-semibold text-[#52796f] block">GPS Telemetry</span>
+                        <span className="text-[9px] font-semibold text-[#52796f] block">Tree Identification</span>
                         <span className="font-mono text-[#173324] font-bold text-[11px] truncate block">
-                          {isPendingPlanting ? "Pending Geotag" : formattedGps}
+                          {treeTag}
                         </span>
                       </div>
 
@@ -272,14 +272,9 @@ export function BuyerTreesTab({
 
                 {/* Bottom Interactive Actions Bar */}
                 <div className="px-4 py-3 bg-[#fafcfb] border-t border-[#edf2ee] flex items-center justify-between gap-2 text-xs">
-                  <a
-                    href={`https://www.google.com/maps?q=${gpsCoords?.latitude || 18.922},${gpsCoords?.longitude || 73.816}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 font-bold text-[11px] text-[#1b7a43] hover:text-[#145c32] hover:underline cursor-pointer"
-                  >
-                    <span>🧭</span> Google Maps
-                  </a>
+                  <span className="inline-flex items-center gap-1 font-bold text-[11px] text-[#1b7a43]">
+                    <span>🏷️</span> {treeTag}
+                  </span>
 
                   <div className="flex items-center gap-2">
                     {onInspectTree && (
@@ -294,7 +289,7 @@ export function BuyerTreesTab({
 
                     {isPendingPlanting ? (
                       <span
-                        title="Official certificate unlocks once our forestry team plants the sapling with verified ground GPS coordinates"
+                        title="Official certificate unlocks once our forestry team plants the sapling with assigned Tree ID"
                         className="px-3 py-1.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-300 font-bold select-none flex items-center gap-1 text-xs"
                       >
                         <span>⏳</span>
