@@ -8,8 +8,8 @@ export interface BackendTreeInstance {
   treeTag: string;
   orderRef: string;
   assignedReserve: string;
-  gpsCoordinates: GpsCoordinates;
-  formattedGps: string;
+  gpsCoordinates?: GpsCoordinates;
+  formattedGps?: string;
   datePlanted: string;
   healthStatus: TreeHealthStatus;
   treeVarietyName: string;
@@ -35,7 +35,7 @@ export interface CreateTreeInstancePayload {
   treeTag: string;
   orderRef?: string;
   assignedReserve: string;
-  gpsCoordinates: GpsCoordinates;
+  gpsCoordinates?: GpsCoordinates;
   datePlanted?: string;
   healthStatus?: TreeHealthStatus;
   treeVarietyName?: string;

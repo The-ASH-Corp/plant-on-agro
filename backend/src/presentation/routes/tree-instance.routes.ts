@@ -42,7 +42,7 @@ router.post(
   Container.treeInstanceController.create
 );
 
-// PUT /api/v1/tree-instances/:id - Update an existing tree instance (e.g. health status, GPS)
+// PUT /api/v1/tree-instances/:id - Update an existing tree instance (e.g. health status, notes, image)
 router.put(
   '/:id',
   authenticate,

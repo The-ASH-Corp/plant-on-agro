@@ -31,7 +31,7 @@ export const createTreeInstanceSchema = z.object({
     .trim()
     .min(1, 'Assigned reserve cannot be empty')
     .max(150, 'Reserve name too long'),
-  gpsCoordinates: gpsCoordinatesSchema,
+  gpsCoordinates: gpsCoordinatesSchema.optional().default({ latitude: 0, longitude: 0 }),
   datePlanted: z.coerce.date().optional(),
   healthStatus: healthStatusEnum.optional().default('Sapling Growing'),
   treeVarietyName: z.string().trim().optional().default(''),

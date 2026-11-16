@@ -50,8 +50,8 @@ export interface TreeInstanceItem {
   treeTag: string;
   orderRef: string;
   assignedReserve: string;
-  gpsCoordinates: GpsCoordinates;
-  formattedGps: string;
+  gpsCoordinates?: GpsCoordinates;
+  formattedGps?: string;
   datePlanted: string;
   healthStatus: TreeHealthStatus;
   treeVarietyName: string;

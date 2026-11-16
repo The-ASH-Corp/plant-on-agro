@@ -65,7 +65,6 @@ export function OrderDetailsModal({
 }: OrderDetailsModalProps) {
   const [selectedStatus, setSelectedStatus] = useState<AdoptionOrderStatus | null>(null);
   const [showPlantingInputs, setShowPlantingInputs] = useState(false);
-  const [gpsInput, setGpsInput] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [reserveInput, setReserveInput] = useState("");
   const [notesInput, setNotesInput] = useState("");
@@ -86,8 +85,6 @@ export function OrderDetailsModal({
       setShowPlantingInputs(false);
       const res = order.reserveName || (locations[0]?.name ?? "Western Ghats, Maharashtra");
       setReserveInput(res);
-      const match = locations.find((l) => l.name.toLowerCase() === res.toLowerCase());
-      setGpsInput(order.gpsCoords || match?.gps || "18.9894° N, 73.4428° E");
       const speciesCode = (order.treeSpecies || "TR").substring(0, 2).toUpperCase();
       const cleanOrderNumber = order.orderNumber.replace(/^POA-?/, "");
       setTagInput(`POA-${speciesCode}-${cleanOrderNumber}-001`);

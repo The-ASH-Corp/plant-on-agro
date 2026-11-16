@@ -30,7 +30,7 @@ export function CertificateEditor({ certificate, onChange, onToggle }: Certifica
           <h3 className="text-base font-bold text-[#173324] flex items-center gap-2">
             <span>📜</span> Certificate of Plantation Section & Sample Mockup
           </h3>
-          <p className="text-xs text-[#52796f]">Highlighting tamper-proof digital certificates, GPS links, and live mockup data.</p>
+          <p className="text-xs text-[#52796f]">Highlighting tamper-proof digital certificates, unique tree IDs, and live mockup data.</p>
         </div>
         <div className="flex items-center gap-3">
           <ToggleSwitch

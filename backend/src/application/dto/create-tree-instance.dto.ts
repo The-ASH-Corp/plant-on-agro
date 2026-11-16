@@ -4,7 +4,7 @@ export interface CreateTreeInstanceDto {
   treeTag: string;
   orderRef?: string;
   assignedReserve: string;
-  gpsCoordinates: GpsCoordinates;
+  gpsCoordinates?: GpsCoordinates;
   datePlanted?: string | Date;
   healthStatus?: TreeHealthStatus;
   treeVarietyName?: string;

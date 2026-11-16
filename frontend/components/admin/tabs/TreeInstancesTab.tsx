@@ -87,8 +87,7 @@ export function TreeInstancesTab({
         (item.orderRef && item.orderRef.toLowerCase().includes(q)) ||
         item.assignedReserve.toLowerCase().includes(q) ||
         item.treeVarietyName.toLowerCase().includes(q) ||
-        item.adopterName.toLowerCase().includes(q) ||
-        item.formattedGps.toLowerCase().includes(q);
+        item.adopterName.toLowerCase().includes(q);
 
       const matchesHealth = selectedHealth === "All" || item.healthStatus === selectedHealth;
 
@@ -341,8 +340,6 @@ export function TreeInstancesTab({
                     border: "border-gray-200",
                   };
 
-                  const mapsUrl = `https://www.google.com/maps?q=${item.gpsCoordinates.latitude},${item.gpsCoordinates.longitude}`;
-
                   return (
                     <tr key={item.id} className="hover:bg-[#fbfcfb] transition-colors">
                       {/* Tree Tag & Thumbnail */}
@@ -481,7 +478,6 @@ export function TreeInstancesTab({
               text: "text-gray-800",
               border: "border-gray-200",
             };
-            const mapsUrl = `https://www.google.com/maps?q=${item.gpsCoordinates.latitude},${item.gpsCoordinates.longitude}`;
 
             return (
               <div
