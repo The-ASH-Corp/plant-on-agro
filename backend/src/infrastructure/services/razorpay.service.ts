@@ -46,13 +46,17 @@ export class RazorpayPaymentService implements IPaymentGatewayService {
   }
 
   public isLiveConfigured(): boolean {
-    return this.isConfigured && this.client !== null;
+    return (
+      this.isConfigured &&
+      this.client !== null &&
+      process.env.ENABLE_PAYMENT_SIMULATOR !== 'true'
+    );
   }
 
   public async createOrder(params: CreatePaymentOrderParams): Promise<PaymentOrderResult> {
     const amountInPaise = Math.round(params.amount * 100);
 
-    if (this.isLiveConfigured() && this.client) {
+    if (this.isLiveConfigured() && this.client && process.env.ENABLE_PAYMENT_SIMULATOR !== 'true') {
       try {
         const order = await this.client.orders.create({
           amount: amountInPaise,
@@ -92,8 +96,8 @@ export class RazorpayPaymentService implements IPaymentGatewayService {
       return false;
     }
 
-    // Only allow simulator verification if live keys are NOT configured
-    if (!this.isLiveConfigured()) {
+    // Only allow simulator verification if live keys are NOT configured or simulator is enabled
+    if (!this.isLiveConfigured() || process.env.ENABLE_PAYMENT_SIMULATOR === 'true') {
       return (
         params.razorpaySignature === 'mock_signature_valid' ||
         params.razorpayOrderId.startsWith('order_sim_')
@@ -158,7 +162,7 @@ export class RazorpayPaymentService implements IPaymentGatewayService {
   }
 
   public async fetchPayment(paymentId: string): Promise<any> {
-    if (this.isLiveConfigured() && this.client) {
+    if (this.isLiveConfigured() && this.client && process.env.ENABLE_PAYMENT_SIMULATOR !== 'true') {
       try {
         return await this.client.payments.fetch(paymentId);
       } catch (err) {

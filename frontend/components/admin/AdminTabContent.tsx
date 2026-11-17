@@ -11,6 +11,7 @@ import type { CertificateActions } from "./hooks/useCertificateActions";
 import type { DeleteActions } from "./hooks/useDeleteActions";
 
 import { OverviewTab } from "./tabs/OverviewTab";
+import { TreesTab } from "./tabs/TreesTab";
 import { PlansTab } from "./tabs/PlansTab";
 import { TreeInstancesTab } from "./tabs/TreeInstancesTab";
 import { LocationsTab } from "./tabs/LocationsTab";
@@ -72,6 +73,17 @@ export function AdminTabContent({
       );
 
     case "trees":
+      return (
+        <TreesTab
+          trees={trees}
+          searchQuery={searchQuery}
+          onOpenAddTree={() => treeActions.setShowAddTreeModal(true)}
+          onEditTree={(tree) => treeActions.setSelectedTreeForEdit(tree)}
+          onDeleteTree={deleteActions.handleDeleteTree}
+          onUpdateUniversalPrice={treeActions.handleSetUniversalPrice}
+        />
+      );
+
     case "orders":
       return (
         <OrdersTab

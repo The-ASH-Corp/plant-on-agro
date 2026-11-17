@@ -318,52 +318,62 @@ export function OverviewTab({
           </div>
 
           <div className="space-y-2.5">
-            {orders.slice(0, 4).map((order) => (
-              <div
-                key={order.id}
-                onClick={() => onSelectOrder(order)}
-                className="p-3.5 3xl:p-4 rounded-2xl bg-[#f8faf8] border border-[#e5ebe7] flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#f0f5f2] transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 3xl:w-12 3xl:h-12 rounded-xl bg-emerald-100/60 text-[#1b7a43] flex items-center justify-center font-bold text-base 3xl:text-lg shrink-0">
-                    🌳
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs 3xl:text-sm font-bold text-[#173324]">{order.treeSpecies}</span>
-                      <span className="text-[10px] 3xl:text-xs font-mono font-semibold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        {order.orderNumber}
-                      </span>
-                      {(order.isRead === false || order.status === "New Request") && (
-                        <span className="text-[9px] 3xl:text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-500 text-white animate-pulse">
-                          NEW
-                        </span>
-                      )}
+            {orders.length === 0 ? (
+              <div className="py-8 text-center bg-[#f8faf8] rounded-2xl border border-dashed border-[#d5e2da] p-6 space-y-2">
+                <span className="text-3xl block">📋</span>
+                <h4 className="text-sm font-bold text-[#173324]">No Adoption Orders Yet</h4>
+                <p className="text-xs text-[#73877b] max-w-sm mx-auto leading-relaxed">
+                  Adoption requests submitted through the storefront will appear here automatically for review and fulfillment.
+                </p>
+              </div>
+            ) : (
+              orders.slice(0, 4).map((order) => (
+                <div
+                  key={order.id}
+                  onClick={() => onSelectOrder(order)}
+                  className="p-3.5 3xl:p-4 rounded-2xl bg-[#f8faf8] border border-[#e5ebe7] flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#f0f5f2] transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 3xl:w-12 3xl:h-12 rounded-xl bg-emerald-100/60 text-[#1b7a43] flex items-center justify-center font-bold text-base 3xl:text-lg shrink-0">
+                      🌳
                     </div>
-                    <span className="text-[11px] 3xl:text-xs text-[#73877b] truncate block mt-0.5">
-                      Adopted by {order.adopterName} • {order.reserveName}
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs 3xl:text-sm font-bold text-[#173324]">{order.treeSpecies}</span>
+                        <span className="text-[10px] 3xl:text-xs font-mono font-semibold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          {order.orderNumber}
+                        </span>
+                        {(order.isRead === false || order.status === "New Request") && (
+                          <span className="text-[9px] 3xl:text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-500 text-white animate-pulse">
+                            NEW
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[11px] 3xl:text-xs text-[#73877b] truncate block mt-0.5">
+                        Adopted by {order.adopterName} • {order.reserveName}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-1 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100">
+                    <span className="text-xs 3xl:text-sm font-bold text-[#173324] block">₹{order.totalAmount}</span>
+                    <span
+                      className={`text-[10px] 3xl:text-xs font-bold px-2 py-0.5 rounded-full inline-block ${
+                        order.status === "New Request"
+                          ? "bg-amber-100 text-amber-800 border border-amber-300"
+                          : order.status === "Verified & Tagged"
+                          ? "bg-sky-50 text-sky-700 border border-sky-200"
+                          : order.status === "Planted"
+                          ? "bg-lime-50 text-lime-700 border border-lime-200"
+                          : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                      }`}
+                    >
+                      {order.status}
                     </span>
                   </div>
                 </div>
-
-                <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-1 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100">
-                  <span className="text-xs 3xl:text-sm font-bold text-[#173324] block">₹{order.totalAmount}</span>
-                  <span
-                    className={`text-[10px] 3xl:text-xs font-bold px-2 py-0.5 rounded-full inline-block ${
-                      order.status === "New Request"
-                        ? "bg-amber-100 text-amber-800 border border-amber-300"
-                        : order.status === "Verified & Tagged"
-                        ? "bg-sky-50 text-sky-700 border border-sky-200"
-                        : order.status === "Planted"
-                        ? "bg-lime-50 text-lime-700 border border-lime-200"
-                        : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    }`}
-                  >
-                    {order.status}
-                  </span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -377,25 +387,42 @@ export function OverviewTab({
           </div>
 
           <div className="space-y-4">
-            {locations.slice(0, 4).map((loc) => {
-              const pct = Math.round((loc.treesPlanted / loc.capacity) * 100);
-              return (
-                <div key={loc.id} className="space-y-1.5">
-                  <div className="flex justify-between text-xs 3xl:text-sm">
-                    <span className="font-semibold text-[#173324] truncate max-w-[150px]">{loc.name}</span>
-                    <span className="text-[#73877b] font-mono text-[11px] 3xl:text-xs">
-                      {loc.treesPlanted.toLocaleString()} / {loc.capacity.toLocaleString()} ({pct}%)
-                    </span>
+            {locations.length === 0 ? (
+              <div className="py-6 text-center bg-[#f8faf8] rounded-2xl border border-dashed border-[#d5e2da] p-5 space-y-2">
+                <span className="text-3xl block">📍</span>
+                <h4 className="text-sm font-bold text-[#173324]">No Reserves Registered</h4>
+                <p className="text-xs text-[#73877b] leading-relaxed">
+                  Register your first verified sanctuary to allocate planting parcels and capacity.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("locations")}
+                  className="mt-1 px-3 py-1.5 rounded-xl bg-[#173324] hover:bg-[#1f4230] text-white text-xs font-semibold shadow-xs transition-all cursor-pointer inline-flex items-center gap-1"
+                >
+                  <span>+</span> Register Reserve
+                </button>
+              </div>
+            ) : (
+              locations.slice(0, 4).map((loc) => {
+                const pct = Math.round((loc.treesPlanted / (loc.capacity || 1)) * 100);
+                return (
+                  <div key={loc.id} className="space-y-1.5">
+                    <div className="flex justify-between text-xs 3xl:text-sm">
+                      <span className="font-semibold text-[#173324] truncate max-w-[150px]">{loc.name}</span>
+                      <span className="text-[#73877b] font-mono text-[11px] 3xl:text-xs">
+                        {loc.treesPlanted.toLocaleString()} / {loc.capacity.toLocaleString()} ({pct}%)
+                      </span>
+                    </div>
+                    <div className="w-full bg-[#eef3f0] h-2 rounded-full overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-[#2d6a4f] to-[#52b788] h-full rounded-full transition-all duration-500"
+                        style={{ width: `${pct}%` }}
+                      ></div>
+                    </div>
                   </div>
-                  <div className="w-full bg-[#eef3f0] h-2 rounded-full overflow-hidden">
-                    <div
-                      className="bg-gradient-to-r from-[#2d6a4f] to-[#52b788] h-full rounded-full transition-all duration-500"
-                      style={{ width: `${pct}%` }}
-                    ></div>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
 
           <button

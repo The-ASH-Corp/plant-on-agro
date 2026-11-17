@@ -323,9 +323,17 @@ export function OrdersTab({
               {totalCount === 0 && !isLoading ? (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-[#73877b]">
-                    <div className="text-3xl mb-2">🔍</div>
-                    <div className="font-semibold text-sm text-[#173324]">No orders match this filter</div>
-                    <p className="text-xs text-[#73877b] mt-1">Try resetting the status filter or search query</p>
+                    <div className="text-3xl mb-2">📋</div>
+                    <div className="font-semibold text-sm text-[#173324]">
+                      {searchQuery || selectedStatusFilter !== "all"
+                        ? "No orders match this filter"
+                        : "No adoption orders received yet"}
+                    </div>
+                    <p className="text-xs text-[#73877b] mt-1 max-w-sm mx-auto">
+                      {searchQuery || selectedStatusFilter !== "all"
+                        ? "Try clearing your search query or switching the status filter tab."
+                        : "New buyer orders placed through the public site will appear here automatically."}
+                    </p>
                   </td>
                 </tr>
               ) : (

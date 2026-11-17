@@ -60,6 +60,7 @@ export function AdminSidebar({
 }: AdminSidebarProps) {
   const navItems: NavItemDef[] = [
     { id: "overview", label: "Overview", icon: "📊", badge: "Live" },
+    { id: "trees", label: "Tree Varieties", icon: "🌳", count: treesCount },
     { id: "plans", label: "Adoption Plans", icon: "🌱", count: plansCount },
     { id: "instances", label: "Tree Instances", icon: "🏷️", count: instancesCount },
     { id: "locations", label: "Reserves & GPS", icon: "📍", count: locationsCount },

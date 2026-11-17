@@ -25,6 +25,18 @@ export function CertificateGrid({
     );
   }
 
+  if (certificates.length === 0) {
+    return (
+      <div className="bg-white rounded-3xl p-12 border border-[#e2eae5] text-center space-y-2">
+        <div className="text-4xl mb-2">📜</div>
+        <h3 className="font-bold text-sm text-[#173324]">No Certificates Found</h3>
+        <p className="text-xs text-[#73877b] max-w-sm mx-auto">
+          Cryptographic deeds will appear here once adoption orders are marked planted and issued.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-4 4k:grid-cols-5 gap-5 3xl:gap-7">
       {certificates.map((cert) => (
