@@ -113,16 +113,6 @@ export function TreesTab({
               Botanical species are curated for regional bio-reserves. Individual trees do not have prices—buyers select Adoption Plans, and our forestry team assigns specific native species and Unique Tree IDs to users upon purchase verification.
             </p>
           </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onOpenAddTree}
-              className="px-5 py-2.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-[#173324] font-bold text-xs 3xl:text-sm transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
-            >
-              <span>+</span>
-              <span>Add Botanical Variety</span>
-            </button>
-          </div>
         </div>
       </div>
 

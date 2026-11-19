@@ -142,21 +142,6 @@ export function BuyerSidebar({
               </div>
             </div>
           </div>
-
-          {/* Quick Plant CTA */}
-          <div className="px-4 mt-4">
-            <button
-              onClick={() => {
-                onOpenPlantFlow();
-                setSidebarOpen(false);
-              }}
-              className="w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-gradient-to-r from-[#1b7a43] via-[#2d6a4f] to-[#52b788] text-white hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-emerald-950/50 hover:shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer border border-emerald-400/30"
-            >
-              <span className="text-sm">🌱</span>
-              <span>Adopt Another Tree</span>
-            </button>
-          </div>
-
           {/* Navigation Links */}
           <nav className="p-4 space-y-1.5 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400/70 px-3 mb-2 font-mono">
