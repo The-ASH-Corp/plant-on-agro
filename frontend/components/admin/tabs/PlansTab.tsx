@@ -240,7 +240,7 @@ export function PlansTab({
                       Plan Adoption Price
                     </span>
                     <span className="text-base font-extrabold text-[#173324]">
-                      ₹{(priceModifier ?? 25000).toLocaleString("en-IN")}
+                      ₹{(priceModifier ?? 0).toLocaleString("en-IN")}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">

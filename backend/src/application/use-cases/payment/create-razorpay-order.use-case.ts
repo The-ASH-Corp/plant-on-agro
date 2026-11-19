@@ -103,13 +103,23 @@ export class CreateRazorpayOrderUseCase {
     } else if (dto.planId && dto.planId.trim().length > 0) {
       const plan = await this.adoptionPlanRepository.findById(dto.planId.trim());
       if (plan) {
-        planPrice = plan.price > 0 ? plan.price : (plan.priceModifier > 0 ? plan.priceModifier : 25000);
+        planPrice =
+          typeof plan.price === 'number' && plan.price >= 0
+            ? plan.price
+            : typeof plan.priceModifier === 'number' && plan.priceModifier >= 0
+            ? plan.priceModifier
+            : 0;
         selectedPlanLabel = plan.planLabel;
       }
     } else if (dto.planLabel && dto.planLabel.trim().length > 0) {
       const plan = await this.adoptionPlanRepository.findByLabel(dto.planLabel.trim());
       if (plan) {
-        planPrice = plan.price > 0 ? plan.price : (plan.priceModifier > 0 ? plan.priceModifier : 25000);
+        planPrice =
+          typeof plan.price === 'number' && plan.price >= 0
+            ? plan.price
+            : typeof plan.priceModifier === 'number' && plan.priceModifier >= 0
+            ? plan.priceModifier
+            : 0;
         selectedPlanLabel = plan.planLabel;
       }
     }
