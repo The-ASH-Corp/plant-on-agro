@@ -18,8 +18,8 @@ export interface TreeInstanceResponseDto {
   treeTag: string;
   orderRef: string;
   assignedReserve: string;
-  gpsCoordinates: GpsCoordinates;
-  formattedGps: string; // e.g. "18.5204° N, 73.8567° E"
+  gpsCoordinates?: GpsCoordinates;
+  formattedGps?: string;
   datePlanted: string;
   healthStatus: TreeHealthStatus;
   treeVarietyName: string;
@@ -36,11 +36,11 @@ export interface TreeInstanceResponseDto {
 
 export class TreeInstanceResponseMapper {
   public static toDto(entity: TreeInstance): TreeInstanceResponseDto {
-    const lat = entity.gpsCoordinates.latitude;
-    const lng = entity.gpsCoordinates.longitude;
+    const lat = entity.gpsCoordinates?.latitude ?? 0;
+    const lng = entity.gpsCoordinates?.longitude ?? 0;
     const latDir = lat >= 0 ? 'N' : 'S';
     const lngDir = lng >= 0 ? 'E' : 'W';
-    const formattedGps = `${Math.abs(lat).toFixed(4)}° ${latDir}, ${Math.abs(lng).toFixed(4)}° ${lngDir}`;
+    const formattedGps = (lat === 0 && lng === 0) ? '' : `${Math.abs(lat).toFixed(4)}° ${latDir}, ${Math.abs(lng).toFixed(4)}° ${lngDir}`;
 
     return {
       id: entity.id || '',

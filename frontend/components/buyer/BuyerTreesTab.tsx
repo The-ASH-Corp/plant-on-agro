@@ -146,8 +146,6 @@ export function BuyerTreesTab({
             const orderRef = tree.orderRef || tree._orderRef || "";
             const assignedReserve = tree.assignedReserve || tree._assignedReserve || "Living Reserve";
             const healthStatus = tree.healthStatus || tree._healthStatus || "Sapling Growing";
-            const gpsCoords = tree.gpsCoordinates || tree._gpsCoordinates || { latitude: 18.9894, longitude: 73.4428 };
-            const formattedGps = tree.formattedGps || `${gpsCoords.latitude}° N, ${gpsCoords.longitude}° E`;
             const datePlanted = tree.datePlanted || tree._datePlanted || "Recently Planted";
             const lastInspectedAt = tree.lastInspectedAt || tree._lastInspectedAt;
             const notes = tree.notes || tree._notes || "";

@@ -124,7 +124,7 @@ export class DownloadCertificatePdfUseCase {
     if (certificate.status !== 'Issued') {
       throw new BadRequestError(
         `Certificate "${certificate.certificateNumber}" is currently in "${certificate.status}" status. ` +
-          `Official deed downloads are only available once the tree is physically planted and the deed is Issued.`
+          `Official deed downloads are only available once the tree is planted and the deed is Issued.`
       );
     }
 

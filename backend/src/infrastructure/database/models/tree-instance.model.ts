@@ -57,13 +57,15 @@ const TreeInstanceSchema = new Schema<ITreeInstanceDocument>(
     gpsCoordinates: {
       latitude: {
         type: Number,
-        required: true,
+        required: false,
+        default: 0,
         min: -90,
         max: 90,
       },
       longitude: {
         type: Number,
-        required: true,
+        required: false,
+        default: 0,
         min: -180,
         max: 180,
       },

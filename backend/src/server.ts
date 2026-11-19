@@ -13,7 +13,6 @@ const bootstrap = async (): Promise<void> => {
 
     // 1. Initialize Database connection
     await Database.connect();
-    await seedAdoptionPlansIfEmpty();
 
     // 2. Initialize Express application
     const app = createApp();

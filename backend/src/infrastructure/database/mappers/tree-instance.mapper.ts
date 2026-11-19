@@ -9,8 +9,8 @@ export class TreeInstanceMapper {
       orderRef: doc.orderRef,
       assignedReserve: doc.assignedReserve,
       gpsCoordinates: {
-        latitude: doc.gpsCoordinates.latitude,
-        longitude: doc.gpsCoordinates.longitude,
+        latitude: doc.gpsCoordinates?.latitude ?? 0,
+        longitude: doc.gpsCoordinates?.longitude ?? 0,
       },
       datePlanted: doc.datePlanted,
       healthStatus: doc.healthStatus,
@@ -40,8 +40,8 @@ export class TreeInstanceMapper {
       orderRef: entity.orderRef,
       assignedReserve: entity.assignedReserve,
       gpsCoordinates: {
-        latitude: entity.gpsCoordinates.latitude,
-        longitude: entity.gpsCoordinates.longitude,
+        latitude: entity.gpsCoordinates?.latitude ?? 0,
+        longitude: entity.gpsCoordinates?.longitude ?? 0,
       },
       datePlanted: entity.datePlanted,
       healthStatus: entity.healthStatus,

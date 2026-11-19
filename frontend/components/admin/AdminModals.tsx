@@ -10,6 +10,8 @@ import type { CertificateActions } from "./hooks/useCertificateActions";
 import { DELETE_ITEM_LABELS, type DeleteActions } from "./hooks/useDeleteActions";
 import { certificateService } from "@/services/certificates/certificate.service";
 
+import { AddTreeModal } from "./modals/AddTreeModal";
+import { EditTreeModal } from "./modals/EditTreeModal";
 import { AddPlanModal } from "./modals/AddPlanModal";
 import { EditPlanModal } from "./modals/EditPlanModal";
 import { AddTreeInstanceModal } from "./modals/AddTreeInstanceModal";
@@ -62,6 +64,21 @@ export function AdminModals({
 
   return (
     <>
+      {/* Tree Varieties */}
+      <AddTreeModal
+        isOpen={treeActions.showAddTreeModal}
+        universalPrice={data.trees.length > 0 && typeof data.trees[0].price === "number" ? data.trees[0].price : 349}
+        onClose={() => treeActions.setShowAddTreeModal(false)}
+        onSubmit={treeActions.handleCreateTree}
+      />
+      <EditTreeModal
+        isOpen={Boolean(treeActions.selectedTreeForEdit)}
+        tree={treeActions.selectedTreeForEdit}
+        onClose={() => treeActions.setSelectedTreeForEdit(null)}
+        onSubmit={treeActions.handleUpdateTree}
+        isSubmitting={treeActions.isUpdatingTree}
+      />
+
       {/* Adoption Plans */}
       <AddPlanModal
         isOpen={planActions.showAddPlanModal}

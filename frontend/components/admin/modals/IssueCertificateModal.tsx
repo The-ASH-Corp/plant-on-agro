@@ -116,7 +116,7 @@ export function IssueCertificateModal({
         )}
 
         <form onSubmit={onSubmit} className="space-y-4 text-xs">
-          {/* Order Reference & Physical Tree Tag */}
+          {/* Order Reference & Unique Tree ID */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">
@@ -135,7 +135,7 @@ export function IssueCertificateModal({
 
             <div>
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">
-                Tree Sapling Tag
+                Unique Tree ID
               </label>
               <input
                 name="treeTag"

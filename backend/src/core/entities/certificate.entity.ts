@@ -12,7 +12,7 @@ export interface CertificateProps {
   issueDate: Date; // Date certificate was officially issued
   pdfUrl?: string; // Download link for PDF
   qrCodeVerificationUrl?: string; // Direct QR link to verify authenticity
-  treeTag?: string; // Associated physical tree tag
+  treeTag?: string; // Associated unique Tree ID
   treeSpecies?: string; // Species adopted e.g. "Indian Mango"
   reserveName?: string; // Location planted
   adopterName?: string; // Adopter / buyer name

@@ -22,8 +22,6 @@ export function useInstanceActions({ data, showToast, setActiveTab }: Params) {
     const treeTag = (fd.get("treeTag") as string).trim().toUpperCase();
     const orderRef = (fd.get("orderRef") as string)?.trim() || "";
     const assignedReserve = (fd.get("assignedReserve") as string).trim();
-    const latitude = Number(fd.get("latitude")) || 18.5204;
-    const longitude = Number(fd.get("longitude")) || 73.8567;
     const datePlanted = (fd.get("datePlanted") as string) || new Date().toISOString();
     const healthStatus = (fd.get("healthStatus") as TreeHealthStatus) || "Sapling Growing";
     const treeVarietyName = (fd.get("treeVarietyName") as string)?.trim() || "";
@@ -36,7 +34,6 @@ export function useInstanceActions({ data, showToast, setActiveTab }: Params) {
         treeTag,
         orderRef,
         assignedReserve,
-        gpsCoordinates: { latitude, longitude },
         datePlanted,
         healthStatus,
         treeVarietyName,
@@ -54,8 +51,6 @@ export function useInstanceActions({ data, showToast, setActiveTab }: Params) {
           treeTag,
           orderRef,
           assignedReserve,
-          gpsCoordinates: { latitude, longitude },
-          formattedGps: `${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E`,
           datePlanted,
           healthStatus,
           treeVarietyName,
@@ -99,14 +94,6 @@ export function useInstanceActions({ data, showToast, setActiveTab }: Params) {
     const orderRef = (fd.get("orderRef") as string)?.trim() || "";
     const assignedReserve =
       (fd.get("assignedReserve") as string)?.trim() || selectedInstanceForEdit.assignedReserve;
-    const latitude =
-      parseFloat(fd.get("latitude") as string) ||
-      selectedInstanceForEdit.gpsCoordinates?.latitude ||
-      18.5204;
-    const longitude =
-      parseFloat(fd.get("longitude") as string) ||
-      selectedInstanceForEdit.gpsCoordinates?.longitude ||
-      73.8567;
     const datePlanted =
       (fd.get("datePlanted") as string)?.trim() || selectedInstanceForEdit.datePlanted;
     const healthStatus =
@@ -129,8 +116,8 @@ export function useInstanceActions({ data, showToast, setActiveTab }: Params) {
       }
     }
 
-    const gpsCoordinates = { latitude, longitude };
-    const formattedGps = `${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E`;
+    const gpsCoordinates = selectedInstanceForEdit.gpsCoordinates || { latitude: 0, longitude: 0 };
+    const formattedGps = selectedInstanceForEdit.formattedGps || "";
 
     const applyLocalUpdate = () =>
       setInstances((prev) =>

@@ -24,8 +24,8 @@ export interface TreeInstanceProps {
   treeTag: string; // Unique serial tag e.g. "POA-TR-2026-0001"
   orderRef?: string; // Reference to adoption order (e.g. "ORD-88219")
   assignedReserve: string; // Name or ID of reserve parcel
-  gpsCoordinates: GpsCoordinates; // Physical ground coordinates
-  datePlanted: Date; // Date physically put into the ground
+  gpsCoordinates?: GpsCoordinates; // Reserve reference coordinates (optional)
+  datePlanted: Date; // Date planted in reserve
   healthStatus: TreeHealthStatus; // Current health status
   treeVarietyName?: string; // e.g. "Indian Mango", "Teakwood"
   adopterName?: string;
@@ -65,9 +65,10 @@ export class TreeInstance {
     this._treeTag = props.treeTag.trim().toUpperCase();
     this._orderRef = props.orderRef ? props.orderRef.trim() : '';
     this._assignedReserve = props.assignedReserve.trim();
+    const coords = props.gpsCoordinates || { latitude: 0, longitude: 0 };
     this._gpsCoordinates = {
-      latitude: props.gpsCoordinates.latitude,
-      longitude: props.gpsCoordinates.longitude,
+      latitude: coords.latitude ?? 0,
+      longitude: coords.longitude ?? 0,
     };
     this._datePlanted = props.datePlanted instanceof Date ? props.datePlanted : new Date(props.datePlanted);
     this._healthStatus = props.healthStatus || 'Sapling Growing';
@@ -93,15 +94,14 @@ export class TreeInstance {
     if (!props.assignedReserve || props.assignedReserve.trim().length === 0) {
       throw new Error('Assigned reserve cannot be empty');
     }
-    if (!props.gpsCoordinates) {
-      throw new Error('GPS coordinates are required');
-    }
-    const { latitude, longitude } = props.gpsCoordinates;
-    if (typeof latitude !== 'number' || latitude < -90 || latitude > 90) {
-      throw new Error('Latitude must be a valid number between -90 and 90');
-    }
-    if (typeof longitude !== 'number' || longitude < -180 || longitude > 180) {
-      throw new Error('Longitude must be a valid number between -180 and 180');
+    if (props.gpsCoordinates) {
+      const { latitude, longitude } = props.gpsCoordinates;
+      if (typeof latitude !== 'number' || latitude < -90 || latitude > 90) {
+        throw new Error('Latitude must be a valid number between -90 and 90');
+      }
+      if (typeof longitude !== 'number' || longitude < -180 || longitude > 180) {
+        throw new Error('Longitude must be a valid number between -180 and 180');
+      }
     }
     if (!props.datePlanted) {
       throw new Error('Date planted is required');

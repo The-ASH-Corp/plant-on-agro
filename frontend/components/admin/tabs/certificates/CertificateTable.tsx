@@ -39,6 +39,16 @@ export function CertificateTable({
                   </div>
                 </td>
               </tr>
+            ) : certificates.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="py-12 text-center text-[#73877b]">
+                  <div className="text-3xl mb-2">📜</div>
+                  <div className="font-semibold text-sm text-[#173324]">No Certificates Found</div>
+                  <p className="text-xs text-[#73877b] mt-1 max-w-sm mx-auto">
+                    Certificates will appear here once adoption orders are fulfilled and issued.
+                  </p>
+                </td>
+              </tr>
             ) : (
               certificates.map((cert, index) => (
                 <CertificateTableRow

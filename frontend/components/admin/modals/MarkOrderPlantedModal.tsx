@@ -96,7 +96,7 @@ export function MarkOrderPlantedModal({
 
       setNotes(
         order.notes ||
-          `Physically planted at assigned reserve parcel for ${order.adopterName}.`
+          `Planted at assigned reserve sanctuary for ${order.adopterName}.`
       );
       setErrorMsg(null);
     }
