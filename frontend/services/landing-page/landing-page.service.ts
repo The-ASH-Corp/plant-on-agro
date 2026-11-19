@@ -148,7 +148,7 @@ export const DEFAULT_LANDING_PAGE_CONTENT: LandingPageContent = {
     initialTreesTag: '🌱 1,00,000 Tree Initial Mission',
     visionTitle: 'The PlantOn Vision',
     visionDescription:
-      "To build the world's most transparent, connected, and physically verifiable green ecosystem—where adopting a tree is not just a digital transaction, but the beginning of a lifelong relationship with living nature.",
+      "To build the world's most transparent, connected, and scientifically verifiable green ecosystem—where adopting a tree is not just a digital transaction, but the beginning of a lifelong relationship with living nature.",
     missionTitle: 'Our Immediate & Long-Term Mission',
     missionSubtitle:
       'A structured, phased pathway from our 30-acre Kerala flagship to a pan-national 600-acre regenerative network.',

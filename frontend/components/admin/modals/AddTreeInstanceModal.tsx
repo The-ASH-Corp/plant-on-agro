@@ -41,13 +41,13 @@ export function AddTreeInstanceModal({
         </button>
 
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-xl">🏷️</span>
+          <span className="text-xl">🌱</span>
           <h3 style={{ fontFamily: "var(--font-display)" }} className="text-2xl text-[#173324]">
-            Tag & Plant Tree Instance
+            Plant Tree Instance
           </h3>
         </div>
         <p className="text-xs text-[#55695d] mb-4">
-          Register a physical sapling put into the ground with unique Tree ID tag, reserve sanctuary, and initial health status.
+          Register a sapling in the reserve sanctuary with unique Tree ID, reserve location, and initial health status.
         </p>
 
         <form onSubmit={onSubmit} className="space-y-3.5 text-xs">
@@ -55,7 +55,7 @@ export function AddTreeInstanceModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">
-                Unique Tree Tag / Serial *
+                Unique Tree ID *
               </label>
               <input
                 name="treeTag"
@@ -174,7 +174,7 @@ export function AddTreeInstanceModal({
             <textarea
               name="notes"
               rows={2}
-              placeholder="e.g. Metal serial tag affixed to stake. Rich loam soil with organic vermicompost."
+              placeholder="e.g. Tree planted in rich loam soil with organic vermicompost."
               className="w-full px-3.5 py-2 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7]"
             />
           </div>
@@ -187,9 +187,9 @@ export function AddTreeInstanceModal({
               className="flex-1 py-3 rounded-xl bg-[#173324] text-white font-semibold hover:bg-[#1e4433] disabled:opacity-50 transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
-                <span>Tagging Sapling...</span>
+                <span>Registering Sapling...</span>
               ) : (
-                <span>Tag & Plant Sapling</span>
+                <span>Plant Sapling</span>
               )}
             </button>
             <button

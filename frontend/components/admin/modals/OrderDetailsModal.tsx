@@ -37,7 +37,7 @@ const ALL_STATUSES: { value: AdoptionOrderStatus; label: string; desc: string; c
   {
     value: "Planted",
     label: "Planted in Ground",
-    desc: "Sapling physically planted by forestry team at reserve parcel",
+    desc: "Sapling planted by forestry team at reserve sanctuary",
     color: "bg-lime-50 text-lime-800 border-lime-300",
   },
   {
@@ -186,7 +186,7 @@ export function OrderDetailsModal({
                 </span>
                 <span className="text-[11px] text-[#55695d]">
                   {assignedTreeTags
-                    ? "Tree species & physical tree tag officially linked to buyer deed"
+                    ? "Tree species & unique tree ID officially linked to buyer deed"
                     : "Action Required: Enter tree species & planting details for this purchase"}
                 </span>
               </div>
@@ -221,7 +221,7 @@ export function OrderDetailsModal({
           ) : (
             <div className="space-y-2 pt-1 border-t border-amber-200">
               <p className="text-[11px] text-amber-900 leading-snug">
-                As Admin, specify the tree species (e.g. Sandalwood, Teak, Neem), botanical details, and physical tree tag to be planted for <strong>{order.adopterName}</strong> and stamped on their certificate.
+                As Admin, specify the tree species (e.g. Sandalwood, Teak, Neem), botanical details, and unique tree ID to be planted for <strong>{order.adopterName}</strong> and stamped on their certificate.
               </p>
               <button
                 type="button"
@@ -322,7 +322,7 @@ export function OrderDetailsModal({
 
               <div>
                 <label className="block text-[10px] font-bold uppercase text-[#173324] mb-1">
-                  Physical Tree Tag / Serial <span className="text-emerald-600">*</span>
+                  Unique Tree ID <span className="text-emerald-600">*</span>
                 </label>
                 <div className="space-y-1.5">
                   <input

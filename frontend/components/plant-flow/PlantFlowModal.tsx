@@ -22,11 +22,6 @@ import {
   Step7Confirmation,
 } from "./steps";
 
-const LOCATION_COORDINATES: Record<
-  string,
-  { lat: number; lng: number; formatted: string }
-> = {};
-
 export interface PlantFlowProps {
   onClose: () => void;
   initialPlanId?: string | null;
@@ -195,13 +190,6 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
     methodUsed: string,
     serverData?: any
   ) => {
-    const chosenCoords =
-      (location && LOCATION_COORDINATES[location]) || {
-        lat: 19.9975,
-        lng: 73.7898,
-        formatted: "19.9975° N, 73.7898° E",
-      };
-
     const speciesShort = (selectedTree?.name || "TR")
       .substring(0, 2)
       .toUpperCase();
@@ -213,7 +201,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
       year: "numeric",
     });
 
-    // 1. Physical Tree Instance Records for Database
+    // 1. Tree Instance Records for Database
     const newInstances: any[] = [];
     if (serverData?.treeInstances && Array.isArray(serverData.treeInstances) && serverData.treeInstances.length > 0) {
       const normalized = serverData.treeInstances.map((t: any) => ({
@@ -235,11 +223,11 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
       }));
       newInstances.push(...normalized);
     }
-    // Trees are never randomly allocated upon purchase; an administrator assigns the physical tree to the order/user.
+    // Trees are never randomly allocated upon purchase; an administrator assigns the unique tree ID to the order/user.
 
     // 2. Order Record - Use server-verified order directly
     const invNumber = `INV-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
-    const orderNotes = `Adoption contract for ${qty}x ${selectedTree?.name || "tree"} planted at ${location || "Flagship Living Forest Reserve"} under "${effectivePlanLabel}". Officially cataloged and physically nurtured. Paid via ${methodUsed}.`;
+    const orderNotes = `Adoption contract for ${qty}x ${selectedTree?.name || "tree"} planted at ${location || "Flagship Living Forest Reserve"} under "${effectivePlanLabel}". Officially cataloged and nurtured. Paid via ${methodUsed}.`;
 
     let finalOrderRecord: any = serverData?.order ? orderService.mapToUiItem(serverData.order) : null;
 
@@ -259,7 +247,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
               category: selectedTree?.category || "Fruit Trees",
               planType: effectivePlanLabel,
               reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
-              gpsCoords: chosenCoords.formatted,
+              gpsCoords: "",
               quantity: qty,
               unitPrice: pricePerTree,
               subtotal: total,
@@ -269,7 +257,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
           scientificName: selectedTree?.sci || "Botanical Tree",
           category: selectedTree?.category || "Fruit Trees",
           reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
-          gpsCoords: chosenCoords.formatted,
+          gpsCoords: "",
           planType: effectivePlanLabel,
           dedicationMessage: dedicationMessage.trim(),
           quantity: qty,
@@ -304,7 +292,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
           scientificName: selectedTree?.sci || "Botanical Tree",
           category: selectedTree?.category || "Fruit Trees",
           reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
-          gpsCoords: chosenCoords.formatted,
+          gpsCoords: "",
           planType: effectivePlanLabel,
           dedicationMessage: dedicationMessage.trim(),
           quantity: qty,

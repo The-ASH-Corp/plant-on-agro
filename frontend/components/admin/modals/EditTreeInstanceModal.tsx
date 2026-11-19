@@ -256,7 +256,7 @@ export function EditTreeInstanceModal({
         <div className="flex items-center gap-2 mb-1">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
           <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">
-            Physical Living Ledger • Serial: {instance.treeTag}
+            Living Ledger • Tree ID: {instance.treeTag}
           </span>
         </div>
 
@@ -267,7 +267,7 @@ export function EditTreeInstanceModal({
           Update Tree Details & Photos
         </h3>
         <p className="text-xs text-[#55695d] mb-4">
-          Manage ground telemetry, physical arborist notes, and client-facing growth photographs.
+          Manage ground telemetry, arborist notes, and client-facing growth photographs.
         </p>
 
         {/* Tab switch */}

@@ -208,7 +208,7 @@ export function TreeInstancesTab({
             )}
           </div>
           <p className="text-xs text-[#73877b]">
-            Physical saplings with unique Tree ID tags and ground health logs
+            Living trees with unique Tree IDs and ground health logs
           </p>
         </div>
 
@@ -238,7 +238,7 @@ export function TreeInstancesTab({
             className="px-4 py-2.5 rounded-xl bg-[#173324] hover:bg-[#1f4230] text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer shrink-0"
           >
             <span>+</span>
-            <span>Tag & Plant Sapling</span>
+            <span>Plant Sapling</span>
           </button>
         </div>
       </div>
@@ -247,7 +247,7 @@ export function TreeInstancesTab({
       <div className="grid grid-cols-2 lg:grid-cols-4 4k:grid-cols-4 gap-3.5 3xl:gap-5">
         <div className="p-4 3xl:p-6 rounded-2xl bg-white border border-[#e2eae5] shadow-xs">
           <span className="text-[10px] 3xl:text-xs text-[#73877b] font-bold uppercase tracking-wider block">
-            Total Tagged Trees
+            Total Planted Trees
           </span>
           <span className="text-2xl 3xl:text-3xl font-bold text-[#173324] mt-1 block">
             {stats.total.toLocaleString()}
@@ -305,13 +305,13 @@ export function TreeInstancesTab({
           <p className="text-xs text-[#73877b] max-w-sm mx-auto">
             {searchQuery || selectedHealth !== "All"
               ? "No tree instances match your active search or health status filter."
-              : "No physical saplings have been registered yet. Add your first sapling with a unique Tree ID!"}
+              : "No saplings have been registered yet. Add your first sapling with a unique Tree ID!"}
           </p>
           <button
             onClick={onOpenAddInstance}
             className="px-4 py-2 rounded-xl bg-[#173324] text-white text-xs font-semibold hover:bg-[#1f4230] transition-all cursor-pointer"
           >
-            + Tag & Plant First Sapling
+            + Plant First Sapling
           </button>
         </div>
       ) : viewMode === "table" ? (
@@ -321,7 +321,7 @@ export function TreeInstancesTab({
             <table className="w-full text-left text-xs">
               <thead className="bg-[#f7faf8] border-b border-[#e2eae5] text-[#7a8a80] uppercase tracking-wider font-bold">
                 <tr>
-                  <th className="py-4 px-4">Tree ID / Tag</th>
+                  <th className="py-4 px-4">Unique Tree ID</th>
                   <th className="py-4 px-4">Order Ref / Adopter</th>
                   <th className="py-4 px-4">Variety & Reserve</th>
                   <th className="py-4 px-4">Sanctuary Zone</th>

@@ -14,7 +14,7 @@ export interface OrderItem {
   category?: string;
   planType: string;
   reserveName: string; // The designated reserve parcel where we plant the tree
-  gpsCoords?: string; // Exact physical coordinates where planted
+  gpsCoords?: string; // Reserve coordinates where planted
   quantity: number;
   unitPrice: number;
   subtotal: number;

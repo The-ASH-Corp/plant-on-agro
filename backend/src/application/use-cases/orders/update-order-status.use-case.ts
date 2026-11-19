@@ -136,7 +136,7 @@ export class UpdateOrderStatusUseCase {
       // Update or assign Tree Instances explicitly managed by Admin
       let treeInstances: TreeInstance[] = [];
       if (this.treeInstanceRepository) {
-        // 1. If Admin selected existing physical nursery instances to assign to this purchase
+        // 1. If Admin selected existing nursery instances to assign to this purchase
         if (assignedTreeInstanceIds && assignedTreeInstanceIds.length > 0) {
           for (const instId of assignedTreeInstanceIds) {
             const cleanInstId = (instId || '').trim();
@@ -153,7 +153,7 @@ export class UpdateOrderStatusUseCase {
                   datePlanted: new Date(),
                   notes:
                     notes ||
-                    `Physically assigned to order ${order.orderNumber} for ${order.adopterName}. Verified.`,
+                    `Assigned to order ${order.orderNumber} for ${order.adopterName}. Verified.`,
                 });
                 inst.updateGpsCoordinates(targetCoord.lat, targetCoord.lng);
                 await this.treeInstanceRepository.update(inst);
@@ -163,18 +163,12 @@ export class UpdateOrderStatusUseCase {
           }
         }
 
-        // 2. If Admin explicitly provided physical tree tag(s) (e.g. from physical marker tag stamped on the sapling)
+        // 2. If Admin explicitly provided unique Tree ID(s)
         if (treeTags && treeTags.length > 0 && treeInstances.length < order.quantity) {
           for (let tagIdx = 0; tagIdx < treeTags.length; tagIdx++) {
             const rawTag = treeTags[tagIdx];
             const cleanTag = (rawTag || '').trim().toUpperCase();
             if (cleanTag && !treeInstances.some((t) => t.treeTag === cleanTag)) {
-              // Determine GPS for this specific tree (either custom per-tree GPS or grove GPS)
-              const specificGps = (treeGpsCoords && treeGpsCoords[tagIdx] && treeGpsCoords[tagIdx].trim().length > 0)
-                ? treeGpsCoords[tagIdx].trim()
-                : effectiveGps;
-              const treeCoord = parseGpsCoords(specificGps);
-
               let existing = await this.treeInstanceRepository.findByTag(cleanTag);
               if (existing) {
                 existing.update({
@@ -189,7 +183,7 @@ export class UpdateOrderStatusUseCase {
                     notes ||
                     `Assigned to order ${order.orderNumber} for ${order.adopterName}. Planted in ${order.reserveName || 'reserve'}.`,
                 });
-                existing.updateGpsCoordinates(treeCoord.lat, treeCoord.lng);
+                existing.updateGpsCoordinates(targetCoord.lat, targetCoord.lng);
                 await this.treeInstanceRepository.update(existing);
                 treeInstances.push(existing);
               } else {
@@ -197,7 +191,7 @@ export class UpdateOrderStatusUseCase {
                   treeTag: cleanTag,
                   orderRef: order.orderNumber,
                   assignedReserve: order.reserveName,
-                  gpsCoordinates: { latitude: treeCoord.lat, longitude: treeCoord.lng },
+                  gpsCoordinates: { latitude: targetCoord.lat, longitude: targetCoord.lng },
                   datePlanted: new Date(),
                   healthStatus: 'Healthy',
                   treeVarietyName: order.treeSpecies,

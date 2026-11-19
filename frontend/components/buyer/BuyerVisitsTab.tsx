@@ -413,7 +413,7 @@ export function BuyerVisitsTab({ user, instances, onOpenPlantFlow }: BuyerVisits
               <h2 className="text-lg font-bold text-[#173324]" style={{ fontFamily: "var(--font-display)" }}>
                 Field Album & Visit Memories
               </h2>
-              <p className="text-xs text-gray-500">Live photographs logged from physical visits to the reserve</p>
+              <p className="text-xs text-gray-500">Live photographs logged from visits to the reserve</p>
             </div>
             <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800">
               {allMemories.length} Photographs

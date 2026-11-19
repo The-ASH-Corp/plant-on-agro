@@ -219,7 +219,7 @@ export function EditPlanModal({
               required
               value={formData.desc}
               onChange={handleChange}
-              placeholder="e.g. Dedicate a grove for lifetime celebrations with physical wooden plaques and digital updates."
+              placeholder="e.g. Dedicate a grove for lifetime celebrations with unique tree IDs and digital updates."
               className="w-full px-3.5 py-2 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7] focus:border-[#173324] transition-colors"
             />
           </div>
@@ -234,7 +234,7 @@ export function EditPlanModal({
               rows={3}
               value={formData.features}
               onChange={handleChange}
-              placeholder="Physical engraved tree plaque&#10;Quarterly high-res field photo logs&#10;Framed digital certificate of adoption&#10;Direct farmer community support"
+              placeholder="Unique Tree ID for each planted tree&#10;Quarterly high-res field photo logs&#10;Official digital certificate of adoption&#10;Direct farmer community support"
               className="w-full px-3.5 py-2 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7] focus:border-[#173324] transition-colors"
             />
             <span className="text-[10px] text-[#73877b] mt-0.5 block">

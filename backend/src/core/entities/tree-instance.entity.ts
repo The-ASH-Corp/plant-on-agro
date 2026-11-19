@@ -24,8 +24,8 @@ export interface TreeInstanceProps {
   treeTag: string; // Unique serial tag e.g. "POA-TR-2026-0001"
   orderRef?: string; // Reference to adoption order (e.g. "ORD-88219")
   assignedReserve: string; // Name or ID of reserve parcel
-  gpsCoordinates?: GpsCoordinates; // Physical ground coordinates (optional)
-  datePlanted: Date; // Date physically put into the ground
+  gpsCoordinates?: GpsCoordinates; // Reserve reference coordinates (optional)
+  datePlanted: Date; // Date planted in reserve
   healthStatus: TreeHealthStatus; // Current health status
   treeVarietyName?: string; // e.g. "Indian Mango", "Teakwood"
   adopterName?: string;

@@ -134,7 +134,7 @@ export function EditCertificateModal({
 
             <div>
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">
-                Physical Tree Tag
+                Unique Tree ID
               </label>
               <input
                 name="treeTag"
