@@ -11,7 +11,7 @@ export interface TreeVarietyProps {
   commonName: string;
   scientificName: string;
   category: TreeCategory;
-  price: number;
+  price?: number;
   co2AbsorptionRateKgYear: number;
   growthTimeline: string;
   careRequirements: string;
@@ -46,7 +46,7 @@ export class TreeVariety {
     this._commonName = props.commonName.trim();
     this._scientificName = props.scientificName.trim();
     this._category = props.category;
-    this._price = props.price;
+    this._price = props.price ?? 0;
     this._co2AbsorptionRateKgYear = props.co2AbsorptionRateKgYear;
     this._growthTimeline = props.growthTimeline.trim();
     this._careRequirements = props.careRequirements.trim();
@@ -65,7 +65,7 @@ export class TreeVariety {
     if (!props.scientificName || props.scientificName.trim().length === 0) {
       throw new Error('Scientific name cannot be empty');
     }
-    if (props.price < 0) {
+    if (props.price !== undefined && props.price < 0) {
       throw new Error('Price cannot be negative');
     }
     if (props.co2AbsorptionRateKgYear < 0) {

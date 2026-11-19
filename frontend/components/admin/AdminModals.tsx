@@ -67,7 +67,6 @@ export function AdminModals({
       {/* Tree Varieties */}
       <AddTreeModal
         isOpen={treeActions.showAddTreeModal}
-        universalPrice={data.trees.length > 0 && typeof data.trees[0].price === "number" ? data.trees[0].price : 349}
         onClose={() => treeActions.setShowAddTreeModal(false)}
         onSubmit={treeActions.handleCreateTree}
       />

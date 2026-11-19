@@ -4,7 +4,7 @@ export interface CreateTreeVarietyDto {
   commonName: string;
   scientificName: string;
   category: TreeCategory;
-  price: number;
+  price?: number;
   co2AbsorptionRateKgYear: number;
   growthTimeline: string;
   careRequirements: string;

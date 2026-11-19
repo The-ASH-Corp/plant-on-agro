@@ -549,17 +549,18 @@ export function Step7Confirmation({
         Your Tree Journey Has Begun!
       </h3>
       <p className="text-[#4a6557] mb-8">
-        Our plantation team will get to work. You&apos;ll receive updates, photos, and
-        your certificate soon.
+        Your adoption plan is officially registered. Our forestry team will review your order, assign the native tree species and Unique Tree ID(s), and prepare your digital deed.
       </p>
 
       <div
         className="p-5 rounded-2xl mb-6 text-left space-y-3"
         style={{ background: "#f0faf4", border: "1px solid #d4ede1" }}
       >
-        <div className="flex justify-between text-sm">
-          <span className="text-[#4a6557]">Tree</span>
-          <span className="font-semibold text-[#173324]">{selectedTree?.name}</span>
+        <div className="flex justify-between text-sm items-center">
+          <span className="text-[#4a6557]">Tree Species</span>
+          <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 text-xs">
+            🌿 Assigned by Admin Post-Purchase
+          </span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-[#4a6557]">Location</span>

@@ -26,7 +26,7 @@ export interface Tree {
   name: string;
   sci: string;
   category: TreeCategory;
-  price: number;
+  price?: number;
   location: string;
   growth: string;
   img: string;

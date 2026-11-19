@@ -5,7 +5,7 @@ export interface ITreeVarietyDocument extends Document {
   commonName: string;
   scientificName: string;
   category: TreeCategory;
-  price: number;
+  price?: number;
   co2AbsorptionRateKgYear: number;
   growthTimeline: string;
   careRequirements: string;
@@ -46,7 +46,8 @@ const TreeVarietySchema = new Schema<ITreeVarietyDocument>(
     },
     price: {
       type: Number,
-      required: true,
+      required: false,
+      default: 0,
       min: 0,
     },
     co2AbsorptionRateKgYear: {

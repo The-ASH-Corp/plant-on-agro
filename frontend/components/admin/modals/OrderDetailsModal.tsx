@@ -166,7 +166,9 @@ export function OrderDetailsModal({
         </div>
 
         <h3 style={{ fontFamily: "var(--font-display)" }} className="text-2xl text-[#173324] mt-1 mb-3">
-          {order.treeSpecies} Adoption Details
+          {order.treeSpecies === "Pending Admin Assignment"
+            ? `${order.planType} Order Details`
+            : `${order.treeSpecies} Adoption Details`}
         </h3>
 
         {/* Admin Tree Assignment Option Panel */}
@@ -187,7 +189,7 @@ export function OrderDetailsModal({
                 <span className="text-[11px] text-[#55695d]">
                   {assignedTreeTags
                     ? "Tree species & unique tree ID officially linked to buyer deed"
-                    : "Action Required: Enter tree species & planting details for this purchase"}
+                    : "Action Required: Assign tree species & unique tree ID to this purchase"}
                 </span>
               </div>
             </div>
@@ -221,7 +223,7 @@ export function OrderDetailsModal({
           ) : (
             <div className="space-y-2 pt-1 border-t border-amber-200">
               <p className="text-[11px] text-amber-900 leading-snug">
-                As Admin, specify the tree species (e.g. Sandalwood, Teak, Neem), botanical details, and unique tree ID to be planted for <strong>{order.adopterName}</strong> and stamped on their certificate.
+                As Admin, assign the botanical species (e.g. Sandalwood, Teak, Neem) and unique tree ID to be planted for <strong>{order.adopterName}</strong> and stamped on their certificate.
               </p>
               <button
                 type="button"
@@ -236,7 +238,7 @@ export function OrderDetailsModal({
                 className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#173324] to-[#1b7a43] hover:brightness-110 text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>🌱</span>
-                <span>Enter Tree Details to Plant (Species, Tree ID) →</span>
+                <span>Assign Tree & Unique Tree ID to Buyer →</span>
               </button>
             </div>
           )}

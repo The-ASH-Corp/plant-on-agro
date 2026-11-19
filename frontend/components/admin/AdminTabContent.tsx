@@ -80,7 +80,6 @@ export function AdminTabContent({
           onOpenAddTree={() => treeActions.setShowAddTreeModal(true)}
           onEditTree={(tree) => treeActions.setSelectedTreeForEdit(tree)}
           onDeleteTree={deleteActions.handleDeleteTree}
-          onUpdateUniversalPrice={treeActions.handleSetUniversalPrice}
         />
       );
 

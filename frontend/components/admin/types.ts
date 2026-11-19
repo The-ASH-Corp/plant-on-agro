@@ -117,7 +117,7 @@ export interface TreeVarietyItem {
     | "Native Trees"
     | "Shade Trees"
     | "Occasion";
-  price: number;
+  price?: number;
   location: string;
   growth: string;
   growthTimeline?: string;

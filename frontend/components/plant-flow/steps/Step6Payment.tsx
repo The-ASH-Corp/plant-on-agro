@@ -54,7 +54,11 @@ export function Step6Payment({
           ) : null}
           <div className="flex justify-between text-[#4a6557]">
             <span>Package Enrolled</span>
-            <span className="text-[#173324] font-medium">{qty} × Adoption Package</span>
+            <span className="text-[#173324] font-medium">{qty} × {displayPackage}</span>
+          </div>
+          <div className="flex justify-between text-[#4a6557]">
+            <span>Tree Allocation</span>
+            <span className="text-emerald-700 font-semibold text-right">Assigned by Admin Post-Purchase</span>
           </div>
           <div className="flex justify-between text-[#4a6557]">
             <span>Reserve Location</span>
@@ -85,7 +89,7 @@ export function Step6Payment({
             <span className="font-bold text-[#173324]">
               One-Time Single Payment Guarantee:
             </span>{" "}
-            No recurring subscriptions or maintenance fees. Covers Tree id.
+            No recurring fees. Native tree species and Unique Tree IDs are officially assigned & planted by our forestry admin team upon purchase verification.
           </div>
         </div>
       </div>
