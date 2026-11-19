@@ -22,8 +22,6 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
     const commonName = (fd.get("name") as string).trim();
     const scientificName = (fd.get("sci") as string).trim();
     const category = fd.get("category") as TreeVarietyItem["category"];
-    const currentUniversalPrice = trees.length > 0 && typeof trees[0].price === "number" ? trees[0].price : 349;
-    const price = currentUniversalPrice;
     const co2 = Number(fd.get("co2")) || 25;
     const location = (fd.get("location") as string).trim() || "Western Ghats, Maharashtra";
     const growth = (fd.get("growth") as string).trim() || "10–12 m in 5 years";
@@ -31,7 +29,7 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
       (fd.get("careRequirements") as string)?.trim() ||
       "Weekly watering in early stages, adequate sunlight, organic soil";
     const img =
-      (fd.get("img") as string).trim() ||
+      ((fd.get("img") as string) || "").trim() ||
       "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format";
     const desc =
       (fd.get("desc") as string).trim() ||
@@ -50,7 +48,6 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
       name: commonName,
       sci: scientificName,
       category,
-      price,
       location,
       growth,
       img,
@@ -64,7 +61,6 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
         commonName,
         scientificName,
         category,
-        price,
         co2AbsorptionRateKgYear: co2,
         growthTimeline: growth,
         careRequirements,
@@ -81,7 +77,7 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
       }
 
       setShowAddTreeModal(false);
-      showToast(`Added "${commonName}" to tree catalog at universal price ₹${price}!`);
+      showToast(`Added "${commonName}" to botanical tree catalog!`);
       setActiveTab("trees");
     } catch (err: any) {
       console.warn("Tree creation notice:", err);
@@ -98,8 +94,6 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
     const commonName = (fd.get("name") as string)?.trim() || selectedTreeForEdit.name;
     const scientificName = (fd.get("sci") as string)?.trim() || selectedTreeForEdit.sci;
     const category = (fd.get("category") as TreeVarietyItem["category"]) || selectedTreeForEdit.category;
-    const inputPrice = Number(fd.get("price"));
-    const price = !isNaN(inputPrice) && inputPrice >= 0 ? inputPrice : selectedTreeForEdit.price;
     const co2 = Number(fd.get("co2")) || selectedTreeForEdit.co2PerYearKg || 25;
     const location = (fd.get("location") as string)?.trim() || selectedTreeForEdit.location;
     const growth = (fd.get("growth") as string)?.trim() || selectedTreeForEdit.growth;
@@ -130,7 +124,6 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
                 commonName,
                 scientificName,
                 category,
-                price,
                 location,
                 growth,
                 growthTimeline: growth,
@@ -143,10 +136,7 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
                 careRequirements,
                 isActive,
               }
-            : {
-                ...t,
-                price, // Synchronize all trees to the same price
-              }
+            : t
         )
       );
 
@@ -156,7 +146,6 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
         commonName,
         scientificName,
         category,
-        price,
         co2AbsorptionRateKgYear: co2,
         growthTimeline: growth,
         careRequirements,
@@ -167,19 +156,18 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
       });
 
       if (res.data) {
-        // Also ensure all trees in state have this updated universal price
         setTrees((prev) =>
           prev.map((t) =>
             t.id === id
               ? treeVarietyService.mapToUiItem(res.data!)
-              : { ...t, price }
+              : t
           )
         );
       } else {
         applyLocalUpdate();
       }
       setSelectedTreeForEdit(null);
-      showToast(`Updated "${commonName}" & synced all trees to ₹${price}!`);
+      showToast(`Updated "${commonName}"!`);
     } catch (err: any) {
       console.warn("Tree update notice:", err);
       showToast(err?.message || "Failed to update tree variety");
@@ -188,19 +176,8 @@ export function useTreeActions({ data, showToast, setActiveTab }: Params) {
     }
   };
 
-  const handleSetUniversalPrice = async (newPrice: number) => {
-    if (isNaN(newPrice) || newPrice < 0) return;
-    try {
-      await treeVarietyService.updateUniversalPrice(newPrice);
-    } catch (err) {
-      console.warn("Failed to update universal price on backend:", err);
-    }
-    // Update all trees in state
-    setTrees((prev) => prev.map((t) => ({ ...t, price: newPrice })));
-    showToast(`Universal adoption price set to ₹${newPrice} for all trees!`);
-  };
-
-  const universalPrice = trees.length > 0 && typeof trees[0].price === "number" ? trees[0].price : 349;
+  const handleSetUniversalPrice = async () => {};
+  const universalPrice = 0;
 
   return {
     showAddTreeModal,

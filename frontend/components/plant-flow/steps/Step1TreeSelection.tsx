@@ -67,7 +67,6 @@ export function Step1TreeSelection({
               <div>
                 <div className="font-semibold text-[#173324] text-sm">{t.name}</div>
                 <div className="text-[#4a6557] text-xs">{t.category}</div>
-                <div className="text-[#2d6a4f] font-bold text-sm">₹{t.price}</div>
               </div>
               {selectedTree?.id === t.id && (
                 <span className="ml-auto text-[#52b788] text-lg">✓</span>

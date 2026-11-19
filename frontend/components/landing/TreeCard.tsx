@@ -27,9 +27,8 @@ export function TreeCard({ tree, onPlant }: TreeCardProps) {
         </div>
       </div>
       <div className="p-5">
-        <div className="flex items-start justify-between gap-2 mb-1">
+        <div className="mb-1">
           <h3 className="font-semibold text-[#173324] text-base">{tree.name}</h3>
-          <span className="text-[#2d6a4f] font-bold text-sm whitespace-nowrap">₹{tree.price}</span>
         </div>
         <p className="text-[#4a6557] text-xs italic mb-3">{tree.sci}</p>
         <p className="text-[#5a6b62] text-sm leading-relaxed mb-4 line-clamp-2">{tree.desc}</p>

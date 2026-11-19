@@ -7,8 +7,6 @@ import { TrashIcon, PencilIcon, Select } from "@/components/ui";
 interface TreesTabProps {
   trees: TreeVarietyItem[];
   searchQuery: string;
-  universalPrice?: number;
-  onUpdateUniversalPrice?: (newPrice: number) => Promise<void> | void;
   onOpenAddTree: () => void;
   onEditTree: (tree: TreeVarietyItem) => void;
   onDeleteTree: (id: string, name?: string) => void;
@@ -27,8 +25,6 @@ const CATEGORIES = [
 export function TreesTab({
   trees,
   searchQuery,
-  universalPrice,
-  onUpdateUniversalPrice,
   onOpenAddTree,
   onEditTree,
   onDeleteTree,
@@ -37,33 +33,6 @@ export function TreesTab({
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(9);
-
-  const currentUniversalPrice =
-    universalPrice ??
-    (trees.length > 0 && typeof trees[0].price === "number"
-      ? trees[0].price
-      : 349);
-  const [editingPrice, setEditingPrice] = useState<number | string>(
-    currentUniversalPrice
-  );
-  const [isUpdatingPrice, setIsUpdatingPrice] = useState(false);
-
-  useEffect(() => {
-    setEditingPrice(currentUniversalPrice);
-  }, [currentUniversalPrice]);
-
-  const handleSaveUniversalPrice = async () => {
-    const numeric = Number(editingPrice);
-    if (isNaN(numeric) || numeric < 0) return;
-    setIsUpdatingPrice(true);
-    try {
-      if (onUpdateUniversalPrice) {
-        await onUpdateUniversalPrice(numeric);
-      }
-    } finally {
-      setIsUpdatingPrice(false);
-    }
-  };
 
   // Filter trees based on search and category
   const filteredTrees = useMemo(() => {
@@ -119,17 +88,17 @@ export function TreesTab({
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      {/* Universal Price Hero Card */}
+      {/* Botanical Species Master Ledger Banner */}
       <div className="p-5 sm:p-6 3xl:p-8 rounded-3xl bg-gradient-to-br from-[#173324] via-[#1e4431] to-[#2d6a4f] text-white shadow-md border border-[#2b5a40] relative overflow-hidden">
         <div className="absolute -right-8 -bottom-8 w-48 h-48 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none" />
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6 relative z-10">
           <div className="space-y-2 max-w-xl 3xl:max-w-2xl">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="px-2.5 py-0.5 rounded-full text-[10px] 3xl:text-xs font-bold uppercase tracking-wider bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
-                Universal Tree Pricing
+                Botanical Tree Varieties
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] 3xl:text-xs font-semibold bg-white/10 text-white/80">
-                All Trees Synced to Same Price
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] 3xl:text-xs font-semibold bg-white/10 text-white/80">
+                Priced via Adoption Plans
               </span>
             </div>
             <div className="flex items-baseline gap-3">
@@ -137,40 +106,21 @@ export function TreesTab({
                 style={{ fontFamily: "var(--font-display)" }}
                 className="text-2xl sm:text-3xl 3xl:text-4xl 4k:text-5xl font-bold tracking-tight text-white"
               >
-                ₹{currentUniversalPrice}
+                {trees.length} Species Catalogued
               </h2>
-              <span className="text-emerald-300 text-sm 3xl:text-base font-medium">/ tree adoption</span>
             </div>
             <p className="text-xs 3xl:text-sm text-white/85 leading-relaxed">
-              Every tree variety on PlantOn Agro has the exact same adoption price. When clients purchase, a species from the database is randomly allocated. Modifying the universal price here immediately synchronizes all {trees.length} species across the platform and checkout.
+              Botanical species are curated for regional bio-reserves. Individual trees do not have prices—buyers select Adoption Plans, and our forestry team assigns specific native species and Unique Tree IDs to users upon purchase verification.
             </p>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-white/15 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs 3xl:text-sm font-semibold text-white/90">₹</span>
-              <input
-                type="number"
-                min={0}
-                value={editingPrice}
-                onChange={(e) => setEditingPrice(e.target.value)}
-                placeholder="Set new price"
-                className="w-full sm:w-28 px-3 py-2 rounded-xl bg-white text-[#173324] font-bold text-sm 3xl:text-base outline-none focus:ring-2 focus:ring-emerald-400"
-              />
-            </div>
+          <div className="flex items-center gap-3">
             <button
-              onClick={handleSaveUniversalPrice}
-              disabled={isUpdatingPrice || Number(editingPrice) === currentUniversalPrice}
-              className="px-4 py-2 3xl:py-2.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-[#173324] font-bold text-xs 3xl:text-sm transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs whitespace-nowrap flex items-center justify-center gap-1.5"
+              onClick={onOpenAddTree}
+              className="px-5 py-2.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-[#173324] font-bold text-xs 3xl:text-sm transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
             >
-              {isUpdatingPrice ? (
-                <>
-                  <span className="w-3.5 h-3.5 border-2 border-[#173324] border-t-transparent rounded-full animate-spin" />
-                  <span>Syncing...</span>
-                </>
-              ) : (
-                <span>Update All Trees</span>
-              )}
+              <span>+</span>
+              <span>Add Botanical Variety</span>
             </button>
           </div>
         </div>
@@ -305,9 +255,6 @@ export function TreesTab({
                   <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-md text-[#173324] shadow-xs">
                     {tree.category}
                   </span>
-                  <span className="absolute bottom-3 right-3 text-xs font-bold px-2.5 py-1 rounded-full bg-[#173324]/90 backdrop-blur-md text-emerald-300 shadow-xs">
-                    ₹{tree.price}
-                  </span>
                 </div>
 
                 {/* Card Body */}
@@ -402,7 +349,6 @@ export function TreesTab({
                 <tr>
                   <th className="py-3.5 px-4">Tree Variety</th>
                   <th className="py-3.5 px-4">Category</th>
-                  <th className="py-3.5 px-4">Price</th>
                   <th className="py-3.5 px-4">Location</th>
                   <th className="py-3.5 px-4">CO2 / Year</th>
                   <th className="py-3.5 px-4 text-right">Actions</th>
@@ -438,9 +384,6 @@ export function TreesTab({
                     </td>
                     <td className="py-3 px-4 font-semibold text-[#55695d]">
                       {tree.category}
-                    </td>
-                    <td className="py-3 px-4 font-bold text-[#173324]">
-                      ₹{tree.price}
                     </td>
                     <td className="py-3 px-4 text-[#73877b]">{tree.location}</td>
                     <td className="py-3 px-4 font-semibold text-[#1b7a43]">

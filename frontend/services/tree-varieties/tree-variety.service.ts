@@ -8,7 +8,7 @@ export interface BackendTreeVariety {
   commonName: string;
   scientificName: string;
   category: TreeVarietyItem['category'];
-  price: number;
+  price?: number;
   co2AbsorptionRateKgYear: number;
   growthTimeline: string;
   careRequirements: string;
@@ -31,7 +31,7 @@ export interface CreateTreeVarietyPayload {
   commonName: string;
   scientificName: string;
   category: TreeVarietyItem['category'];
-  price: number;
+  price?: number;
   co2AbsorptionRateKgYear: number;
   growthTimeline: string;
   careRequirements: string;

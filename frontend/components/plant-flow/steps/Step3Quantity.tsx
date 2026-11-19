@@ -53,7 +53,7 @@ export function Step3Quantity({
         </button>
       </div>
       <div className="text-[#4a6557] text-sm mb-2">
-        {planLabel || selectedTree?.name || "Adoption Package"} × {qty} ={" "}
+        {planLabel || "Adoption Package"} × {qty} ={" "}
         <strong className="text-[#2d6a4f] text-base">
           ₹{total.toLocaleString("en-IN")}
         </strong>

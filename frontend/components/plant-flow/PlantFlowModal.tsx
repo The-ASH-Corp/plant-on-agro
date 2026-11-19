@@ -90,12 +90,6 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
             }));
             setTrees(mappedTrees);
 
-            // Randomly allocate a tree from the database for the user who is purchasing
-            if (mappedTrees.length > 0) {
-              const randomTree = mappedTrees[Math.floor(Math.random() * mappedTrees.length)];
-              setSelectedTree(randomTree);
-            }
-
             // Extract bio-reserves strictly from locations API
             const apiLocations =
               locationsRes?.data?.items?.map((l) => l.name).filter(Boolean) || [];
@@ -227,7 +221,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
 
     // 2. Order Record - Use server-verified order directly
     const invNumber = `INV-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
-    const orderNotes = `Adoption contract for ${qty}x ${selectedTree?.name || "tree"} planted at ${location || "Flagship Living Forest Reserve"} under "${effectivePlanLabel}". Officially cataloged and nurtured. Paid via ${methodUsed}.`;
+    const orderNotes = `Adoption contract for ${qty}x tree(s) planted at ${location || "Flagship Living Forest Reserve"} under "${effectivePlanLabel}". Tree species and Unique Tree IDs to be assigned by forestry admin upon verification. Paid via ${methodUsed}.`;
 
     let finalOrderRecord: any = serverData?.order ? orderService.mapToUiItem(serverData.order) : null;
 
@@ -241,10 +235,10 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
           adopterPhone: phone || "",
           items: [
             {
-              treeVarietyId: selectedTree?.id ? String(selectedTree.id) : undefined,
-              treeSpecies: selectedTree?.name || "Indigenous Tree",
-              scientificName: selectedTree?.sci || "Botanical Tree",
-              category: selectedTree?.category || "Fruit Trees",
+              treeVarietyId: undefined,
+              treeSpecies: "Pending Admin Assignment",
+              scientificName: "To be assigned by forestry admin",
+              category: "Reserve Forestry Stewardship",
               planType: effectivePlanLabel,
               reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
               gpsCoords: "",
@@ -253,9 +247,9 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
               subtotal: total,
             },
           ],
-          treeSpecies: selectedTree?.name || "Indigenous Tree",
-          scientificName: selectedTree?.sci || "Botanical Tree",
-          category: selectedTree?.category || "Fruit Trees",
+          treeSpecies: "Pending Admin Assignment",
+          scientificName: "To be assigned by forestry admin",
+          category: "Reserve Forestry Stewardship",
           reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
           gpsCoords: "",
           planType: effectivePlanLabel,
@@ -288,9 +282,9 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
           adopterName: name || user?.name || "Verified Adopter",
           adopterEmail: email || user?.email || "adopter@example.com",
           adopterPhone: phone || "",
-          treeSpecies: selectedTree?.name || "Indigenous Tree",
-          scientificName: selectedTree?.sci || "Botanical Tree",
-          category: selectedTree?.category || "Fruit Trees",
+          treeSpecies: "Pending Admin Assignment",
+          scientificName: "To be assigned by forestry admin",
+          category: "Reserve Forestry Stewardship",
           reserveName: location || "Flagship Living Forest — Wayanad, Kerala",
           gpsCoords: "",
           planType: effectivePlanLabel,

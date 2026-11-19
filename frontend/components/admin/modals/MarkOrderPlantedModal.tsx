@@ -73,14 +73,15 @@ export function MarkOrderPlantedModal({
   // Initialize reserve, tree species, and tree tags from order
   useEffect(() => {
     if (order) {
-      const initialSpecies = order.treeSpecies || "Indian Sandalwood";
+      const isPending = !order.treeSpecies || order.treeSpecies === "Pending Admin Assignment";
+      const initialSpecies = isPending ? "Indian Sandalwood" : order.treeSpecies;
       setTreeSpecies(initialSpecies);
 
       const matchedPreset = POPULAR_TREE_PRESETS.find(
         (p) => p.name.toLowerCase() === initialSpecies.toLowerCase()
       );
-      setScientificName(order.scientificName || matchedPreset?.scientific || "Botanical Specimen");
-      setCategory(order.category || matchedPreset?.category || "Native Trees");
+      setScientificName(order.scientificName && !isPending ? order.scientificName : (matchedPreset?.scientific || "Santalum album"));
+      setCategory(order.category && !isPending ? order.category : (matchedPreset?.category || "Timber Trees"));
 
       const initialReserve = order.reserveName || "";
       setSelectedReserve(initialReserve);
@@ -184,9 +185,9 @@ export function MarkOrderPlantedModal({
         <div className="flex items-center gap-2.5 mb-2">
           <span className="text-2xl">🌱</span>
           <div>
-            <h2 className="text-lg font-bold tracking-tight">Enter Tree Details & Mark Planted</h2>
+            <h2 className="text-lg font-bold tracking-tight">Assign Tree Species & Mark Planted</h2>
             <p className="text-xs text-[#52796f]">
-              Specify tree species, botanical details and tree Id for the official certificate
+              Assign botanical species, Unique Tree IDs, and issue certificate to this buyer
             </p>
           </div>
         </div>

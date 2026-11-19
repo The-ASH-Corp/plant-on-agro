@@ -5,14 +5,12 @@ import { TreeVarietyItem } from "../types";
 import { Select } from "@/components/ui";
 interface AddTreeModalProps {
   isOpen: boolean;
-  universalPrice?: number;
   onClose: () => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
 export function AddTreeModal({
   isOpen,
-  universalPrice = 349,
   onClose,
   onSubmit,
 }: AddTreeModalProps) {
@@ -57,7 +55,7 @@ export function AddTreeModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">Category</label>
               <Select
@@ -74,22 +72,7 @@ export function AddTreeModal({
               </Select>
             </div>
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="font-bold text-[#3d4f45] uppercase tracking-wider block">Price (₹)</label>
-                <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded">Universal Price</span>
-              </div>
-              <input
-                name="price"
-                type="number"
-                required
-                readOnly
-                value={universalPrice}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#f0f4f1] cursor-not-allowed font-semibold"
-              />
-              <span className="text-[10px] text-[#73877b] mt-0.5 block">Locked: all trees share this identical price</span>
-            </div>
-            <div>
-              <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">CO2 (kg/yr)</label>
+              <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">CO2 Absorption (kg/yr)</label>
               <input
                 name="co2"
                 type="number"
@@ -121,16 +104,6 @@ export function AddTreeModal({
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7]"
               />
             </div>
-          </div>
-
-          <div>
-            <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">Cover Photo URL</label>
-            <input
-              name="img"
-              type="url"
-              defaultValue="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7]"
-            />
           </div>
 
           <div>

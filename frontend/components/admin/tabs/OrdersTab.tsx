@@ -376,8 +376,14 @@ export function OrdersTab({
                         <span className="text-[11px] text-[#73877b]">{order.adopterEmail}</span>
                       </td>
                       <td className="py-3.5 px-4">
-                        <span className="font-bold text-[#173324] block">{order.treeSpecies}</span>
-                        <span className="text-[11px] text-[#55695d]">{order.planType}</span>
+                        {order.treeSpecies === "Pending Admin Assignment" ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-300">
+                            <span>⏳</span> Pending Assignment
+                          </span>
+                        ) : (
+                          <span className="font-bold text-[#173324] block">{order.treeSpecies}</span>
+                        )}
+                        <span className="text-[11px] text-[#55695d] block mt-0.5">{order.planType}</span>
                       </td>
 
                       {/* Explicit Tree Assignment Column */}
@@ -404,7 +410,7 @@ export function OrdersTab({
                             className="px-2.5 py-1 text-[11px] font-bold text-white bg-gradient-to-r from-[#173324] to-[#1b7a43] hover:brightness-110 rounded-lg shadow-2xs transition-all cursor-pointer inline-flex items-center gap-1"
                           >
                             <span>🌱</span>
-                            <span>Enter Tree to Plant</span>
+                            <span>Assign Tree to User</span>
                           </button>
                         )}
                       </td>

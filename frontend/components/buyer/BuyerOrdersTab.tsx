@@ -184,9 +184,15 @@ export function BuyerOrdersTab({
 
                       {/* Tree Species */}
                       <td className="py-3.5 px-4">
-                        <span className="font-bold text-[#173324] block">{order.treeSpecies}</span>
-                        <span className="text-[10px] text-[#52796f]">
-                          {order.quantity} {order.quantity > 1 ? "Trees" : "Tree"} Planted
+                        {order.treeSpecies === "Pending Admin Assignment" ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-300">
+                            <span>⏳</span> Pending Admin Assignment
+                          </span>
+                        ) : (
+                          <span className="font-bold text-[#173324] block">{order.treeSpecies}</span>
+                        )}
+                        <span className="text-[10px] text-[#52796f] block mt-0.5">
+                          {order.planType || `${order.quantity} Tree(s)`}
                         </span>
                       </td>
 

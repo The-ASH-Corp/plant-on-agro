@@ -19,7 +19,7 @@ export const createTreeVarietySchema = z.object({
     'Shade Trees',
     'Occasion',
   ]),
-  price: z.number().min(0, 'Price must be 0 or greater'),
+  price: z.number().min(0, 'Price must be 0 or greater').optional().default(0),
   co2AbsorptionRateKgYear: z
     .number()
     .min(0, 'CO2 absorption rate must be 0 or greater'),
@@ -69,6 +69,6 @@ export const queryTreeVarietiesSchema = z.object({
 });
 
 export const updateUniversalPriceSchema = z.object({
-  price: z.number().min(0, 'Price must be 0 or greater'),
+  price: z.number().min(0, 'Price must be 0 or greater').optional().default(0),
 });
 

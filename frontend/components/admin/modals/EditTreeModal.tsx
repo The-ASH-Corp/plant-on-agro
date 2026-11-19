@@ -7,7 +7,6 @@ import { TreeVarietyItem } from "../types";
 interface EditTreeModalProps {
   isOpen: boolean;
   tree: TreeVarietyItem | null;
-  universalPrice?: number;
   onClose: () => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void> | void;
   isSubmitting?: boolean;
@@ -16,7 +15,6 @@ interface EditTreeModalProps {
 export function EditTreeModal({
   isOpen,
   tree,
-  universalPrice,
   onClose,
   onSubmit,
   isSubmitting = false,
@@ -25,7 +23,6 @@ export function EditTreeModal({
     name: "",
     sci: "",
     category: "Fruit Trees" as TreeVarietyItem["category"],
-    price: 349,
     co2: 25,
     location: "Western Ghats, Maharashtra",
     growth: "10–14 m in 5 years",
@@ -41,7 +38,6 @@ export function EditTreeModal({
         name: tree.name || tree.commonName || "",
         sci: tree.sci || tree.scientificName || "",
         category: tree.category || "Fruit Trees",
-        price: tree.price || 349,
         co2: tree.co2PerYearKg || tree.co2AbsorptionRateKgYear || 25,
         location: tree.location || "Western Ghats, Maharashtra",
         growth: tree.growth || tree.growthTimeline || "10–14 m in 5 years",
@@ -141,7 +137,7 @@ export function EditTreeModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">
                 Category *
@@ -162,30 +158,8 @@ export function EditTreeModal({
               </Select>
             </div>
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="font-bold text-[#3d4f45] uppercase tracking-wider block">
-                  Price (₹) *
-                </label>
-                <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded">
-                  All Trees
-                </span>
-              </div>
-              <input
-                name="price"
-                type="number"
-                required
-                min={0}
-                value={formData.price}
-                onChange={handleChange}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e2eae5] outline-none text-[#173324] bg-[#fcfaf7] focus:border-[#2d6a4f] transition-colors"
-              />
-              <span className="text-[10px] text-emerald-700 mt-0.5 block leading-tight">
-                All trees share the same price. Saving here syncs all catalog species.
-              </span>
-            </div>
-            <div>
               <label className="font-bold text-[#3d4f45] uppercase tracking-wider block mb-1">
-                CO2 (kg/yr) *
+                CO2 Absorption (kg/yr) *
               </label>
               <input
                 name="co2"

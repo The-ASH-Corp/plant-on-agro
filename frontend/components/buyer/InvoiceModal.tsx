@@ -106,9 +106,15 @@ export function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                 <tbody className="divide-y divide-gray-100">
                   <tr>
                     <td className="py-3">
-                      <strong className="text-gray-900 block">{order.treeSpecies}</strong>
+                      <strong className="text-gray-900 block">
+                        {order.treeSpecies === "Pending Admin Assignment"
+                          ? `${order.planType} Lifetime Adoption`
+                          : `${order.treeSpecies} (${order.planType})`}
+                      </strong>
                       <span className="text-[11px] text-gray-500">
-                        {order.planType} Lifetime Adoption Package (Nursery sapling, unique Tree ID, arborist care)
+                        {order.treeSpecies === "Pending Admin Assignment"
+                          ? "Adoption package enrolled. Botanical tree species & Unique Tree ID assigned post-purchase."
+                          : `${order.planType} Lifetime Adoption Package (Nursery sapling, unique Tree ID, arborist care)`}
                       </span>
                     </td>
                     <td className="py-3 text-center font-bold text-gray-800">{order.quantity}</td>
