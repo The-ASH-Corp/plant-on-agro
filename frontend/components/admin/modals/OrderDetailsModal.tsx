@@ -64,8 +64,6 @@ export function OrderDetailsModal({
   onOpenAssignTree,
 }: OrderDetailsModalProps) {
   const [selectedStatus, setSelectedStatus] = useState<AdoptionOrderStatus | null>(null);
-  const [showPlantingInputs, setShowPlantingInputs] = useState(false);
-  const [tagInput, setTagInput] = useState("");
   const [reserveInput, setReserveInput] = useState("");
   const [notesInput, setNotesInput] = useState("");
 
@@ -77,17 +75,13 @@ export function OrderDetailsModal({
 
   const assignedTreeTags = matchingInstances.length > 0
     ? matchingInstances.map((i) => i.treeTag).join(", ")
-    : (order?.treeTag || "");
+    : (order?.treeTag || (order?.assignedTreeTags && order.assignedTreeTags.length > 0 ? order.assignedTreeTags.join(", ") : ""));
 
   useEffect(() => {
     if (order) {
       setSelectedStatus(null);
-      setShowPlantingInputs(false);
       const res = order.reserveName || (locations[0]?.name ?? "Western Ghats, Maharashtra");
       setReserveInput(res);
-      const speciesCode = (order.treeSpecies || "TR").substring(0, 2).toUpperCase();
-      const cleanOrderNumber = order.orderNumber.replace(/^POA-?/, "");
-      setTagInput(`POA-${speciesCode}-${cleanOrderNumber}-001`);
       setNotesInput(order.notes || `Planted at verified reserve parcel for ${order.adopterName}.`);
     }
   }, [order, locations]);
@@ -101,28 +95,16 @@ export function OrderDetailsModal({
     currentStatus === "Completed";
 
   const handleStatusChange = (newStatus: AdoptionOrderStatus) => {
-    if (newStatus === "Planted" && !tagInput.trim() && !assignedTreeTags) {
-      setShowPlantingInputs(true);
-      return;
+    if (newStatus === "Planted" && !assignedTreeTags) {
+      if (onOpenAssignTree) {
+        onClose();
+        onOpenAssignTree(order);
+        return;
+      }
     }
     setSelectedStatus(newStatus);
     if (onUpdateStatus) {
       onUpdateStatus(order.orderNumber, newStatus, "", reserveInput, notesInput);
-    }
-  };
-
-  const handleConfirmPlanted = () => {
-    setSelectedStatus("Planted");
-    setShowPlantingInputs(false);
-    if (onUpdateStatus) {
-      onUpdateStatus(
-        order.orderNumber,
-        "Planted",
-        "",
-        reserveInput.trim(),
-        notesInput.trim(),
-        tagInput.trim() ? [tagInput.trim().toUpperCase()] : undefined
-      );
     }
   };
 
@@ -171,78 +153,30 @@ export function OrderDetailsModal({
             : `${order.treeSpecies} Adoption Details`}
         </h3>
 
-        {/* Admin Tree Assignment Option Panel */}
-        <div
-          className={`p-4 mb-4 rounded-2xl border space-y-2.5 transition-all ${
-            assignedTreeTags
-              ? "bg-[#f2faf5] border-[#b4ddc3] text-[#173324]"
-              : "bg-gradient-to-r from-amber-50 to-[#fffdf5] border-amber-300 text-amber-950 shadow-xs"
-          }`}
-        >
-          <div className="flex items-center justify-between">
+        {/* Informational banner only when tree is already assigned */}
+        {assignedTreeTags && (
+          <div className="p-3 mb-4 rounded-2xl bg-[#f2faf5] border border-[#b4ddc3] text-[#173324] flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-xl">🌲</span>
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-[#173324] block">
-                  Tree Planting & Certificate Details
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#173324] block">
+                  Assigned Tree Details
                 </span>
-                <span className="text-[11px] text-[#55695d]">
-                  {assignedTreeTags
-                    ? "Tree species & unique tree ID officially linked to buyer deed"
-                    : "Action Required: Assign tree species & unique tree ID to this purchase"}
+                <span className="text-xs font-mono font-bold text-emerald-800">
+                  🏷️ {assignedTreeTags} • {order.treeSpecies}
+                  {order.scientificName && (
+                    <span className="text-[11px] text-emerald-700 italic ml-1">
+                      ({order.scientificName})
+                    </span>
+                  )}
                 </span>
               </div>
             </div>
-            <span
-              className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
-                assignedTreeTags
-                  ? "bg-emerald-100 text-emerald-800 border-emerald-300"
-                  : "bg-amber-200 text-amber-900 border-amber-300 animate-pulse"
-              }`}
-            >
-              {assignedTreeTags ? "✓ Assigned & Planted" : "Needs Tree Details"}
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+              ✓ Planted
             </span>
           </div>
-
-          {assignedTreeTags ? (
-            <div className="flex items-center justify-between pt-2 border-t border-[#c6e6d3] flex-wrap gap-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-mono font-bold text-xs bg-white text-emerald-800 px-2.5 py-1 rounded-lg border border-emerald-300 shadow-2xs">
-                  🏷️ {assignedTreeTags}
-                </span>
-                <span className="text-xs text-emerald-900 font-bold">
-                  {order.treeSpecies}
-                </span>
-                {order.scientificName && (
-                  <span className="text-[11px] text-emerald-700 italic">
-                    ({order.scientificName})
-                  </span>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-2 pt-1 border-t border-amber-200">
-              <p className="text-[11px] text-amber-900 leading-snug">
-                As Admin, assign the botanical species (e.g. Sandalwood, Teak, Neem) and unique tree ID to be planted for <strong>{order.adopterName}</strong> and stamped on their certificate.
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  if (onOpenAssignTree) {
-                    onOpenAssignTree(order);
-                  } else {
-                    handleStatusChange("Planted");
-                  }
-                }}
-                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#173324] to-[#1b7a43] hover:brightness-110 text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>🌱</span>
-                <span>Assign Tree & Unique Tree ID to Buyer →</span>
-              </button>
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Status Changing Option Panel */}
         <div className="p-4 mb-4 rounded-2xl bg-[#f0faf4] border border-[#cbe9d8]">
@@ -305,58 +239,33 @@ export function OrderDetailsModal({
           )}
 
           {currentStatus === "Verified & Tagged" && (
-            <div className="mt-3 space-y-3 p-3 bg-white rounded-xl border border-emerald-300">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800">
-                <span>🌱</span> Step 3: Assign Geographical Location & Plant Tree
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-[#173324] mb-1">
-                  Planting Location (Selected by Buyer)
-                </label>
-                <div className="w-full text-xs font-semibold py-2 px-3 rounded-lg border border-[#d2e4d8] bg-[#f4f8f5] text-[#173324] flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 truncate">
-                    <span>📍</span> {reserveInput || order.reserveName || "—"}
-                  </span>
-                  <span className="text-[10px] font-bold text-[#687f72] uppercase tracking-wider shrink-0">🔒 Locked</span>
+            <div className="mt-3 space-y-2.5 p-3.5 bg-white rounded-2xl border border-emerald-300">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800">
+                  <span>🌱</span>
+                  <span>Stage 2 Complete: Ready to Assign Tree</span>
                 </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  Ready to Plant
+                </span>
               </div>
-
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-[#173324] mb-1">
-                  Unique Tree ID <span className="text-emerald-600">*</span>
-                </label>
-                <div className="space-y-1.5">
-                  <input
-                    type="text"
-                    required
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    placeholder="e.g. POA-TK-2026-0042"
-                    className="w-full text-xs font-mono font-bold py-1.5 px-2.5 rounded-lg border border-[#b2ddc4] bg-[#fafcfb] text-[#173324] uppercase outline-none"
-                  />
-                  {onOpenAssignTree && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onClose();
-                        onOpenAssignTree(order);
-                      }}
-                      className="w-full py-1.5 px-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1"
-                    >
-                      <span>📦</span>
-                      <span>Or Select From Available Nursery Saplings Inventory →</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-
+              <p className="text-[11px] text-[#55695d] leading-relaxed">
+                Order is verified. Assign the tree species and unique tree ID to proceed to planting.
+              </p>
               <button
                 type="button"
-                onClick={handleConfirmPlanted}
-                className="w-full py-2.5 px-4 text-xs font-bold text-white bg-gradient-to-r from-[#173324] to-[#1b7a43] hover:brightness-105 rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                onClick={() => {
+                  onClose();
+                  if (onOpenAssignTree) {
+                    onOpenAssignTree(order);
+                  } else {
+                    handleStatusChange("Planted");
+                  }
+                }}
+                className="w-full py-2.5 px-4 text-xs font-bold text-white bg-gradient-to-r from-[#173324] to-[#1b7a43] hover:brightness-105 rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2"
               >
-                <span>Confirm Planting & Issue Certificate 📜</span>
+                <span>🌱</span>
+                <span>Assign Tree Species & Mark Planted →</span>
               </button>
             </div>
           )}
@@ -411,16 +320,7 @@ export function OrderDetailsModal({
               {assignedTreeTags ? (
                 <span>🏷️ {assignedTreeTags}</span>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClose();
-                    onOpenAssignTree?.(order);
-                  }}
-                  className="text-xs font-bold text-[#1b7a43] underline cursor-pointer"
-                >
-                  + Assign Tree Now
-                </button>
+                <span className="text-xs text-[#7a8a80] font-normal">Pending Planting</span>
               )}
             </span>
           </div>

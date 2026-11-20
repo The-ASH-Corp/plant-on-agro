@@ -152,6 +152,53 @@ export function OrdersTab({
     };
   }, [currentPage, pageSize, debouncedSearch, selectedStatusFilter, orders.length]);
 
+  // Synchronize serverOrders with incoming updated orders from props
+  useEffect(() => {
+    if (serverOrders && orders && orders.length > 0) {
+      setServerOrders((prev) => {
+        if (!prev) return prev;
+        return prev.map((srv) => {
+          const matching = orders.find(
+            (o) => o.orderNumber === srv.orderNumber || o.id === srv.id
+          );
+          return matching ? { ...srv, ...matching } : srv;
+        });
+      });
+    }
+  }, [orders]);
+
+  // Listen for real-time status & tree updates across admin modals
+  useEffect(() => {
+    const handleStatusChanged = (e: any) => {
+      const detail = e.detail;
+      if (!detail) return;
+      if (serverOrders) {
+        setServerOrders((prev) => {
+          if (!prev) return prev;
+          return prev.map((o) => {
+            if (o.orderNumber === detail.orderNumber || o.id === detail.orderNumber) {
+              return {
+                ...o,
+                status: detail.newStatus || detail.status || o.status,
+                treeSpecies: detail.treeSpecies || o.treeSpecies,
+                scientificName: detail.scientificName || o.scientificName,
+                category: detail.category || o.category,
+                assignedTreeTags: detail.treeTags || o.assignedTreeTags,
+                treeTag: detail.treeTags?.[0] || o.treeTag,
+              };
+            }
+            return o;
+          });
+        });
+      }
+    };
+
+    window.addEventListener("poa-order-status-changed", handleStatusChanged);
+    return () => {
+      window.removeEventListener("poa-order-status-changed", handleStatusChanged);
+    };
+  }, [serverOrders]);
+
   // Total records and pagination calculations
   const totalCount = serverTotal !== null ? serverTotal : filteredOrders.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
@@ -347,7 +394,12 @@ export function OrdersTab({
                       (inst.orderRef && (inst.orderRef === order.orderNumber || inst.orderRef === order.id)) ||
                       (order.treeTag && inst.treeTag === order.treeTag)
                   );
-                  const assignedTag = matchingInstance?.treeTag || order.treeTag;
+                  const assignedTag =
+                    matchingInstance?.treeTag ||
+                    order.treeTag ||
+                    (order.assignedTreeTags && order.assignedTreeTags.length > 0
+                      ? order.assignedTreeTags[0]
+                      : "");
 
                   return (
                     <tr
@@ -386,7 +438,7 @@ export function OrdersTab({
                         <span className="text-[11px] text-[#55695d] block mt-0.5">{order.planType}</span>
                       </td>
 
-                      {/* Explicit Tree Assignment Column */}
+                      {/* Assigned Tree Column (Display only; assignment happens at 'Verified & Tagged' step) */}
                       <td className="py-3.5 px-4">
                         {assignedTag ? (
                           <div className="flex items-center gap-1.5 flex-wrap">
@@ -398,20 +450,9 @@ export function OrdersTab({
                             </span>
                           </div>
                         ) : (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (onOpenAssignTree) {
-                                onOpenAssignTree(order);
-                              } else {
-                                handleStatusChange(order.orderNumber, "Planted");
-                              }
-                            }}
-                            className="px-2.5 py-1 text-[11px] font-bold text-white bg-gradient-to-r from-[#173324] to-[#1b7a43] hover:brightness-110 rounded-lg shadow-2xs transition-all cursor-pointer inline-flex items-center gap-1"
-                          >
-                            <span>🌱</span>
-                            <span>Assign Tree to User</span>
-                          </button>
+                          <span className="text-[11px] text-[#7a8a80] font-medium">
+                            Pending Assignment
+                          </span>
                         )}
                       </td>
 

@@ -92,14 +92,14 @@ export function CertificateFiltersBar({
             </button>
           </div>
 
-          {/* + Issue Deed CTA */}
-          <button
+          {/* Manual certificate creation option commented out as requested */}
+          {/* <button
             onClick={onOpenIssueModal}
             className="px-4 py-2 rounded-2xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center gap-1.5"
           >
             <span>+</span>
             <span>Issue New Deed</span>
-          </button>
+          </button> */}
         </div>
       </div>
 

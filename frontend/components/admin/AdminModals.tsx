@@ -136,6 +136,7 @@ export function AdminModals({
         order={orderActions.orderToMarkPlanted}
         locations={data.locations}
         instances={data.instances}
+        treeVarieties={data.trees}
         onClose={() => orderActions.setOrderToMarkPlanted(null)}
         onSubmit={async (
           orderNumber,
@@ -163,9 +164,17 @@ export function AdminModals({
             treeGpsCoords
           );
         }}
+        onCompleteOrder={async (orderNumber) => {
+          await orderActions.handleUpdateOrderStatus(orderNumber, "Completed");
+        }}
+        onViewOrderDetails={(updatedOrder) => {
+          orderActions.setOrderToMarkPlanted(null);
+          orderActions.setSelectedOrder(updatedOrder);
+        }}
       />
 
       {/* Certificates */}
+      {/* Manual Certificate Issuance Modal - Commented out as requested
       <IssueCertificateModal
         isOpen={certificateActions.showIssueCertModal}
         onClose={() => certificateActions.setShowIssueCertModal(false)}
@@ -174,6 +183,7 @@ export function AdminModals({
         orders={orders}
         instances={instances}
       />
+      */}
       <InspectCertificateModal
         certificate={selectedCertForInspect}
         onClose={() => setSelectedCertForInspect(null)}

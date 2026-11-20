@@ -215,7 +215,8 @@ export function CertificatesTab({
           </p>
         </div>
 
-        <div className="relative z-10 flex sm:flex-col items-end justify-between gap-3">
+        {/* Manual certificate issuance option commented out as requested */}
+        {/* <div className="relative z-10 flex sm:flex-col items-end justify-between gap-3">
           <button
             onClick={onOpenIssueCertificate}
             className="px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-extrabold text-xs tracking-wide shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center gap-2"
@@ -223,7 +224,7 @@ export function CertificatesTab({
             <span className="text-sm">📜</span>
             <span>+ Issue Certificate Deed</span>
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* 2. KPI Metric Cards */}
