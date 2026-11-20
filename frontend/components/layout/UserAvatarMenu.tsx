@@ -163,27 +163,6 @@ export function UserAvatarMenu({ user, onLogout, openPlant }: UserAvatarMenuProp
                 <p className="text-[10px] text-[#52796f] truncate">{dashboardDesc}</p>
               </div>
             </button>
-
-            {/* If Buyer and openPlant is provided */}
-            {!isAdmin && openPlant && (
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  openPlant();
-                }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-[#eef7f2] transition-colors cursor-pointer group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-[#e2f3e9] group-hover:bg-[#d0edd9] text-[#1b7a43] flex items-center justify-center text-base transition-colors shrink-0">
-                  🌱
-                </div>
-                <div className="min-w-0 flex-1">
-                  <span className="text-xs font-bold text-[#173324] group-hover:text-[#1b7a43] block">
-                    Plant Another Tree
-                  </span>
-                  <p className="text-[10px] text-[#52796f] truncate">Choose an adoption plan</p>
-                </div>
-              </button>
-            )}
           </div>
 
           {/* Logout Section */}

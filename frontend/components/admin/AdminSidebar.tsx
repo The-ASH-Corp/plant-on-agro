@@ -32,7 +32,6 @@ interface AdminSidebarProps {
   onOpenAddTree?: () => void;
   onOpenAddPlan: () => void;
   onOpenAddLocation: () => void;
-  onOpenAddInstance?: () => void;
   onOpenIssueCertificate?: () => void;
 }
 
@@ -55,7 +54,6 @@ export function AdminSidebar({
   onOpenAddTree,
   onOpenAddPlan,
   onOpenAddLocation,
-  onOpenAddInstance,
   onOpenIssueCertificate,
 }: AdminSidebarProps) {
   const navItems: NavItemDef[] = [
@@ -138,15 +136,6 @@ export function AdminSidebar({
                         <span className="text-base 3xl:text-lg 4k:text-xl">{item.icon}</span>
                         <span>{item.label}</span>
                       </div>
-                      {typeof item.count === "number" && (
-                        <span
-                          className={`text-[11px] 3xl:text-xs px-2 py-0.5 rounded-full font-mono ${
-                            isActive ? "bg-white/20 text-white font-bold" : "bg-white/10 text-white/70"
-                          }`}
-                        >
-                          {item.count}
-                        </span>
-                      )}
                       {item.badge && (
                         <span className="text-[9px] 3xl:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
                           {item.badge}

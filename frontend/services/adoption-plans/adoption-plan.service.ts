@@ -94,7 +94,12 @@ export const adoptionPlanService = {
 
   // Helper mapper to UI model
   mapToUiItem(item: BackendAdoptionPlan): AdoptionPlanItem {
-    const rawPrice = typeof item.price === 'number' && item.price > 0 ? item.price : item.priceModifier;
+    const rawPrice =
+      typeof item.price === 'number' && item.price >= 0
+        ? item.price
+        : typeof item.priceModifier === 'number' && item.priceModifier >= 0
+        ? item.priceModifier
+        : 0;
     return {
       id: item.id,
       label: item.planLabel,

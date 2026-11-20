@@ -20,7 +20,7 @@ import { deriveOrdersFromInstances } from "../utils/deriveAdminData";
 import type { ShowToast } from "./useAdminToast";
 
 /** Holds all admin dashboard collections and loads them from the backend on mount. */
-export function useAdminData(showToast: ShowToast) {
+export function useAdminData(showToast: ShowToast, isReady = true) {
   const [trees, setTrees] = useState<TreeVarietyItem[]>([]);
   const [plans, setPlans] = useState<AdoptionPlanItem[]>([]);
   const [instances, setInstances] = useState<TreeInstanceItem[]>([]);
@@ -64,67 +64,64 @@ export function useAdminData(showToast: ShowToast) {
 
   // Load real tree varieties, adoption plans, and tree instances from backend API on mount
   useEffect(() => {
+    if (!isReady) return;
     let isMounted = true;
     async function loadCatalog() {
       try {
-        const [treesRes, plansRes, instancesRes, usersRes, ordersRes, certsRes, locationsRes, waitlistRes] = await Promise.all([
+        const results = await Promise.allSettled([
           treeVarietyService.getAll(),
           adoptionPlanService.getAll(),
-          treeInstanceService.getAll(),
-          userService.listUsers(100, 0).catch((err) => {
-            console.warn("Could not load users:", err);
-            return null;
-          }),
+          treeInstanceService.getAll({ limit: 100 }),
+          userService.listUsers(100, 0),
           orderService.getAll({ limit: 200 }),
-          certificateService.getCertificates({ limit: 200 }).catch((err) => {
-            console.warn("Could not load certificates:", err);
-            return null;
-          }),
-          locationService.getAll({ limit: 100 }).catch((err) => {
-            console.warn("Could not load locations from backend:", err);
-            return null;
-          }),
-          waitlistService.getAll().catch((err) => {
-            console.warn("Could not load waitlist:", err);
-            return null;
-          }),
+          certificateService.getCertificates({ limit: 100 }),
+          locationService.getAll({ limit: 100 }),
+          waitlistService.getAll(),
         ]);
         if (!isMounted) return;
 
-        const apiTrees = treesRes.data?.items ? treesRes.data.items.map(treeVarietyService.mapToUiItem) : [];
-        const apiPlans = plansRes.data?.items ? plansRes.data.items.map(adoptionPlanService.mapToUiItem) : [];
-        const apiInstances = instancesRes.data?.items ? instancesRes.data.items.map(treeInstanceService.mapToUiItem) : [];
+        const [treesRes, plansRes, instancesRes, usersRes, ordersRes, certsRes, locationsRes, waitlistRes] = results;
 
-        setTrees(apiTrees);
-        setPlans(apiPlans);
-        setInstances(apiInstances);
+        if (treesRes.status === "fulfilled" && treesRes.value?.data?.items) {
+          setTrees(treesRes.value.data.items.map(treeVarietyService.mapToUiItem));
+        }
 
-        if (usersRes?.data) {
-          const raw = usersRes.data;
+        if (plansRes.status === "fulfilled" && plansRes.value?.data?.items) {
+          setPlans(plansRes.value.data.items.map(adoptionPlanService.mapToUiItem));
+        }
+
+        const rawInstances =
+          instancesRes.status === "fulfilled" && instancesRes.value?.data?.items
+            ? instancesRes.value.data.items
+            : [];
+        setInstances(rawInstances.map(treeInstanceService.mapToUiItem));
+
+        if (usersRes.status === "fulfilled" && usersRes.value?.data) {
+          const raw = usersRes.value.data as any;
           const userItems = Array.isArray(raw) ? raw : (raw.items || []);
           setUsers(userItems);
         }
 
-        if (certsRes?.data?.items) {
-          setCertificates(certsRes.data.items);
+        if (certsRes.status === "fulfilled" && certsRes.value?.data?.items) {
+          setCertificates(certsRes.value.data.items);
         }
 
-        if (waitlistRes?.data?.items) {
-          setWaitlist(waitlistRes.data.items);
+        if (waitlistRes.status === "fulfilled" && waitlistRes.value?.data?.items) {
+          setWaitlist(waitlistRes.value.data.items);
         }
 
         // Count live trees planted per reserve
         const treeCountMap: Record<string, number> = {};
-        (instancesRes.data?.items || []).forEach((i: any) => {
+        rawInstances.forEach((i: any) => {
           const resName = i.assignedReserve;
           if (resName) {
             treeCountMap[resName] = (treeCountMap[resName] || 0) + 1;
           }
         });
 
-        // Load bio-reserves strictly from backend API (no fabricated random places)
-        if (locationsRes?.data?.items && locationsRes.data.items.length > 0) {
-          const apiLocations = locationsRes.data.items.map((item) => {
+        // Load bio-reserves strictly from backend API
+        if (locationsRes.status === "fulfilled" && locationsRes.value?.data?.items && locationsRes.value.data.items.length > 0) {
+          const apiLocations = locationsRes.value.data.items.map((item) => {
             const uiLoc = locationService.mapToUiItem(item);
             const liveCount = treeCountMap[uiLoc.name] || uiLoc.treesPlanted || 0;
             return {
@@ -138,12 +135,11 @@ export function useAdminData(showToast: ShowToast) {
           setLocations([]);
         }
 
-        // Dynamically load adoption orders directly from MongoDB database (collection: adoptionorders)
-        if (ordersRes.data?.items && ordersRes.data.items.length > 0) {
-          setOrders(ordersRes.data.items.map(orderService.mapToUiItem));
-        } else {
-          // Graceful fallback to derive from instances if adoptionorders collection is empty
-          setOrders(deriveOrdersFromInstances(instancesRes.data?.items || [], []));
+        // Dynamically load adoption orders directly from backend
+        if (ordersRes.status === "fulfilled" && ordersRes.value?.data?.items && ordersRes.value.data.items.length > 0) {
+          setOrders(ordersRes.value.data.items.map(orderService.mapToUiItem));
+        } else if (rawInstances.length > 0) {
+          setOrders(deriveOrdersFromInstances(rawInstances, []));
         }
       } catch (err) {
         console.warn("Could not load catalog from backend:", err);
@@ -153,7 +149,7 @@ export function useAdminData(showToast: ShowToast) {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [isReady]);
 
   return {
     trees, setTrees,

@@ -1,5 +1,5 @@
-import { AdoptionPlan } from '../../../core/entities/adoption-plan.entity';
-import { IAdoptionPlanDocument } from '../models/adoption-plan.model';
+import { AdoptionPlan } from "../../../core/entities/adoption-plan.entity";
+import { IAdoptionPlanDocument } from "../models/adoption-plan.model";
 
 export class AdoptionPlanMapper {
   public static toDomain(doc: IAdoptionPlanDocument): AdoptionPlan {
@@ -7,7 +7,10 @@ export class AdoptionPlanMapper {
       id: doc._id ? String(doc._id) : undefined,
       planLabel: doc.planLabel,
       icon: doc.icon,
-      price: (doc as any).price !== undefined ? (doc as any).price : doc.priceModifier,
+      price:
+        (doc as any).price !== undefined
+          ? (doc as any).price
+          : doc.priceModifier,
       priceModifier: doc.priceModifier,
       description: doc.description,
       features: doc.features,
@@ -20,7 +23,9 @@ export class AdoptionPlanMapper {
     });
   }
 
-  public static toPersistence(plan: AdoptionPlan): Partial<IAdoptionPlanDocument> {
+  public static toPersistence(
+    plan: AdoptionPlan,
+  ): Partial<IAdoptionPlanDocument> {
     return {
       planLabel: plan.planLabel,
       icon: plan.icon,

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { TreeVarietyItem } from "../types";
 import { TrashIcon, PencilIcon, Select } from "@/components/ui";
+import { treeVarietyService } from "@/services/tree-varieties/tree-variety.service";
 
 interface TreesTabProps {
   trees: TreeVarietyItem[];
@@ -33,10 +34,33 @@ export function TreesTab({
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(9);
+  const [serverTrees, setServerTrees] = useState<TreeVarietyItem[] | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchTrees() {
+      try {
+        const res = await treeVarietyService.getAll();
+        if (isMounted && res.data?.items) {
+          setServerTrees(res.data.items.map(treeVarietyService.mapToUiItem));
+        }
+      } catch (err) {
+        console.warn("Could not fetch trees:", err);
+      }
+    }
+    fetchTrees();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const baseTrees = useMemo(() => {
+    return serverTrees !== null && serverTrees.length > 0 ? serverTrees : trees;
+  }, [serverTrees, trees]);
 
   // Filter trees based on search and category
   const filteredTrees = useMemo(() => {
-    return trees.filter((t) => {
+    return baseTrees.filter((t) => {
       const matchesSearch =
         t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         t.sci.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -46,7 +70,7 @@ export function TreesTab({
         selectedCategory === "All" || t.category === selectedCategory;
       return matchesSearch && matchesCat;
     });
-  }, [trees, searchQuery, selectedCategory]);
+  }, [baseTrees, searchQuery, selectedCategory]);
 
   // Reset page to 1 whenever filters change
   useEffect(() => {
@@ -106,22 +130,12 @@ export function TreesTab({
                 style={{ fontFamily: "var(--font-display)" }}
                 className="text-2xl sm:text-3xl 3xl:text-4xl 4k:text-5xl font-bold tracking-tight text-white"
               >
-                {trees.length} Species Catalogued
+                {baseTrees.length} Species Catalogued
               </h2>
             </div>
             <p className="text-xs 3xl:text-sm text-white/85 leading-relaxed">
               Botanical species are curated for regional bio-reserves. Individual trees do not have prices—buyers select Adoption Plans, and our forestry team assigns specific native species and Unique Tree IDs to users upon purchase verification.
             </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onOpenAddTree}
-              className="px-5 py-2.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-[#173324] font-bold text-xs 3xl:text-sm transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
-            >
-              <span>+</span>
-              <span>Add Botanical Variety</span>
-            </button>
           </div>
         </div>
       </div>

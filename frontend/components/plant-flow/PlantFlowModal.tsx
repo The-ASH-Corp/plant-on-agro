@@ -152,9 +152,9 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
   const selectedPlanData = plans.find((p) => p.id === selectedPlan);
   // In this project, the amount is strictly for the PLAN, NOT for the tree.
   const planPrice =
-    selectedPlanData && typeof selectedPlanData.price === "number" && selectedPlanData.price > 0
+    selectedPlanData && typeof selectedPlanData.price === "number" && selectedPlanData.price >= 0
       ? selectedPlanData.price
-      : 25000;
+      : 0;
   const pricePerTree = planPrice;
   const total = planPrice * qty;
 

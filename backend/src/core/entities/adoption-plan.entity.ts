@@ -80,7 +80,7 @@ export class AdoptionPlan {
   }
 
   public get price(): number {
-    return this._price !== undefined && this._price > 0 ? this._price : this._priceModifier;
+    return this._price !== undefined ? this._price : this._priceModifier;
   }
 
   public get priceModifier(): number {

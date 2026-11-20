@@ -11,7 +11,11 @@ interface EditPlanModalProps {
   isSubmitting?: boolean;
 }
 
-const OCCASIONS: { value: OccasionDedicationType; label: string; icon: string }[] = [
+const OCCASIONS: {
+  value: OccasionDedicationType;
+  label: string;
+  icon: string;
+}[] = [
   { value: "birthday", label: "Birthday", icon: "🎂" },
   { value: "student", label: "Student", icon: "🎓" },
   { value: "marriage", label: "Marriage", icon: "💍" },
@@ -39,9 +43,9 @@ export function EditPlanModal({
     isActive: true,
   });
 
-  const [selectedOccasions, setSelectedOccasions] = useState<OccasionDedicationType[]>([
-    "general",
-  ]);
+  const [selectedOccasions, setSelectedOccasions] = useState<
+    OccasionDedicationType[]
+  >(["general"]);
 
   useEffect(() => {
     if (plan) {
@@ -49,8 +53,8 @@ export function EditPlanModal({
         plan.priceModifier !== undefined
           ? plan.priceModifier
           : typeof plan.price === "number"
-          ? plan.price
-          : 0;
+            ? plan.price
+            : 0;
 
       setFormData({
         label: plan.label || plan.planLabel || "",
@@ -65,7 +69,7 @@ export function EditPlanModal({
       setSelectedOccasions(
         plan.occasionDedications && plan.occasionDedications.length > 0
           ? plan.occasionDedications
-          : ["general"]
+          : ["general"],
       );
     }
   }, [plan]);
@@ -73,7 +77,7 @@ export function EditPlanModal({
   if (!isOpen || !plan) return null;
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value, type } = e.target;
     if (type === "checkbox") {
@@ -127,7 +131,8 @@ export function EditPlanModal({
           Edit Adoption Plan
         </h3>
         <p className="text-xs text-[#55695d] mb-4">
-          Update pricing modifiers, features, badges, and occasion dedication options.
+          Update pricing modifiers, features, badges, and occasion dedication
+          options.
         </p>
 
         <form onSubmit={onSubmit} className="space-y-4 text-xs">
@@ -139,7 +144,12 @@ export function EditPlanModal({
             value={JSON.stringify(selectedOccasions)}
           />
           {selectedOccasions.map((occ) => (
-            <input key={`edit-hidden-${occ}`} type="hidden" name="occasions" value={occ} />
+            <input
+              key={`edit-hidden-${occ}`}
+              type="hidden"
+              name="occasions"
+              value={occ}
+            />
           ))}
 
           {/* Plan Label and Icon */}
@@ -250,13 +260,16 @@ export function EditPlanModal({
                   Occasion Dedication Options *
                 </label>
                 <span className="text-[10px] text-[#73877b]">
-                  {selectedOccasions.length} of {OCCASIONS.length} occasions selected
+                  {selectedOccasions.length} of {OCCASIONS.length} occasions
+                  selected
                 </span>
               </div>
               <div className="flex items-center gap-1.5 text-[10px]">
                 <button
                   type="button"
-                  onClick={() => setSelectedOccasions(OCCASIONS.map((o) => o.value))}
+                  onClick={() =>
+                    setSelectedOccasions(OCCASIONS.map((o) => o.value))
+                  }
                   className="px-2 py-0.5 rounded-md border border-[#e2eae5] bg-white text-[#173324] hover:bg-[#f2f6f3] font-medium cursor-pointer transition-colors"
                 >
                   Select All
@@ -288,7 +301,9 @@ export function EditPlanModal({
                     <span>{occ.icon}</span>
                     <span>{occ.label}</span>
                     {isChecked ? (
-                      <span className="text-emerald-300 font-bold text-xs leading-none">✓</span>
+                      <span className="text-emerald-300 font-bold text-xs leading-none">
+                        ✓
+                      </span>
                     ) : (
                       <span className="w-2 h-2 rounded-full border border-gray-300 inline-block" />
                     )}
@@ -297,7 +312,8 @@ export function EditPlanModal({
               })}
             </div>
             <span className="text-[10px] text-[#73877b] block leading-relaxed">
-              Adopters can choose to dedicate their tree adoption towards any of the active checked occasion programs.
+              Adopters can choose to dedicate their tree adoption towards any of
+              the active checked occasion programs.
             </span>
           </div>
 

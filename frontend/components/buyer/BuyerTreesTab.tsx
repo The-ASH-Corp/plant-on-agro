@@ -91,13 +91,6 @@ export function BuyerTreesTab({
               </button>
             ))}
           </div>
-
-          <button
-            onClick={onOpenPlantFlow}
-            className="text-xs font-bold px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#1b7a43] to-[#2d6a4f] text-white hover:scale-105 transition-transform shadow-xs cursor-pointer flex items-center gap-1"
-          >
-            <span>+</span> Adopt Tree
-          </button>
         </div>
       </div>
 

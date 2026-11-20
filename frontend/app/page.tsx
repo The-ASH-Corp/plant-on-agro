@@ -16,20 +16,36 @@ import {
 } from "@/components/landing";
 
 import { HeroLiveStats } from "@/components/landing/Hero";
-import { ImpactLiveStats, ImpactProjectItem } from "@/components/landing/ImpactSection";
+import {
+  ImpactLiveStats,
+  ImpactProjectItem,
+} from "@/components/landing/ImpactSection";
 import { SampleTreeCertificate } from "@/components/landing/CertificateSection";
 import { PlantFlow } from "@/components/plant-flow";
 import { BookVisitModal } from "@/components/buyer/BookVisitModal";
-import { ExperienceItem, experienceService } from "@/services/experiences/experience.service";
+import {
+  ExperienceItem,
+  experienceService,
+} from "@/services/experiences/experience.service";
 import {
   landingPageService,
   LandingPageContent,
   DEFAULT_LANDING_PAGE_CONTENT,
 } from "@/services/landing-page/landing-page.service";
-import { treeInstanceService, BackendTreeInstance } from "@/services/tree-instances/tree-instance.service";
-import { treeVarietyService, BackendTreeVariety } from "@/services/tree-varieties/tree-variety.service";
+import {
+  treeInstanceService,
+  BackendTreeInstance,
+} from "@/services/tree-instances/tree-instance.service";
+import {
+  treeVarietyService,
+  BackendTreeVariety,
+} from "@/services/tree-varieties/tree-variety.service";
 import { adoptionPlanService } from "@/services/adoption-plans/adoption-plan.service";
-import { locationService, BackendLocation } from "@/services/locations/location.service";
+import {
+  locationService,
+  BackendLocation,
+} from "@/services/locations/location.service";
+import { getMediaUrl, DEFAULT_NATURE_IMAGE } from "@/services/media/media.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
 
@@ -42,16 +58,25 @@ export default function App() {
   const [activeSection, setActiveSection] = useState<Section>("home");
   const [plantOpen, setPlantOpen] = useState(false);
   const [visitOpen, setVisitOpen] = useState(false);
-  const [selectedExpForVisit, setSelectedExpForVisit] = useState<ExperienceItem | null>(null);
+  const [selectedExpForVisit, setSelectedExpForVisit] =
+    useState<ExperienceItem | null>(null);
   const [experiences, setExperiences] = useState<ExperienceItem[]>([]);
   const [initialPlanId, setInitialPlanId] = useState<string | null>(null);
-  const [cmsContent, setCmsContent] = useState<LandingPageContent>(DEFAULT_LANDING_PAGE_CONTENT);
+  const [cmsContent, setCmsContent] = useState<LandingPageContent>(
+    DEFAULT_LANDING_PAGE_CONTENT,
+  );
 
   // Live DB states
-  const [heroLiveStats, setHeroLiveStats] = useState<HeroLiveStats | undefined>();
-  const [impactLiveStats, setImpactLiveStats] = useState<ImpactLiveStats | undefined>();
+  const [heroLiveStats, setHeroLiveStats] = useState<
+    HeroLiveStats | undefined
+  >();
+  const [impactLiveStats, setImpactLiveStats] = useState<
+    ImpactLiveStats | undefined
+  >();
   const [liveProjects, setLiveProjects] = useState<ImpactProjectItem[]>([]);
-  const [sampleCertificate, setSampleCertificate] = useState<SampleTreeCertificate | undefined>();
+  const [sampleCertificate, setSampleCertificate] = useState<
+    SampleTreeCertificate | undefined
+  >();
 
   const [userTrees, setUserTrees] = useState<BackendTreeInstance[]>([]);
 
@@ -65,7 +90,14 @@ export default function App() {
 
     async function loadAllData() {
       try {
-        const [cmsRes, instancesRes, varietiesRes, plansRes, expRes, locationsRes] = await Promise.allSettled([
+        const [
+          cmsRes,
+          instancesRes,
+          varietiesRes,
+          plansRes,
+          expRes,
+          locationsRes,
+        ] = await Promise.allSettled([
           landingPageService.get(),
           treeInstanceService.getAll({ limit: 100 }),
           treeVarietyService.getAll({ limit: 50 }),
@@ -90,14 +122,15 @@ export default function App() {
             ? instancesRes.value.data.items
             : [];
         const totalTrees =
-          instancesRes.status === "fulfilled" && typeof instancesRes.value.data?.total === "number"
+          instancesRes.status === "fulfilled" &&
+          typeof instancesRes.value.data?.total === "number"
             ? instancesRes.value.data.total
             : instances.length;
 
         // Filter trees owned by current logged in user
         if (user?.email) {
           const matching = instances.filter(
-            (i) => i.adopterEmail?.toLowerCase() === user.email.toLowerCase()
+            (i) => i.adopterEmail?.toLowerCase() === user.email.toLowerCase(),
           );
           setUserTrees(matching);
         } else {
@@ -109,7 +142,8 @@ export default function App() {
             ? varietiesRes.value.data.items
             : [];
         const totalVarieties =
-          varietiesRes.status === "fulfilled" && typeof varietiesRes.value.data?.total === "number"
+          varietiesRes.status === "fulfilled" &&
+          typeof varietiesRes.value.data?.total === "number"
             ? varietiesRes.value.data.total
             : varieties.length;
 
@@ -130,13 +164,19 @@ export default function App() {
 
         // Compute CO2 offset (based on real variety absorption or avg 28.5 kg / tree / yr)
         const totalCo2Kg = instances.reduce((sum, inst) => {
-          const matchedVar = varieties.find((v) => v.commonName === inst.treeVarietyName);
+          const matchedVar = varieties.find(
+            (v) => v.commonName === inst.treeVarietyName,
+          );
           return sum + (matchedVar?.co2AbsorptionRateKgYear || 28.5);
         }, 0);
-        const totalCo2Mt = totalTrees > 0 ? Number(((totalCo2Kg || totalTrees * 28.5) / 1000).toFixed(2)) : 0;
+        const totalCo2Mt =
+          totalTrees > 0
+            ? Number(((totalCo2Kg || totalTrees * 28.5) / 1000).toFixed(2))
+            : 0;
 
         // Compute canopy area
-        const canopyAcres = totalTrees > 0 ? Number(((totalTrees * 450) / 43560).toFixed(1)) : 0;
+        const canopyAcres =
+          totalTrees > 0 ? Number(((totalTrees * 450) / 43560).toFixed(1)) : 0;
 
         // Set Live Hero Stats
         setHeroLiveStats({
@@ -158,7 +198,8 @@ export default function App() {
         const reserveCounts: Record<string, number> = {};
         instances.forEach((i) => {
           if (i.assignedReserve) {
-            reserveCounts[i.assignedReserve] = (reserveCounts[i.assignedReserve] || 0) + 1;
+            reserveCounts[i.assignedReserve] =
+              (reserveCounts[i.assignedReserve] || 0) + 1;
           }
         });
 
@@ -169,7 +210,7 @@ export default function App() {
             title: loc.name,
             trees: `${count} ${count === 1 ? "tree" : "trees"} planted`,
             region: loc.region,
-            img: loc.image || "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&auto=format",
+            img: getMediaUrl(loc.image || DEFAULT_NATURE_IMAGE),
           });
         }
         if (projectsList.length > 0) {
@@ -182,16 +223,23 @@ export default function App() {
         const firstInstance = instances[0];
         if (firstInstance) {
           setSampleCertificate({
-            recipientName: user?.name || firstInstance.adopterName || "Tree Adopter",
+            recipientName:
+              user?.name || firstInstance.adopterName || "Tree Adopter",
             treeName: firstInstance.treeVarietyName || "Sacred Banyan",
             treeId: firstInstance.treeTag || "POA-BY-1204",
-            location: firstInstance.assignedReserve || verifiedLocations[0]?.name || "Flagship Reserve",
+            location:
+              firstInstance.assignedReserve ||
+              verifiedLocations[0]?.name ||
+              "Flagship Reserve",
             date: firstInstance.datePlanted
-              ? new Date(firstInstance.datePlanted).toLocaleDateString("en-IN", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })
+              ? new Date(firstInstance.datePlanted).toLocaleDateString(
+                  "en-IN",
+                  {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  },
+                )
               : "15 Apr 2026",
           });
         }
@@ -303,10 +351,7 @@ export default function App() {
         )}
       </main>
 
-      <Footer
-        openPlant={() => handleOpenPlant()}
-        content={cmsContent.footer}
-      />
+      <Footer openPlant={() => handleOpenPlant()} content={cmsContent.footer} />
 
       {plantOpen && (
         <PlantFlow

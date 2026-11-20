@@ -54,7 +54,7 @@ export function AdminDashboard() {
 
   const { toastMessage, showToast } = useAdminToast();
   const { user, logout, isReady, isAdmin } = useAdminAuthGuard();
-  const data = useAdminData(showToast);
+  const data = useAdminData(showToast, isReady);
 
   const ctx = { data, showToast, setActiveTab };
   const treeActions = useTreeActions(ctx);
@@ -102,7 +102,6 @@ export function AdminDashboard() {
         onOpenAddTree={() => treeActions.setShowAddTreeModal(true)}
         onOpenAddPlan={() => planActions.setShowAddPlanModal(true)}
         onOpenAddLocation={() => locationActions.setShowAddLocationModal(true)}
-        onOpenAddInstance={() => instanceActions.setShowAddInstanceModal(true)}
         onOpenIssueCertificate={() => certificateActions.setShowIssueCertModal(true)}
       />
 

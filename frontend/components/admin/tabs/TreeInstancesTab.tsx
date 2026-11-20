@@ -9,10 +9,21 @@ import { getBackendOrigin } from "@/services/api/api-client";
 interface TreeInstancesTabProps {
   instances: TreeInstanceItem[];
   searchQuery: string;
-  onOpenAddInstance: () => void;
+  onOpenAddInstance?: () => void;
   onEditInstance?: (instance: TreeInstanceItem) => void;
   onUpdateHealth?: (id: string, status: TreeHealthStatus) => void;
   onDeleteInstance?: (id: string, tag?: string) => void;
+}
+
+export interface PurchaserGroup {
+  purchaserName: string;
+  purchaserEmail?: string;
+  orderRefs: string[];
+  reserves: string[];
+  varieties: string[];
+  totalTrees: number;
+  trees: TreeInstanceItem[];
+  healthCounts: Record<TreeHealthStatus, number>;
 }
 
 const HEALTH_FILTERS: { value: string; label: string; icon: string }[] = [
@@ -24,7 +35,10 @@ const HEALTH_FILTERS: { value: string; label: string; icon: string }[] = [
   { value: "Critical", label: "Critical", icon: "🚨" },
 ];
 
-const HEALTH_BADGES: Record<TreeHealthStatus, { label: string; icon: string; bg: string; text: string; border: string }> = {
+const HEALTH_BADGES: Record<
+  TreeHealthStatus,
+  { label: string; icon: string; bg: string; text: string; border: string }
+> = {
   Thriving: { label: "Thriving", icon: "🌳", bg: "bg-emerald-50", text: "text-emerald-800", border: "border-emerald-200" },
   Healthy: { label: "Healthy", icon: "🌿", bg: "bg-green-50", text: "text-green-800", border: "border-green-200" },
   "Sapling Growing": { label: "Sapling Growing", icon: "🌱", bg: "bg-teal-50", text: "text-teal-800", border: "border-teal-200" },
@@ -42,21 +56,21 @@ const resolveImageUrl = (url?: string) => {
 export function TreeInstancesTab({
   instances,
   searchQuery,
-  onOpenAddInstance,
   onEditInstance,
   onUpdateHealth,
   onDeleteInstance,
 }: TreeInstancesTabProps) {
   const [selectedHealth, setSelectedHealth] = useState<string>("All");
-  const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+  const [viewMode, setViewMode] = useState<"grouped" | "table" | "grid">("grouped");
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
+  const [pageSize, setPageSize] = useState<number>(20);
   const [debouncedSearch, setDebouncedSearch] = useState<string>(searchQuery);
   const [serverInstances, setServerInstances] = useState<TreeInstanceItem[] | null>(null);
   const [serverTotal, setServerTotal] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
-  // Debounce search query to prevent excessive backend queries
+  // Debounce search query
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchQuery);
@@ -64,47 +78,108 @@ export function TreeInstancesTab({
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  // Reset page to 1 whenever filters or page size change
+  // Reset page to 1 whenever filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearch, selectedHealth, pageSize]);
 
-  // Summary Metrics (derived from instances)
-  const stats = useMemo(() => {
-    const total = serverTotal !== null ? serverTotal : instances.length;
-    const thrivingOrHealthy = instances.filter((i) => i.healthStatus === "Thriving" || i.healthStatus === "Healthy").length;
-    const saplings = instances.filter((i) => i.healthStatus === "Sapling Growing").length;
-    const attentionNeeded = instances.filter((i) => i.healthStatus === "Needs Attention" || i.healthStatus === "Critical").length;
-    return { total, thrivingOrHealthy, saplings, attentionNeeded };
-  }, [instances, serverTotal]);
+  // Base instances list (prioritize server data if loaded, otherwise prop data)
+  const baseInstances = useMemo(() => {
+    return serverInstances !== null && serverInstances.length > 0 ? serverInstances : instances;
+  }, [serverInstances, instances]);
 
-  // Fallback client-side filtered list
+  // Summary Metrics
+  const stats = useMemo(() => {
+    const total = baseInstances.length;
+    const thrivingOrHealthy = baseInstances.filter(
+      (i) => i.healthStatus === "Thriving" || i.healthStatus === "Healthy"
+    ).length;
+    const saplings = baseInstances.filter((i) => i.healthStatus === "Sapling Growing").length;
+    const attentionNeeded = baseInstances.filter(
+      (i) => i.healthStatus === "Needs Attention" || i.healthStatus === "Critical"
+    ).length;
+    return { total, thrivingOrHealthy, saplings, attentionNeeded };
+  }, [baseInstances]);
+
+  // Filtered list
   const filtered = useMemo(() => {
-    return instances.filter((item) => {
-      const q = debouncedSearch.toLowerCase();
+    return baseInstances.filter((item) => {
+      const q = debouncedSearch.toLowerCase().trim();
       const matchesSearch =
+        !q ||
         item.treeTag.toLowerCase().includes(q) ||
         (item.orderRef && item.orderRef.toLowerCase().includes(q)) ||
         item.assignedReserve.toLowerCase().includes(q) ||
         item.treeVarietyName.toLowerCase().includes(q) ||
-        item.adopterName.toLowerCase().includes(q);
+        (item.adopterName && item.adopterName.toLowerCase().includes(q)) ||
+        (item.adopterEmail && item.adopterEmail.toLowerCase().includes(q));
 
       const matchesHealth = selectedHealth === "All" || item.healthStatus === selectedHealth;
 
       return matchesSearch && matchesHealth;
     });
-  }, [instances, debouncedSearch, selectedHealth]);
+  }, [baseInstances, debouncedSearch, selectedHealth]);
 
-  // Fetch paginated data from backend API
+  // Group trees by purchaser / adopter name
+  const purchaserGroups = useMemo(() => {
+    const groupsMap = new Map<string, PurchaserGroup>();
+
+    filtered.forEach((item) => {
+      const name = item.adopterName?.trim() || "Unassigned / General Reserve";
+      let group = groupsMap.get(name);
+      if (!group) {
+        group = {
+          purchaserName: name,
+          purchaserEmail: item.adopterEmail,
+          orderRefs: [],
+          reserves: [],
+          varieties: [],
+          totalTrees: 0,
+          trees: [],
+          healthCounts: {
+            Thriving: 0,
+            Healthy: 0,
+            "Sapling Growing": 0,
+            "Needs Attention": 0,
+            Critical: 0,
+          },
+        };
+        groupsMap.set(name, group);
+      }
+
+      if (item.adopterEmail && !group.purchaserEmail) {
+        group.purchaserEmail = item.adopterEmail;
+      }
+      if (item.orderRef && !group.orderRefs.includes(item.orderRef)) {
+        group.orderRefs.push(item.orderRef);
+      }
+      if (item.assignedReserve && !group.reserves.includes(item.assignedReserve)) {
+        group.reserves.push(item.assignedReserve);
+      }
+      if (item.treeVarietyName && !group.varieties.includes(item.treeVarietyName)) {
+        group.varieties.push(item.treeVarietyName);
+      }
+
+      group.totalTrees += 1;
+      group.trees.push(item);
+
+      if (item.healthStatus && group.healthCounts[item.healthStatus] !== undefined) {
+        group.healthCounts[item.healthStatus] += 1;
+      }
+    });
+
+    // Sort groups by total trees descending (e.g. bulk orders first)
+    return Array.from(groupsMap.values()).sort((a, b) => b.totalTrees - a.totalTrees);
+  }, [filtered]);
+
+  // Fetch instances from backend API (fetch full catalog with high limit)
   useEffect(() => {
     let isMounted = true;
     async function fetchInstancesFromBackend() {
       setIsLoading(true);
       try {
-        const skip = (currentPage - 1) * pageSize;
         const res = await treeInstanceService.getAll({
-          limit: pageSize,
-          skip,
+          limit: 100,
           search: debouncedSearch.trim() || undefined,
           healthStatus: selectedHealth !== "All" ? selectedHealth : undefined,
         });
@@ -115,7 +190,7 @@ export function TreeInstancesTab({
           setServerTotal(res.data.total);
         }
       } catch (err) {
-        console.warn("Backend tree instances pagination notice:", err);
+        console.warn("Backend tree instances load notice:", err);
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -125,45 +200,31 @@ export function TreeInstancesTab({
     return () => {
       isMounted = false;
     };
-  }, [currentPage, pageSize, debouncedSearch, selectedHealth, instances]);
+  }, [debouncedSearch, selectedHealth]);
 
-  // Total records count and pagination calculations
-  const totalCount = serverTotal !== null ? serverTotal : filtered.length;
-  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-  const safeCurrentPage = Math.min(currentPage, totalPages);
-  const startIndex = (safeCurrentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, totalCount);
+  // Expand / Collapse group toggles
+  const toggleGroup = (name: string) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [name]: prev[name] === false ? true : false,
+    }));
+  };
 
-  // Active items to render
-  const displayInstances = useMemo(() => {
-    if (serverInstances !== null) {
-      return serverInstances;
-    }
-    return filtered.slice(startIndex, endIndex);
-  }, [serverInstances, filtered, startIndex, endIndex]);
+  const expandAll = () => {
+    const all: Record<string, boolean> = {};
+    purchaserGroups.forEach((g) => {
+      all[g.purchaserName] = true;
+    });
+    setExpandedGroups(all);
+  };
 
-  // Dynamic pagination pill generator with ellipsis
-  const pageNumbers = useMemo(() => {
-    const pages: (number | string)[] = [];
-    if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i);
-    } else {
-      pages.push(1);
-      if (safeCurrentPage > 3) {
-        pages.push("ellipsis-1");
-      }
-      const start = Math.max(2, safeCurrentPage - 1);
-      const end = Math.min(totalPages - 1, safeCurrentPage + 1);
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
-      if (safeCurrentPage < totalPages - 2) {
-        pages.push("ellipsis-2");
-      }
-      pages.push(totalPages);
-    }
-    return pages;
-  }, [totalPages, safeCurrentPage]);
+  const collapseAll = () => {
+    const all: Record<string, boolean> = {};
+    purchaserGroups.forEach((g) => {
+      all[g.purchaserName] = false;
+    });
+    setExpandedGroups(all);
+  };
 
   // Optimistic health status change
   const handleHealthChange = (id: string, status: TreeHealthStatus) => {
@@ -189,68 +250,90 @@ export function TreeInstancesTab({
     }
   };
 
+  // Flat table pagination
+  const totalCount = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (safeCurrentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalCount);
+  const displayFlatInstances = useMemo(() => {
+    return filtered.slice(startIndex, endIndex);
+  }, [filtered, startIndex, endIndex]);
+
   return (
     <div className="space-y-6 animate-fadeIn">
-      {/* Top Banner & Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-[#e2eae5] shadow-xs">
+      {/* Top Banner & Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-[#e2eae5] shadow-xs">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h2 style={{ fontFamily: "var(--font-display)" }} className="text-xl font-bold text-[#173324]">
-              Individual Tree Instances & Locations ({totalCount})
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h2 style={{ fontFamily: "var(--font-display)" }} className="text-xl sm:text-2xl font-bold text-[#173324]">
+              Tree Saplings & Instances Ledger
             </h2>
-            {totalPages > 1 && (
-              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#1b7a43] border border-emerald-200">
-                Page {safeCurrentPage} of {totalPages}
-              </span>
-            )}
+            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+              {stats.total} Total Saplings
+            </span>
+            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#f4f7f5] text-[#55695d] border border-[#dce5df]">
+              👥 {purchaserGroups.length} Purchasers
+            </span>
             {isLoading && (
               <span className="w-3.5 h-3.5 border-2 border-[#1b7a43] border-t-transparent rounded-full animate-spin" />
             )}
           </div>
-          <p className="text-xs text-[#73877b]">
-            Living trees with unique Tree IDs and ground health logs
+          <p className="text-xs text-[#73877b] mt-1">
+            Living trees and saplings planted exclusively through verified customer adoption orders. Grouped by purchaser name.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* View Mode Toggle */}
+        {/* View Mode Toggle */}
+        <div className="flex items-center gap-2 self-start md:self-auto">
           <div className="flex items-center p-1 rounded-xl bg-[#f2f6f3] border border-[#e2eae5]">
             <button
+              onClick={() => setViewMode("grouped")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5 ${
+                viewMode === "grouped" ? "bg-white text-[#173324] shadow-xs" : "text-[#73877b] hover:text-[#173324]"
+              }`}
+            >
+              <span>👥</span>
+              <span>Grouped by Buyer</span>
+            </button>
+            <button
               onClick={() => setViewMode("table")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5 ${
                 viewMode === "table" ? "bg-white text-[#173324] shadow-xs" : "text-[#73877b] hover:text-[#173324]"
               }`}
             >
-              Table View
+              <span>📋</span>
+              <span>Flat Table</span>
             </button>
             <button
               onClick={() => setViewMode("grid")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5 ${
                 viewMode === "grid" ? "bg-white text-[#173324] shadow-xs" : "text-[#73877b] hover:text-[#173324]"
               }`}
             >
-              Card View
+              <span>🗂️</span>
+              <span>Card Grid</span>
             </button>
           </div>
-
-          <button
-            onClick={onOpenAddInstance}
-            className="px-4 py-2.5 rounded-xl bg-[#173324] hover:bg-[#1f4230] text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer shrink-0"
-          >
-            <span>+</span>
-            <span>Plant Sapling</span>
-          </button>
         </div>
       </div>
 
       {/* Quick Status KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 4k:grid-cols-4 gap-3.5 3xl:gap-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 3xl:gap-5">
         <div className="p-4 3xl:p-6 rounded-2xl bg-white border border-[#e2eae5] shadow-xs">
           <span className="text-[10px] 3xl:text-xs text-[#73877b] font-bold uppercase tracking-wider block">
             Total Planted Trees
           </span>
           <span className="text-2xl 3xl:text-3xl font-bold text-[#173324] mt-1 block">
             {stats.total.toLocaleString()}
+          </span>
+        </div>
+        <div className="p-4 3xl:p-6 rounded-2xl bg-white border border-[#e2eae5] shadow-xs">
+          <span className="text-[10px] 3xl:text-xs text-blue-700 font-bold uppercase tracking-wider block">
+            Active Purchasers
+          </span>
+          <span className="text-2xl 3xl:text-3xl font-bold text-blue-900 mt-1 block">
+            {purchaserGroups.length.toLocaleString()}
           </span>
         </div>
         <div className="p-4 3xl:p-6 rounded-2xl bg-white border border-[#e2eae5] shadow-xs">
@@ -269,69 +352,281 @@ export function TreeInstancesTab({
             {stats.saplings.toLocaleString()}
           </span>
         </div>
-        <div className="p-4 3xl:p-6 rounded-2xl bg-white border border-[#e2eae5] shadow-xs">
-          <span className="text-[10px] 3xl:text-xs text-amber-700 font-bold uppercase tracking-wider block">
-            Attention Needed
-          </span>
-          <span className="text-2xl 3xl:text-3xl font-bold text-amber-800 mt-1 block">
-            {stats.attentionNeeded.toLocaleString()}
-          </span>
-        </div>
       </div>
 
-      {/* Health Status Filter Chips */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-        {HEALTH_FILTERS.map((f) => (
-          <button
-            key={f.value}
-            onClick={() => setSelectedHealth(f.value)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all cursor-pointer flex items-center gap-1.5 ${
-              selectedHealth === f.value
-                ? "bg-[#173324] text-white shadow-xs"
-                : "bg-white text-[#55695d] border border-[#e2eae5] hover:border-[#173324]"
-            }`}
-          >
-            <span>{f.icon}</span>
-            <span>{f.label}</span>
-          </button>
-        ))}
+      {/* Health Status Filter Chips & Expand/Collapse */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {HEALTH_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => setSelectedHealth(f.value)}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all cursor-pointer flex items-center gap-1.5 ${
+                selectedHealth === f.value
+                  ? "bg-[#173324] text-white shadow-xs"
+                  : "bg-white text-[#55695d] border border-[#e2eae5] hover:border-[#173324]"
+              }`}
+            >
+              <span>{f.icon}</span>
+              <span>{f.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {viewMode === "grouped" && purchaserGroups.length > 0 && (
+          <div className="flex items-center gap-2 self-end sm:self-auto">
+            <button
+              type="button"
+              onClick={expandAll}
+              className="text-[11px] font-semibold text-[#1b7a43] hover:text-[#173324] bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition-colors cursor-pointer"
+            >
+              Expand All
+            </button>
+            <button
+              type="button"
+              onClick={collapseAll}
+              className="text-[11px] font-semibold text-[#55695d] hover:text-[#173324] bg-gray-50 hover:bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-200 transition-colors cursor-pointer"
+            >
+              Collapse All
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Empty State */}
-      {totalCount === 0 && !isLoading ? (
+      {purchaserGroups.length === 0 && !isLoading ? (
         <div className="p-12 text-center bg-white rounded-3xl border border-[#e2eae5] space-y-3">
-          <div className="text-4xl">🏷️</div>
-          <h3 className="text-base font-bold text-[#173324]">No Tree Instances Found</h3>
-          <p className="text-xs text-[#73877b] max-w-sm mx-auto">
-            {searchQuery || selectedHealth !== "All"
-              ? "No tree instances match your active search or health status filter."
-              : "No saplings have been registered yet. Add your first sapling with a unique Tree ID!"}
+          <div className="text-4xl">🌱</div>
+          <h3 className="text-base font-bold text-[#173324]">No Tree Saplings Found</h3>
+          <p className="text-xs text-[#73877b] max-w-md mx-auto leading-relaxed">
+            {debouncedSearch || selectedHealth !== "All"
+              ? "No tree saplings match your active search or health status filter."
+              : "Tree saplings and living instances are automatically added to this ledger once a user completes a tree adoption purchase and the order is marked planted by the forestry team. Admin manual creation is restricted to maintain authentic ledger deeds."}
           </p>
-          <button
-            onClick={onOpenAddInstance}
-            className="px-4 py-2 rounded-xl bg-[#173324] text-white text-xs font-semibold hover:bg-[#1f4230] transition-all cursor-pointer"
-          >
-            + Plant First Sapling
-          </button>
+        </div>
+      ) : viewMode === "grouped" ? (
+        /* ========================================================================= */
+        /* GROUPED BY PURCHASER VIEW (DEFAULT)                                       */
+        /* ========================================================================= */
+        <div className="space-y-4">
+          {purchaserGroups.map((group) => {
+            const isExpanded = expandedGroups[group.purchaserName] !== false; // Default open
+            const initialLetter = group.purchaserName.charAt(0).toUpperCase() || "U";
+
+            return (
+              <div
+                key={group.purchaserName}
+                className="bg-white rounded-3xl border border-[#e2eae5] shadow-xs overflow-hidden transition-all"
+              >
+                {/* Group Header Card */}
+                <div
+                  onClick={() => toggleGroup(group.purchaserName)}
+                  className="p-5 sm:p-6 bg-gradient-to-r from-white via-[#fbfdfb] to-[#f4f8f5] flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-[#f6faf7] select-none border-b border-[#edf3ef]"
+                >
+                  {/* Left: User Avatar, Name, Email, Order Refs */}
+                  <div className="flex items-start sm:items-center gap-3.5">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#173324] to-[#2d6a4f] text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0">
+                      {initialLetter}
+                    </div>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3
+                          style={{ fontFamily: "var(--font-display)" }}
+                          className="text-lg sm:text-xl font-bold text-[#173324]"
+                        >
+                          {group.purchaserName}
+                        </h3>
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                          {group.totalTrees} {group.totalTrees === 1 ? "Tree Planted" : "Trees Planted"}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-[#55695d] mt-1">
+                        {group.purchaserEmail && (
+                          <span className="flex items-center gap-1">
+                            <span>✉️</span>
+                            <span>{group.purchaserEmail}</span>
+                          </span>
+                        )}
+                        {group.orderRefs.length > 0 && (
+                          <span className="flex items-center gap-1 font-mono text-[11px] text-[#1b7a43]">
+                            <span>🧾</span>
+                            <span>{group.orderRefs.join(", ")}</span>
+                          </span>
+                        )}
+                        {group.reserves.length > 0 && (
+                          <span className="flex items-center gap-1 text-[11px]">
+                            <span>📍</span>
+                            <span>{group.reserves.join(" • ")}</span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right: Health Metrics Breakdown & Toggle */}
+                  <div className="flex items-center gap-3">
+                    <div className="hidden lg:flex items-center gap-1.5">
+                      {group.healthCounts.Thriving > 0 && (
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+                          🌳 {group.healthCounts.Thriving} Thriving
+                        </span>
+                      )}
+                      {group.healthCounts.Healthy > 0 && (
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-green-50 text-green-800 border border-green-200">
+                          🌿 {group.healthCounts.Healthy} Healthy
+                        </span>
+                      )}
+                      {group.healthCounts["Sapling Growing"] > 0 && (
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 border border-teal-200">
+                          🌱 {group.healthCounts["Sapling Growing"]} Growing
+                        </span>
+                      )}
+                      {group.healthCounts["Needs Attention"] > 0 && (
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
+                          ⚠️ {group.healthCounts["Needs Attention"]} Attention
+                        </span>
+                      )}
+                      {group.healthCounts.Critical > 0 && (
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-rose-50 text-rose-800 border border-rose-200">
+                          🚨 {group.healthCounts.Critical} Critical
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1 text-xs font-semibold text-[#173324] bg-white border border-[#d2ded7] px-3 py-1.5 rounded-xl shadow-2xs">
+                      <span>{isExpanded ? "Collapse" : `View ${group.totalTrees} Trees`}</span>
+                      <span className="text-sm font-bold ml-1">{isExpanded ? "▲" : "▼"}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Group Body: Trees Table (Visible when expanded) */}
+                {isExpanded && (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-[#f8faf8] border-b border-[#e2eae5] text-[#7a8a80] uppercase tracking-wider font-bold">
+                        <tr>
+                          <th className="py-3 px-4 w-12 text-center">#</th>
+                          <th className="py-3 px-4">Unique Tree ID</th>
+                          <th className="py-3 px-4">Variety Specimen</th>
+                          <th className="py-3 px-4">Sanctuary Location</th>
+                          <th className="py-3 px-4">Date Planted</th>
+                          <th className="py-3 px-4">Health Status</th>
+                          <th className="py-3 px-4">Arborist Notes</th>
+                          <th className="py-3 px-4 text-right">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#f0f4f1]">
+                        {group.trees.map((item, idx) => {
+                          const badge = HEALTH_BADGES[item.healthStatus] || {
+                            label: item.healthStatus,
+                            icon: "🌱",
+                            bg: "bg-gray-50",
+                            text: "text-gray-800",
+                            border: "border-gray-200",
+                          };
+
+                          return (
+                            <tr key={item.id} className="hover:bg-[#fbfcfb] transition-colors">
+                              <td className="py-3 px-4 text-center text-[#8b9c92] font-mono text-[11px]">
+                                {idx + 1}
+                              </td>
+
+                              {/* Tree Tag */}
+                              <td className="py-3 px-4 font-mono">
+                                <span className="font-bold text-[#1b7a43] bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 text-xs inline-flex items-center gap-1.5">
+                                  <span>🏷️</span>
+                                  <span>{item.treeTag}</span>
+                                </span>
+                              </td>
+
+                              {/* Variety */}
+                              <td className="py-3 px-4 font-bold text-[#173324]">
+                                {item.treeVarietyName || "Botanical Specimen"}
+                              </td>
+
+                              {/* Reserve */}
+                              <td className="py-3 px-4 text-[#55695d]">
+                                <span className="flex items-center gap-1">
+                                  <span>📍</span>
+                                  <span className="truncate max-w-[180px]">{item.assignedReserve}</span>
+                                </span>
+                              </td>
+
+                              {/* Date Planted */}
+                              <td className="py-3 px-4 text-[#73877b]">
+                                {formatDate(item.datePlanted)}
+                              </td>
+
+                              {/* Health Status Selector */}
+                              <td className="py-3 px-4">
+                                {onUpdateHealth ? (
+                                  <Select
+                                    value={item.healthStatus}
+                                    onChange={(e) =>
+                                      handleHealthChange(item.id, e.target.value as TreeHealthStatus)
+                                    }
+                                    className={`px-2.5 py-1 rounded-lg border text-xs font-semibold outline-none cursor-pointer ${badge.bg} ${badge.text} ${badge.border}`}
+                                  >
+                                    <option value="Sapling Growing">🌱 Sapling Growing</option>
+                                    <option value="Healthy">🌿 Healthy</option>
+                                    <option value="Thriving">🌳 Thriving</option>
+                                    <option value="Needs Attention">⚠️ Needs Attention</option>
+                                    <option value="Critical">🚨 Critical</option>
+                                  </Select>
+                                ) : (
+                                  <span
+                                    className={`px-2.5 py-1 rounded-lg border text-xs font-semibold inline-flex items-center gap-1 ${badge.bg} ${badge.text} ${badge.border}`}
+                                  >
+                                    <span>{badge.icon}</span>
+                                    <span>{badge.label}</span>
+                                  </span>
+                                )}
+                              </td>
+
+                              {/* Notes */}
+                              <td className="py-3 px-4 text-[#55695d] max-w-xs truncate text-[11px] italic">
+                                {item.notes || "Ground plantation verified."}
+                              </td>
+
+                              {/* Status Badge */}
+                              <td className="py-3 px-4 text-right">
+                                <span className="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-semibold">
+                                  Assigned
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       ) : viewMode === "table" ? (
-        /* Table View */
+        /* ========================================================================= */
+        /* FLAT TABLE VIEW                                                           */
+        /* ========================================================================= */
         <div className="bg-white rounded-3xl border border-[#e2eae5] overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-[#f7faf8] border-b border-[#e2eae5] text-[#7a8a80] uppercase tracking-wider font-bold">
                 <tr>
                   <th className="py-4 px-4">Unique Tree ID</th>
-                  <th className="py-4 px-4">Order Ref / Adopter</th>
+                  <th className="py-4 px-4">Purchaser / Adopter</th>
+                  <th className="py-4 px-4">Order Ref</th>
                   <th className="py-4 px-4">Variety & Reserve</th>
-                  <th className="py-4 px-4">Sanctuary Zone</th>
                   <th className="py-4 px-4">Date Planted</th>
                   <th className="py-4 px-4">Health Status</th>
-                  <th className="py-4 px-4 text-right">Actions</th>
+                  <th className="py-4 px-4 text-right">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#f0f4f1]">
-                {displayInstances.map((item) => {
+                {displayFlatInstances.map((item) => {
                   const badge = HEALTH_BADGES[item.healthStatus] || {
                     label: item.healthStatus,
                     icon: "🌱",
@@ -342,45 +637,24 @@ export function TreeInstancesTab({
 
                   return (
                     <tr key={item.id} className="hover:bg-[#fbfcfb] transition-colors">
-                      {/* Tree Tag & Thumbnail */}
                       <td className="py-3.5 px-4 font-mono">
-                        <div className="flex items-center gap-2.5">
-                          {item.imageUrl ? (
-                            <div className="w-8 h-8 rounded-lg overflow-hidden border border-[#d2ded7] shrink-0 bg-gray-100">
-                              <img
-                                src={resolveImageUrl(item.imageUrl)}
-                                alt={item.treeTag}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-8 h-8 rounded-lg border border-dashed border-[#ccd9d1] bg-[#f4f7f5] flex items-center justify-center text-xs shrink-0 text-[#8b9c92]">
-                              🌳
-                            </div>
-                          )}
-                          <span className="font-bold text-[#1b7a43] bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200 text-xs block w-fit">
-                            {item.treeTag}
-                          </span>
-                        </div>
+                        <span className="font-bold text-[#1b7a43] bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200 text-xs block w-fit">
+                          {item.treeTag}
+                        </span>
                       </td>
-
-                      {/* Order Ref & Adopter */}
                       <td className="py-3.5 px-4">
-                        {item.orderRef ? (
-                          <span className="font-mono text-[11px] font-semibold text-[#173324] block">
-                            {item.orderRef}
-                          </span>
-                        ) : (
-                          <span className="text-[11px] text-[#a0b0a6] italic block">Unassigned Nursery Stock</span>
-                        )}
-                        {item.adopterName && (
-                          <span className="text-[11px] text-[#55695d] font-medium block">
-                            {item.adopterName}
+                        <span className="font-bold text-[#173324] block">
+                          {item.adopterName || "Guest Purchaser"}
+                        </span>
+                        {item.adopterEmail && (
+                          <span className="text-[10px] text-[#73877b] block">
+                            {item.adopterEmail}
                           </span>
                         )}
                       </td>
-
-                      {/* Variety & Reserve */}
+                      <td className="py-3.5 px-4 font-mono text-[11px] font-semibold text-[#173324]">
+                        {item.orderRef || "—"}
+                      </td>
                       <td className="py-3.5 px-4">
                         <span className="font-bold text-[#173324] block">
                           {item.treeVarietyName || "Botanical Specimen"}
@@ -389,21 +663,9 @@ export function TreeInstancesTab({
                           {item.assignedReserve}
                         </span>
                       </td>
-
-                      {/* Sanctuary Zone */}
-                      <td className="py-3.5 px-4 font-medium text-[#173324]">
-                        <span className="flex items-center gap-1">
-                          <span>📍</span>
-                          <span>{item.assignedReserve}</span>
-                        </span>
-                      </td>
-
-                      {/* Date Planted */}
                       <td className="py-3.5 px-4 text-[#55695d]">
                         {formatDate(item.datePlanted)}
                       </td>
-
-                      {/* Health Status */}
                       <td className="py-3.5 px-4">
                         {onUpdateHealth ? (
                           <Select
@@ -426,39 +688,10 @@ export function TreeInstancesTab({
                           </span>
                         )}
                       </td>
-
-                      {/* Actions */}
                       <td className="py-3.5 px-4 text-right">
-                        <div className="inline-flex items-center justify-end gap-1.5">
-                          {onEditInstance && !item.orderRef && !item.adopterName && (
-                            <button
-                              type="button"
-                              onClick={() => onEditInstance(item)}
-                              className="text-[#173324] hover:text-[#1b7a43] hover:bg-emerald-50 p-1.5 rounded-lg transition-colors cursor-pointer text-xs inline-flex items-center justify-center border border-transparent hover:border-emerald-200"
-                              title={`Edit tree instance ${item.treeTag}`}
-                            >
-                              <PencilIcon className="w-3.5 h-3.5 text-[#1b7a43]" />
-                            </button>
-                          )}
-                          {Boolean(item.orderRef || item.adopterName) && (
-                            <span
-                              className="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-semibold"
-                              title="Tree is assigned to an adopter and locked from editing"
-                            >
-                               Assigned
-                            </span>
-                          )}
-                          {onDeleteInstance && !item.orderRef && !item.adopterName && (
-                            <button
-                              type="button"
-                              onClick={() => onDeleteInstance(item.id, item.treeTag ? `${item.treeTag} (${item.treeVarietyName})` : item.treeVarietyName)}
-                              className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 p-1.5 rounded-lg transition-colors cursor-pointer text-xs inline-flex items-center justify-center border border-transparent hover:border-rose-200"
-                              title={`Delete unassigned tree instance ${item.treeTag}`}
-                            >
-                              <TrashIcon className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
+                        <span className="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-semibold">
+                          Assigned
+                        </span>
                       </td>
                     </tr>
                   );
@@ -466,11 +699,61 @@ export function TreeInstancesTab({
               </tbody>
             </table>
           </div>
+
+          {/* Flat Table Pagination Controls */}
+          {totalCount > 0 && (
+            <div className="bg-white p-4 border-t border-[#e2eae5] flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-xs text-[#55695d]">
+                Showing <span className="font-bold text-[#173324]">{startIndex + 1}</span> to{" "}
+                <span className="font-bold text-[#173324]">{endIndex}</span> of{" "}
+                <span className="font-bold text-[#173324]">{totalCount}</span> saplings
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={safeCurrentPage === 1}
+                  className="px-3 py-1.5 rounded-xl border border-[#e2eae5] text-xs font-semibold text-[#173324] hover:bg-[#f2f6f3] disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+                >
+                  Previous
+                </button>
+                <span className="text-xs font-semibold text-[#173324] px-2">
+                  Page {safeCurrentPage} of {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safeCurrentPage === totalPages}
+                  className="px-3 py-1.5 rounded-xl border border-[#e2eae5] text-xs font-semibold text-[#173324] hover:bg-[#f2f6f3] disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+                >
+                  Next
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs text-[#73877b]">
+                <span>Show</span>
+                <Select
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  className="px-2.5 py-1.5 rounded-xl border border-[#e2eae5] bg-[#fcfaf7] text-xs font-semibold text-[#173324]"
+                >
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </Select>
+                <span>per page</span>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
-        /* Card View */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-4 4k:grid-cols-5 gap-5 3xl:gap-7">
-          {displayInstances.map((item) => {
+        /* ========================================================================= */
+        /* CARD GRID VIEW                                                            */
+        /* ========================================================================= */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5">
+          {displayFlatInstances.map((item) => {
             const badge = HEALTH_BADGES[item.healthStatus] || {
               label: item.healthStatus,
               icon: "🌱",
@@ -485,15 +768,6 @@ export function TreeInstancesTab({
                 className="p-5 rounded-3xl bg-white border border-[#e2eae5] shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden"
               >
                 <div>
-                  {item.imageUrl && (
-                    <div className="h-32 -mx-5 -mt-5 mb-3 overflow-hidden bg-gray-100">
-                      <img
-                        src={resolveImageUrl(item.imageUrl)}
-                        alt={item.treeTag}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
                   <div className="flex items-start justify-between mb-3">
                     <span className="font-mono text-xs font-bold text-[#1b7a43] bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200">
                       {item.treeTag}
@@ -511,40 +785,26 @@ export function TreeInstancesTab({
                   </h3>
                   <p className="text-xs text-[#73877b] mt-1">{item.assignedReserve}</p>
 
-                  <div className="mt-4 pt-3 border-t border-[#f4f7f5] space-y-1.5 text-xs">
+                  <div className="mt-4 pt-3 border-t border-[#f4f5f4] space-y-1.5 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-[#8b9c92]">Order Ref:</span>
-                      <span className="font-mono font-semibold text-[#173324]">
-                        {item.orderRef || "Nursery Reserve"}
-                      </span>
+                      <span className="text-[#8b9c92]">Purchaser:</span>
+                      <span className="font-semibold text-[#173324]">{item.adopterName || "Guest"}</span>
                     </div>
-                    {item.adopterName && (
-                      <div className="flex justify-between">
-                        <span className="text-[#8b9c92]">Adopter:</span>
-                        <span className="font-medium text-[#173324]">{item.adopterName}</span>
+                    {item.orderRef && (
+                      <div className="flex justify-between font-mono text-[11px]">
+                        <span className="text-[#8b9c92]">Order Ref:</span>
+                        <span className="font-semibold text-[#173324]">{item.orderRef}</span>
                       </div>
                     )}
-                    <div className="flex justify-between items-center">
-                      <span className="text-[#8b9c92]">Sanctuary:</span>
-                      <span className="font-semibold text-[#173324] text-[11px]">
-                        📍 {item.assignedReserve}
-                      </span>
-                    </div>
                     <div className="flex justify-between">
                       <span className="text-[#8b9c92]">Date Planted:</span>
                       <span className="text-[#55695d]">{formatDate(item.datePlanted)}</span>
                     </div>
                   </div>
-
-                  {item.notes && (
-                    <p className="mt-3 text-[11px] text-[#55695d] bg-[#f9fbfa] p-2 rounded-xl border border-[#e8f0ec] italic">
-                      "{item.notes}"
-                    </p>
-                  )}
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-[#f4f7f5] flex items-center justify-between">
-                  {onUpdateHealth && (
+                  {onUpdateHealth ? (
                     <Select
                       value={item.healthStatus}
                       onChange={(e) => handleHealthChange(item.id, e.target.value as TreeHealthStatus)}
@@ -556,121 +816,15 @@ export function TreeInstancesTab({
                       <option value="Needs Attention">⚠️ Needs Attention</option>
                       <option value="Critical">🚨 Critical</option>
                     </Select>
-                  )}
+                  ) : null}
 
-                  <div className="flex items-center gap-1.5">
-                    {onEditInstance && !item.orderRef && !item.adopterName && (
-                      <button
-                        type="button"
-                        onClick={() => onEditInstance(item)}
-                        className="inline-flex items-center gap-1 text-[#173324] hover:text-[#1b7a43] hover:bg-emerald-50 px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors border border-transparent hover:border-emerald-200"
-                        title={`Edit tree instance ${item.treeTag}`}
-                      >
-                        <PencilIcon className="w-3.5 h-3.5 text-[#1b7a43]" />
-                        <span>Edit</span>
-                      </button>
-                    )}
-                    {Boolean(item.orderRef || item.adopterName) && (
-                      <span
-                        className="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-semibold"
-                        title="Tree is assigned to an adopter and locked from editing"
-                      >
-                         Assigned
-                      </span>
-                    )}
-                    {onDeleteInstance && !item.orderRef && !item.adopterName && (
-                      <button
-                        type="button"
-                        onClick={() => onDeleteInstance(item.id, item.treeTag ? `${item.treeTag} (${item.treeVarietyName})` : item.treeVarietyName)}
-                        className="inline-flex items-center gap-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors border border-transparent hover:border-rose-200"
-                        title={`Delete unassigned tree instance ${item.treeTag}`}
-                      >
-                        <TrashIcon className="w-3.5 h-3.5" />
-                        <span>Delete</span>
-                      </button>
-                    )}
-                  </div>
+                  <span className="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-semibold">
+                    Assigned
+                  </span>
                 </div>
               </div>
             );
           })}
-        </div>
-      )}
-
-      {/* Pagination Controls Bar */}
-      {totalCount > 0 && (
-        <div className="bg-white p-4 rounded-3xl border border-[#e2eae5] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
-          {/* Record summary */}
-          <div className="text-xs text-[#55695d]">
-            Showing <span className="font-bold text-[#173324]">{startIndex + 1}</span> to{" "}
-            <span className="font-bold text-[#173324]">{endIndex}</span> of{" "}
-            <span className="font-bold text-[#173324]">{totalCount}</span> tree instances
-          </div>
-
-          {/* Page navigation buttons */}
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={safeCurrentPage === 1}
-              className="px-3 py-1.5 rounded-xl border border-[#e2eae5] text-xs font-semibold text-[#173324] hover:bg-[#f2f6f3] disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center gap-1"
-            >
-              <span>‹</span>
-              <span className="hidden sm:inline">Previous</span>
-            </button>
-
-            <div className="flex items-center gap-1">
-              {pageNumbers.map((p, idx) =>
-                typeof p === "number" ? (
-                  <button
-                    key={`page-${p}`}
-                    type="button"
-                    onClick={() => setCurrentPage(p)}
-                    className={`min-w-8 h-8 px-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
-                      safeCurrentPage === p
-                        ? "bg-[#173324] text-white shadow-xs"
-                        : "bg-white text-[#55695d] border border-[#e2eae5] hover:bg-[#f2f6f3]"
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ) : (
-                  <span
-                    key={`ellipsis-${idx}`}
-                    className="px-1 text-xs text-[#73877b] select-none"
-                  >
-                    •••
-                  </span>
-                )
-              )}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={safeCurrentPage === totalPages}
-              className="px-3 py-1.5 rounded-xl border border-[#e2eae5] text-xs font-semibold text-[#173324] hover:bg-[#f2f6f3] disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center gap-1"
-            >
-              <span className="hidden sm:inline">Next</span>
-              <span>›</span>
-            </button>
-          </div>
-
-          {/* Page size dropdown */}
-          <div className="flex items-center gap-2 text-xs text-[#73877b]">
-            <span>Show</span>
-            <Select
-              value={pageSize}
-              onChange={(e) => setPageSize(Number(e.target.value))}
-              className="px-2.5 py-1.5 rounded-xl border border-[#e2eae5] bg-[#fcfaf7] text-xs font-semibold text-[#173324] focus:border-[#173324] outline-none cursor-pointer"
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-            </Select>
-            <span>per page</span>
-          </div>
         </div>
       )}
     </div>

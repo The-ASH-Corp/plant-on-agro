@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { AdoptionPlanItem, OccasionDedicationType } from "../types";
 import { TrashIcon, PencilIcon } from "@/components/ui";
+import { adoptionPlanService } from "@/services/adoption-plans/adoption-plan.service";
 
 interface PlansTabProps {
   plans: AdoptionPlanItem[];
@@ -24,15 +25,50 @@ const OCCASION_FILTERS: { value: string; label: string; icon: string }[] = [
   { value: "general", label: "General", icon: "🌱" },
 ];
 
-const OCCASION_TAGS: Record<OccasionDedicationType, { label: string; icon: string; color: string }> = {
-  birthday: { label: "Birthday", icon: "🎂", color: "bg-amber-50 text-amber-800 border-amber-200" },
-  student: { label: "Student", icon: "🎓", color: "bg-cyan-50 text-cyan-800 border-cyan-200" },
-  marriage: { label: "Marriage", icon: "💍", color: "bg-rose-50 text-rose-800 border-rose-200" },
-  memorial: { label: "Memorial", icon: "🕯️", color: "bg-indigo-50 text-indigo-800 border-indigo-200" },
-  anniversary: { label: "Anniversary", icon: "💍", color: "bg-pink-50 text-pink-800 border-pink-200" },
-  corporate: { label: "Corporate", icon: "🏢", color: "bg-blue-50 text-blue-800 border-blue-200" },
-  general: { label: "General", icon: "🌱", color: "bg-emerald-50 text-emerald-800 border-emerald-200" },
-  other: { label: "Other Occasion", icon: "🌱", color: "bg-teal-50 text-teal-800 border-teal-200" },
+const OCCASION_TAGS: Record<
+  OccasionDedicationType,
+  { label: string; icon: string; color: string }
+> = {
+  birthday: {
+    label: "Birthday",
+    icon: "🎂",
+    color: "bg-amber-50 text-amber-800 border-amber-200",
+  },
+  student: {
+    label: "Student",
+    icon: "🎓",
+    color: "bg-cyan-50 text-cyan-800 border-cyan-200",
+  },
+  marriage: {
+    label: "Marriage",
+    icon: "💍",
+    color: "bg-rose-50 text-rose-800 border-rose-200",
+  },
+  memorial: {
+    label: "Memorial",
+    icon: "🕯️",
+    color: "bg-indigo-50 text-indigo-800 border-indigo-200",
+  },
+  anniversary: {
+    label: "Anniversary",
+    icon: "💍",
+    color: "bg-pink-50 text-pink-800 border-pink-200",
+  },
+  corporate: {
+    label: "Corporate",
+    icon: "🏢",
+    color: "bg-blue-50 text-blue-800 border-blue-200",
+  },
+  general: {
+    label: "General",
+    icon: "🌱",
+    color: "bg-emerald-50 text-emerald-800 border-emerald-200",
+  },
+  other: {
+    label: "Other Occasion",
+    icon: "🌱",
+    color: "bg-teal-50 text-teal-800 border-teal-200",
+  },
 };
 
 export function PlansTab({
@@ -43,9 +79,32 @@ export function PlansTab({
   onDeletePlan,
 }: PlansTabProps) {
   const [selectedOccasion, setSelectedOccasion] = useState<string>("all");
+  const [serverPlans, setServerPlans] = useState<AdoptionPlanItem[] | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchPlans() {
+      try {
+        const res = await adoptionPlanService.getAll();
+        if (isMounted && res.data?.items) {
+          setServerPlans(res.data.items.map(adoptionPlanService.mapToUiItem));
+        }
+      } catch (err) {
+        console.warn("Could not fetch plans:", err);
+      }
+    }
+    fetchPlans();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const basePlans = useMemo(() => {
+    return serverPlans !== null && serverPlans.length > 0 ? serverPlans : plans;
+  }, [serverPlans, plans]);
 
   const filteredPlans = useMemo(() => {
-    return plans.filter((p) => {
+    return basePlans.filter((p) => {
       const label = p.label || p.planLabel || "";
       const desc = p.desc || p.description || "";
       const badge = p.badge || "";
@@ -64,18 +123,22 @@ export function PlansTab({
 
       return matchesSearch && matchesOccasion;
     });
-  }, [plans, searchQuery, selectedOccasion]);
+  }, [basePlans, searchQuery, selectedOccasion]);
 
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Top Header Card */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-[#e2eae5] shadow-xs">
         <div>
-          <h2 style={{ fontFamily: "var(--font-display)" }} className="text-xl font-bold text-[#173324]">
+          <h2
+            style={{ fontFamily: "var(--font-display)" }}
+            className="text-xl font-bold text-[#173324]"
+          >
             Adoption Packages & Occasion Programs ({filteredPlans.length})
           </h2>
           <p className="text-xs text-[#73877b]">
-            Configure plan labels, fixed adoption pricing (₹), occasion dedications, and included features.
+            Configure plan labels, fixed adoption pricing (₹), occasion
+            dedications, and included features.
           </p>
         </div>
         <button
@@ -109,7 +172,9 @@ export function PlansTab({
       {filteredPlans.length === 0 ? (
         <div className="p-12 text-center bg-white rounded-3xl border border-[#e2eae5] space-y-3">
           <div className="text-4xl">🌱</div>
-          <h3 className="text-base font-bold text-[#173324]">No Adoption Plans Found</h3>
+          <h3 className="text-base font-bold text-[#173324]">
+            No Adoption Plans Found
+          </h3>
           <p className="text-xs text-[#73877b] max-w-sm mx-auto">
             {searchQuery || selectedOccasion !== "all"
               ? "No plans match your current search or occasion filter."
@@ -125,7 +190,10 @@ export function PlansTab({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 4k:grid-cols-5 gap-5 3xl:gap-7">
           {filteredPlans.map((plan) => {
-            const priceModifier = plan.priceModifier !== undefined ? plan.priceModifier : plan.price;
+            const priceModifier =
+              plan.priceModifier !== undefined
+                ? plan.priceModifier
+                : plan.price;
             const features = plan.features || [];
             const occasions = plan.occasionDedications || ["general"];
 
@@ -163,7 +231,9 @@ export function PlansTab({
                       {onDeletePlan && (
                         <button
                           type="button"
-                          onClick={() => onDeletePlan(plan.id, plan.label || plan.planLabel)}
+                          onClick={() =>
+                            onDeletePlan(plan.id, plan.label || plan.planLabel)
+                          }
                           title="Delete adoption plan"
                           className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 hover:text-rose-700 cursor-pointer text-xs inline-flex items-center justify-center"
                           aria-label={`Delete ${plan.label || plan.planLabel}`}
@@ -224,7 +294,9 @@ export function PlansTab({
                             key={idx}
                             className="text-xs text-[#384a3f] flex items-start gap-1.5 leading-snug"
                           >
-                            <span className="text-emerald-600 font-bold text-xs shrink-0">✓</span>
+                            <span className="text-emerald-600 font-bold text-xs shrink-0">
+                              ✓
+                            </span>
                             <span>{feature}</span>
                           </li>
                         ))}
@@ -240,14 +312,13 @@ export function PlansTab({
                       Plan Adoption Price
                     </span>
                     <span className="text-base font-extrabold text-[#173324]">
-                      ₹{(priceModifier ?? 25000).toLocaleString("en-IN")}
+                      ₹{(priceModifier ?? 0).toLocaleString("en-IN")}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#f0f5f2] text-[#1b7a43]">
                       {(plan.activeCount ?? 0).toLocaleString()} Adopters
                     </span>
-                    
                   </div>
                 </div>
               </div>

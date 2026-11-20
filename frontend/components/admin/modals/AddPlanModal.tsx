@@ -10,7 +10,11 @@ interface AddPlanModalProps {
   isSubmitting?: boolean;
 }
 
-const OCCASIONS: { value: OccasionDedicationType; label: string; icon: string }[] = [
+const OCCASIONS: {
+  value: OccasionDedicationType;
+  label: string;
+  icon: string;
+}[] = [
   { value: "birthday", label: "Birthday", icon: "🎂" },
   { value: "student", label: "Student", icon: "🎓" },
   { value: "marriage", label: "Marriage", icon: "💍" },
@@ -21,13 +25,15 @@ const OCCASIONS: { value: OccasionDedicationType; label: string; icon: string }[
   { value: "general", label: "General", icon: "🌱" },
 ];
 
-export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }: AddPlanModalProps) {
-  const [selectedOccasions, setSelectedOccasions] = useState<OccasionDedicationType[]>([
-    "birthday",
-    "memorial",
-    "anniversary",
-    "general",
-  ]);
+export function AddPlanModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  isSubmitting = false,
+}: AddPlanModalProps) {
+  const [selectedOccasions, setSelectedOccasions] = useState<
+    OccasionDedicationType[]
+  >(["birthday", "memorial", "anniversary", "general"]);
 
   if (!isOpen) return null;
 
@@ -37,7 +43,7 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
         ? prev.length > 1
           ? prev.filter((item) => item !== val)
           : prev // keep at least 1
-        : [...prev, val]
+        : [...prev, val],
     );
   };
 
@@ -63,11 +69,15 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
             Adoption Program Setup
           </span>
         </div>
-        <h3 style={{ fontFamily: "var(--font-display)" }} className="text-2xl text-[#173324] mb-1 font-bold">
+        <h3
+          style={{ fontFamily: "var(--font-display)" }}
+          className="text-2xl text-[#173324] mb-1 font-bold"
+        >
           Add Adoption Plan
         </h3>
         <p className="text-xs text-[#55695d] mb-4">
-          Configure a tier with pricing modifiers, feature lists, and occasion dedication options.
+          Configure a tier with pricing modifiers, feature lists, and occasion
+          dedication options.
         </p>
 
         <form onSubmit={onSubmit} className="space-y-4 text-xs">
@@ -78,7 +88,12 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
             value={JSON.stringify(selectedOccasions)}
           />
           {selectedOccasions.map((occ) => (
-            <input key={`hidden-${occ}`} type="hidden" name="occasions" value={occ} />
+            <input
+              key={`hidden-${occ}`}
+              type="hidden"
+              name="occasions"
+              value={occ}
+            />
           ))}
 
           {/* Plan Label and Icon */}
@@ -181,13 +196,16 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
                   Occasion Dedication Options *
                 </label>
                 <span className="text-[10px] text-[#73877b]">
-                  {selectedOccasions.length} of {OCCASIONS.length} occasions selected
+                  {selectedOccasions.length} of {OCCASIONS.length} occasions
+                  selected
                 </span>
               </div>
               <div className="flex items-center gap-1.5 text-[10px]">
                 <button
                   type="button"
-                  onClick={() => setSelectedOccasions(OCCASIONS.map((o) => o.value))}
+                  onClick={() =>
+                    setSelectedOccasions(OCCASIONS.map((o) => o.value))
+                  }
                   className="px-2 py-0.5 rounded-md border border-[#e2eae5] bg-white text-[#173324] hover:bg-[#f2f6f3] font-medium cursor-pointer transition-colors"
                 >
                   Select All
@@ -219,7 +237,9 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
                     <span>{occ.icon}</span>
                     <span>{occ.label}</span>
                     {isChecked ? (
-                      <span className="text-emerald-300 font-bold text-xs leading-none">✓</span>
+                      <span className="text-emerald-300 font-bold text-xs leading-none">
+                        ✓
+                      </span>
                     ) : (
                       <span className="w-2 h-2 rounded-full border border-gray-300 inline-block" />
                     )}
@@ -228,7 +248,8 @@ export function AddPlanModal({ isOpen, onClose, onSubmit, isSubmitting = false }
               })}
             </div>
             <span className="text-[10px] text-[#73877b] block leading-relaxed">
-              Adopters can choose to dedicate their tree adoption towards any of the active checked occasion programs.
+              Adopters can choose to dedicate their tree adoption towards any of
+              the active checked occasion programs.
             </span>
           </div>
 

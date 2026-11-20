@@ -1,7 +1,7 @@
 import {
   AdoptionPlan,
   OccasionDedication,
-} from '../../core/entities/adoption-plan.entity';
+} from "../../core/entities/adoption-plan.entity";
 
 export interface AdoptionPlanResponseDto {
   id: string;
@@ -22,7 +22,7 @@ export interface AdoptionPlanResponseDto {
 export class AdoptionPlanResponseMapper {
   public static toDto(entity: AdoptionPlan): AdoptionPlanResponseDto {
     return {
-      id: entity.id || '',
+      id: entity.id || "",
       planLabel: entity.planLabel,
       icon: entity.icon,
       price: entity.price,

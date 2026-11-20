@@ -25,6 +25,17 @@ export function getMediaUrl(
   const clean = pathOrUrl.trim();
   if (!clean) return fallback;
 
+  // If in browser on HTTPS and URL uses HTTP localhost:5000 or HTTP on a live site:
+  if (typeof window !== "undefined" && window.location.protocol === "https:") {
+    if (clean.startsWith("http://localhost") || clean.startsWith("http://127.0.0.1")) {
+      const backendOrigin = getBackendOrigin();
+      return backendOrigin ? clean.replace(/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/, backendOrigin) : fallback;
+    }
+    if (clean.startsWith("http://")) {
+      return clean.replace(/^http:\/\//, "https://");
+    }
+  }
+
   if (
     clean.startsWith("http://") ||
     clean.startsWith("https://") ||
@@ -50,6 +61,7 @@ export function handleImageError(
 ): void {
   const target = event.currentTarget;
   if (target.src !== fallback) {
+    target.onerror = null;
     target.src = fallback;
   }
 }

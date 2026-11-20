@@ -2,6 +2,7 @@
 
 import { Counter } from "@/components/ui/Counter";
 import { ImpactSectionContent } from "@/services/landing-page/landing-page.service";
+import { getMediaUrl, handleImageError, DEFAULT_NATURE_IMAGE } from "@/services/media/media.service";
 
 export interface ImpactLiveStats {
   totalTrees: number;
@@ -150,8 +151,12 @@ export function ImpactSection({ content, liveStats, liveProjects }: ImpactSectio
               >
                 <div className="relative h-44 overflow-hidden">
                   <img
-                    src={p.img}
+                    src={getMediaUrl(p.img, DEFAULT_NATURE_IMAGE)}
                     alt={p.title}
+                    onError={(e) => handleImageError(e, DEFAULT_NATURE_IMAGE)}
+                    loading="lazy"
+                    crossOrigin="anonymous"
+                    referrerPolicy="no-referrer"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div
