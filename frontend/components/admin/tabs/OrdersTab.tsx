@@ -386,7 +386,7 @@ export function OrdersTab({
                         <span className="text-[11px] text-[#55695d] block mt-0.5">{order.planType}</span>
                       </td>
 
-                      {/* Explicit Tree Assignment Column */}
+                      {/* Assigned Tree Column (Display only; assignment happens at 'Verified & Tagged' step) */}
                       <td className="py-3.5 px-4">
                         {assignedTag ? (
                           <div className="flex items-center gap-1.5 flex-wrap">
@@ -398,20 +398,9 @@ export function OrdersTab({
                             </span>
                           </div>
                         ) : (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (onOpenAssignTree) {
-                                onOpenAssignTree(order);
-                              } else {
-                                handleStatusChange(order.orderNumber, "Planted");
-                              }
-                            }}
-                            className="px-2.5 py-1 text-[11px] font-bold text-white bg-gradient-to-r from-[#173324] to-[#1b7a43] hover:brightness-110 rounded-lg shadow-2xs transition-all cursor-pointer inline-flex items-center gap-1"
-                          >
-                            <span>🌱</span>
-                            <span>Assign Tree to User</span>
-                          </button>
+                          <span className="text-[11px] text-[#7a8a80] font-medium">
+                            Pending Assignment
+                          </span>
                         )}
                       </td>
 

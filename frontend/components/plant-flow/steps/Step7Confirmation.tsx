@@ -612,19 +612,6 @@ export function Step7Confirmation({
 
         <button
           type="button"
-          id="btn-verify-admin-ledger"
-          onClick={() => {
-            onClose();
-            router.push("/admin");
-          }}
-          className="flex-1 py-3 px-4 rounded-xl font-semibold text-xs sm:text-sm text-[#173324] border border-[#d4ede1] bg-[#f0faf4] hover:bg-[#e4f5ec] flex items-center justify-center gap-2 cursor-pointer transition-all"
-        >
-          <span>📊</span>
-          <span>Verify in Admin Ledger</span>
-        </button>
-
-        <button
-          type="button"
           id="btn-close-wizard"
           onClick={onClose}
           className="py-3 px-5 rounded-xl font-semibold text-xs sm:text-sm cursor-pointer hover:bg-[#e0ece5] transition-all"

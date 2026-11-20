@@ -387,28 +387,35 @@ export function MarkOrderPlantedModal({
           </div>
 
           {/* SECTION 2: Tree Identification & Unique Tree IDs */}
-          <div className="p-3.5 rounded-2xl bg-[#fafdfa] border border-[#d2e4d8] space-y-3">
+          <div className="p-3.5 rounded-2xl bg-[#fafdfa] border border-[#d2e4d8] space-y-2.5">
             <div>
               <label className="text-[11px] font-bold uppercase tracking-wider text-[#173324] block">
-                Tree Identification & Unique Tree IDs ({treeCount}{" "}
-                {treeCount > 1 ? "Trees" : "Tree"}){" "}
+                Unique Tree ID {treeCount > 1 ? `(${treeCount} Trees)` : ""}{" "}
                 <span className="text-emerald-600">*</span>
               </label>
               <p className="text-[10px] text-[#55695d]">
-                Enter the unique Tree ID code for each sapling (stamped onto the
-                digital deed):
+                Auto-generated identifier stamped on buyer deed certificate:
               </p>
             </div>
 
-            {/* Tree Rows List */}
-            <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-              {treeTags.map((tag, idx) => (
-                <div
-                  key={idx}
-                  className="p-2.5 rounded-xl border bg-[#fbfdfa] border-[#e2eae5] flex items-center gap-2"
-                >
-                  {/* Tag Input */}
-                  <div className="flex items-center gap-2 flex-1">
+            {treeCount === 1 ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  required
+                  value={treeTags[0] || ""}
+                  onChange={(e) => handleTagChange(0, e.target.value)}
+                  placeholder="e.g. POA-SW-2026-001"
+                  className="w-full px-3.5 py-2 rounded-xl border border-[#b2ddc4] bg-white font-mono font-bold text-xs text-[#173324] uppercase outline-none focus:border-[#1b7a43]"
+                />
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                {treeTags.map((tag, idx) => (
+                  <div
+                    key={idx}
+                    className="p-2 rounded-xl border bg-[#fbfdfa] border-[#e2eae5] flex items-center gap-2"
+                  >
                     <span className="text-[11px] font-mono font-bold text-[#1b7a43] shrink-0 w-16">
                       Tree #{idx + 1}:
                     </span>
@@ -421,9 +428,9 @@ export function MarkOrderPlantedModal({
                       className="flex-1 px-3 py-1.5 rounded-lg border border-[#b2ddc4] bg-white font-mono font-bold text-[#173324] uppercase outline-none focus:border-[#1b7a43]"
                     />
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Arborist Planting Notes */}
@@ -476,7 +483,7 @@ export function MarkOrderPlantedModal({
               <span>
                 {isSubmitting
                   ? "Assigning & Minting..."
-                  : "Confirm & Assign Tree to User 🌿"}
+                  : "Confirm Tree Assignment & Mark Planted 🌿"}
               </span>
             </button>
           </div>
