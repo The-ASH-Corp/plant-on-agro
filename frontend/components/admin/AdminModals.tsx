@@ -174,6 +174,7 @@ export function AdminModals({
       />
 
       {/* Certificates */}
+      {/* Manual Certificate Issuance Modal - Commented out as requested
       <IssueCertificateModal
         isOpen={certificateActions.showIssueCertModal}
         onClose={() => certificateActions.setShowIssueCertModal(false)}
@@ -182,6 +183,7 @@ export function AdminModals({
         orders={orders}
         instances={instances}
       />
+      */}
       <InspectCertificateModal
         certificate={selectedCertForInspect}
         onClose={() => setSelectedCertForInspect(null)}

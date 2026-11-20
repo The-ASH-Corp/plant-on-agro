@@ -41,12 +41,14 @@ export function CertificateEmptyState({
             Clear Search & Filters
           </button>
         ) : (
-          <button
+          /* Manual certificate creation option commented out as requested */
+          /* <button
             onClick={onOpenIssueModal}
             className="px-5 py-2.5 rounded-2xl bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-all cursor-pointer"
           >
             + Issue First Certificate Deed
-          </button>
+          </button> */
+          null
         )}
       </div>
     </div>
