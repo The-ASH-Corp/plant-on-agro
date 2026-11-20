@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { AdminTabType, AdoptionPlanItem, OccasionDedicationType } from "../types";
+import {
+  AdminTabType,
+  AdoptionPlanItem,
+  OccasionDedicationType,
+} from "../types";
 import { adoptionPlanService } from "@/services/adoption-plans/adoption-plan.service";
 import type { AdminData } from "./useAdminData";
 import type { ShowToast } from "./useAdminToast";
@@ -19,7 +23,8 @@ const parseFeatures = (raw: string) =>
 export function usePlanActions({ data, showToast, setActiveTab }: Params) {
   const { setPlans } = data;
   const [showAddPlanModal, setShowAddPlanModal] = useState(false);
-  const [selectedPlanForEdit, setSelectedPlanForEdit] = useState<AdoptionPlanItem | null>(null);
+  const [selectedPlanForEdit, setSelectedPlanForEdit] =
+    useState<AdoptionPlanItem | null>(null);
   const [isUpdatingPlan, setIsUpdatingPlan] = useState(false);
 
   const handleCreatePlan = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -91,8 +96,10 @@ export function usePlanActions({ data, showToast, setActiveTab }: Params) {
 
     const fd = new FormData(e.currentTarget);
     const id = (fd.get("id") as string) || selectedPlanForEdit.id;
-    const planLabel = (fd.get("label") as string)?.trim() || selectedPlanForEdit.label;
-    const icon = (fd.get("icon") as string)?.trim() || selectedPlanForEdit.icon || "🌱";
+    const planLabel =
+      (fd.get("label") as string)?.trim() || selectedPlanForEdit.label;
+    const icon =
+      (fd.get("icon") as string)?.trim() || selectedPlanForEdit.icon || "🌱";
     const priceModifier = Number(fd.get("price")) || 0;
     const badge = (fd.get("badge") as string)?.trim() || "Standard";
     const description = (fd.get("desc") as string)?.trim() || "";
@@ -110,7 +117,9 @@ export function usePlanActions({ data, showToast, setActiveTab }: Params) {
           occasionDedications = JSON.parse(rawOccasions);
         }
       } catch {
-        occasionDedications = selectedPlanForEdit.occasionDedications || ["general"];
+        occasionDedications = selectedPlanForEdit.occasionDedications || [
+          "general",
+        ];
       }
     }
     if (occasionDedications.length === 0) {
@@ -137,8 +146,8 @@ export function usePlanActions({ data, showToast, setActiveTab }: Params) {
                 badge,
                 isActive,
               }
-            : p
-        )
+            : p,
+        ),
       );
 
     setIsUpdatingPlan(true);

@@ -1,37 +1,37 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 const occasionDedicationEnum = z.enum([
-  'birthday',
-  'student',
-  'marriage',
-  'memorial',
-  'anniversary',
-  'corporate',
-  'general',
-  'other',
+  "birthday",
+  "student",
+  "marriage",
+  "memorial",
+  "anniversary",
+  "corporate",
+  "general",
+  "other",
 ]);
 
 export const createAdoptionPlanSchema = z.object({
   planLabel: z
     .string()
     .trim()
-    .min(1, 'Plan label cannot be empty')
-    .max(100, 'Plan label too long'),
-  icon: z.string().trim().optional().default('🌱'),
+    .min(1, "Plan label cannot be empty")
+    .max(100, "Plan label too long"),
+  icon: z.string().trim().optional().default("🌱"),
   price: z.number().optional(),
   priceModifier: z.number().optional().default(0),
   description: z
     .string()
     .trim()
-    .min(1, 'Description cannot be empty')
-    .max(1000, 'Description too long'),
+    .min(1, "Description cannot be empty")
+    .max(1000, "Description too long"),
   features: z.array(z.string().trim().min(1)).optional().default([]),
   occasionDedications: z
     .array(occasionDedicationEnum)
-    .min(1, 'At least one occasion dedication must be selected')
+    .min(1, "At least one occasion dedication must be selected")
     .optional()
-    .default(['general']),
-  badge: z.string().trim().optional().default('Standard'),
+    .default(["general"]),
+  badge: z.string().trim().optional().default("Standard"),
   activeCount: z.number().min(0).optional().default(0),
 });
 
@@ -49,15 +49,15 @@ export const updateAdoptionPlanSchema = z.object({
 });
 
 export const getAdoptionPlanByIdSchema = z.object({
-  id: z.string().min(1, 'ID is required'),
+  id: z.string().min(1, "ID is required"),
 });
 
 export const queryAdoptionPlansSchema = z.object({
   occasion: z.string().optional(),
   search: z.string().optional(),
   isActive: z
-    .enum(['true', 'false'])
-    .transform((val) => val === 'true')
+    .enum(["true", "false"])
+    .transform((val) => val === "true")
     .optional(),
   limit: z.coerce.number().min(1).max(100).optional().default(50),
   skip: z.coerce.number().min(0).optional().default(0),

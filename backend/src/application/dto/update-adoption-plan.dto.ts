@@ -1,4 +1,4 @@
-import { OccasionDedication } from '../../core/entities/adoption-plan.entity';
+import { OccasionDedication } from "../../core/entities/adoption-plan.entity";
 
 export interface UpdateAdoptionPlanDto {
   planLabel?: string;

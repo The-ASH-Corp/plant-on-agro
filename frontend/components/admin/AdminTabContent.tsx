@@ -114,7 +114,6 @@ export function AdminTabContent({
         <TreeInstancesTab
           instances={instances}
           searchQuery={searchQuery}
-          onOpenAddInstance={() => instanceActions.setShowAddInstanceModal(true)}
           onEditInstance={(inst) => instanceActions.setSelectedInstanceForEdit(inst)}
           onUpdateHealth={instanceActions.handleUpdateInstanceHealth}
           onDeleteInstance={deleteActions.handleDeleteInstance}

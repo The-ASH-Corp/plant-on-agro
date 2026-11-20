@@ -1,30 +1,39 @@
-import { IAdoptionPlanRepository } from '../../../core/interfaces/adoption-plan.repository.interface';
-import { AdoptionPlan } from '../../../core/entities/adoption-plan.entity';
-import { CreateAdoptionPlanDto } from '../../dto/create-adoption-plan.dto';
+import { IAdoptionPlanRepository } from "../../../core/interfaces/adoption-plan.repository.interface";
+import { AdoptionPlan } from "../../../core/entities/adoption-plan.entity";
+import { CreateAdoptionPlanDto } from "../../dto/create-adoption-plan.dto";
 import {
   AdoptionPlanResponseDto,
   AdoptionPlanResponseMapper,
-} from '../../dto/adoption-plan-response.dto';
+} from "../../dto/adoption-plan-response.dto";
 
 export class CreateAdoptionPlanUseCase {
-  constructor(private readonly adoptionPlanRepository: IAdoptionPlanRepository) {}
+  constructor(
+    private readonly adoptionPlanRepository: IAdoptionPlanRepository,
+  ) {}
 
-  public async execute(input: CreateAdoptionPlanDto): Promise<AdoptionPlanResponseDto> {
-    const existing = await this.adoptionPlanRepository.findByLabel(input.planLabel);
+  public async execute(
+    input: CreateAdoptionPlanDto,
+  ): Promise<AdoptionPlanResponseDto> {
+    const existing = await this.adoptionPlanRepository.findByLabel(
+      input.planLabel,
+    );
     if (existing) {
-      throw new Error(`An adoption plan with label "${input.planLabel}" already exists`);
+      throw new Error(
+        `An adoption plan with label "${input.planLabel}" already exists`,
+      );
     }
 
-    const planPrice = input.price !== undefined ? input.price : (input.priceModifier ?? 0);
+    const planPrice =
+      input.price !== undefined ? input.price : (input.priceModifier ?? 0);
     const plan = new AdoptionPlan({
       planLabel: input.planLabel,
-      icon: input.icon ?? '🌱',
+      icon: input.icon ?? "🌱",
       price: planPrice,
       priceModifier: planPrice,
       description: input.description,
       features: input.features ?? [],
-      occasionDedications: input.occasionDedications ?? ['general'],
-      badge: input.badge ?? 'Standard',
+      occasionDedications: input.occasionDedications ?? ["general"],
+      badge: input.badge ?? "Standard",
       activeCount: input.activeCount ?? 0,
       isActive: true,
     });

@@ -70,7 +70,7 @@ export function useAdminData(showToast: ShowToast) {
         const [treesRes, plansRes, instancesRes, usersRes, ordersRes, certsRes, locationsRes, waitlistRes] = await Promise.all([
           treeVarietyService.getAll(),
           adoptionPlanService.getAll(),
-          treeInstanceService.getAll(),
+          treeInstanceService.getAll({ limit: 500 }),
           userService.listUsers(100, 0).catch((err) => {
             console.warn("Could not load users:", err);
             return null;

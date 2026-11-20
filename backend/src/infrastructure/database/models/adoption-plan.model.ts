@@ -1,5 +1,5 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { OccasionDedication } from '../../../core/entities/adoption-plan.entity';
+import mongoose, { Schema, Document } from "mongoose";
+import { OccasionDedication } from "../../../core/entities/adoption-plan.entity";
 
 export interface IAdoptionPlanDocument extends Document {
   planLabel: string;
@@ -29,7 +29,7 @@ const AdoptionPlanSchema = new Schema<IAdoptionPlanDocument>(
       type: String,
       required: true,
       trim: true,
-      default: '🌱',
+      default: "🌱",
     },
     price: {
       type: Number,
@@ -53,21 +53,21 @@ const AdoptionPlanSchema = new Schema<IAdoptionPlanDocument>(
     occasionDedications: {
       type: [String],
       enum: [
-        'birthday',
-        'student',
-        'marriage',
-        'memorial',
-        'anniversary',
-        'corporate',
-        'general',
-        'other',
+        "birthday",
+        "student",
+        "marriage",
+        "memorial",
+        "anniversary",
+        "corporate",
+        "general",
+        "other",
       ],
-      default: ['general'],
+      default: ["general"],
       index: true,
     },
     badge: {
       type: String,
-      default: 'Standard',
+      default: "Standard",
       trim: true,
     },
     activeCount: {
@@ -84,10 +84,10 @@ const AdoptionPlanSchema = new Schema<IAdoptionPlanDocument>(
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
 
 export const AdoptionPlanModel = mongoose.model<IAdoptionPlanDocument>(
-  'AdoptionPlan',
-  AdoptionPlanSchema
+  "AdoptionPlan",
+  AdoptionPlanSchema,
 );

@@ -3,7 +3,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
-import { useHydratedStore, useIsClient } from "@/store/hooks/use-hydrated-store";
+import {
+  useHydratedStore,
+  useIsClient,
+} from "@/store/hooks/use-hydrated-store";
 import { PlantFlow } from "@/components/plant-flow";
 import { SignOutConfirmationModal } from "@/components/ui";
 import {
@@ -30,7 +33,7 @@ import { BuyerSidebarWidgets } from "./BuyerSidebarWidgets";
 
 function deriveBuyerOrders(
   instances: BackendTreeInstance[],
-  storedOrders: any[] = []
+  storedOrders: any[] = [],
 ): BuyerOrderRecord[] {
   const byOrderNum = new Map<string, BuyerOrderRecord>();
 
@@ -38,7 +41,10 @@ function deriveBuyerOrders(
   for (const o of storedOrders) {
     if (o && (o.orderNumber || o.id)) {
       const orderNumber = o.orderNumber || o.id;
-      const tags = o.assignedTreeTags || o.treeTags || (o.treeTag ? [o.treeTag] : undefined);
+      const tags =
+        o.assignedTreeTags ||
+        o.treeTags ||
+        (o.treeTag ? [o.treeTag] : undefined);
       byOrderNum.set(orderNumber, {
         id: o.id || `ord-${orderNumber}`,
         orderNumber,
@@ -118,14 +124,17 @@ function deriveBuyerOrders(
   }
 
   return Array.from(byOrderNum.values()).sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 }
 
 export function BuyerDashboard() {
   const router = useRouter();
   const user = useHydratedStore(useAuthStore, (s) => s.user);
-  const isAuthenticated = useHydratedStore(useAuthStore, (s) => s.isAuthenticated);
+  const isAuthenticated = useHydratedStore(
+    useAuthStore,
+    (s) => s.isAuthenticated,
+  );
   const logout = useAuthStore((s) => s.logout);
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
 
@@ -137,15 +146,20 @@ export function BuyerDashboard() {
     }
   }, [hasHydrated]);
 
-  const isReady = isClient && (hasHydrated || (useAuthStore.persist?.hasHydrated?.() ?? false));
+  const isReady =
+    isClient &&
+    (hasHydrated || (useAuthStore.persist?.hasHydrated?.() ?? false));
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSignOutModal, setShowSignOutModal] = useState(false);
   const [activeTab, setActiveTab] = useState<BuyerDashboardTab>("trees");
   const [plantFlowOpen, setPlantFlowOpen] = useState(false);
-  const [selectedCertificateTree, setSelectedCertificateTree] = useState<BackendTreeInstance | null>(null);
-  const [selectedInspectTree, setSelectedInspectTree] = useState<BackendTreeInstance | null>(null);
-  const [selectedOrderInvoice, setSelectedOrderInvoice] = useState<BuyerOrderRecord | null>(null);
+  const [selectedCertificateTree, setSelectedCertificateTree] =
+    useState<BackendTreeInstance | null>(null);
+  const [selectedInspectTree, setSelectedInspectTree] =
+    useState<BackendTreeInstance | null>(null);
+  const [selectedOrderInvoice, setSelectedOrderInvoice] =
+    useState<BuyerOrderRecord | null>(null);
   const [trees, setTrees] = useState<BackendTreeInstance[]>([]);
   const [orders, setOrders] = useState<BuyerOrderRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -209,7 +223,10 @@ export function BuyerDashboard() {
       if (Array.isArray(e.detail?.instances)) {
         const insts = e.detail.instances as BackendTreeInstance[];
         const instIds = new Set(insts.map((i) => i.id));
-        setTrees((prev) => [...insts, ...prev.filter((t) => !instIds.has(t.id))]);
+        setTrees((prev) => [
+          ...insts,
+          ...prev.filter((t) => !instIds.has(t.id)),
+        ]);
       } else if (e.detail?.instance) {
         const inst = e.detail.instance as BackendTreeInstance;
         setTrees((prev) => [inst, ...prev.filter((t) => t.id !== inst.id)]);
@@ -217,7 +234,10 @@ export function BuyerDashboard() {
 
       if (e.detail?.order) {
         const o = e.detail.order;
-        const oTags = o.assignedTreeTags || o.treeTags || (o.treeTag ? [o.treeTag] : undefined);
+        const oTags =
+          o.assignedTreeTags ||
+          o.treeTags ||
+          (o.treeTag ? [o.treeTag] : undefined);
         const newRecord: BuyerOrderRecord = {
           id: o.id || `ord-${o.orderNumber}`,
           orderNumber: o.orderNumber,
@@ -225,7 +245,8 @@ export function BuyerDashboard() {
           treeTags: oTags,
           assignedTreeTags: oTags,
           invoiceNumber:
-            o.invoiceNumber || `INV-2026-${o.orderNumber.replace(/^ORD-?/, "")}`,
+            o.invoiceNumber ||
+            `INV-2026-${o.orderNumber.replace(/^ORD-?/, "")}`,
           date: o.datePlanted || new Date().toISOString().split("T")[0],
           treeSpecies: o.treeSpecies || "Indigenous Tree",
           scientificName: o.scientificName,
@@ -273,25 +294,38 @@ export function BuyerDashboard() {
   const greenAreaSqFt = totalTrees * 65;
   const totalSpent = useMemo(
     () => orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0),
-    [orders]
+    [orders],
   );
 
   // Filter trees based on whether they have been officially planted & verified
   const plantedTreesWithCertificates = useMemo(() => {
     return trees.filter((tree) => {
-      const order = orders.find((o) => o.orderNumber === tree.orderRef || o.id === tree.orderRef);
+      const order = orders.find(
+        (o) => o.orderNumber === tree.orderRef || o.id === tree.orderRef,
+      );
       if (order) {
-        return order.status === "Planted" || order.status === "Certificate Issued" || order.status === "Completed";
+        return (
+          order.status === "Planted" ||
+          order.status === "Certificate Issued" ||
+          order.status === "Completed"
+        );
       }
-      return (tree.healthStatus as string) !== "Awaiting Planting" && (tree.healthStatus as string) !== "New Request";
+      return (
+        (tree.healthStatus as string) !== "Awaiting Planting" &&
+        (tree.healthStatus as string) !== "New Request"
+      );
     });
   }, [trees, orders]);
 
   const pendingPlantingTrees = useMemo(() => {
     return trees.filter((tree) => {
-      const order = orders.find((o) => o.orderNumber === tree.orderRef || o.id === tree.orderRef);
+      const order = orders.find(
+        (o) => o.orderNumber === tree.orderRef || o.id === tree.orderRef,
+      );
       if (order) {
-        return order.status === "New Request" || order.status === "Verified & Tagged";
+        return (
+          order.status === "New Request" || order.status === "Verified & Tagged"
+        );
       }
       return false;
     });
@@ -314,7 +348,9 @@ export function BuyerDashboard() {
         <div className="text-center space-y-3">
           <div className="w-8 h-8 border-3 border-emerald-400 border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-xs text-emerald-200 font-medium">
-            {!isReady ? "Verifying security credentials..." : "Redirecting to login..."}
+            {!isReady
+              ? "Verifying security credentials..."
+              : "Redirecting to login..."}
           </p>
         </div>
       </div>
@@ -367,7 +403,6 @@ export function BuyerDashboard() {
             {/* Primary Module Stage (8 Cols on Desktop) */}
             <div className="lg:col-span-8 space-y-4">
               {/* Tab Switcher Pills */}
-             
 
               {/* Active Tab View */}
               {activeTab === "trees" && (
@@ -406,10 +441,7 @@ export function BuyerDashboard() {
               )}
 
               {activeTab === "visits" && (
-                <BuyerVisitsTab
-                  user={user ?? null}
-                  instances={trees}
-                />
+                <BuyerVisitsTab user={user ?? null} instances={trees} />
               )}
             </div>
 

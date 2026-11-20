@@ -32,7 +32,6 @@ interface AdminSidebarProps {
   onOpenAddTree?: () => void;
   onOpenAddPlan: () => void;
   onOpenAddLocation: () => void;
-  onOpenAddInstance?: () => void;
   onOpenIssueCertificate?: () => void;
 }
 
@@ -55,7 +54,6 @@ export function AdminSidebar({
   onOpenAddTree,
   onOpenAddPlan,
   onOpenAddLocation,
-  onOpenAddInstance,
   onOpenIssueCertificate,
 }: AdminSidebarProps) {
   const navItems: NavItemDef[] = [

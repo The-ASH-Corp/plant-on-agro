@@ -14,7 +14,6 @@ import { AddTreeModal } from "./modals/AddTreeModal";
 import { EditTreeModal } from "./modals/EditTreeModal";
 import { AddPlanModal } from "./modals/AddPlanModal";
 import { EditPlanModal } from "./modals/EditPlanModal";
-import { AddTreeInstanceModal } from "./modals/AddTreeInstanceModal";
 import { EditTreeInstanceModal } from "./modals/EditTreeInstanceModal";
 import { AddLocationModal } from "./modals/AddLocationModal";
 import { EditLocationModal } from "./modals/EditLocationModal";
@@ -93,11 +92,6 @@ export function AdminModals({
       />
 
       {/* Tree Instances */}
-      <AddTreeInstanceModal
-        isOpen={instanceActions.showAddInstanceModal}
-        onClose={() => instanceActions.setShowAddInstanceModal(false)}
-        onSubmit={instanceActions.handleCreateInstance}
-      />
       <EditTreeInstanceModal
         isOpen={Boolean(instanceActions.selectedInstanceForEdit)}
         instance={instanceActions.selectedInstanceForEdit}

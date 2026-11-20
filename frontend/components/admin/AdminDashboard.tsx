@@ -102,7 +102,6 @@ export function AdminDashboard() {
         onOpenAddTree={() => treeActions.setShowAddTreeModal(true)}
         onOpenAddPlan={() => planActions.setShowAddPlanModal(true)}
         onOpenAddLocation={() => locationActions.setShowAddLocationModal(true)}
-        onOpenAddInstance={() => instanceActions.setShowAddInstanceModal(true)}
         onOpenIssueCertificate={() => certificateActions.setShowIssueCertModal(true)}
       />
 
