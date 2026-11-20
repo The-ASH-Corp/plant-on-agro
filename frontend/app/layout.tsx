@@ -22,6 +22,14 @@ export const metadata: Metadata = {
   title: "PlantOnAgro - You Plant. We Grow.",
   description:
     "Verified agroforestry, living tree adoption & digital plantation certificates.",
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/favicon.ico", type: "image/x-icon" },
+    ],
+    apple: "/apple-icon.png",
+    shortcut: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

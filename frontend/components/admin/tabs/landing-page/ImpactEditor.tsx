@@ -1,6 +1,7 @@
 "use client";
 
 import { ImpactSectionContent, ImpactStatItem, ImpactProjectItem } from "@/services/landing-page/landing-page.service";
+import { getMediaUrl, handleImageError, DEFAULT_NATURE_IMAGE } from "@/services/media/media.service";
 import { ImpactEditorProps } from "./types";
 import { ToggleSwitch } from "./ToggleSwitch";
 
@@ -201,7 +202,14 @@ export function ImpactEditor({ impact, onChange, onToggle }: ImpactEditorProps) 
                 ✕
               </button>
               <div className="h-24 w-full rounded-lg overflow-hidden relative">
-                <img src={proj.img} alt={proj.title} className="w-full h-full object-cover" />
+                <img
+                  src={getMediaUrl(proj.img, DEFAULT_NATURE_IMAGE)}
+                  alt={proj.title}
+                  onError={(e) => handleImageError(e, DEFAULT_NATURE_IMAGE)}
+                  crossOrigin="anonymous"
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div>
                 <span className="text-[10px] text-gray-500 font-semibold">Image URL</span>
