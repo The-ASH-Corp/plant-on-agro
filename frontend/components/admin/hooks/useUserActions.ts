@@ -23,7 +23,10 @@ export function useUserActions({ data, showToast }: Params) {
       if (res?.data) {
         const raw = res.data;
         const items = Array.isArray(raw) ? raw : (raw.items || []);
-        setUsers(items);
+        const buyerItems = items.filter(
+          (u: any) => u.role !== "admin" && u.role?.toLowerCase() !== "admin"
+        );
+        setUsers(buyerItems);
         showToast("User directory refreshed successfully");
       }
     } catch {
@@ -35,6 +38,10 @@ export function useUserActions({ data, showToast }: Params) {
 
   // Triggers the confirmation modal
   const handleToggleBlockUser = async (targetUser: User): Promise<void> => {
+    if (targetUser.role === "admin" || (targetUser as any).role?.toLowerCase() === "admin") {
+      showToast("Cannot block an administrator account.");
+      return;
+    }
     setUserToToggleBlock(targetUser);
   };
 

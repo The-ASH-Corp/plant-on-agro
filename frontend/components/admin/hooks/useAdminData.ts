@@ -99,7 +99,10 @@ export function useAdminData(showToast: ShowToast, isReady = true) {
         if (usersRes.status === "fulfilled" && usersRes.value?.data) {
           const raw = usersRes.value.data as any;
           const userItems = Array.isArray(raw) ? raw : (raw.items || []);
-          setUsers(userItems);
+          const buyerItems = userItems.filter(
+            (u: any) => u.role !== "admin" && u.role?.toLowerCase() !== "admin"
+          );
+          setUsers(buyerItems);
         }
 
         if (certsRes.status === "fulfilled" && certsRes.value?.data?.items) {

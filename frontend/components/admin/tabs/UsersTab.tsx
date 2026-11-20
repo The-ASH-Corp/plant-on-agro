@@ -41,7 +41,10 @@ export function UsersTab({
         if (isMounted && res.data) {
           const raw = res.data as any;
           const userItems = Array.isArray(raw) ? raw : (raw.items || []);
-          setServerUsers(userItems);
+          const buyerItems = userItems.filter(
+            (u: any) => u.role !== "admin" && u.role?.toLowerCase() !== "admin"
+          );
+          setServerUsers(buyerItems);
         }
       } catch (err) {
         console.warn("Could not fetch users:", err);
@@ -57,9 +60,11 @@ export function UsersTab({
     return serverUsers !== null && serverUsers.length > 0 ? serverUsers : users;
   }, [serverUsers, users]);
 
-  // Show all registered accounts with role indicators
+  // Exclude administrators: list buyer / regular user accounts only
   const regularUsers = useMemo(() => {
-    return baseUsers;
+    return baseUsers.filter(
+      (u) => u.role !== "admin" && (u as any).role?.toLowerCase() !== "admin"
+    );
   }, [baseUsers]);
 
   const getUserOrderStats = (email: string) => {
