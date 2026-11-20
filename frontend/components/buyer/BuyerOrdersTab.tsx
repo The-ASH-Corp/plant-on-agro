@@ -59,13 +59,7 @@ export function BuyerOrdersTab({
           </p>
         </div>
 
-        <button
-          onClick={onOpenPlantFlow}
-          className="text-xs font-bold px-4 py-2 rounded-xl bg-gradient-to-r from-[#1b7a43] to-[#2d6a4f] text-white hover:scale-105 transition-transform shadow-sm cursor-pointer flex items-center gap-1.5 self-start sm:self-auto"
-        >
-          <span>🌱</span>
-          <span>New Tree Adoption</span>
-        </button>
+       
       </div>
 
       {/* 4 Financial & Telemetry Summary Cards */}
