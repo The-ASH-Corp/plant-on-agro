@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { AdoptionPlanItem, OccasionDedicationType } from "../types";
 import { TrashIcon, PencilIcon } from "@/components/ui";
+import { adoptionPlanService } from "@/services/adoption-plans/adoption-plan.service";
 
 interface PlansTabProps {
   plans: AdoptionPlanItem[];
@@ -78,9 +79,32 @@ export function PlansTab({
   onDeletePlan,
 }: PlansTabProps) {
   const [selectedOccasion, setSelectedOccasion] = useState<string>("all");
+  const [serverPlans, setServerPlans] = useState<AdoptionPlanItem[] | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchPlans() {
+      try {
+        const res = await adoptionPlanService.getAll();
+        if (isMounted && res.data?.items) {
+          setServerPlans(res.data.items.map(adoptionPlanService.mapToUiItem));
+        }
+      } catch (err) {
+        console.warn("Could not fetch plans:", err);
+      }
+    }
+    fetchPlans();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const basePlans = useMemo(() => {
+    return serverPlans !== null && serverPlans.length > 0 ? serverPlans : plans;
+  }, [serverPlans, plans]);
 
   const filteredPlans = useMemo(() => {
-    return plans.filter((p) => {
+    return basePlans.filter((p) => {
       const label = p.label || p.planLabel || "";
       const desc = p.desc || p.description || "";
       const badge = p.badge || "";
@@ -99,7 +123,7 @@ export function PlansTab({
 
       return matchesSearch && matchesOccasion;
     });
-  }, [plans, searchQuery, selectedOccasion]);
+  }, [basePlans, searchQuery, selectedOccasion]);
 
   return (
     <div className="space-y-6 animate-fadeIn">

@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Select } from "@/components/ui";
 import { User } from "@/types/auth";
 import { AdoptionOrder } from "../types";
+import { userService } from "@/services/user/user.service";
 
 interface UsersTabProps {
   users: User[];
@@ -30,11 +31,36 @@ export function UsersTab({
   const [statusFilter, setStatusFilter] = useState<UserStatusFilter>("all");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [serverUsers, setServerUsers] = useState<User[] | null>(null);
 
-  // Filter out any admin accounts so admins are never shown in the customer/user directory
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchUsers() {
+      try {
+        const res = await userService.listUsers(100, 0);
+        if (isMounted && res.data) {
+          const raw = res.data as any;
+          const userItems = Array.isArray(raw) ? raw : (raw.items || []);
+          setServerUsers(userItems);
+        }
+      } catch (err) {
+        console.warn("Could not fetch users:", err);
+      }
+    }
+    fetchUsers();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const baseUsers = useMemo(() => {
+    return serverUsers !== null && serverUsers.length > 0 ? serverUsers : users;
+  }, [serverUsers, users]);
+
+  // Show all registered accounts with role indicators
   const regularUsers = useMemo(() => {
-    return users.filter((u) => u.role !== "admin");
-  }, [users]);
+    return baseUsers;
+  }, [baseUsers]);
 
   const getUserOrderStats = (email: string) => {
     const userOrders = orders.filter(
@@ -313,8 +339,14 @@ export function UsersTab({
 
                       {/* Role */}
                       <td className="py-3.5 px-4">
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md inline-block bg-blue-50 text-blue-700 border border-blue-200">
-                          Buyer
+                        <span
+                          className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md inline-block ${
+                            user.role === "admin"
+                              ? "bg-purple-50 text-purple-700 border border-purple-200"
+                              : "bg-blue-50 text-blue-700 border border-blue-200"
+                          }`}
+                        >
+                          {user.role ? (user.role === "admin" ? "Administrator" : user.role) : "Buyer"}
                         </span>
                       </td>
 

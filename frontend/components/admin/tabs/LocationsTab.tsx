@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { PlantationLocationItem } from "../types";
 import { TrashIcon, PencilIcon } from "@/components/ui";
+import { locationService } from "@/services/locations/location.service";
 
 interface LocationsTabProps {
   locations: PlantationLocationItem[];
@@ -19,15 +20,39 @@ export function LocationsTab({
   onEditLocation,
   onDeleteLocation,
 }: LocationsTabProps) {
+  const [serverLocations, setServerLocations] = useState<PlantationLocationItem[] | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchLocations() {
+      try {
+        const res = await locationService.getAll({ limit: 100 });
+        if (isMounted && res.data?.items) {
+          setServerLocations(res.data.items.map(locationService.mapToUiItem));
+        }
+      } catch (err) {
+        console.warn("Could not fetch locations:", err);
+      }
+    }
+    fetchLocations();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const baseLocations = useMemo(() => {
+    return serverLocations !== null && serverLocations.length > 0 ? serverLocations : locations;
+  }, [serverLocations, locations]);
+
   const filteredLocations = useMemo(() => {
-    return locations.filter(
+    return baseLocations.filter(
       (l) =>
         l.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         l.region.toLowerCase().includes(searchQuery.toLowerCase()) ||
         l.gps.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (l.soilHealth && l.soilHealth.toLowerCase().includes(searchQuery.toLowerCase()))
     );
-  }, [locations, searchQuery]);
+  }, [baseLocations, searchQuery]);
 
   return (
     <div className="space-y-6 animate-fadeIn">

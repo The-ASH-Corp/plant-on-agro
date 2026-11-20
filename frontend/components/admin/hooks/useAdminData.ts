@@ -20,7 +20,7 @@ import { deriveOrdersFromInstances } from "../utils/deriveAdminData";
 import type { ShowToast } from "./useAdminToast";
 
 /** Holds all admin dashboard collections and loads them from the backend on mount. */
-export function useAdminData(showToast: ShowToast) {
+export function useAdminData(showToast: ShowToast, isReady = true) {
   const [trees, setTrees] = useState<TreeVarietyItem[]>([]);
   const [plans, setPlans] = useState<AdoptionPlanItem[]>([]);
   const [instances, setInstances] = useState<TreeInstanceItem[]>([]);
@@ -64,6 +64,7 @@ export function useAdminData(showToast: ShowToast) {
 
   // Load real tree varieties, adoption plans, and tree instances from backend API on mount
   useEffect(() => {
+    if (!isReady) return;
     let isMounted = true;
     async function loadCatalog() {
       try {
@@ -148,7 +149,7 @@ export function useAdminData(showToast: ShowToast) {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [isReady]);
 
   return {
     trees, setTrees,
