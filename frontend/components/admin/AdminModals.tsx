@@ -136,6 +136,7 @@ export function AdminModals({
         order={orderActions.orderToMarkPlanted}
         locations={data.locations}
         instances={data.instances}
+        treeVarieties={data.trees}
         onClose={() => orderActions.setOrderToMarkPlanted(null)}
         onSubmit={async (
           orderNumber,
@@ -162,6 +163,13 @@ export function AdminModals({
             category,
             treeGpsCoords
           );
+        }}
+        onCompleteOrder={async (orderNumber) => {
+          await orderActions.handleUpdateOrderStatus(orderNumber, "Completed");
+        }}
+        onViewOrderDetails={(updatedOrder) => {
+          orderActions.setOrderToMarkPlanted(null);
+          orderActions.setSelectedOrder(updatedOrder);
         }}
       />
 

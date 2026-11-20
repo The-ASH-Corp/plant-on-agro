@@ -106,12 +106,12 @@ export function useOrderActions({ data, showToast }: Params) {
         } catch (retryErr: any) {
           const msg = retryErr?.response?.data?.message || retryErr?.message || "Failed to update order status";
           showToast(`❌ ${msg}`);
-          return;
+          throw new Error(msg);
         }
       } else {
         const msg = orderApiErr?.response?.data?.message || orderApiErr?.message || "Failed to update order status";
         showToast(`❌ ${msg}`);
-        return;
+        throw new Error(msg);
       }
     }
 
@@ -128,11 +128,53 @@ export function useOrderActions({ data, showToast }: Params) {
               treeSpecies: treeSpecies || o.treeSpecies,
               scientificName: scientificName || o.scientificName,
               category: category || o.category,
+              treeTag: treeTags?.[0] || o.treeTag,
+              assignedTreeTags: treeTags || o.assignedTreeTags,
+              treeTags: treeTags || o.treeTags,
             }
           : o
       );
       return updated;
     });
+
+    if (
+      selectedOrder &&
+      (selectedOrder.orderNumber === orderIdentifier || selectedOrder.id === orderIdentifier)
+    ) {
+      setSelectedOrder((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: newStatus,
+              isRead: true,
+              gpsCoords: gpsCoords || prev.gpsCoords,
+              reserveName: reserveName || prev.reserveName,
+              treeSpecies: treeSpecies || prev.treeSpecies,
+              scientificName: scientificName || prev.scientificName,
+              category: category || prev.category,
+              treeTag: treeTags?.[0] || prev.treeTag,
+              assignedTreeTags: treeTags || prev.assignedTreeTags,
+              treeTags: treeTags || prev.treeTags,
+            }
+          : null
+      );
+    }
+
+    // Dispatch global event for components (e.g. OrdersTab) to synchronize in real time
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("poa-order-status-changed", {
+          detail: {
+            orderNumber: targetOrder?.orderNumber || orderIdentifier,
+            newStatus,
+            treeSpecies,
+            scientificName,
+            category,
+            treeTags,
+          },
+        })
+      );
+    }
 
     // 3. If Planted, refresh certificates registry and tree instances
     if (newStatus === "Planted") {

@@ -75,7 +75,7 @@ export function OrderDetailsModal({
 
   const assignedTreeTags = matchingInstances.length > 0
     ? matchingInstances.map((i) => i.treeTag).join(", ")
-    : (order?.treeTag || "");
+    : (order?.treeTag || (order?.assignedTreeTags && order.assignedTreeTags.length > 0 ? order.assignedTreeTags.join(", ") : ""));
 
   useEffect(() => {
     if (order) {
