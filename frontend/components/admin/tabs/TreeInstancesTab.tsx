@@ -179,7 +179,7 @@ export function TreeInstancesTab({
       setIsLoading(true);
       try {
         const res = await treeInstanceService.getAll({
-          limit: 500,
+          limit: 100,
           search: debouncedSearch.trim() || undefined,
           healthStatus: selectedHealth !== "All" ? selectedHealth : undefined,
         });

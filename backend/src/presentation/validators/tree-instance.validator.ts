@@ -85,6 +85,6 @@ export const queryTreeInstancesSchema = z.object({
     .enum(['true', 'false'])
     .transform((val) => val === 'true')
     .optional(),
-  limit: z.coerce.number().min(1).max(100).optional().default(50),
+  limit: z.coerce.number().min(1).max(1000).optional().default(50),
   skip: z.coerce.number().min(0).optional().default(0),
 });
