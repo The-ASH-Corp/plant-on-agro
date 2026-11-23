@@ -24,8 +24,9 @@ export const metadata: Metadata = {
     "Verified agroforestry, living tree adoption & digital plantation certificates.",
   icons: {
     icon: [
-      { url: "/favicon.png", type: "image/png" },
       { url: "/favicon.ico", type: "image/x-icon" },
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/planton%20logo%20favicon.jpg.jpeg", type: "image/jpeg" },
     ],
     apple: "/apple-icon.png",
     shortcut: "/favicon.ico",
@@ -44,6 +45,9 @@ export default function RootLayout({
       className={`${outfit.variable} ${dmSerifDisplay.variable} h-full antialiased`}
     >
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
