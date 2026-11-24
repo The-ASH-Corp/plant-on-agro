@@ -9,7 +9,7 @@ import {
 import { TreeInstance } from "../../../core/entities/tree-instance.entity";
 import { Certificate } from "../../../core/entities/certificate.entity";
 import { OrderDto, OrderResponseMapper } from "../../dto/order.dto";
-import { BadRequestError, NotFoundError } from "../../../core/errors/app-error";
+import { BadRequestError, ConflictError, NotFoundError } from "../../../core/errors/app-error";
 
 export const ORDER_STATUS_PROGRESSION: AdoptionOrderStatus[] = [
   "New Request",
@@ -147,16 +147,39 @@ export class UpdateOrderStatusUseCase {
       const cleanOrderNumber = order.orderNumber.replace(/^POA-?/, "");
 
       // Update or assign Tree Instances explicitly managed by Admin
+      const assertNotOwnedByAnotherOrder = (existingInst: TreeInstance) => {
+        const instOrderRef = (existingInst.orderRef || "").trim().toUpperCase();
+        const instEmail = (existingInst.adopterEmail || "").trim().toLowerCase();
+        const targetOrderNum = order.orderNumber.trim().toUpperCase();
+        const targetEmail = (order.adopterEmail || "").trim().toLowerCase();
+
+        if (
+          (instOrderRef && instOrderRef !== targetOrderNum) ||
+          (instEmail && targetEmail && instEmail !== targetEmail)
+        ) {
+          throw new ConflictError(
+            `Tree tag "${existingInst.treeTag}" is already permanently assigned to order "${instOrderRef || instEmail}" and cannot be reassigned to order "${order.orderNumber}".`
+          );
+        }
+      };
+
       let treeInstances: TreeInstance[] = [];
       if (this.treeInstanceRepository) {
         // 1. If Admin selected existing nursery instances to assign to this purchase
         if (assignedTreeInstanceIds && assignedTreeInstanceIds.length > 0) {
-          for (const instId of assignedTreeInstanceIds) {
+          for (let instIdx = 0; instIdx < assignedTreeInstanceIds.length; instIdx++) {
+            const instId = assignedTreeInstanceIds[instIdx];
             const cleanInstId = (instId || "").trim();
             if (cleanInstId) {
               const inst =
                 await this.treeInstanceRepository.findById(cleanInstId);
               if (inst) {
+                assertNotOwnedByAnotherOrder(inst);
+                const perTreeCoord =
+                  treeGpsCoords?.[instIdx] && treeGpsCoords[instIdx].trim()
+                    ? parseGpsCoords(treeGpsCoords[instIdx])
+                    : targetCoord;
+
                 inst.update({
                   orderRef: order.orderNumber,
                   adopterName: order.adopterName,
@@ -169,7 +192,7 @@ export class UpdateOrderStatusUseCase {
                     notes ||
                     `Assigned to order ${order.orderNumber} for ${order.adopterName}. Verified.`,
                 });
-                inst.updateGpsCoordinates(targetCoord.lat, targetCoord.lng);
+                inst.updateGpsCoordinates(perTreeCoord.lat, perTreeCoord.lng);
                 await this.treeInstanceRepository.update(inst);
                 treeInstances.push(inst);
               }
@@ -190,9 +213,17 @@ export class UpdateOrderStatusUseCase {
               cleanTag &&
               !treeInstances.some((t) => t.treeTag === cleanTag)
             ) {
+              const perTreeCoord =
+                treeGpsCoords?.[tagIdx] && treeGpsCoords[tagIdx].trim()
+                  ? parseGpsCoords(treeGpsCoords[tagIdx])
+                  : targetCoord;
+
               let existing =
                 await this.treeInstanceRepository.findByTag(cleanTag);
               if (existing) {
+                // Prevent silently hijacking another customer's assigned tree
+                assertNotOwnedByAnotherOrder(existing);
+
                 existing.update({
                   orderRef: order.orderNumber,
                   adopterName: order.adopterName,
@@ -205,7 +236,7 @@ export class UpdateOrderStatusUseCase {
                     notes ||
                     `Assigned to order ${order.orderNumber} for ${order.adopterName}. Planted in ${order.reserveName || "reserve"}.`,
                 });
-                existing.updateGpsCoordinates(targetCoord.lat, targetCoord.lng);
+                existing.updateGpsCoordinates(perTreeCoord.lat, perTreeCoord.lng);
                 await this.treeInstanceRepository.update(existing);
                 treeInstances.push(existing);
               } else {
@@ -214,8 +245,8 @@ export class UpdateOrderStatusUseCase {
                   orderRef: order.orderNumber,
                   assignedReserve: order.reserveName,
                   gpsCoordinates: {
-                    latitude: targetCoord.lat,
-                    longitude: targetCoord.lng,
+                    latitude: perTreeCoord.lat,
+                    longitude: perTreeCoord.lng,
                   },
                   datePlanted: new Date(),
                   healthStatus: "Healthy",
@@ -240,8 +271,13 @@ export class UpdateOrderStatusUseCase {
           const existingForOrder =
             await this.treeInstanceRepository.findByOrderRef(order.orderNumber);
           if (existingForOrder.length > 0) {
-            for (const inst of existingForOrder) {
-              inst.updateGpsCoordinates(targetCoord.lat, targetCoord.lng);
+            for (let idx = 0; idx < existingForOrder.length; idx++) {
+              const inst = existingForOrder[idx];
+              const perTreeCoord =
+                treeGpsCoords?.[idx] && treeGpsCoords[idx].trim()
+                  ? parseGpsCoords(treeGpsCoords[idx])
+                  : targetCoord;
+              inst.updateGpsCoordinates(perTreeCoord.lat, perTreeCoord.lng);
               inst.update({
                 assignedReserve: order.reserveName,
                 healthStatus: "Healthy",
@@ -258,13 +294,17 @@ export class UpdateOrderStatusUseCase {
             for (let i = 0; i < order.quantity; i++) {
               const itemIndex = i + 1;
               const treeTag = `POA-${speciesCode}-${cleanOrderNumber}-${String(itemIndex).padStart(3, "0")}`;
+              const perTreeCoord =
+                treeGpsCoords?.[i] && treeGpsCoords[i].trim()
+                  ? parseGpsCoords(treeGpsCoords[i])
+                  : targetCoord;
               const newInstance = new TreeInstance({
                 treeTag,
                 orderRef: order.orderNumber,
                 assignedReserve: order.reserveName,
                 gpsCoordinates: {
-                  latitude: targetCoord.lat,
-                  longitude: targetCoord.lng,
+                  latitude: perTreeCoord.lat,
+                  longitude: perTreeCoord.lng,
                 },
                 datePlanted: new Date(),
                 healthStatus: "Healthy",

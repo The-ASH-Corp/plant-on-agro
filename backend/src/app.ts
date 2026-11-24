@@ -12,8 +12,9 @@ import morgan from 'morgan';
 export const createApp = (): Application => {
   const app = express();
 
-  // Enable trust proxy for accurate IP resolution behind reverse proxies (Nginx, Cloudflare, ALB)
-  app.set('trust proxy', 1);
+  // Only trust reverse-proxy headers when explicitly behind a reverse proxy (production or TRUST_PROXY=true)
+  const shouldTrustProxy = env.NODE_ENV === 'production' || process.env.TRUST_PROXY === 'true';
+  app.set('trust proxy', shouldTrustProxy ? 1 : false);
 
   // Security & standard middlewares
   app.disable('x-powered-by');

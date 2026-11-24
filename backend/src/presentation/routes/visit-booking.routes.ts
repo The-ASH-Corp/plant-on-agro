@@ -4,11 +4,15 @@ import { authenticate, authorize } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-// POST /api/v1/visits - Schedule / Book a plantation visit
-router.post('/', (req, res, next) => Container.visitBookingController.create(req, res, next));
+// POST /api/v1/visits - Schedule / Book a plantation visit (Authenticated adopter or admin)
+router.post('/', authenticate, (req, res, next) =>
+  Container.visitBookingController.create(req, res, next)
+);
 
-// GET /api/v1/visits/my-visits - Get visits for authenticated user or by email query
-router.get('/my-visits', (req, res, next) => Container.visitBookingController.getMyVisits(req, res, next));
+// GET /api/v1/visits/my-visits - Get visits strictly for authenticated user
+router.get('/my-visits', authenticate, (req, res, next) =>
+  Container.visitBookingController.getMyVisits(req, res, next)
+);
 
 // GET /api/v1/visits - List all visits with filtering (Admin)
 router.get(
@@ -18,8 +22,10 @@ router.get(
   (req, res, next) => Container.visitBookingController.getAll(req, res, next)
 );
 
-// GET /api/v1/visits/:id - Get specific visit details by ID or booking reference
-router.get('/:id', (req, res, next) => Container.visitBookingController.getById(req, res, next));
+// GET /api/v1/visits/:id - Get specific visit details by ID or booking reference (Owner or Admin)
+router.get('/:id', authenticate, (req, res, next) =>
+  Container.visitBookingController.getById(req, res, next)
+);
 
 // PATCH /api/v1/visits/:id/status - Update visit booking status / guide assignment (Admin)
 router.patch(

@@ -1,5 +1,5 @@
 import { IUserRepository } from '../../core/interfaces/user.repository.interface';
-import { NotFoundError } from '../../core/errors/app-error';
+import { NotFoundError, UnauthorizedError } from '../../core/errors/app-error';
 import { UserDto } from '../dto/user.dto';
 
 export class GetCurrentUserUseCase {
@@ -10,6 +10,10 @@ export class GetCurrentUserUseCase {
 
     if (!user) {
       throw new NotFoundError('User', userId);
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedError('Your account has been deactivated. Please contact support.');
     }
 
     return {

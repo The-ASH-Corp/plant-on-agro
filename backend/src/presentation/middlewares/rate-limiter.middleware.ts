@@ -7,26 +7,10 @@ import { HttpStatus } from '../../shared/constants/http-status';
 import { normalizeEmail } from '../../shared/utils/string.util';
 
 /**
- * Normalizes client IP addresses by unwrapping IPv6-mapped IPv4 addresses (::ffff:x.x.x.x)
+ * Resolves the client IP strictly via Express's trust-proxy-validated `req.ip`
+ * (never trusting spoofable raw CF-Connecting-IP / X-Forwarded-For / X-Real-IP headers directly).
  */
 export function getClientIp(req: Request): string {
-  // If behind a trusted reverse proxy (e.g. Nginx, Cloudflare, AWS ALB)
-  const cfConnectingIp = req.headers['cf-connecting-ip'];
-  if (typeof cfConnectingIp === 'string' && cfConnectingIp.trim().length > 0) {
-    return normalizeIp(cfConnectingIp);
-  }
-
-  const forwarded = req.headers['x-forwarded-for'];
-  if (typeof forwarded === 'string' && forwarded.trim().length > 0) {
-    const firstIp = forwarded.split(',')[0].trim();
-    if (firstIp) return normalizeIp(firstIp);
-  }
-
-  const realIp = req.headers['x-real-ip'];
-  if (typeof realIp === 'string' && realIp.trim().length > 0) {
-    return normalizeIp(realIp);
-  }
-
   return normalizeIp(req.ip || req.socket?.remoteAddress || '127.0.0.1');
 }
 

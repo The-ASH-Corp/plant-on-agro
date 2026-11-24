@@ -69,6 +69,7 @@ export const updateOrderStatusSchema = z.object({
   treeSpecies: z.string().trim().optional(),
   scientificName: z.string().trim().optional(),
   category: z.string().trim().optional(),
+  treeGpsCoords: z.array(z.string().trim()).optional(),
 });
 
 export const getOrderByIdSchema = z.object({

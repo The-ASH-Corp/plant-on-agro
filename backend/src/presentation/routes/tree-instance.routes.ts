@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Container } from '../../infrastructure/di/container';
 import { validateRequest } from '../middlewares/validate.middleware';
-import { authenticate, authorize } from '../middlewares/auth.middleware';
+import { authenticate, optionalAuthenticate, authorize } from '../middlewares/auth.middleware';
 import {
   createTreeInstanceSchema,
   updateTreeInstanceSchema,
@@ -12,23 +12,26 @@ import {
 
 const router = Router();
 
-// GET /api/v1/tree-instances - List tree instances with filters and pagination
+// GET /api/v1/tree-instances - List tree instances (redacts other buyers' PII for guests/buyers)
 router.get(
   '/',
+  optionalAuthenticate,
   validateRequest({ query: queryTreeInstancesSchema }),
   Container.treeInstanceController.getAll
 );
 
-// GET /api/v1/tree-instances/tag/:tag - Lookup tree instance by unique tag
+// GET /api/v1/tree-instances/tag/:tag - Lookup tree instance by unique tag (PII redacted for non-owners)
 router.get(
   '/tag/:tag',
+  optionalAuthenticate,
   validateRequest({ params: getTreeInstanceByTagSchema }),
   Container.treeInstanceController.getByTag
 );
 
-// GET /api/v1/tree-instances/:id - Get single tree instance by ID
+// GET /api/v1/tree-instances/:id - Get single tree instance by ID (PII redacted for non-owners)
 router.get(
   '/:id',
+  optionalAuthenticate,
   validateRequest({ params: getTreeInstanceByIdSchema }),
   Container.treeInstanceController.getById
 );

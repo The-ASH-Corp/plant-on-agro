@@ -3,6 +3,7 @@ import { NotFoundError, ConflictError, ForbiddenError } from '../../core/errors/
 import { Email } from '../../core/value-objects/email.vo';
 import { UpdateUserDto, UserDto } from '../dto/user.dto';
 import { UserPayload } from '../../core/interfaces/jwt-service.interface';
+import { redisService } from '../../infrastructure/redis/redis.client';
 
 export class UpdateUserUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
@@ -62,6 +63,15 @@ export class UpdateUserUseCase {
     }
 
     const updated = await this.userRepository.update(user);
+
+    // Immediately invalidate cached active status in Redis when activation state changes
+    if (dto.isActive !== undefined && redisService.isReady()) {
+      try {
+        await redisService.getClient().del(`poa:user:active:${id}`);
+      } catch {
+        // Ignore Redis cache invalidation errors
+      }
+    }
 
     return {
       id: updated.id ?? '',

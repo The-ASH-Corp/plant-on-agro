@@ -1,5 +1,6 @@
 import { IUserRepository } from '../../core/interfaces/user.repository.interface';
 import { NotFoundError } from '../../core/errors/app-error';
+import { redisService } from '../../infrastructure/redis/redis.client';
 
 export class DeleteUserUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
@@ -10,6 +11,16 @@ export class DeleteUserUseCase {
       throw new NotFoundError('User', id);
     }
 
-    return this.userRepository.delete(id);
+    const deleted = await this.userRepository.delete(id);
+
+    if (deleted && redisService.isReady()) {
+      try {
+        await redisService.getClient().del(`poa:user:active:${id}`);
+      } catch {
+        // Ignore Redis cache invalidation errors
+      }
+    }
+
+    return deleted;
   }
 }

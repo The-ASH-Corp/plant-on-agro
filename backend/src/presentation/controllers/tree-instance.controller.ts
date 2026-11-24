@@ -5,6 +5,7 @@ import { GetTreeInstanceByIdUseCase } from '../../application/use-cases/tree-ins
 import { GetTreeInstanceByTagUseCase } from '../../application/use-cases/tree-instances/get-tree-instance-by-tag.use-case';
 import { UpdateTreeInstanceUseCase } from '../../application/use-cases/tree-instances/update-tree-instance.use-case';
 import { DeleteTreeInstanceUseCase } from '../../application/use-cases/tree-instances/delete-tree-instance.use-case';
+import { TreeInstanceResponseDto } from '../../application/dto/tree-instance-response.dto';
 import { ApiResponse } from '../../shared/utils/api-response';
 
 export class TreeInstanceController {
@@ -17,6 +18,30 @@ export class TreeInstanceController {
     private readonly deleteTreeInstanceUseCase: DeleteTreeInstanceUseCase
   ) {}
 
+  /**
+   * Redacts buyer PII (adopterEmail, orderRef, personal adopterName) for unauthenticated guests
+   * and for buyers viewing specimens that do not belong to them. Admins and owners receive full data.
+   */
+  private redactForRequester(req: Request, item: TreeInstanceResponseDto): TreeInstanceResponseDto {
+    const user = req.user;
+    if (user?.role === 'admin') {
+      return item;
+    }
+
+    const userEmail = (user?.email || '').trim().toLowerCase();
+    const itemEmail = (item.adopterEmail || '').trim().toLowerCase();
+    if (user && userEmail && itemEmail && userEmail === itemEmail) {
+      return item;
+    }
+
+    return {
+      ...item,
+      adopterEmail: '',
+      orderRef: '',
+      adopterName: item.adopterName ? 'Verified Adopter' : '',
+    };
+  }
+
   public create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const result = await this.createTreeInstanceUseCase.execute(req.body);
@@ -28,8 +53,29 @@ export class TreeInstanceController {
 
   public getAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const result = await this.getTreeInstancesUseCase.execute(req.query as any);
-      ApiResponse.success(res, result, 'Tree instances retrieved successfully');
+      const query: Record<string, any> = { ...req.query };
+      const user = req.user;
+
+      if (!user) {
+        // Prevent unauthenticated email/order enumeration via query filters
+        delete query.adopterEmail;
+        delete query.orderRef;
+      } else if (user.role !== 'admin') {
+        // Buyers cannot query other adopters' emails or orders
+        if (query.adopterEmail) {
+          query.adopterEmail = user.email;
+        }
+        if (query.orderRef) {
+          query.adopterEmail = user.email;
+        }
+      }
+
+      const result = await this.getTreeInstancesUseCase.execute(query as any);
+      const sanitized = {
+        ...result,
+        items: result.items.map((item) => this.redactForRequester(req, item)),
+      };
+      ApiResponse.success(res, sanitized, 'Tree instances retrieved successfully');
     } catch (error) {
       next(error);
     }
@@ -39,7 +85,7 @@ export class TreeInstanceController {
     try {
       const { id } = req.params;
       const result = await this.getTreeInstanceByIdUseCase.execute(id as string);
-      ApiResponse.success(res, result, 'Tree instance retrieved successfully');
+      ApiResponse.success(res, this.redactForRequester(req, result), 'Tree instance retrieved successfully');
     } catch (error) {
       next(error);
     }
@@ -49,7 +95,7 @@ export class TreeInstanceController {
     try {
       const { tag } = req.params;
       const result = await this.getTreeInstanceByTagUseCase.execute(tag as string);
-      ApiResponse.success(res, result, 'Tree instance retrieved by tag successfully');
+      ApiResponse.success(res, this.redactForRequester(req, result), 'Tree instance retrieved by tag successfully');
     } catch (error) {
       next(error);
     }
