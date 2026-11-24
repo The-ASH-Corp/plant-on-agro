@@ -15,6 +15,7 @@ import { EditTreeModal } from "./modals/EditTreeModal";
 import { AddPlanModal } from "./modals/AddPlanModal";
 import { EditPlanModal } from "./modals/EditPlanModal";
 import { EditTreeInstanceModal } from "./modals/EditTreeInstanceModal";
+import { LogArboristUpdateModal } from "./modals/LogArboristUpdateModal";
 import { AddLocationModal } from "./modals/AddLocationModal";
 import { EditLocationModal } from "./modals/EditLocationModal";
 import { OrderDetailsModal } from "./modals/OrderDetailsModal";
@@ -98,6 +99,15 @@ export function AdminModals({
         onClose={() => instanceActions.setSelectedInstanceForEdit(null)}
         onSubmit={instanceActions.handleUpdateInstance}
         isSubmitting={instanceActions.isUpdatingInstance}
+      />
+      <LogArboristUpdateModal
+        isOpen={Boolean(instanceActions.selectedInstanceForInspection)}
+        instance={instanceActions.selectedInstanceForInspection}
+        onClose={() => instanceActions.setSelectedInstanceForInspection(null)}
+        onSaveUpdate={instanceActions.handleSaveGrowthUpdate}
+        onDeleteUpdate={instanceActions.handleDeleteGrowthUpdate}
+        onSetPrimaryPhoto={instanceActions.handleSetPrimaryPhoto}
+        isSubmitting={instanceActions.isLoggingInspection}
       />
 
       {/* Locations */}

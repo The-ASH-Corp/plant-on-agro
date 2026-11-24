@@ -10,6 +10,7 @@ interface TreeInstancesTabProps {
   instances: TreeInstanceItem[];
   searchQuery: string;
   onOpenAddInstance?: () => void;
+  onLogInspection?: (instance: TreeInstanceItem) => void;
   onEditInstance?: (instance: TreeInstanceItem) => void;
   onUpdateHealth?: (id: string, status: TreeHealthStatus) => void;
   onDeleteInstance?: (id: string, tag?: string) => void;
@@ -56,6 +57,7 @@ const resolveImageUrl = (url?: string) => {
 export function TreeInstancesTab({
   instances,
   searchQuery,
+  onLogInspection,
   onEditInstance,
   onUpdateHealth,
   onDeleteInstance,
@@ -513,8 +515,9 @@ export function TreeInstancesTab({
                           <th className="py-3 px-4">Sanctuary Location</th>
                           <th className="py-3 px-4">Date Planted</th>
                           <th className="py-3 px-4">Health Status</th>
+                          <th className="py-3 px-4">Growth Journey</th>
                           <th className="py-3 px-4">Arborist Notes</th>
-                          <th className="py-3 px-4 text-right">Status</th>
+                          <th className="py-3 px-4 text-right">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[#f0f4f1]">
@@ -526,6 +529,7 @@ export function TreeInstancesTab({
                             text: "text-gray-800",
                             border: "border-gray-200",
                           };
+                          const updateCount = item.growthUpdates?.length || 0;
 
                           return (
                             <tr key={item.id} className="hover:bg-[#fbfcfb] transition-colors">
@@ -585,16 +589,57 @@ export function TreeInstancesTab({
                                 )}
                               </td>
 
+                              {/* Growth Journey Pill / Trigger */}
+                              <td className="py-3 px-4">
+                                <button
+                                  type="button"
+                                  onClick={() => onLogInspection?.(item)}
+                                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all cursor-pointer ${
+                                    updateCount > 0
+                                      ? "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100 shadow-2xs"
+                                      : "bg-[#f4f7f5] text-[#55695d] border-[#dce5df] hover:bg-[#e8efe9]"
+                                  }`}
+                                  title="View growth journey or upload periodic photo"
+                                >
+                                  <span>📸</span>
+                                  <span>
+                                    {updateCount > 0
+                                      ? `${updateCount} ${updateCount === 1 ? "Photo" : "Photos"}`
+                                      : "+ Log Photo"}
+                                  </span>
+                                </button>
+                              </td>
+
                               {/* Notes */}
                               <td className="py-3 px-4 text-[#55695d] max-w-xs truncate text-[11px] italic">
                                 {item.notes || "Ground plantation verified."}
                               </td>
 
-                              {/* Status Badge */}
+                              {/* Actions */}
                               <td className="py-3 px-4 text-right">
-                                <span className="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-semibold">
-                                  Assigned
-                                </span>
+                                <div className="flex items-center justify-end gap-1.5">
+                                  {onLogInspection && (
+                                    <button
+                                      type="button"
+                                      onClick={() => onLogInspection(item)}
+                                      className="px-2.5 py-1 rounded-lg bg-[#173324] hover:bg-[#1f4230] text-white text-xs font-bold transition-all shadow-2xs cursor-pointer flex items-center gap-1 hover:scale-105"
+                                      title="Log arborist inspection & growth photo"
+                                    >
+                                      <span>📸</span>
+                                      <span className="hidden sm:inline">Log Update</span>
+                                    </button>
+                                  )}
+                                  {onEditInstance && (
+                                    <button
+                                      type="button"
+                                      onClick={() => onEditInstance(item)}
+                                      className="p-1.5 rounded-lg border border-[#d2ded7] hover:bg-[#f2f6f3] text-[#55695d] hover:text-[#173324] transition-colors cursor-pointer text-xs"
+                                      title="Edit tree details"
+                                    >
+                                      ✏️
+                                    </button>
+                                  )}
+                                </div>
                               </td>
                             </tr>
                           );
@@ -622,7 +667,8 @@ export function TreeInstancesTab({
                   <th className="py-4 px-4">Variety & Reserve</th>
                   <th className="py-4 px-4">Date Planted</th>
                   <th className="py-4 px-4">Health Status</th>
-                  <th className="py-4 px-4 text-right">Status</th>
+                  <th className="py-4 px-4">Growth Photos</th>
+                  <th className="py-4 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#f0f4f1]">
@@ -634,6 +680,7 @@ export function TreeInstancesTab({
                     text: "text-gray-800",
                     border: "border-gray-200",
                   };
+                  const updateCount = item.growthUpdates?.length || 0;
 
                   return (
                     <tr key={item.id} className="hover:bg-[#fbfcfb] transition-colors">
@@ -688,10 +735,53 @@ export function TreeInstancesTab({
                           </span>
                         )}
                       </td>
+
+                      {/* Growth Photos Count & Quick Trigger */}
+                      <td className="py-3.5 px-4">
+                        <button
+                          type="button"
+                          onClick={() => onLogInspection?.(item)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all cursor-pointer ${
+                            updateCount > 0
+                              ? "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100 shadow-2xs"
+                              : "bg-[#f4f7f5] text-[#55695d] border-[#dce5df] hover:bg-[#e8efe9]"
+                          }`}
+                          title="View growth journey or upload periodic photo"
+                        >
+                          <span>📸</span>
+                          <span>
+                            {updateCount > 0
+                              ? `${updateCount} ${updateCount === 1 ? "Update" : "Updates"}`
+                              : "+ Add Photo"}
+                          </span>
+                        </button>
+                      </td>
+
+                      {/* Actions */}
                       <td className="py-3.5 px-4 text-right">
-                        <span className="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-semibold">
-                          Assigned
-                        </span>
+                        <div className="flex items-center justify-end gap-1.5">
+                          {onLogInspection && (
+                            <button
+                              type="button"
+                              onClick={() => onLogInspection(item)}
+                              className="px-2.5 py-1 rounded-lg bg-[#173324] hover:bg-[#1f4230] text-white text-xs font-bold transition-all shadow-2xs cursor-pointer flex items-center gap-1 hover:scale-105"
+                              title="Log arborist inspection & growth photo"
+                            >
+                              <span>📸</span>
+                              <span>Log Update</span>
+                            </button>
+                          )}
+                          {onEditInstance && (
+                            <button
+                              type="button"
+                              onClick={() => onEditInstance(item)}
+                              className="p-1.5 rounded-lg border border-[#d2ded7] hover:bg-[#f2f6f3] text-[#55695d] hover:text-[#173324] transition-colors cursor-pointer text-xs"
+                              title="Edit tree details"
+                            >
+                              ✏️
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -761,6 +851,7 @@ export function TreeInstancesTab({
               text: "text-gray-800",
               border: "border-gray-200",
             };
+            const updateCount = item.growthUpdates?.length || 0;
 
             return (
               <div
@@ -768,16 +859,31 @@ export function TreeInstancesTab({
                 className="p-5 rounded-3xl bg-white border border-[#e2eae5] shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden"
               >
                 <div>
-                  <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-start justify-between mb-3 gap-2">
                     <span className="font-mono text-xs font-bold text-[#1b7a43] bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200">
                       {item.treeTag}
                     </span>
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 ${badge.bg} ${badge.text} ${badge.border}`}
-                    >
-                      <span>{badge.icon}</span>
-                      <span>{badge.label}</span>
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => onLogInspection?.(item)}
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 cursor-pointer transition-colors ${
+                          updateCount > 0
+                            ? "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100"
+                            : "bg-[#f4f7f5] text-[#55695d] border-[#dce5df] hover:bg-[#e8efe9]"
+                        }`}
+                        title="View growth updates"
+                      >
+                        <span>📸</span>
+                        <span>{updateCount}</span>
+                      </button>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 ${badge.bg} ${badge.text} ${badge.border}`}
+                      >
+                        <span>{badge.icon}</span>
+                        <span>{badge.label}</span>
+                      </span>
+                    </div>
                   </div>
 
                   <h3 style={{ fontFamily: "var(--font-display)" }} className="text-base font-bold text-[#173324]">
@@ -803,24 +909,28 @@ export function TreeInstancesTab({
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-[#f4f7f5] flex items-center justify-between">
-                  {onUpdateHealth ? (
-                    <Select
-                      value={item.healthStatus}
-                      onChange={(e) => handleHealthChange(item.id, e.target.value as TreeHealthStatus)}
-                      className="text-xs font-semibold px-2 py-1 rounded-lg border border-[#e2eae5] bg-[#f7faf8] text-[#173324] outline-none cursor-pointer"
+                <div className="mt-4 pt-3 border-t border-[#f4f7f5] flex items-center justify-between gap-2">
+                  {onLogInspection && (
+                    <button
+                      type="button"
+                      onClick={() => onLogInspection(item)}
+                      className="flex-1 py-1.5 px-3 rounded-xl bg-[#173324] hover:bg-[#1f4230] text-white text-xs font-bold transition-all shadow-2xs cursor-pointer flex items-center justify-center gap-1.5 hover:scale-[1.02]"
                     >
-                      <option value="Sapling Growing">🌱 Sapling Growing</option>
-                      <option value="Healthy">🌿 Healthy</option>
-                      <option value="Thriving">🌳 Thriving</option>
-                      <option value="Needs Attention">⚠️ Needs Attention</option>
-                      <option value="Critical">🚨 Critical</option>
-                    </Select>
-                  ) : null}
+                      <span>📸</span>
+                      <span>Log Inspection</span>
+                    </button>
+                  )}
 
-                  <span className="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-semibold">
-                    Assigned
-                  </span>
+                  {onEditInstance && (
+                    <button
+                      type="button"
+                      onClick={() => onEditInstance(item)}
+                      className="p-1.5 rounded-xl border border-[#d2ded7] hover:bg-[#f2f6f3] text-[#55695d] hover:text-[#173324] transition-colors cursor-pointer text-xs"
+                      title="Edit tree details"
+                    >
+                      ✏️
+                    </button>
+                  )}
                 </div>
               </div>
             );
