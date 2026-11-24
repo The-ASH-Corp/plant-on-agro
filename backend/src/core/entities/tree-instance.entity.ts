@@ -226,6 +226,16 @@ export class TreeInstance {
         ...u,
         recordedAt: u.recordedAt instanceof Date ? u.recordedAt : new Date(u.recordedAt),
       }));
+      this._growthUpdates.sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime());
+      if (this._growthUpdates.length > 0) {
+        const latest = this._growthUpdates[this._growthUpdates.length - 1];
+        if (latest.imageUrl && (props.imageUrl === undefined || !props.imageUrl.trim())) {
+          this._imageUrl = latest.imageUrl;
+        }
+        if (props.lastInspectedAt === undefined) {
+          this._lastInspectedAt = latest.recordedAt;
+        }
+      }
     }
     if (props.lastInspectedAt !== undefined) {
       this._lastInspectedAt = props.lastInspectedAt;

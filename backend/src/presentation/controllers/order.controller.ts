@@ -7,6 +7,7 @@ import { UpdateOrderStatusUseCase } from '../../application/use-cases/orders/upd
 import { MarkOrdersReadUseCase } from '../../application/use-cases/orders/mark-orders-read.use-case';
 import { DeleteOrderUseCase } from '../../application/use-cases/orders/delete-order.use-case';
 import { ApiResponse } from '../../shared/utils/api-response';
+import { ForbiddenError, UnauthorizedError } from '../../core/errors/app-error';
 
 export class OrderController {
   constructor(
@@ -18,6 +19,20 @@ export class OrderController {
     private readonly markOrdersReadUseCase: MarkOrdersReadUseCase,
     private readonly deleteOrderUseCase: DeleteOrderUseCase
   ) {}
+
+  private assertOrderAccess(req: Request, order: { adopterEmail?: string }): void {
+    const currentUser = req.user;
+    if (!currentUser) {
+      throw new UnauthorizedError('Authentication required');
+    }
+    if (currentUser.role !== 'admin') {
+      const userEmail = (currentUser.email || '').trim().toLowerCase();
+      const orderEmail = (order.adopterEmail || '').trim().toLowerCase();
+      if (!userEmail || userEmail !== orderEmail) {
+        throw new ForbiddenError('Access denied: You can only view your own adoption orders');
+      }
+    }
+  }
 
   public create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -48,6 +63,7 @@ export class OrderController {
     try {
       const { id } = req.params;
       const result = await this.getOrderByIdUseCase.execute(id as string);
+      this.assertOrderAccess(req, result);
       ApiResponse.success(res, result, 'Order retrieved successfully');
     } catch (error) {
       next(error);
@@ -58,6 +74,7 @@ export class OrderController {
     try {
       const { orderNumber } = req.params;
       const result = await this.getOrderByNumberUseCase.execute(orderNumber as string);
+      this.assertOrderAccess(req, result);
       ApiResponse.success(res, result, 'Order retrieved by number successfully');
     } catch (error) {
       next(error);
