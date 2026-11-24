@@ -32,8 +32,8 @@ export function VisionDonationModal({
     amount: number;
   } | null>(null);
 
-  // Compute estimated trees sponsored
-  const estimatedTrees = Math.max(1, Math.round(amount / 500));
+  // Compute estimated trees sponsored (aligned with server floor: ₹500/tree)
+  const estimatedTrees = Math.max(1, Math.floor(amount / 500));
 
   const handleDonate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,8 +45,8 @@ export function VisionDonationModal({
       setError("Please provide a valid email address to receive your contribution deed.");
       return;
     }
-    if (amount <= 0) {
-      setError("Please specify a valid contribution amount (minimum ₹1).");
+    if (amount < 100) {
+      setError("Please specify a valid contribution amount (minimum ₹100).");
       return;
     }
 

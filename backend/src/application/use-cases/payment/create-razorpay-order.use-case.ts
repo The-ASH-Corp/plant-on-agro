@@ -29,6 +29,10 @@ export interface SecurePaymentOrderResult extends PaymentOrderResult {
   orderNumber: string;
 }
 
+const MIN_VISION_DONATION_INR = 100;
+const DONATION_PER_TREE_INR = 500;
+const MAX_ORDER_QUANTITY = 10000;
+
 export class CreateRazorpayOrderUseCase {
   constructor(
     private readonly paymentGatewayService: IPaymentGatewayService,
@@ -40,7 +44,13 @@ export class CreateRazorpayOrderUseCase {
   public async execute(
     dto: CreateRazorpayOrderDto,
   ): Promise<SecurePaymentOrderResult> {
-    const qty = Math.max(1, Math.floor(Number(dto.quantity) || 1));
+    const rawQty = Number(dto.quantity);
+    if (dto.quantity !== undefined && (!Number.isFinite(rawQty) || rawQty < 1 || rawQty > MAX_ORDER_QUANTITY)) {
+      throw new BadRequestError(
+        `Tree quantity must be a valid number between 1 and ${MAX_ORDER_QUANTITY}.`,
+      );
+    }
+    const requestedQty = Math.max(1, Math.floor(rawQty || 1));
 
     if (!dto.adopterEmail || !dto.adopterEmail.trim()) {
       throw new BadRequestError(
@@ -99,22 +109,16 @@ export class CreateRazorpayOrderUseCase {
     // 2. Resolve Plan Price from Server Database (Amount is strictly for the PLAN, NOT for the tree)
     let planPrice = 25000; // Default flagship retail plan (₹25,000 as per PDF)
     let selectedPlanLabel = dto.planLabel?.trim() || "10 Trees Retail Plan";
+    let matchedDbPlan = false;
 
-    const isVisionDonation =
-      Boolean(dto.isDonation) ||
-      dto.planId === "vision-2m-donation" ||
-      dto.planId === "donation" ||
-      dto.planLabel?.toLowerCase().includes("vision") ||
-      dto.planLabel?.toLowerCase().includes("donation");
+    const cleanPlanId = dto.planId?.trim() || "";
+    const isDonationPlanId =
+      cleanPlanId === "vision-2m-donation" || cleanPlanId === "donation";
 
-    if (isVisionDonation && typeof dto.amount === "number" && dto.amount > 0) {
-      planPrice = Math.max(1, Math.round(dto.amount));
-      selectedPlanLabel = dto.planLabel?.trim() || "2M Trees Vision Campaign";
-    } else if (dto.planId && dto.planId.trim().length > 0) {
-      const plan = await this.adoptionPlanRepository.findById(
-        dto.planId.trim(),
-      );
+    if (cleanPlanId.length > 0 && !isDonationPlanId) {
+      const plan = await this.adoptionPlanRepository.findById(cleanPlanId);
       if (plan) {
+        matchedDbPlan = true;
         planPrice =
           typeof plan.price === "number" && plan.price >= 0
             ? plan.price
@@ -123,11 +127,12 @@ export class CreateRazorpayOrderUseCase {
               : 0;
         selectedPlanLabel = plan.planLabel;
       }
-    } else if (dto.planLabel && dto.planLabel.trim().length > 0) {
+    } else if (!dto.isDonation && dto.planLabel && dto.planLabel.trim().length > 0) {
       const plan = await this.adoptionPlanRepository.findByLabel(
         dto.planLabel.trim(),
       );
       if (plan) {
+        matchedDbPlan = true;
         planPrice =
           typeof plan.price === "number" && plan.price >= 0
             ? plan.price
@@ -138,13 +143,42 @@ export class CreateRazorpayOrderUseCase {
       }
     }
 
-    // 3. Authoritative Total Price Calculation (Immune to client tampering)
-    // The amount is determined strictly by the Plan or custom Vision Donation.
-    const unitPrice = Math.max(1, planPrice);
-    const authoritativeTotal =
-      isVisionDonation && typeof dto.amount === "number" && dto.amount > 0
-        ? Math.max(1, Math.round(dto.amount))
-        : unitPrice * qty;
+    // Only allow Vision Donation mode when NOT targeting a real adoption plan
+    const isVisionDonation =
+      !matchedDbPlan && (Boolean(dto.isDonation) || isDonationPlanId);
+
+    // 3. Authoritative Total Price & Quantity Calculation (Immune to client tampering)
+    let effectiveQty = requestedQty;
+    let authoritativeTotal: number;
+
+    if (isVisionDonation) {
+      const rawAmount = Number(dto.amount);
+      if (!Number.isFinite(rawAmount) || Math.round(rawAmount) < MIN_VISION_DONATION_INR) {
+        throw new BadRequestError(
+          `Minimum 2M Trees Vision Campaign contribution is ₹${MIN_VISION_DONATION_INR}.`,
+        );
+      }
+
+      authoritativeTotal = Math.round(rawAmount);
+      const perTreeFloor = DONATION_PER_TREE_INR;
+      const maxAllowedTreesForAmount = Math.max(
+        1,
+        Math.round(authoritativeTotal / perTreeFloor),
+      );
+
+      // Block attempts to claim arbitrary tree counts for a tiny donation amount
+      if (dto.quantity !== undefined && requestedQty > maxAllowedTreesForAmount) {
+        throw new BadRequestError(
+          `Contribution amount ₹${authoritativeTotal} cannot sponsor ${requestedQty} trees (minimum ₹${perTreeFloor} per tree).`,
+        );
+      }
+
+      effectiveQty = Math.max(1, Math.floor(authoritativeTotal / perTreeFloor));
+      selectedPlanLabel = "2M Trees Vision Campaign";
+    } else {
+      const unitPrice = Math.max(1, planPrice);
+      authoritativeTotal = unitPrice * effectiveQty;
+    }
 
     if (authoritativeTotal <= 0) {
       throw new BadRequestError(
@@ -173,7 +207,7 @@ export class CreateRazorpayOrderUseCase {
           "Flagship Living Forest — Wayanad, Kerala",
         planType: selectedPlanLabel,
         dedicationMessage: dto.dedicationMessage?.trim() || "",
-        quantity: qty,
+        quantity: effectiveQty,
         totalAmount: authoritativeTotal,
         paymentMethod: "razorpay",
         paymentStatus: "Pending",
@@ -191,7 +225,7 @@ export class CreateRazorpayOrderUseCase {
       notes: {
         orderNumber,
         treeSpecies: selectedVarietyName,
-        quantity: String(qty),
+        quantity: String(effectiveQty),
         adopterEmail: dto.adopterEmail.trim().toLowerCase(),
       },
     });
