@@ -169,8 +169,7 @@ export function ImpactSection({ content, liveStats, liveProjects }: ImpactSectio
                 </div>
                 <div className="p-5">
                   <h3 className="text-white font-semibold mb-1">{p.title}</h3>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-[#52b788] font-medium">{p.trees}</span>
+                  <div className="flex items-center text-xs">
                     <span className="text-white/50">📍 {p.region}</span>
                   </div>
                 </div>
