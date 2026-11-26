@@ -13,6 +13,12 @@ interface Step7ConfirmationProps {
   orderId: string;
   buyerEmail?: string;
   buyerName?: string;
+  buyerPhone?: string;
+  planLabel?: string;
+  qty?: number;
+  total?: number;
+  waitlistMode?: boolean;
+  waitlistMessage?: string;
   onClose: () => void;
 }
 
@@ -24,6 +30,12 @@ export function Step7Confirmation({
   orderId,
   buyerEmail = "",
   buyerName = "",
+  buyerPhone = "",
+  planLabel = "",
+  qty = 1,
+  total = 0,
+  waitlistMode = false,
+  waitlistMessage = "",
   onClose,
 }: Step7ConfirmationProps) {
   const router = useRouter();
@@ -39,8 +51,9 @@ export function Step7Confirmation({
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [cachedEmailExists, setCachedEmailExists] = useState<boolean | null>(null);
 
-  // Background pre-check email existence as soon as Step 7 renders
+  // Background pre-check email existence as soon as Step 7 renders (paid checkout mode only)
   useEffect(() => {
+    if (waitlistMode) return;
     let isMounted = true;
     const effectiveEmail = (buyerEmail || "").trim().toLowerCase();
     if (!isAuthenticated && effectiveEmail) {
@@ -56,7 +69,7 @@ export function Step7Confirmation({
     return () => {
       isMounted = false;
     };
-  }, [buyerEmail, isAuthenticated]);
+  }, [buyerEmail, isAuthenticated, waitlistMode]);
 
   // Account creation form state
   const [fullName, setFullName] = useState(buyerName || "");
@@ -532,6 +545,104 @@ export function Step7Confirmation({
             </div>
           </div>
         </form>
+      </div>
+    );
+  }
+
+  // -------------------------------------------------------------
+  // RENDER: Temporary Waitlist Confirmation Popup
+  // -------------------------------------------------------------
+  if (waitlistMode) {
+    return (
+      <div className="text-center py-4">
+        <div className="w-16 h-16 rounded-full bg-emerald-100 text-[#1b7a43] text-3xl flex items-center justify-center mx-auto mb-4 shadow-sm border border-emerald-200">
+          ✓
+        </div>
+
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-[#2d6a4f] text-[11px] font-bold uppercase tracking-wider border border-emerald-200 mb-3">
+          <span>✨ Added to Priority Waitlist</span>
+          <span>•</span>
+          <span>No Payment Taken</span>
+        </div>
+
+        <h3
+          style={{ fontFamily: "var(--font-display)" }}
+          className="text-[#173324] text-2xl sm:text-3xl font-bold mb-2"
+        >
+          You&apos;re on the Waitlist!
+        </h3>
+
+        <p className="text-sm text-[#4a6557] mb-6 max-w-md mx-auto leading-relaxed">
+          {waitlistMessage ||
+            "Your details and tree reservation request have been saved to our priority waitlist. Our team will notify you via phone and email as soon as online payments and allocations open."}
+        </p>
+
+        <div
+          className="p-5 rounded-2xl mb-6 text-left space-y-2.5"
+          style={{ background: "#f0faf4", border: "1px solid #d4ede1" }}
+        >
+          {planLabel && (
+            <div className="flex justify-between text-sm gap-4">
+              <span className="text-[#4a6557]">Selected Plan</span>
+              <span className="font-semibold text-[#173324] text-right">{planLabel}</span>
+            </div>
+          )}
+          <div className="flex justify-between text-sm gap-4">
+            <span className="text-[#4a6557]">Trees Requested</span>
+            <span className="font-semibold text-[#173324]">
+              {qty} {qty === 1 ? "Tree" : "Trees"}
+            </span>
+          </div>
+          {location && (
+            <div className="flex justify-between text-sm gap-4">
+              <span className="text-[#4a6557]">Preferred Reserve</span>
+              <span className="font-semibold text-[#173324] text-right max-w-[60%]">
+                {location}
+              </span>
+            </div>
+          )}
+          {total > 0 && (
+            <div className="flex justify-between text-sm gap-4">
+              <span className="text-[#4a6557]">Estimated Plan Value</span>
+              <span className="font-semibold text-[#2d6a4f]">
+                ₹{total.toLocaleString("en-IN")}{" "}
+                <span className="text-[11px] font-normal text-[#4a6557]">(pay later)</span>
+              </span>
+            </div>
+          )}
+          <div className="border-t border-[#d4ede1] pt-2.5 mt-2.5 space-y-2">
+            {buyerName && (
+              <div className="flex justify-between text-sm gap-4">
+                <span className="text-[#4a6557]">Name</span>
+                <span className="font-medium text-[#173324] text-right">{buyerName}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-sm gap-4">
+              <span className="text-[#4a6557]">Email</span>
+              <span className="font-mono text-xs sm:text-sm font-medium text-[#173324] text-right break-all">
+                {buyerEmail}
+              </span>
+            </div>
+            {buyerPhone && (
+              <div className="flex justify-between text-sm gap-4">
+                <span className="text-[#4a6557]">Phone</span>
+                <span className="font-mono text-xs sm:text-sm font-medium text-[#173324]">
+                  {buyerPhone}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          id="btn-close-wizard"
+          onClick={onClose}
+          className="w-full py-3.5 px-6 rounded-xl font-bold text-sm text-white cursor-pointer transition-all shadow-md hover:brightness-105"
+          style={{ background: "linear-gradient(135deg,#52b788,#2d6a4f)" }}
+        >
+          Done
+        </button>
       </div>
     );
   }

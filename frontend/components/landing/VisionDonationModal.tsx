@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { paymentService, loadRazorpayCheckoutScript } from "@/services/payment/payment.service";
+import { TEMPORARY_WAITLIST_CHECKOUT } from "@/services/payment/checkout-mode";
+import { waitlistService } from "@/services/waitlist/waitlist.service";
 import { User } from "@/types/auth";
 
 interface VisionDonationModalProps {
@@ -26,6 +28,10 @@ export function VisionDonationModal({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [waitlistSuccess, setWaitlistSuccess] = useState<{
+    message: string;
+    amount: number;
+  } | null>(null);
   const [successData, setSuccessData] = useState<{
     orderNumber: string;
     paymentId: string;
@@ -38,15 +44,60 @@ export function VisionDonationModal({
   const handleDonate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!donorName.trim()) {
-      setError("Please enter your name for the donation receipt.");
+      setError("Please enter your name.");
       return;
     }
-    if (!donorEmail.trim() || !donorEmail.includes("@")) {
-      setError("Please provide a valid email address to receive your contribution deed.");
+    if (!donorEmail.trim() || !/^\S+@\S+\.\S+$/.test(donorEmail.trim())) {
+      setError("Please provide a valid email address.");
       return;
     }
     if (amount < 100) {
       setError("Please specify a valid contribution amount (minimum ₹100).");
+      return;
+    }
+
+    // TEMPORARY WAITLIST MODE: Save campaign pledge to Waitlist instead of opening Razorpay
+    if (TEMPORARY_WAITLIST_CHECKOUT) {
+      if (!donorPhone.trim() || donorPhone.replace(/\D/g, "").length < 7) {
+        setError("Please provide a valid phone number so we can notify you when payments open.");
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const pledgeNotes = [
+          `2M Trees Vision Pledge: ₹${amount.toLocaleString("en-IN")} (~${estimatedTrees} trees)`,
+          isAnonymous ? "Preference: Anonymous" : null,
+          message.trim() ? `Message: "${message.trim()}"` : null,
+        ]
+          .filter(Boolean)
+          .join(" | ");
+
+        const res = await waitlistService.joinWaitlist({
+          name: donorName.trim(),
+          email: donorEmail.trim(),
+          phoneNumber: donorPhone.trim(),
+          source: "vision_2m_campaign",
+          notes: pledgeNotes,
+        });
+
+        setWaitlistSuccess({
+          message:
+            res.message ||
+            "🎉 You're on the waitlist! We will reach out as soon as online campaign payments launch.",
+          amount,
+        });
+      } catch (err: any) {
+        console.error("Failed to save campaign waitlist pledge:", err);
+        setError(
+          err?.response?.data?.message ||
+            err?.message ||
+            "Could not add you to the waitlist. Please try again."
+        );
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
@@ -179,7 +230,51 @@ export function VisionDonationModal({
 
         {/* Content */}
         <div className="p-6 overflow-y-auto space-y-5">
-          {successData ? (
+          {waitlistSuccess ? (
+            /* Temporary Waitlist Confirmation View */
+            <div className="text-center py-6 space-y-4 animate-fade-in">
+              <div className="w-16 h-16 rounded-full bg-emerald-100 text-[#1b7a43] flex items-center justify-center text-3xl mx-auto shadow-inner border border-emerald-200">
+                ✓
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-[#2d6a4f] text-[11px] font-bold uppercase tracking-wider border border-emerald-200">
+                <span>✨ Added to Priority Waitlist</span>
+                <span>•</span>
+                <span>No Payment Taken</span>
+              </div>
+              <h3 className="text-xl font-bold text-[#173324]" style={{ fontFamily: "var(--font-display)" }}>
+                You&apos;re on the Waitlist!
+              </h3>
+              <p className="text-xs text-gray-600 max-w-md mx-auto leading-relaxed">
+                {waitlistSuccess.message}
+              </p>
+
+              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-left space-y-2 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Reserved Pledge:</span>
+                  <span className="font-bold text-[#173324]">
+                    ₹{waitlistSuccess.amount.toLocaleString("en-IN")} (~{estimatedTrees} trees)
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Registered Email:</span>
+                  <span className="font-mono text-[#173324]">{donorEmail}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Registered Phone:</span>
+                  <span className="font-mono text-[#173324]">{donorPhone}</span>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  onClick={onClose}
+                  className="w-full py-2.5 rounded-xl text-xs font-bold text-white bg-[#2d6a4f] hover:bg-[#1b4332] shadow-sm transition-all cursor-pointer"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          ) : successData ? (
             /* Success View */
             <div className="text-center py-6 space-y-4 animate-fade-in">
               <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-3xl mx-auto shadow-inner">
@@ -315,10 +410,17 @@ export function VisionDonationModal({
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    Phone (Optional)
+                    {TEMPORARY_WAITLIST_CHECKOUT ? (
+                      <>
+                        Phone Number <span className="text-rose-500">*</span>
+                      </>
+                    ) : (
+                      "Phone (Optional)"
+                    )}
                   </label>
                   <input
                     type="tel"
+                    required={TEMPORARY_WAITLIST_CHECKOUT}
                     value={donorPhone}
                     onChange={(e) => setDonorPhone(e.target.value)}
                     placeholder="+91 98765 43210"
@@ -362,19 +464,37 @@ export function VisionDonationModal({
                   className="w-full py-3 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-[#2d6a4f] to-[#1b4332] hover:opacity-95 shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {loading ? (
-                    <span>Connecting to Razorpay...</span>
+                    <span>
+                      {TEMPORARY_WAITLIST_CHECKOUT
+                        ? "Adding to Waitlist..."
+                        : "Connecting to Razorpay..."}
+                    </span>
+                  ) : TEMPORARY_WAITLIST_CHECKOUT ? (
+                    <span>
+                      Join Waitlist & Reserve Pledge (₹{amount.toLocaleString("en-IN")}) 🌱
+                    </span>
                   ) : (
                     <span>Proceed to Donate ₹{amount.toLocaleString("en-IN")} via Razorpay 💳</span>
                   )}
                 </button>
 
-                <p className="text-[10px] text-gray-400 text-center flex items-center justify-center gap-1">
-                  <span>🔒 256-bit Secure Checkout</span>
-                  <span>•</span>
-                  <span>UPI, Cards, NetBanking</span>
-                  <span>•</span>
-                  <span>Digital Receipt Generated</span>
-                </p>
+                {TEMPORARY_WAITLIST_CHECKOUT ? (
+                  <p className="text-[10px] text-gray-500 text-center flex items-center justify-center gap-1">
+                    <span>✨ Priority Waitlist</span>
+                    <span>•</span>
+                    <span>No payment collected today</span>
+                    <span>•</span>
+                    <span>Notified when payments open</span>
+                  </p>
+                ) : (
+                  <p className="text-[10px] text-gray-400 text-center flex items-center justify-center gap-1">
+                    <span>🔒 256-bit Secure Checkout</span>
+                    <span>•</span>
+                    <span>UPI, Cards, NetBanking</span>
+                    <span>•</span>
+                    <span>Digital Receipt Generated</span>
+                  </p>
+                )}
               </div>
             </form>
           )}

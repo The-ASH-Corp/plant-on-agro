@@ -7,6 +7,7 @@ interface PlantFlowFooterProps {
   canNext: boolean;
   isProcessing: boolean;
   total?: number;
+  waitlistMode?: boolean;
   onBack: () => void;
   onNext: () => void;
 }
@@ -16,10 +17,14 @@ export function PlantFlowFooter({
   canNext,
   isProcessing,
   total,
+  waitlistMode = false,
   onBack,
   onNext,
 }: PlantFlowFooterProps) {
   if (step >= 6) return null;
+
+  const isWaitlistSubmitStep = waitlistMode && step === 4;
+  const isPaymentSubmitStep = !waitlistMode && step === 5;
 
   return (
     <div
@@ -39,7 +44,11 @@ export function PlantFlowFooter({
       )}
       <button
         onClick={onNext}
-        id={step === 5 ? "btn-complete-order" : "btn-continue-step"}
+        id={
+          isWaitlistSubmitStep || isPaymentSubmitStep
+            ? "btn-complete-order"
+            : "btn-continue-step"
+        }
         disabled={!canNext || isProcessing}
         className="flex-1 py-3 rounded-xl font-semibold text-sm text-white transition-all disabled:opacity-40 cursor-pointer flex items-center justify-center gap-2 shadow-sm"
         style={{
@@ -70,10 +79,16 @@ export function PlantFlowFooter({
               ></path>
             </svg>
             <span>
-              {step === 5 ? "Connecting to Razorpay..." : "Processing..."}
+              {isWaitlistSubmitStep
+                ? "Adding to Waitlist..."
+                : isPaymentSubmitStep
+                ? "Connecting to Razorpay..."
+                : "Processing..."}
             </span>
           </>
-        ) : step === 5 ? (
+        ) : isWaitlistSubmitStep ? (
+          "Join Waitlist & Reserve Spot 🌱"
+        ) : isPaymentSubmitStep ? (
           total !== undefined ? (
             `Proceed to Pay ₹${total.toLocaleString("en-IN")} with Razorpay 💳`
           ) : (
