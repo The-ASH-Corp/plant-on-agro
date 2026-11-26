@@ -25,12 +25,21 @@ export interface JoinWaitlistPayload {
   phoneNumber: string;
   name?: string;
   source?: string;
+  notes?: string;
 }
 
 class WaitlistService {
   async joinWaitlist(
     payload: JoinWaitlistPayload
-  ): Promise<ApiResponse<{ id: string; email: string; phoneNumber: string; createdAt: string }>> {
+  ): Promise<
+    ApiResponse<{
+      id: string;
+      email: string;
+      phoneNumber: string;
+      notes?: string;
+      createdAt: string;
+    }>
+  > {
     return apiClient.post("/waitlist", payload);
   }
 

@@ -5,7 +5,7 @@ import { ApiResponse } from '../../shared/utils/api-response';
 export class WaitlistController {
   public create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { email, phoneNumber, name, source } = req.body;
+      const { email, phoneNumber, name, source, notes } = req.body;
 
       if (!email || typeof email !== 'string' || !/^\S+@\S+\.\S+$/.test(email.trim())) {
         res.status(400).json({ success: false, message: 'Please provide a valid email address.' });
@@ -19,12 +19,28 @@ export class WaitlistController {
 
       const cleanEmail = email.trim().toLowerCase();
       const cleanPhone = phoneNumber.trim();
+      const cleanSource =
+        typeof source === 'string' && source.trim()
+          ? source.trim().slice(0, 100)
+          : 'adoption_packages_section';
+      const cleanNotes =
+        typeof notes === 'string' && notes.trim()
+          ? notes.trim().slice(0, 1000)
+          : '';
 
       // Check if email already on waitlist
       const existing = await WaitlistModel.findOne({ email: cleanEmail });
       if (existing) {
         existing.phoneNumber = cleanPhone;
-        if (name && typeof name === 'string') existing.name = name.trim();
+        if (name && typeof name === 'string' && name.trim()) {
+          existing.name = name.trim();
+        }
+        if (typeof source === 'string' && source.trim()) {
+          existing.source = cleanSource;
+        }
+        if (cleanNotes) {
+          existing.notes = cleanNotes;
+        }
         await existing.save();
 
         ApiResponse.success(
@@ -33,9 +49,10 @@ export class WaitlistController {
             id: existing._id.toString(),
             email: existing.email,
             phoneNumber: existing.phoneNumber,
+            notes: existing.notes || '',
             createdAt: existing.createdAt.toISOString(),
           },
-          "You're already on the waitlist! We have updated your contact details."
+          "You're already on the waitlist! We have updated your reservation and contact details."
         );
         return;
       }
@@ -44,8 +61,9 @@ export class WaitlistController {
         email: cleanEmail,
         phoneNumber: cleanPhone,
         name: typeof name === 'string' ? name.trim() : '',
-        source: typeof source === 'string' ? source.trim() : 'adoption_packages_section',
+        source: cleanSource,
         status: 'pending',
+        notes: cleanNotes,
       });
 
       ApiResponse.created(
@@ -54,9 +72,10 @@ export class WaitlistController {
           id: newEntry._id.toString(),
           email: newEntry.email,
           phoneNumber: newEntry.phoneNumber,
+          notes: newEntry.notes || '',
           createdAt: newEntry.createdAt.toISOString(),
         },
-        '🎉 Successfully joined the waitlist! We will notify you as soon as adoption packages open.'
+        '🎉 Successfully added to the waitlist! We will notify you as soon as payments and tree allocations open.'
       );
     } catch (error) {
       next(error);
@@ -74,7 +93,12 @@ export class WaitlistController {
 
       if (search && typeof search === 'string' && search.trim()) {
         const regex = new RegExp(search.trim(), 'i');
-        query.$or = [{ email: regex }, { phoneNumber: regex }, { name: regex }];
+        query.$or = [
+          { email: regex },
+          { phoneNumber: regex },
+          { name: regex },
+          { notes: regex },
+        ];
       }
 
       const maxLimit = Math.min(parseInt(limit as string, 10) || 200, 500);

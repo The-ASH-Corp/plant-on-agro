@@ -17,6 +17,17 @@ export function WaitlistTab({ waitlist, setWaitlist, showToast }: WaitlistTabPro
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const formatSourceLabel = (source?: string) => {
+    switch (source) {
+      case "plant_a_tree_flow":
+        return { label: "Plant a Tree Flow", icon: "🌱", cls: "bg-emerald-50 text-emerald-800 border-emerald-200" };
+      case "vision_2m_campaign":
+        return { label: "2M Vision Pledge", icon: "🌍", cls: "bg-teal-50 text-teal-800 border-teal-200" };
+      default:
+        return { label: "Waitlist Section", icon: "📋", cls: "bg-slate-50 text-slate-700 border-slate-200" };
+    }
+  };
+
   const filtered = waitlist.filter((item) => {
     const matchesStatus = statusFilter === "all" || item.status === statusFilter;
     const q = search.toLowerCase().trim();
@@ -24,7 +35,8 @@ export function WaitlistTab({ waitlist, setWaitlist, showToast }: WaitlistTabPro
       !q ||
       item.email.toLowerCase().includes(q) ||
       item.phoneNumber.toLowerCase().includes(q) ||
-      (item.name && item.name.toLowerCase().includes(q));
+      (item.name && item.name.toLowerCase().includes(q)) ||
+      (item.notes && item.notes.toLowerCase().includes(q));
     return matchesStatus && matchesSearch;
   });
 
@@ -73,13 +85,14 @@ export function WaitlistTab({ waitlist, setWaitlist, showToast }: WaitlistTabPro
       showToast("No waitlist records to export.");
       return;
     }
-    const headers = ["Email", "Phone Number", "Name", "Status", "Source", "Date Registered"];
+    const headers = ["Email", "Phone Number", "Name", "Status", "Source", "Selection / Notes", "Date Registered"];
     const rows = filtered.map((w) => [
       `"${w.email}"`,
       `"${w.phoneNumber}"`,
-      `"${w.name || ""}"`,
+      `"${(w.name || "").replace(/"/g, '""')}"`,
       `"${w.status}"`,
       `"${w.source}"`,
+      `"${(w.notes || "").replace(/"/g, '""')}"`,
       `"${new Date(w.createdAt).toLocaleString()}"`,
     ]);
     const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
@@ -106,7 +119,7 @@ export function WaitlistTab({ waitlist, setWaitlist, showToast }: WaitlistTabPro
             Adoption Packages Waitlist Leads
           </h2>
           <p className="text-xs sm:text-sm text-[#4a6557] mt-1">
-            Real-time leads collected from the storefront “Join in Waitlist” button for upcoming living forest packages.
+            Real-time leads collected from “Plant a Tree” reservations and storefront waitlist signups while payment checkout is paused.
           </p>
         </div>
 
@@ -235,13 +248,16 @@ export function WaitlistTab({ waitlist, setWaitlist, showToast }: WaitlistTabPro
                 <tr className="bg-[#f8faf9] border-b border-[#e2eae5] text-[11px] font-bold uppercase tracking-wider text-[#7a8a80]">
                   <th className="py-3.5 px-4 sm:px-6">User / Contact</th>
                   <th className="py-3.5 px-4">Phone Number</th>
+                  <th className="py-3.5 px-4">Selection / Notes</th>
                   <th className="py-3.5 px-4">Joined Date</th>
                   <th className="py-3.5 px-4">Status</th>
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#f0f4f1] text-xs text-[#1c2e24]">
-                {filtered.map((item) => (
+                {filtered.map((item) => {
+                  const sourceInfo = formatSourceLabel(item.source);
+                  return (
                   <tr key={item.id} className="hover:bg-[#fbfdfc] transition-colors">
                     {/* User / Contact */}
                     <td className="py-3.5 px-4 sm:px-6">
@@ -280,6 +296,23 @@ export function WaitlistTab({ waitlist, setWaitlist, showToast }: WaitlistTabPro
                       >
                         Call / Dial
                       </a>
+                    </td>
+
+                    {/* Selection / Notes */}
+                    <td className="py-3.5 px-4 max-w-xs">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border mb-1 ${sourceInfo.cls}`}
+                      >
+                        <span>{sourceInfo.icon}</span>
+                        <span>{sourceInfo.label}</span>
+                      </span>
+                      {item.notes ? (
+                        <div className="text-[11px] text-[#355243] leading-snug break-words">
+                          {item.notes}
+                        </div>
+                      ) : (
+                        <div className="text-[10px] text-gray-400 italic">General waitlist interest</div>
+                      )}
                     </td>
 
                     {/* Joined Date */}
@@ -344,7 +377,8 @@ export function WaitlistTab({ waitlist, setWaitlist, showToast }: WaitlistTabPro
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

@@ -11,6 +11,7 @@ interface Step5UserDetailsProps {
   setPhone: (phone: string) => void;
   dedicationMessage?: string;
   setDedicationMessage?: (val: string) => void;
+  waitlistMode?: boolean;
 }
 
 export function Step5UserDetails({
@@ -22,12 +23,28 @@ export function Step5UserDetails({
   setPhone,
   dedicationMessage = "",
   setDedicationMessage,
+  waitlistMode = false,
 }: Step5UserDetailsProps) {
   return (
     <div>
-      <p className="text-[#4a6557] mb-5 text-sm">
-        Your digital adoption certificate and lifetime digital deed will be issued with these details.
-      </p>
+      {waitlistMode ? (
+        <div
+          className="mb-5 p-3.5 rounded-2xl flex items-start gap-3 text-xs leading-relaxed"
+          style={{ background: "#f0faf4", border: "1px solid #cce7d8" }}
+        >
+          <span className="text-base shrink-0 mt-0.5">✨</span>
+          <div className="text-[#234d36]">
+            <span className="font-bold text-[#173324]">
+              Priority Waitlist Reservation — No Payment Needed Today.
+            </span>{" "}
+            Enter your contact details below to reserve your tree selection on our priority waitlist. We will notify you as soon as online payments open.
+          </div>
+        </div>
+      ) : (
+        <p className="text-[#4a6557] mb-5 text-sm">
+          Your digital adoption certificate and lifetime digital deed will be issued with these details.
+        </p>
+      )}
       <div className="space-y-4">
         <div>
           <label

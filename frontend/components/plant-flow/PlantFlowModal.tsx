@@ -9,6 +9,8 @@ import { treeInstanceService } from "@/services/tree-instances/tree-instance.ser
 import { orderService } from "@/services/orders/order.service";
 import { locationService } from "@/services/locations/location.service";
 import { paymentService, loadRazorpayCheckoutScript } from "@/services/payment/payment.service";
+import { TEMPORARY_WAITLIST_CHECKOUT } from "@/services/payment/checkout-mode";
+import { waitlistService } from "@/services/waitlist/waitlist.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useHydratedStore } from "@/store/hooks/use-hydrated-store";
 import { PlantFlowHeader } from "./PlantFlowHeader";
@@ -44,6 +46,7 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
   const [phone, setPhone] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [waitlistMessage, setWaitlistMessage] = useState<string>("");
   const [orderId] = useState(
     () => "POA-" + Math.random().toString(36).substring(2, 8).toUpperCase()
   );
@@ -325,6 +328,63 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
   };
 
   const handleNext = async () => {
+    // TEMPORARY WAITLIST MODE:
+    // Skip Step 5 (Payment / Razorpay) completely and save user details &
+    // tree/plan selection directly to the Waitlist collection.
+    if (TEMPORARY_WAITLIST_CHECKOUT) {
+      if (step < 4) {
+        setStep((s) => (s + 1) as PlantStep);
+        return;
+      }
+
+      const cleanEmail = email.trim();
+      if (!/^\S+@\S+\.\S+$/.test(cleanEmail)) {
+        setPaymentError("Please enter a valid email address.");
+        return;
+      }
+
+      setPaymentError(null);
+      setIsProcessing(true);
+
+      try {
+        const selectionSummary = [
+          `Plan: ${effectivePlanLabel}`,
+          `Trees: ${qty}`,
+          location ? `Reserve: ${location}` : null,
+          total > 0 ? `Est. Total: ₹${total.toLocaleString("en-IN")}` : null,
+          dedicationMessage.trim()
+            ? `Dedication: "${dedicationMessage.trim()}"`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" | ");
+
+        const res = await waitlistService.joinWaitlist({
+          name: name.trim() || user?.name || undefined,
+          email: cleanEmail,
+          phoneNumber: phone.trim(),
+          source: "plant_a_tree_flow",
+          notes: selectionSummary,
+        });
+
+        setWaitlistMessage(
+          res.message ||
+            "🎉 You're on the waitlist! We will notify you via phone and email as soon as online payments open."
+        );
+        setIsProcessing(false);
+        setStep(6);
+      } catch (err: any) {
+        console.error("Failed to save reservation to waitlist:", err);
+        setPaymentError(
+          err?.response?.data?.message ||
+            err?.message ||
+            "Could not save your reservation to the waitlist. Please check your details and try again."
+        );
+        setIsProcessing(false);
+      }
+      return;
+    }
+
     if (step < 5) {
       setStep((s) => (s + 1) as PlantStep);
       return;
@@ -451,7 +511,11 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
         className="w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar rounded-3xl relative"
         style={{ background: "#fff" }}
       >
-        <PlantFlowHeader step={step} onClose={onClose} />
+        <PlantFlowHeader
+          step={step}
+          onClose={onClose}
+          waitlistMode={TEMPORARY_WAITLIST_CHECKOUT}
+        />
 
         {/* Modal Content Body */}
         <div className="p-6">
@@ -485,19 +549,36 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
           )}
 
           {step === 4 && (
-            <Step5UserDetails
-              name={name}
-              setName={setName}
-              email={email}
-              setEmail={setEmail}
-              phone={phone}
-              setPhone={setPhone}
-              dedicationMessage={dedicationMessage}
-              setDedicationMessage={setDedicationMessage}
-            />
+            <>
+              {paymentError && (
+                <div className="mb-4 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center justify-between shadow-2xs">
+                  <span className="flex items-center gap-2">
+                    <span>⚠️</span>
+                    <span>{paymentError}</span>
+                  </span>
+                  <button
+                    onClick={() => setPaymentError(null)}
+                    className="text-red-500 hover:text-red-700 font-bold ml-2 cursor-pointer text-sm"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+              <Step5UserDetails
+                name={name}
+                setName={setName}
+                email={email}
+                setEmail={setEmail}
+                phone={phone}
+                setPhone={setPhone}
+                dedicationMessage={dedicationMessage}
+                setDedicationMessage={setDedicationMessage}
+                waitlistMode={TEMPORARY_WAITLIST_CHECKOUT}
+              />
+            </>
           )}
 
-          {step === 5 && (
+          {!TEMPORARY_WAITLIST_CHECKOUT && step === 5 && (
             <>
               {paymentError && (
                 <div className="mb-4 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center justify-between shadow-2xs">
@@ -532,6 +613,12 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
               orderId={orderId}
               buyerEmail={email}
               buyerName={name}
+              buyerPhone={phone}
+              planLabel={effectivePlanLabel}
+              qty={qty}
+              total={total}
+              waitlistMode={TEMPORARY_WAITLIST_CHECKOUT}
+              waitlistMessage={waitlistMessage}
               onClose={onClose}
             />
           )}
@@ -542,7 +629,11 @@ export function PlantFlowModal({ onClose, initialPlanId }: PlantFlowProps) {
           canNext={Boolean(canNext)}
           isProcessing={isProcessing}
           total={total}
-          onBack={() => setStep((s) => (s - 1) as PlantStep)}
+          waitlistMode={TEMPORARY_WAITLIST_CHECKOUT}
+          onBack={() => {
+            setPaymentError(null);
+            setStep((s) => (s - 1) as PlantStep);
+          }}
           onNext={handleNext}
         />
       </div>

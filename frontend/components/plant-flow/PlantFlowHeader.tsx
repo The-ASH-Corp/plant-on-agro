@@ -5,9 +5,10 @@ import { PlantStep } from "@/types";
 interface PlantFlowHeaderProps {
   step: PlantStep;
   onClose: () => void;
+  waitlistMode?: boolean;
 }
 
-const STEP_LABELS = [
+const FULL_STEP_LABELS = [
   "Plan",
   "Quantity",
   "Location",
@@ -16,7 +17,22 @@ const STEP_LABELS = [
   "Done",
 ];
 
-export function PlantFlowHeader({ step, onClose }: PlantFlowHeaderProps) {
+const WAITLIST_STEP_LABELS = [
+  "Plan",
+  "Quantity",
+  "Location",
+  "Details",
+];
+
+export function PlantFlowHeader({
+  step,
+  onClose,
+  waitlistMode = false,
+}: PlantFlowHeaderProps) {
+  const visibleSteps = waitlistMode
+    ? WAITLIST_STEP_LABELS
+    : FULL_STEP_LABELS.slice(0, 5);
+
   return (
     <div
       className="sticky top-0 z-10 p-6 pb-4"
@@ -27,7 +43,11 @@ export function PlantFlowHeader({ step, onClose }: PlantFlowHeaderProps) {
           style={{ fontFamily: "var(--font-display)" }}
           className="text-[#173324] text-2xl"
         >
-          {step === 6 ? "Your Journey Has Begun 🌱" : "Plant a Tree"}
+          {step === 6
+            ? waitlistMode
+              ? "Added to Waitlist! 🌱"
+              : "Your Journey Has Begun 🌱"
+            : "Plant a Tree"}
         </h2>
         <button
           onClick={onClose}
@@ -41,7 +61,7 @@ export function PlantFlowHeader({ step, onClose }: PlantFlowHeaderProps) {
       {/* Progress Bar */}
       {step < 6 && (
         <div className="flex items-center gap-1">
-          {STEP_LABELS.slice(0, 5).map((label, i) => (
+          {visibleSteps.map((label, i) => (
             <div key={label} className="flex items-center gap-1 flex-1">
               <div className="flex flex-col items-center">
                 <div
@@ -62,7 +82,7 @@ export function PlantFlowHeader({ step, onClose }: PlantFlowHeaderProps) {
                   {label}
                 </span>
               </div>
-              {i < 4 && (
+              {i < visibleSteps.length - 1 && (
                 <div
                   className="flex-1 h-px mx-1"
                   style={{ background: i + 1 < step ? "#52b788" : "#e2ede7" }}
